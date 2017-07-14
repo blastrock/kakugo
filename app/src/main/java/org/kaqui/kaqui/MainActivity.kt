@@ -1,10 +1,20 @@
 package org.kaqui.kaqui
 
+import android.content.res.ColorStateList
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewCompat
+import android.support.v7.widget.AppCompatButton
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 
+const val NB_ANSWERS = 6
+
 class MainActivity : AppCompatActivity() {
+    lateinit var answerTexts: List<TextView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +30,33 @@ class MainActivity : AppCompatActivity() {
         val kanji = db.getKanji(pickRandom(ids, 1)[0])
 
         kanji_text.text = kanji.kanji
+
+        val answers = pickRandom(ids, NB_ANSWERS)
+
+        val answerTexts = ArrayList<TextView>(NB_ANSWERS)
+        for (i in 0 until NB_ANSWERS) {
+            val kanji = db.getKanji(answers[i])
+            answerTexts.add(TextView(this))
+            answerTexts[i].text = kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
+                    kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ")
+            answerTexts[i].layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f)
+
+            val buttonMaybe = AppCompatButton(this)
+            buttonMaybe.text = "Maybe"
+            ViewCompat.setBackgroundTintList(buttonMaybe, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.holo_orange_light)))
+            val buttonSure = AppCompatButton(this)
+            buttonSure.text = "Sure"
+            ViewCompat.setBackgroundTintList(buttonSure, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.holo_green_light)))
+
+            val layout = LinearLayout(this)
+            layout.orientation = LinearLayout.HORIZONTAL
+            layout.addView(answerTexts[i])
+            layout.addView(buttonMaybe)
+            layout.addView(buttonSure)
+
+            answers_layout.addView(layout, i)
+        }
+        this.answerTexts = answerTexts
     }
 
     private fun <T> pickRandom(list: List<T>, sample: Int): List<T> {
