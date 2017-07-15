@@ -26,19 +26,9 @@ class MainActivity : AppCompatActivity() {
             db.addKanjis(parseXml(resources.getXml(R.xml.kanjidic2)))
         }
 
-        val ids = db.getAllIds()
-        val kanji = db.getKanji(pickRandom(ids, 1)[0])
-
-        kanji_text.text = kanji.kanji
-
-        val answers = pickRandom(ids, NB_ANSWERS)
-
         val answerTexts = ArrayList<TextView>(NB_ANSWERS)
         for (i in 0 until NB_ANSWERS) {
-            val kanji = db.getKanji(answers[i])
             answerTexts.add(TextView(this))
-            answerTexts[i].text = kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
-                    kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ")
             answerTexts[i].layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f)
 
             val buttonMaybe = AppCompatButton(this)
@@ -57,6 +47,8 @@ class MainActivity : AppCompatActivity() {
             answers_layout.addView(layout, i)
         }
         this.answerTexts = answerTexts
+
+        showNewQuestion()
     }
 
     private fun <T> pickRandom(list: List<T>, sample: Int): List<T> {
@@ -69,5 +61,23 @@ class MainActivity : AppCompatActivity() {
             chosen.add(r)
         }
         return chosen.toList()
+    }
+
+    private fun showNewQuestion() {
+        val db = KanjiDb.getInstance(this)
+
+        val ids = db.getAllIds()
+        val questionKanji = db.getKanji(pickRandom(ids, 1)[0])
+
+        kanji_text.text = questionKanji.kanji
+
+        val answers = pickRandom(ids, NB_ANSWERS)
+
+        for (i in 0 until NB_ANSWERS) {
+            val kanji = db.getKanji(answers[i])
+            val answerText = kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
+                    kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ")
+            answerTexts[i].text = answerText
+        }
     }
 }
