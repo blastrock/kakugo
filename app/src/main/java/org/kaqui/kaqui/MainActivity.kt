@@ -10,11 +10,14 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 const val NB_ANSWERS = 6
 
 class MainActivity : AppCompatActivity() {
     lateinit var answerTexts: List<TextView>
+    var currentQuestion: Kanji? = null
+    var currentAnswers: List<Kanji>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,9 +37,11 @@ class MainActivity : AppCompatActivity() {
             val buttonMaybe = AppCompatButton(this)
             buttonMaybe.text = "Maybe"
             ViewCompat.setBackgroundTintList(buttonMaybe, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.holo_orange_light)))
+            buttonMaybe.setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
             val buttonSure = AppCompatButton(this)
             buttonSure.text = "Sure"
             ViewCompat.setBackgroundTintList(buttonSure, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.holo_green_light)))
+            buttonSure.setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
 
             val layout = LinearLayout(this)
             layout.orientation = LinearLayout.HORIZONTAL
@@ -47,6 +52,7 @@ class MainActivity : AppCompatActivity() {
             answers_layout.addView(layout, i)
         }
         this.answerTexts = answerTexts
+        dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
 
         showNewQuestion()
     }
@@ -67,17 +73,49 @@ class MainActivity : AppCompatActivity() {
         val db = KanjiDb.getInstance(this)
 
         val ids = db.getAllIds()
-        val questionKanji = db.getKanji(pickRandom(ids, 1)[0])
+        currentQuestion = db.getKanji(pickRandom(ids, 1)[0])
 
-        kanji_text.text = questionKanji.kanji
+        kanji_text.text = currentQuestion!!.kanji
 
-        val answers = pickRandom(ids, NB_ANSWERS)
+        val currentAnswers = (pickRandom(ids, NB_ANSWERS-1).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
+        shuffle(currentAnswers)
+        this.currentAnswers = currentAnswers
+        fillAnswers()
+    }
 
+    private fun <T> shuffle(l: MutableList<T>) {
+        val rg = Random()
+        for (i in l.size-1 downTo 1) {
+            val target = rg.nextInt(i)
+            val tmp = l[i]
+            l[i] = l[target]
+            l[target] = tmp
+        }
+    }
+
+    private fun fillAnswers() {
         for (i in 0 until NB_ANSWERS) {
-            val kanji = db.getKanji(answers[i])
+            val kanji = currentAnswers!![i]
             val answerText = kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
                     kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ")
             answerTexts[i].text = answerText
         }
+    }
+
+    private fun onAnswerClicked(certainty: Certainty, position: Int) {
+        val db = KanjiDb.getInstance(this)
+
+        if (certainty == Certainty.DONTKNOW) {
+            db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
+        } else if (currentAnswers!![position] == currentQuestion) {
+            // correct
+            db.updateWeight(currentQuestion!!.kanji, certainty)
+        } else {
+            // wrong
+            db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
+            db.updateWeight(currentAnswers!![position].kanji, Certainty.DONTKNOW)
+        }
+
+        showNewQuestion()
     }
 }

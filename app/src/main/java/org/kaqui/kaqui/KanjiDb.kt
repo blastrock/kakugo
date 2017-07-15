@@ -6,6 +6,7 @@ import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.v4.database.DatabaseUtilsCompat
+import android.util.Log
 
 class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -13,7 +14,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         database.execSQL(
                 "CREATE TABLE $KANJIS_TABLE_NAME ("
                         + "id_kanji INTEGER PRIMARY KEY,"
-                        + "kanji TEXT NOT NULL UNIQUE"
+                        + "kanji TEXT NOT NULL UNIQUE,"
+                        + "weight FLOAT NOT NULL DEFAULT 0.0"
                         + ")")
         database.execSQL(
                 "CREATE TABLE $READINGS_TABLE_NAME ("
@@ -94,7 +96,43 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return ret
     }
 
+    fun updateWeight(kanji: String, certainty: Certainty) {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("weight"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            val previousWeight = cursor.getDouble(0)
+            val targetWeight = certaintyToWeight(certainty)
+            if (targetWeight == previousWeight) {
+                Log.v(TAG,"Weight of $kanji stays unchanged at $previousWeight")
+                return
+            }
+            val newWeight =
+                    if (targetWeight > previousWeight)
+                        targetWeight - Math.exp(-1.0 + Math.log(targetWeight - previousWeight))
+                    else
+                        targetWeight + Math.exp(-1.0 + Math.log(-targetWeight + previousWeight))
+
+            if (newWeight !in 0..1) {
+                Log.wtf(TAG, "Weight calculation error, previousWeight = $previousWeight, targetWeight = $targetWeight, newWeight = $newWeight")
+            }
+
+            Log.v(TAG, "Weight of $kanji going from $previousWeight to $newWeight")
+
+            val cv = ContentValues()
+            cv.put("weight", newWeight.toFloat())
+            writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
+        }
+    }
+
+    private fun certaintyToWeight(certainty: Certainty): Double =
+            when (certainty) {
+                Certainty.SURE -> 1.0
+                Certainty.MAYBE -> 0.7
+                Certainty.DONTKNOW -> 0.0
+            }
+
     companion object {
+        private const val TAG = "KanjiDb"
+
         private const val DATABASE_NAME = "kanjis"
         private const val DATABASE_VERSION = 1
 
