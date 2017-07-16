@@ -1,5 +1,7 @@
 package org.kaqui.kaqui
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import org.xmlpull.v1.XmlPullParser
 
 data class Kanji(var kanji: String, var readings: List<Reading>, var meanings: List<String>)
@@ -20,7 +22,21 @@ private fun parseText(xpp: XmlPullParser, tag: String, attrs: Map<String, String
         while (xpp.eventType != XmlPullParser.END_TAG) {
             if (xpp.eventType == XmlPullParser.TEXT)
                 ret = xpp.text
-            else if (xpp.eventType == XmlPullParser.END_TAG)
+            else if (xpp.eventType == XmlPullParser.END_TAG && xpp.name == tag)
+                break
+            xpp.next()
+        }
+    }
+    return ret
+}
+
+private fun parseFreq(xpp: XmlPullParser): Int? {
+    var ret: Int? = null
+    if (xpp.eventType == XmlPullParser.START_TAG && xpp.name == "freq") {
+        while (xpp.eventType != XmlPullParser.END_TAG) {
+            if (xpp.eventType == XmlPullParser.TEXT)
+                ret = xpp.text.toInt()
+            else if (xpp.eventType == XmlPullParser.END_TAG && xpp.name == "freq")
                 break
             xpp.next()
         }
@@ -33,14 +49,16 @@ private fun parseCharacter(xpp: XmlPullParser): Kanji? {
         var literal: String? = null
         val readings = mutableListOf<Reading>()
         val meanings = mutableListOf<String>()
+        var freq: Int? = null
         while (!(xpp.eventType == XmlPullParser.END_TAG && xpp.name == "character")) {
             literal = parseText(xpp, "literal") ?: literal
             parseText(xpp, "reading", mapOf("r_type" to "ja_on")).fmap { readings.add(Reading("ja_on", it)) }
             parseText(xpp, "reading", mapOf("r_type" to "ja_kun")).fmap { readings.add(Reading("ja_kun", it)) }
             parseText(xpp, "meaning", mapOf("m_lang" to null)).fmap { meanings.add(it) }
+            parseFreq(xpp).fmap { freq = it }
             xpp.next()
         }
-        if (literal == null)
+        if (literal == null || freq == null)
             return null
         return Kanji(literal, readings, meanings)
     }
@@ -52,6 +70,8 @@ fun parseXml(xpp: XmlPullParser): List<Kanji> {
     while (xpp.eventType != XmlPullParser.END_DOCUMENT) {
         parseCharacter(xpp).fmap { list.add(it) }
         xpp.next()
+        if (list.size % 100 == 0)
+            Log.v(TAG, "Parsed ${list.size} kanjis")
     }
     return list
 }
