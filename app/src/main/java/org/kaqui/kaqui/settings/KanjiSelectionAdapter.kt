@@ -10,7 +10,9 @@ import org.kaqui.kaqui.KanjiDb
 import org.kaqui.kaqui.R
 import org.kaqui.kaqui.getKanjiDescription
 
-class KanjiSelectionAdapter(val db: KanjiDb, val ids: List<Int>) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
+class KanjiSelectionAdapter(private val context: Context, private val ids: List<Int>) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
+    val db = KanjiDb.getInstance(context)
+
     override fun getItemCount(): Int = ids.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KanjiSelectionViewHolder {
@@ -22,6 +24,14 @@ class KanjiSelectionAdapter(val db: KanjiDb, val ids: List<Int>) : RecyclerView.
         holder.kanji = kanji.kanji
         holder.enabled.isChecked = kanji.enabled
         holder.kanjiText.text = kanji.kanji
+        val background =
+                when (kanji.weight) {
+                    in 0.0f..0.3f -> R.drawable.round_red
+                    in 0.3f..0.8f -> R.drawable.round_yellow
+                    in 0.8f..1.0f -> R.drawable.round_green
+                    else -> R.drawable.round_red
+                }
+        holder.kanjiText.background = ContextCompat.getDrawable(context, background)
         holder.kanjiDescription.text = getKanjiDescription(kanji)
     }
 }

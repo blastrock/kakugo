@@ -17,7 +17,7 @@ class KanjiSelectionFragment : Fragment() {
         val kanjis = db.getKanjisForJlptLevel(arguments.getInt("level"))
 
         val recyclerView = RecyclerView(context)
-        recyclerView.adapter = KanjiSelectionAdapter(db, kanjis)
+        recyclerView.adapter = KanjiSelectionAdapter(context, kanjis)
         recyclerView.layoutManager = LinearLayoutManager(context)
         return recyclerView
     }
