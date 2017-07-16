@@ -9,7 +9,6 @@ class SettingsActivity : AppCompatActivity() {
 
         supportFragmentManager.beginTransaction()
                 .add(android.R.id.content, JlptSelectionFragment.newInstance())
-                .addToBackStack("jlpt")
                 .commit()
     }
 }
