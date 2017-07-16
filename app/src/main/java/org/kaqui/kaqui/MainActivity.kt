@@ -1,6 +1,7 @@
 package org.kaqui.kaqui
 
 import android.animation.ValueAnimator
+import android.app.ProgressDialog
 import android.content.res.ColorStateList
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -9,30 +10,39 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.AppCompatButton
 import android.text.Layout
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import org.xmlpull.v1.XmlPullParserFactory
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
+import java.util.zip.GZIPInputStream
 
 const val NB_ANSWERS = 6
 
 class MainActivity : AppCompatActivity() {
-    lateinit var answerTexts: List<TextView>
-    lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
-    var currentQuestion: Kanji? = null
-    var currentAnswers: List<Kanji>? = null
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
+    private lateinit var answerTexts: List<TextView>
+    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+    private var currentQuestion: Kanji? = null
+    private var currentAnswers: List<Kanji>? = null
+
+    private var downloadProgress: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-
-        val db = KanjiDb.getInstance(this)
-        if (db.empty) {
-            db.addKanjis(parseXml(resources.getXml(R.xml.kanjidic2)))
-        }
 
         val answerTexts = ArrayList<TextView>(NB_ANSWERS)
         for (i in 0 until NB_ANSWERS) {
@@ -65,7 +75,51 @@ class MainActivity : AppCompatActivity() {
         else
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
-        showNewQuestion()
+        val db = KanjiDb.getInstance(this)
+        if (db.empty) {
+            downloadProgress = ProgressDialog(this)
+            downloadProgress!!.setMessage("Downloading kanjidic database")
+            downloadProgress!!.setCancelable(false)
+            downloadProgress!!.show()
+
+            async(CommonPool) {
+                downloadKanjiDic()
+            }
+        } else {
+            showNewQuestion()
+        }
+    }
+
+    private fun downloadKanjiDic() {
+        try {
+            Log.v(TAG, "Downloading kanjidic")
+            val url = URL("http://nihongo.monash.edu/kanjidic2/kanjidic2.xml.gz")
+            val urlConnection = url.openConnection() as HttpURLConnection
+            urlConnection.requestMethod = "GET"
+            urlConnection.doOutput = true
+            urlConnection.connect()
+
+            urlConnection.inputStream.use { gzipStream ->
+                GZIPInputStream(gzipStream, 1024).use { textStream ->
+                    val xpp = XmlPullParserFactory.newInstance().newPullParser()
+                    xpp.setInput(textStream, "UTF-8")
+
+                    val db = KanjiDb.getInstance(this)
+                    db.addKanjis(parseXml(xpp))
+                }
+            }
+            Log.v(TAG, "Finished downloading kanjidic")
+            async(UI) {
+                downloadProgress!!.dismiss()
+                showNewQuestion()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to download and parse kanjidic", e)
+            async(UI) {
+                Toast.makeText(this@MainActivity, "Failed to download and parse kanjidic: " + e.message, Toast.LENGTH_LONG).show()
+                finish()
+            }
+        }
     }
 
     private fun <T> pickRandom(list: List<T>, sample: Int): List<T> {
