@@ -4,7 +4,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import org.xmlpull.v1.XmlPullParser
 
-data class Kanji(var kanji: String, var readings: List<Reading>, var meanings: List<String>)
+data class Kanji(var kanji: String, var readings: List<Reading>, var meanings: List<String>, var jlptLevel: Int?)
 data class Reading(var readingType: String, var reading: String)
 
 fun <T> T?.fmap(f: (T) -> Unit) {
@@ -44,7 +44,7 @@ private fun parseFreq(xpp: XmlPullParser): Int? {
     return ret
 }
 
-private fun parseCharacter(xpp: XmlPullParser): Kanji? {
+private fun parseCharacter(xpp: XmlPullParser, jlptLevels: Map<Int, String>): Kanji? {
     if (xpp.eventType == XmlPullParser.START_TAG && xpp.name == "character") {
         var literal: String? = null
         val readings = mutableListOf<Reading>()
@@ -60,15 +60,25 @@ private fun parseCharacter(xpp: XmlPullParser): Kanji? {
         }
         if (literal == null || freq == null)
             return null
-        return Kanji(literal, readings, meanings)
+        var jlptLevel: Int? = null
+        for ((level, kanjis) in jlptLevels) {
+            if (literal in kanjis) {
+                jlptLevel = level
+                break
+            }
+        }
+        return Kanji(literal, readings, meanings, jlptLevel)
     }
     return null
 }
 
 fun parseXml(xpp: XmlPullParser): List<Kanji> {
+    val jlptLevels = getJlptLevels()
     val list = mutableListOf<Kanji>()
     while (xpp.eventType != XmlPullParser.END_DOCUMENT) {
-        parseCharacter(xpp).fmap { list.add(it) }
+        parseCharacter(xpp, jlptLevels).fmap {
+            list.add(it)
+        }
         xpp.next()
         if (list.size % 100 == 0)
             Log.v(TAG, "Parsed ${list.size} kanjis")

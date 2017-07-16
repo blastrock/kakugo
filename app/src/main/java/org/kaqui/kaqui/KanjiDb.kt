@@ -15,6 +15,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 "CREATE TABLE $KANJIS_TABLE_NAME ("
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
+                        + "jlpt_level INTEGER,"
                         + "weight FLOAT NOT NULL DEFAULT 0.0"
                         + ")")
         database.execSQL(
@@ -44,6 +45,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             for (kanji in kanjis) {
                 val kanjiCv = ContentValues()
                 kanjiCv.put("kanji", kanji.kanji)
+                kanjiCv.put("jlpt_level", kanji.jlptLevel)
                 val kanjiId = writableDatabase.insertOrThrow(KANJIS_TABLE_NAME, null, kanjiCv)
                 for (reading in kanji.readings) {
                     val readingCv = ContentValues()
@@ -86,12 +88,17 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             while (cursor.moveToNext())
                 meanings.add(cursor.getString(0))
         }
-        val ret = Kanji("", readings, meanings)
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        val ret = Kanji("", readings, meanings, null)
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
             ret.kanji = cursor.getString(0)
+            ret.jlptLevel =
+                    if (!cursor.isNull(1))
+                        cursor.getInt(1)
+                    else
+                        null
         }
         return ret
     }
@@ -102,7 +109,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             val previousWeight = cursor.getDouble(0)
             val targetWeight = certaintyToWeight(certainty)
             if (targetWeight == previousWeight) {
-                Log.v(TAG,"Weight of $kanji stays unchanged at $previousWeight")
+                Log.v(TAG, "Weight of $kanji stays unchanged at $previousWeight")
                 return
             }
             val newWeight =
