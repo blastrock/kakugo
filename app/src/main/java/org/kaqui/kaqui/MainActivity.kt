@@ -2,6 +2,7 @@ package org.kaqui.kaqui
 
 import android.animation.ValueAnimator
 import android.app.ProgressDialog
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -9,27 +10,26 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.AppCompatButton
-import android.text.Layout
 import android.util.Log
 import android.util.TypedValue
-import android.view.Gravity
-import android.view.View
+import android.view.*
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import org.kaqui.kaqui.settings.SettingsActivity
 import org.xmlpull.v1.XmlPullParserFactory
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import java.util.zip.GZIPInputStream
 
-const val NB_ANSWERS = 6
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
+        private const val NB_ANSWERS = 6
     }
 
     private lateinit var answerTexts: List<TextView>
@@ -87,6 +87,23 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             showNewQuestion()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                return true
+            }
+            else ->
+                return super.onOptionsItemSelected(item)
         }
     }
 
@@ -223,10 +240,7 @@ class MainActivity : AppCompatActivity() {
         kanjiView.layoutParams = params
 
         val detailView = TextView(this)
-        val detail =
-                kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
-                        kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ") + "\n" +
-                        kanji.meanings.joinToString(", ")
+        val detail = getKanjiDescription(kanji)
         detailView.text = detail
         detailView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
 

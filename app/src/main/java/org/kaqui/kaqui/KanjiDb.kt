@@ -103,6 +103,16 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return ret
     }
 
+    fun getKanjisForJlptLevel(level: Int): List<Int> {
+        val ret = mutableListOf<Int>()
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), "jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+        }
+        return ret
+    }
+
     fun updateWeight(kanji: String, certainty: Certainty) {
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("weight"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
             cursor.moveToFirst()
