@@ -1,14 +1,18 @@
 package org.kaqui.kaqui
 
+import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.AppCompatButton
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.text.Layout
+import android.util.TypedValue
+import android.view.Gravity
+import android.view.View
+import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -16,6 +20,7 @@ const val NB_ANSWERS = 6
 
 class MainActivity : AppCompatActivity() {
     lateinit var answerTexts: List<TextView>
+    lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
     var currentQuestion: Kanji? = null
     var currentAnswers: List<Kanji>? = null
 
@@ -54,6 +59,12 @@ class MainActivity : AppCompatActivity() {
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
 
+        sheetBehavior = BottomSheetBehavior.from(history_view)
+        if (savedInstanceState?.getBoolean("playerOpen", false) ?: false)
+            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        else
+            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
         showNewQuestion()
     }
 
@@ -77,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
         kanji_text.text = currentQuestion!!.kanji
 
-        val currentAnswers = (pickRandom(ids, NB_ANSWERS-1).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
+        val currentAnswers = (pickRandom(ids, NB_ANSWERS - 1).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
         shuffle(currentAnswers)
         this.currentAnswers = currentAnswers
         fillAnswers()
@@ -85,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun <T> shuffle(l: MutableList<T>) {
         val rg = Random()
-        for (i in l.size-1 downTo 1) {
+        for (i in l.size - 1 downTo 1) {
             val target = rg.nextInt(i)
             val tmp = l[i]
             l[i] = l[target]
@@ -107,15 +118,78 @@ class MainActivity : AppCompatActivity() {
 
         if (certainty == Certainty.DONTKNOW) {
             db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
+            addUnknownAnswerToHistory(currentQuestion!!)
         } else if (currentAnswers!![position] == currentQuestion) {
             // correct
             db.updateWeight(currentQuestion!!.kanji, certainty)
+            addGoodAnswerToHistory(currentQuestion!!)
         } else {
             // wrong
             db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
             db.updateWeight(currentAnswers!![position].kanji, Certainty.DONTKNOW)
+            addWrongAnswerToHistory(currentQuestion!!, currentAnswers!![position])
         }
 
         showNewQuestion()
+    }
+
+    private fun addGoodAnswerToHistory(correct: Kanji) {
+        val layout = makeHistoryLine(correct, R.drawable.round_green)
+
+        history_view.addView(layout, 0)
+        updateSheetPeekHeight(layout)
+    }
+
+    private fun addWrongAnswerToHistory(correct: Kanji, wrong: Kanji) {
+        val layoutGood = makeHistoryLine(correct, R.drawable.round_yellow)
+        val layoutBad = makeHistoryLine(wrong, R.drawable.round_red)
+
+        history_view.addView(layoutBad, 0)
+        history_view.addView(layoutGood, 0)
+        updateSheetPeekHeight(layoutGood)
+    }
+
+    private fun addUnknownAnswerToHistory(correct: Kanji) {
+        val layout = makeHistoryLine(correct, R.drawable.round_yellow)
+
+        history_view.addView(layout, 0)
+        updateSheetPeekHeight(layout)
+    }
+
+    private fun makeHistoryLine(kanji: Kanji, style: Int): View {
+        val kanjiView = TextView(this)
+        kanjiView.text = kanji.kanji
+        kanjiView.textSize = 25.0f // sp
+        kanjiView.width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 35.0f, resources.displayMetrics).toInt()
+        kanjiView.height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 35.0f, resources.displayMetrics).toInt()
+        kanjiView.gravity = Gravity.CENTER
+        kanjiView.background = ContextCompat.getDrawable(this, style)
+        val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.0f)
+        params.gravity = Gravity.CENTER_VERTICAL
+        kanjiView.layoutParams = params
+
+        val detailView = TextView(this)
+        val detail =
+                kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
+                        kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ") + "\n" +
+                        kanji.meanings.joinToString(", ")
+        detailView.text = detail
+        detailView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
+
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.HORIZONTAL
+        layout.addView(kanjiView)
+        layout.addView(detailView)
+
+        return layout
+    }
+
+    private fun updateSheetPeekHeight(v: View) {
+        history_view.post {
+            val va = ValueAnimator.ofInt(sheetBehavior.peekHeight, v.height)
+            va.duration = 200 // ms
+            va.addUpdateListener { sheetBehavior.peekHeight = it.animatedValue as Int }
+            va.start()
+        }
     }
 }
