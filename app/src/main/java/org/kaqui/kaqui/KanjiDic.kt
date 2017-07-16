@@ -10,11 +10,11 @@ fun <T> T?.fmap(f: (T) -> Unit) {
         f(this)
 }
 
-private fun checkAttrs(xpp: XmlPullParser, attrs: Map<String, String>): Boolean {
+private fun checkAttrs(xpp: XmlPullParser, attrs: Map<String, String?>): Boolean {
     return attrs.map { (k, v) -> xpp.getAttributeValue(null, k) == v }.all { it }
 }
 
-private fun parseText(xpp: XmlPullParser, tag: String, attrs: Map<String, String>? = null): String? {
+private fun parseText(xpp: XmlPullParser, tag: String, attrs: Map<String, String?>? = null): String? {
     var ret: String? = null
     if (xpp.eventType == XmlPullParser.START_TAG && xpp.name == tag && (attrs == null || checkAttrs(xpp, attrs))) {
         while (xpp.eventType != XmlPullParser.END_TAG) {
@@ -37,7 +37,7 @@ private fun parseCharacter(xpp: XmlPullParser): Kanji? {
             literal = parseText(xpp, "literal") ?: literal
             parseText(xpp, "reading", mapOf("r_type" to "ja_on")).fmap { readings.add(Reading("ja_on", it)) }
             parseText(xpp, "reading", mapOf("r_type" to "ja_kun")).fmap { readings.add(Reading("ja_kun", it)) }
-            parseText(xpp, "meaning").fmap { meanings.add(it) }
+            parseText(xpp, "meaning", mapOf("m_lang" to null)).fmap { meanings.add(it) }
             xpp.next()
         }
         if (literal == null)
