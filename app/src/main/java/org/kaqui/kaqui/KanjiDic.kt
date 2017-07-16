@@ -4,7 +4,14 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import org.xmlpull.v1.XmlPullParser
 
-data class Kanji(var kanji: String, var readings: List<Reading>, var meanings: List<String>, var jlptLevel: Int?)
+data class Kanji(
+        var kanji: String,
+        var readings: List<Reading>,
+        var meanings: List<String>,
+        var jlptLevel: Int?,
+        var weight: Float,
+        var enabled: Boolean
+)
 data class Reading(var readingType: String, var reading: String)
 
 fun <T> T?.fmap(f: (T) -> Unit) {
@@ -67,7 +74,7 @@ private fun parseCharacter(xpp: XmlPullParser, jlptLevels: Map<Int, String>): Ka
                 break
             }
         }
-        return Kanji(literal, readings, meanings, jlptLevel)
+        return Kanji(literal, readings, meanings, jlptLevel, 0.0f,true)
     }
     return null
 }

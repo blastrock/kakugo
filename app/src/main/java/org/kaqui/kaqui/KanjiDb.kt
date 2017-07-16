@@ -16,7 +16,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER,"
-                        + "weight FLOAT NOT NULL DEFAULT 0.0"
+                        + "weight FLOAT NOT NULL DEFAULT 0.0,"
+                        + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
                 "CREATE TABLE $READINGS_TABLE_NAME ("
@@ -88,8 +89,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             while (cursor.moveToNext())
                 meanings.add(cursor.getString(0))
         }
-        val ret = Kanji("", readings, meanings, null)
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        val ret = Kanji("", readings, meanings, null, 0.0f, false)
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "weight", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
@@ -99,6 +100,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         cursor.getInt(1)
                     else
                         null
+            ret.weight = cursor.getFloat(2)
+            ret.enabled = cursor.getInt(3) != 0
         }
         return ret
     }
@@ -138,6 +141,12 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             cv.put("weight", newWeight.toFloat())
             writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
         }
+    }
+
+    fun setKanjiEnabled(kanji: String, enabled: Boolean) {
+        val cv = ContentValues()
+        cv.put("enabled", if (enabled) 1 else 0)
+        writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
     }
 
     private fun certaintyToWeight(certainty: Certainty): Double =
