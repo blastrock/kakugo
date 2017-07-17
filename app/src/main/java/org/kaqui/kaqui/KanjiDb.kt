@@ -149,6 +149,12 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
     }
 
+    fun setLevelEnabled(level: Int, enabled: Boolean) {
+        val cv = ContentValues()
+        cv.put("enabled", if (enabled) 1 else 0)
+        writableDatabase.update(KANJIS_TABLE_NAME, cv, "jlpt_level = ?", arrayOf(level.toString()))
+    }
+
     private fun certaintyToWeight(certainty: Certainty): Double =
             when (certainty) {
                 Certainty.SURE -> 1.0
