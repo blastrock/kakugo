@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addWrongAnswerToHistory(correct: Kanji, wrong: Kanji) {
-        val layoutGood = makeHistoryLine(correct, R.drawable.round_yellow)
+        val layoutGood = makeHistoryLine(correct, R.drawable.round_yellow, false)
         val layoutBad = makeHistoryLine(wrong, R.drawable.round_red)
 
         history_view.addView(layoutBad, 0)
@@ -227,29 +227,25 @@ class MainActivity : AppCompatActivity() {
         updateSheetPeekHeight(layout)
     }
 
-    private fun makeHistoryLine(kanji: Kanji, style: Int): View {
-        val kanjiView = TextView(this)
-        kanjiView.text = kanji.kanji
-        kanjiView.textSize = 25.0f // sp
-        kanjiView.width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 35.0f, resources.displayMetrics).toInt()
-        kanjiView.height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 35.0f, resources.displayMetrics).toInt()
-        kanjiView.gravity = Gravity.CENTER
-        kanjiView.background = ContextCompat.getDrawable(this, style)
-        val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.0f)
-        params.gravity = Gravity.CENTER_VERTICAL
-        kanjiView.layoutParams = params
+    private fun makeHistoryLine(kanji: Kanji, style: Int, withSeparator: Boolean = true): View {
+        val line = LayoutInflater.from(this).inflate(R.layout.kanji_item, history_view, false)
 
-        val detailView = TextView(this)
+        val checkbox = line.findViewById(R.id.kanji_item_checkbox)
+        checkbox.visibility = View.GONE
+
+        val kanjiView = line.findViewById(R.id.kanji_item_text) as TextView
+        kanjiView.text = kanji.kanji
+        kanjiView.background = ContextCompat.getDrawable(this, style)
+
+        val detailView = line.findViewById(R.id.kanji_item_description) as TextView
         val detail = getKanjiDescription(kanji)
         detailView.text = detail
-        detailView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
 
-        val layout = LinearLayout(this)
-        layout.orientation = LinearLayout.HORIZONTAL
-        layout.addView(kanjiView)
-        layout.addView(detailView)
+        if (!withSeparator) {
+            line.findViewById(R.id.kanji_item_separator).visibility = View.GONE
+        }
 
-        return layout
+        return line
     }
 
     private fun updateSheetPeekHeight(v: View) {

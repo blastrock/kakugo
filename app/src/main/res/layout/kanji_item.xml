@@ -8,13 +8,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="6dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="6dp">
 
         <CheckBox
             android:id="@+id/kanji_item_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_margin="8dp"
             android:layout_weight="0"
             android:scaleX="1.5"
             android:scaleY="1.5" />
@@ -24,6 +29,7 @@
             android:layout_width="35sp"
             android:layout_height="35sp"
             android:layout_gravity="center"
+            android:layout_margin="8dp"
             android:layout_weight="0"
             android:gravity="center"
             android:text="K"
@@ -33,13 +39,18 @@
             android:id="@+id/kanji_item_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_weight="1"
             android:text="test1
 test2
-test3" />
+test3 test4" />
 
     </LinearLayout>
 
-    <View style="@style/Separator" />
+    <View
+        android:id="@+id/kanji_item_separator"
+        style="@style/Separator" />
 
 </LinearLayout>
