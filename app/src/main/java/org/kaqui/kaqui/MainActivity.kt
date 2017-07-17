@@ -90,6 +90,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.main_menu, menu)
@@ -139,14 +143,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun <T> pickRandom(list: List<T>, sample: Int): List<T> {
-        if (sample > list.size)
-            throw RuntimeException("can't get a sample of size $sample on list of size ${list.size}")
+    private fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
+        if (sample > list.size - avoid.size)
+            throw RuntimeException("can't get a sample of size $sample on list of size ${list.size - avoid.size}")
 
         val chosen = mutableSetOf<T>()
         while (chosen.size < sample) {
             val r = list[(Math.random() * list.size).toInt()]
-            chosen.add(r)
+            if (r !in avoid)
+                chosen.add(r)
         }
         return chosen.toList()
     }
@@ -154,12 +159,19 @@ class MainActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val ids = db.getAllIds()
-        currentQuestion = db.getKanji(pickRandom(ids, 1)[0])
+        val ids = db.getEnabledIds()
+
+        if (ids.size < NB_ANSWERS) {
+            Toast.makeText(this, "You must select at least $NB_ANSWERS kanjis", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val questionId = pickRandom(ids, 1)[0]
+        currentQuestion = db.getKanji(questionId)
 
         kanji_text.text = currentQuestion!!.kanji
 
-        val currentAnswers = (pickRandom(ids, NB_ANSWERS - 1).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
+        val currentAnswers = (pickRandom(ids, NB_ANSWERS - 1, setOf(questionId)).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
         shuffle(currentAnswers)
         this.currentAnswers = currentAnswers
         fillAnswers()
@@ -185,6 +197,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
+        if (currentQuestion == null || currentAnswers == null) {
+            showNewQuestion()
+            return
+        }
+
         val db = KanjiDb.getInstance(this)
 
         if (certainty == Certainty.DONTKNOW) {

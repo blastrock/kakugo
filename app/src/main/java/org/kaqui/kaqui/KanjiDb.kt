@@ -68,8 +68,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getAllIds(): List<Int> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), null, null, null, null, null).use { cursor ->
+    fun getEnabledIds(): List<Int> {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), "enabled = ?", arrayOf("1"), null, null, null).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
