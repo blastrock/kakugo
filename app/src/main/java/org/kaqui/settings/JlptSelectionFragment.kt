@@ -2,6 +2,7 @@ package org.kaqui.kaqui.settings
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -96,7 +97,7 @@ class JlptSelectionFragment : ListFragment() {
             return
 
         try {
-            val kanjis = File(data.data.path).readText()
+            val kanjis = context.contentResolver.openInputStream(data.data).bufferedReader().readText()
             KanjiDb.getInstance(context).setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
