@@ -15,7 +15,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 "CREATE TABLE $KANJIS_TABLE_NAME ("
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
-                        + "jlpt_level INTEGER,"
+                        + "jlpt_level INTEGER NOT NULL,"
                         + "weight FLOAT NOT NULL DEFAULT 0.0,"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
@@ -89,17 +89,13 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             while (cursor.moveToNext())
                 meanings.add(cursor.getString(0))
         }
-        val ret = Kanji("", readings, meanings, null, 0.0f, false)
+        val ret = Kanji("", readings, meanings, 0, 0.0f, false)
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "weight", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
             ret.kanji = cursor.getString(0)
-            ret.jlptLevel =
-                    if (!cursor.isNull(1))
-                        cursor.getInt(1)
-                    else
-                        null
+            ret.jlptLevel = cursor.getInt(1)
             ret.weight = cursor.getFloat(2)
             ret.enabled = cursor.getInt(3) != 0
         }

@@ -10,7 +10,8 @@ class JlptSelectionFragment : ListFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val itemList = (1..5).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) }
+        val itemList = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
+            mapOf("label" to "Additional kanjis", "level" to 0)
         listAdapter = SimpleAdapter(
                 context,
                 itemList,

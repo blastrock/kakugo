@@ -8,7 +8,7 @@ data class Kanji(
         var kanji: String,
         var readings: List<Reading>,
         var meanings: List<String>,
-        var jlptLevel: Int?,
+        var jlptLevel: Int,
         var weight: Float,
         var enabled: Boolean
 )
@@ -67,7 +67,7 @@ private fun parseCharacter(xpp: XmlPullParser, jlptLevels: Map<Int, String>): Ka
         }
         if (literal == null || freq == null)
             return null
-        var jlptLevel: Int? = null
+        var jlptLevel: Int = 0
         for ((level, kanjis) in jlptLevels) {
             if (literal in kanjis) {
                 jlptLevel = level
