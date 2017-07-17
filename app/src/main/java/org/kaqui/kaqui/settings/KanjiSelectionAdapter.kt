@@ -10,8 +10,24 @@ import org.kaqui.kaqui.KanjiDb
 import org.kaqui.kaqui.R
 import org.kaqui.kaqui.getKanjiDescription
 
-class KanjiSelectionAdapter(private val context: Context, private val ids: List<Int>) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
-    val db = KanjiDb.getInstance(context)
+class KanjiSelectionAdapter(private val context: Context) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
+    private val db = KanjiDb.getInstance(context)
+    private var ids: List<Int> = listOf()
+
+    fun searchFor(text: String) {
+        ids = db.search(text)
+        notifyDataSetChanged()
+    }
+
+    fun clearAll() {
+        ids = listOf()
+        notifyDataSetChanged()
+    }
+
+    fun showLevel(level: Int) {
+        ids = db.getKanjisForJlptLevel(level)
+        notifyDataSetChanged()
+    }
 
     override fun getItemCount(): Int = ids.size
 

@@ -11,7 +11,8 @@ class JlptSelectionFragment : ListFragment() {
         super.onCreate(savedInstanceState)
 
         val itemList = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
-            mapOf("label" to "Additional kanjis", "level" to 0)
+                mapOf("label" to "Additional kanjis", "level" to 0) +
+                mapOf("label" to "Search")
         listAdapter = SimpleAdapter(
                 context,
                 itemList,
@@ -25,10 +26,17 @@ class JlptSelectionFragment : ListFragment() {
 
         val item = listAdapter.getItem(position) as Map<String, Any>
 
-        fragmentManager.beginTransaction()
-                .replace(android.R.id.content, KanjiSelectionFragment.newInstance(item["level"] as Int))
-                .addToBackStack("kanjis")
-                .commit()
+        if ("level" !in item) { // search
+            fragmentManager.beginTransaction()
+                    .replace(android.R.id.content, KanjiSearchFragment.newInstance())
+                    .addToBackStack("kanjiSearch")
+                    .commit()
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(android.R.id.content, KanjiSelectionFragment.newInstance(item["level"] as Int))
+                    .addToBackStack("kanjiSelection")
+                    .commit()
+        }
     }
 
     companion object {

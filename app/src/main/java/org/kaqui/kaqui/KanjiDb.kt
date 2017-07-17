@@ -78,6 +78,22 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
+    fun search(text: String): List<Int> {
+        readableDatabase.rawQuery(
+                """SELECT DISTINCT k.id_kanji
+                FROM kanjis k
+                LEFT JOIN readings r USING(id_kanji)
+                LEFT JOIN meanings m USING(id_kanji)
+                WHERE k.kanji = ? OR r.reading LIKE ? OR m.meaning LIKE ?""",
+                arrayOf(text, "%${text}%", "%${text}%")).use { cursor ->
+            val ret = mutableListOf<Int>()
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+            return ret
+        }
+    }
+
     fun getKanji(id: Int): Kanji {
         val readings = mutableListOf<Reading>()
         val meanings = mutableListOf<String>()
