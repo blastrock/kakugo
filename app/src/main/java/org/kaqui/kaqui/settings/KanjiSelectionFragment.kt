@@ -10,8 +10,8 @@ import org.kaqui.kaqui.KanjiDb
 import org.kaqui.kaqui.R
 
 class KanjiSelectionFragment : Fragment() {
-    lateinit var db: KanjiDb
-    lateinit var listAdapter: KanjiSelectionAdapter
+    private lateinit var db: KanjiDb
+    private lateinit var listAdapter: KanjiSelectionAdapter
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -51,7 +51,7 @@ class KanjiSelectionFragment : Fragment() {
     }
 
     companion object {
-        val TAG = this::class.java.simpleName
+        private val TAG = this::class.java.simpleName!!
 
         fun newInstance(level: Int): KanjiSelectionFragment {
             val f = KanjiSelectionFragment()

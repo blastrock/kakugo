@@ -31,7 +31,7 @@ class JlptSelectionFragment : ListFragment() {
     }
 
     companion object {
-        val TAG = this::class.java.simpleName!!
+        private val TAG = this::class.java.simpleName!!
 
         fun newInstance(): JlptSelectionFragment {
             val f = JlptSelectionFragment()
