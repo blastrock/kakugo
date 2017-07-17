@@ -5,10 +5,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
-import org.kaqui.kaqui.KanjiDb
+import org.kaqui.KanjiDb
 import org.kaqui.kaqui.R
-import org.kaqui.kaqui.getKanjiDescription
+import org.kaqui.getKanjiDescription
 
 class KanjiSelectionAdapter(private val context: Context) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
     private val db = KanjiDb.getInstance(context)

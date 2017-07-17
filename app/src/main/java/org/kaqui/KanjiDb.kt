@@ -1,18 +1,17 @@
-package org.kaqui.kaqui
+package org.kaqui
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.support.v4.database.DatabaseUtilsCompat
 import android.util.Log
 
 class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
-                "CREATE TABLE $KANJIS_TABLE_NAME ("
+                "CREATE TABLE ${KANJIS_TABLE_NAME} ("
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER NOT NULL,"
@@ -20,14 +19,14 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
-                "CREATE TABLE $READINGS_TABLE_NAME ("
+                "CREATE TABLE ${READINGS_TABLE_NAME} ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "reading_type TEXT NOT NULL,"
                         + "reading TEXT NOT NULL"
                         + ")")
         database.execSQL(
-                "CREATE TABLE $MEANINGS_TABLE_NAME ("
+                "CREATE TABLE ${MEANINGS_TABLE_NAME} ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "meaning TEXT NOT NULL"

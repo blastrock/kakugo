@@ -1,4 +1,4 @@
-package org.kaqui.kaqui
+package org.kaqui
 
 import android.animation.ValueAnimator
 import android.app.ProgressDialog
@@ -11,13 +11,13 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.AppCompatButton
 import android.util.Log
-import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import org.kaqui.kaqui.R
 import org.kaqui.kaqui.settings.SettingsActivity
 import org.xmlpull.v1.XmlPullParserFactory
 import java.net.HttpURLConnection

@@ -1,4 +1,4 @@
-package org.kaqui.kaqui
+package org.kaqui
 
 import android.content.ContentValues.TAG
 import android.util.Log
@@ -74,7 +74,7 @@ private fun parseCharacter(xpp: XmlPullParser, jlptLevels: Map<Int, String>): Ka
                 break
             }
         }
-        return Kanji(literal, readings, meanings, jlptLevel, 0.0f,true)
+        return Kanji(literal, readings, meanings, jlptLevel, 0.0f, true)
     }
     return null
 }

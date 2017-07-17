@@ -1,12 +1,11 @@
 package org.kaqui.kaqui.settings
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
-import org.kaqui.kaqui.KanjiDb
+import org.kaqui.KanjiDb
 import org.kaqui.kaqui.R
 
 class KanjiSelectionFragment : Fragment() {

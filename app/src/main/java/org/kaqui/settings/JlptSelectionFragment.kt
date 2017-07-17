@@ -16,7 +16,7 @@ import android.view.View
 import android.widget.ListView
 import android.widget.SimpleAdapter
 import android.widget.Toast
-import org.kaqui.kaqui.KanjiDb
+import org.kaqui.KanjiDb
 import org.kaqui.kaqui.R
 import java.io.File
 
