@@ -4,4 +4,5 @@
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>
     <string name="search">Search</string>
+    <string name="import_selection">Import kanji selection</string>
 </resources>

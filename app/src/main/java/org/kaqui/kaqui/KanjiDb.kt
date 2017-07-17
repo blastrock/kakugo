@@ -167,6 +167,22 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         writableDatabase.update(KANJIS_TABLE_NAME, cv, "jlpt_level = ?", arrayOf(level.toString()))
     }
 
+    fun setSelection(kanjis: String) {
+        writableDatabase.beginTransaction()
+        try {
+            val cv = ContentValues()
+            cv.put("enabled", false)
+            writableDatabase.update(KANJIS_TABLE_NAME, cv, null, null)
+            cv.put("enabled", true)
+            for (c in kanjis) {
+                writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(c.toString()))
+            }
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
     private fun certaintyToWeight(certainty: Certainty): Double =
             when (certainty) {
                 Certainty.SURE -> 1.0
