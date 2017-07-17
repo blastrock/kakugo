@@ -30,10 +30,11 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
         private const val NB_ANSWERS = 6
+        private const val MAX_HISTORY_SIZE = 40
     }
 
     private lateinit var answerTexts: List<TextView>
-    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var sheetBehavior: BottomSheetBehavior<ScrollView>
     private var currentQuestion: Kanji? = null
     private var currentAnswers: List<Kanji>? = null
 
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
 
-        sheetBehavior = BottomSheetBehavior.from(history_view)
+        sheetBehavior = BottomSheetBehavior.from(history_scroll_view)
         if (savedInstanceState?.getBoolean("playerOpen", false) ?: false)
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         else
@@ -226,6 +227,7 @@ class MainActivity : AppCompatActivity() {
 
         history_view.addView(layout, 0)
         updateSheetPeekHeight(layout)
+        discardOldHistory()
     }
 
     private fun addWrongAnswerToHistory(correct: Kanji, wrong: Kanji) {
@@ -235,6 +237,7 @@ class MainActivity : AppCompatActivity() {
         history_view.addView(layoutBad, 0)
         history_view.addView(layoutGood, 0)
         updateSheetPeekHeight(layoutGood)
+        discardOldHistory()
     }
 
     private fun addUnknownAnswerToHistory(correct: Kanji) {
@@ -242,6 +245,7 @@ class MainActivity : AppCompatActivity() {
 
         history_view.addView(layout, 0)
         updateSheetPeekHeight(layout)
+        discardOldHistory()
     }
 
     private fun makeHistoryLine(kanji: Kanji, style: Int, withSeparator: Boolean = true): View {
@@ -272,5 +276,10 @@ class MainActivity : AppCompatActivity() {
             va.addUpdateListener { sheetBehavior.peekHeight = it.animatedValue as Int }
             va.start()
         }
+    }
+
+    private fun discardOldHistory() {
+        for (position in history_view.childCount-1 downTo MAX_HISTORY_SIZE-1)
+            history_view.removeViewAt(position)
     }
 }

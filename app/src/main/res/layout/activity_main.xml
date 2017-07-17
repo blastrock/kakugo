@@ -38,15 +38,24 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/history_view"
+    <ScrollView
+        android:id="@+id/history_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#CCC"
         android:elevation="8dp"
-        android:orientation="vertical"
         app:behavior_hideable="false"
         app:behavior_peekHeight="0dp"
-        app:layout_behavior="@string/bottom_sheet_behavior" />
+        app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <LinearLayout
+            android:id="@+id/history_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </android.support.design.widget.CoordinatorLayout>
