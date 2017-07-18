@@ -75,6 +75,15 @@ class MainActivity : AppCompatActivity() {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         else
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        sheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
+                    history_scroll_view.smoothScrollTo(0, 0)
+            }
+        })
 
         val db = KanjiDb.getInstance(this)
         if (db.empty) {
