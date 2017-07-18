@@ -67,11 +67,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getEnabledIds(): List<Int> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), "enabled = ?", arrayOf("1"), null, null, null).use { cursor ->
-            val ret = mutableListOf<Int>()
+    fun getEnabledIdsAndWeights(): List<Pair<Int, Float>> {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "weight"), "enabled = ?", arrayOf("1"), null, null, null).use { cursor ->
+            val ret = mutableListOf<Pair<Int, Float>>()
             while (cursor.moveToNext()) {
-                ret.add(cursor.getInt(0))
+                ret.add(Pair(cursor.getInt(0), cursor.getFloat(1)))
             }
             return ret
         }

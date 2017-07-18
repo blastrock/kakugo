@@ -160,19 +160,32 @@ class MainActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val ids = db.getEnabledIds()
+        val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0f - weight) }
 
         if (ids.size < NB_ANSWERS) {
             Toast.makeText(this, "You must select at least $NB_ANSWERS kanjis", Toast.LENGTH_LONG).show()
             return
         }
 
-        val questionId = pickRandom(ids, 1)[0]
+        val totalWeight = ids.map { it.second }.sum()
+        val questionPos = Math.random() * totalWeight
+        var questionId = ids[0].first
+        run {
+            var currentWeight = 0.0f
+            for ((id, weight) in ids) {
+                currentWeight += weight
+                if (currentWeight >= questionPos) {
+                    questionId = id
+                    break
+                }
+            }
+        }
+
         currentQuestion = db.getKanji(questionId)
 
         kanji_text.text = currentQuestion!!.kanji
 
-        val currentAnswers = (pickRandom(ids, NB_ANSWERS - 1, setOf(questionId)).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
+        val currentAnswers = (pickRandom(ids.map { it.first }, NB_ANSWERS - 1, setOf(questionId)).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
         shuffle(currentAnswers)
         this.currentAnswers = currentAnswers
         fillAnswers()
@@ -279,7 +292,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun discardOldHistory() {
-        for (position in history_view.childCount-1 downTo MAX_HISTORY_SIZE-1)
+        for (position in history_view.childCount - 1 downTo MAX_HISTORY_SIZE - 1)
             history_view.removeViewAt(position)
     }
 }
