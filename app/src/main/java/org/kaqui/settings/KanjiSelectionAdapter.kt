@@ -5,6 +5,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import org.kaqui.BAD_WEIGHT
+import org.kaqui.GOOD_WEIGHT
 import org.kaqui.KanjiDb
 import org.kaqui.kaqui.R
 import org.kaqui.getKanjiDescription
@@ -41,9 +43,9 @@ class KanjiSelectionAdapter(private val context: Context) : RecyclerView.Adapter
         holder.kanjiText.text = kanji.kanji
         val background =
                 when (kanji.weight) {
-                    in 0.0f..0.3f -> R.drawable.round_red
-                    in 0.3f..0.8f -> R.drawable.round_yellow
-                    in 0.8f..1.0f -> R.drawable.round_green
+                    in 0.0f..BAD_WEIGHT -> R.drawable.round_red
+                    in BAD_WEIGHT..GOOD_WEIGHT -> R.drawable.round_yellow
+                    in GOOD_WEIGHT..1.0f -> R.drawable.round_green
                     else -> R.drawable.round_red
                 }
         holder.kanjiText.background = ContextCompat.getDrawable(context, background)

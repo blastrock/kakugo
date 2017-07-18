@@ -77,6 +77,18 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
+    data class Stats(val bad: Int, val meh: Int, val good: Int)
+
+    fun getStats(): Stats =
+            Stats(getCountForWeight(0.0f, BAD_WEIGHT), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT), getCountForWeight(GOOD_WEIGHT, 1.0f))
+
+    private fun getCountForWeight(from: Float, to: Float): Int {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = ? AND weight BETWEEN ? AND ?", arrayOf("1", from.toString(), to.toString()), null, null, null).use { cursor ->
+            cursor.moveToNext()
+            return cursor.getInt(0)
+        }
+    }
+
     fun search(text: String): List<Int> {
         readableDatabase.rawQuery(
                 """SELECT DISTINCT k.id_kanji
