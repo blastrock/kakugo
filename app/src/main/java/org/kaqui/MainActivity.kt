@@ -121,6 +121,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        else
+            super.onBackPressed()
+    }
+
     private fun downloadKanjiDic() {
         try {
             Log.v(TAG, "Downloading kanjidic")
