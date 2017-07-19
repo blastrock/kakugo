@@ -76,7 +76,7 @@
 
     </ScrollView>
 
-    <ScrollView
+    <android.support.v4.widget.NestedScrollView
         android:id="@+id/history_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -93,7 +93,6 @@
             android:orientation="vertical">
 
         </LinearLayout>
-
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

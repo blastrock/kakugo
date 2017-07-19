@@ -11,6 +11,7 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.view.ViewCompat
+import android.support.v4.widget.NestedScrollView
 import android.support.v7.widget.AppCompatButton
 import android.util.Log
 import android.view.*
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var answerTexts: List<TextView>
-    private lateinit var sheetBehavior: BottomSheetBehavior<ScrollView>
+    private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
     private var currentQuestion: Kanji? = null
     private var currentAnswers: List<Kanji>? = null
 
