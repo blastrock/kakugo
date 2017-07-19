@@ -7,6 +7,7 @@ import android.content.res.ColorStateList
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
+import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.view.ViewCompat
@@ -350,6 +351,8 @@ class MainActivity : AppCompatActivity() {
             va.duration = 200 // ms
             va.addUpdateListener { sheetBehavior.peekHeight = it.animatedValue as Int }
             va.start()
+
+            main_scrollview.layoutParams = CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, main_coordlayout.height - v.height)
         }
     }
 
