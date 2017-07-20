@@ -3,9 +3,11 @@ package org.kaqui
 import java.io.BufferedReader
 
 data class Kanji(
+        var id: Int,
         var kanji: String,
         var readings: List<Reading>,
         var meanings: List<String>,
+        var similarities: List<Kanji>,
         var jlptLevel: Int,
         var weight: Float,
         var enabled: Boolean
@@ -19,7 +21,7 @@ private enum class PartType {
     KatakanaReading,
     HiraganaReading,
     Meaning,
-    Similar,
+    Similarities,
     Frequency,
 }
 
@@ -30,7 +32,7 @@ private fun letterToPartType(letter: Char): PartType {
         'k' -> PartType.KatakanaReading
         'h' -> PartType.HiraganaReading
         'm' -> PartType.Meaning
-        's' -> PartType.Similar
+        's' -> PartType.Similarities
         else -> PartType.Unknown
     }
 }
@@ -59,10 +61,13 @@ fun lineToKanji(levels: Map<Int, String>, line: String): Kanji? {
 
     val literal = parts.filter { it.first == PartType.Kanji }.first().second.first()
 
-    return Kanji(literal.toString(),
+    return Kanji(
+            0,
+            literal.toString(),
             parts.filter { it.first == PartType.KatakanaReading || it.first == PartType.HiraganaReading }
                     .map { Reading(if (it.first == PartType.HiraganaReading) "ja_kun" else "ja_on", it.second) },
             parts.filter { it.first == PartType.Meaning }.map { it.second },
+            parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0f, false) },
             getJlptLevel(levels, literal),
             0.0f,
             true)

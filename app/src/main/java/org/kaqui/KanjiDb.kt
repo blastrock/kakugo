@@ -11,7 +11,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
-                "CREATE TABLE $KANJIS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS $KANJIS_TABLE_NAME ("
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER NOT NULL,"
@@ -19,21 +19,31 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
-                "CREATE TABLE $READINGS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS $READINGS_TABLE_NAME ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "reading_type TEXT NOT NULL,"
                         + "reading TEXT NOT NULL"
                         + ")")
         database.execSQL(
-                "CREATE TABLE $MEANINGS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS $MEANINGS_TABLE_NAME ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "meaning TEXT NOT NULL"
                         + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $SIMILARITIES_TABLE_NAME ("
+                        + "id_similarity INTEGER PRIMARY KEY,"
+                        + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
+                        + "similar_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji)"
+                        + ")")
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 3) {
+            database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
+            onCreate(database)
+        }
     }
 
     val empty: Boolean
@@ -64,9 +74,33 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                     writableDatabase.insertOrThrow(MEANINGS_TABLE_NAME, null, meaningCv)
                 }
             }
+
+            for (kanji in kanjis) {
+                for (similarity in kanji.similarities) {
+                    val kanjiId = getKanjiId(kanji.kanji[0])!!
+                    val similarityId = getKanjiId(similarity.kanji[0])
+                    similarityId ?: continue
+
+                    val similarityCv = ContentValues()
+                    similarityCv.put("id_kanji", kanjiId)
+                    similarityCv.put("similar_kanji", similarityId)
+                    writableDatabase.insertOrThrow(SIMILARITIES_TABLE_NAME, null, similarityCv)
+                }
+            }
             writableDatabase.setTransactionSuccessful()
         } finally {
             writableDatabase.endTransaction()
+        }
+    }
+
+    fun getKanjiId(kanji: Char): Int? {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), "kanji = ?", arrayOf(kanji.toString()), null, null, null).use { cursor ->
+            if (cursor.count == 0)
+                return null
+            else {
+                cursor.moveToFirst()
+                return cursor.getInt(0)
+            }
         }
     }
 
@@ -99,7 +133,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 LEFT JOIN readings r USING(id_kanji)
                 LEFT JOIN meanings m USING(id_kanji)
                 WHERE k.kanji = ? OR r.reading LIKE ? OR m.meaning LIKE ?""",
-                arrayOf(text, "%${text}%", "%${text}%")).use { cursor ->
+                arrayOf(text, "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
@@ -111,6 +145,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     fun getKanji(id: Int): Kanji {
         val readings = mutableListOf<Reading>()
         val meanings = mutableListOf<String>()
+        val similarities = mutableListOf<Kanji>()
         readableDatabase.query(READINGS_TABLE_NAME, arrayOf("reading_type", "reading"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 readings.add(Reading(cursor.getString(0), cursor.getString(1)))
@@ -119,7 +154,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             while (cursor.moveToNext())
                 meanings.add(cursor.getString(0))
         }
-        val ret = Kanji("", readings, meanings, 0, 0.0f, false)
+        readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("similar_kanji"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0f, false))
+        }
+        val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0f, false)
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "weight", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
@@ -235,11 +274,12 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KanjiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 3
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val READINGS_TABLE_NAME = "readings"
         private const val MEANINGS_TABLE_NAME = "meanings"
+        private const val SIMILARITIES_TABLE_NAME = "similarities"
 
         private var singleton: KanjiDb? = null
 
