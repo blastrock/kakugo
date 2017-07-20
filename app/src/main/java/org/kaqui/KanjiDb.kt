@@ -11,7 +11,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
-                "CREATE TABLE ${KANJIS_TABLE_NAME} ("
+                "CREATE TABLE $KANJIS_TABLE_NAME ("
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER NOT NULL,"
@@ -19,14 +19,14 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
-                "CREATE TABLE ${READINGS_TABLE_NAME} ("
+                "CREATE TABLE $READINGS_TABLE_NAME ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "reading_type TEXT NOT NULL,"
                         + "reading TEXT NOT NULL"
                         + ")")
         database.execSQL(
-                "CREATE TABLE ${MEANINGS_TABLE_NAME} ("
+                "CREATE TABLE $MEANINGS_TABLE_NAME ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "meaning TEXT NOT NULL"
@@ -39,9 +39,12 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     val empty: Boolean
         get() = DatabaseUtils.queryNumEntries(readableDatabase, KANJIS_TABLE_NAME) == 0L
 
-    fun addKanjis(kanjis: List<Kanji>) {
+    fun replaceKanjis(kanjis: List<Kanji>) {
+        writableDatabase.beginTransaction()
         try {
-            writableDatabase.beginTransaction()
+            writableDatabase.delete(MEANINGS_TABLE_NAME, null, null)
+            writableDatabase.delete(READINGS_TABLE_NAME, null, null)
+            writableDatabase.delete(KANJIS_TABLE_NAME, null, null)
             for (kanji in kanjis) {
                 val kanjiCv = ContentValues()
                 kanjiCv.put("kanji", kanji.kanji)

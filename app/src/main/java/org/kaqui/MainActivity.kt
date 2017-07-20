@@ -106,13 +106,10 @@ class MainActivity : AppCompatActivity() {
 
         val db = KanjiDb.getInstance(this)
         if (db.empty) {
-            downloadProgress = ProgressDialog(this)
-            downloadProgress!!.setMessage("Downloading kanjidic database")
-            downloadProgress!!.setCancelable(false)
-            downloadProgress!!.show()
+            showDownloadProgressDialog()
 
             async(CommonPool) {
-                downloadKanjiDic()
+                downloadKanjiDic(true)
             }
         } else {
             showNewQuestion()
@@ -135,6 +132,13 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 return true
             }
+            R.id.download_database -> {
+                showDownloadProgressDialog()
+                async(CommonPool) {
+                    downloadKanjiDic()
+                }
+                return true
+            }
             else ->
                 return super.onOptionsItemSelected(item)
         }
@@ -147,7 +151,14 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
     }
 
-    private fun downloadKanjiDic() {
+    private fun showDownloadProgressDialog() {
+        downloadProgress = ProgressDialog(this)
+        downloadProgress!!.setMessage("Downloading kanjidic database")
+        downloadProgress!!.setCancelable(false)
+        downloadProgress!!.show()
+    }
+
+    private fun downloadKanjiDic(abortOnError: Boolean = false) {
         try {
             Log.v(TAG, "Downloading kanjidic")
             val url = URL("http://nihongo.monash.edu/kanjidic2/kanjidic2.xml.gz")
@@ -162,19 +173,27 @@ class MainActivity : AppCompatActivity() {
                     xpp.setInput(textStream, "UTF-8")
 
                     val db = KanjiDb.getInstance(this)
-                    db.addKanjis(parseXml(xpp))
+                    val dump = db.dumpUserData()
+                    db.replaceKanjis(parseXml(xpp))
+                    db.restoreUserDataDump(dump)
                 }
             }
             Log.v(TAG, "Finished downloading kanjidic")
             async(UI) {
                 downloadProgress!!.dismiss()
+                downloadProgress = null
                 showNewQuestion()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to download and parse kanjidic", e)
             async(UI) {
                 Toast.makeText(this@MainActivity, "Failed to download and parse kanjidic: " + e.message, Toast.LENGTH_LONG).show()
-                finish()
+                if (abortOnError)
+                    finish()
+                else {
+                    downloadProgress!!.dismiss()
+                    downloadProgress = null
+                }
             }
         }
     }

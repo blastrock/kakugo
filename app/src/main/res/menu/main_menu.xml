@@ -4,4 +4,7 @@
     <item
         android:id="@+id/menu_settings"
         android:title="@string/settings" />
+    <item
+        android:id="@+id/download_database"
+        android:title="@string/download_database" />
 </menu>
