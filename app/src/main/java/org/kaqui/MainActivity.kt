@@ -161,20 +161,16 @@ class MainActivity : AppCompatActivity() {
     private fun downloadKanjiDic(abortOnError: Boolean = false) {
         try {
             Log.v(TAG, "Downloading kanjidic")
-            val url = URL("http://nihongo.monash.edu/kanjidic2/kanjidic2.xml.gz")
+            val url = URL("https://axanux.net/kanjidic_.gz")
             val urlConnection = url.openConnection() as HttpURLConnection
             urlConnection.requestMethod = "GET"
-            urlConnection.doOutput = true
             urlConnection.connect()
 
             urlConnection.inputStream.use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
-                    val xpp = XmlPullParserFactory.newInstance().newPullParser()
-                    xpp.setInput(textStream, "UTF-8")
-
                     val db = KanjiDb.getInstance(this)
                     val dump = db.dumpUserData()
-                    db.replaceKanjis(parseXml(xpp))
+                    db.replaceKanjis(parseFile(textStream.bufferedReader()))
                     db.restoreUserDataDump(dump)
                 }
             }
