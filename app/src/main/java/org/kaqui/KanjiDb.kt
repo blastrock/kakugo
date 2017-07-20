@@ -54,6 +54,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         try {
             writableDatabase.delete(MEANINGS_TABLE_NAME, null, null)
             writableDatabase.delete(READINGS_TABLE_NAME, null, null)
+            writableDatabase.delete(SIMILARITIES_TABLE_NAME, null, null)
             writableDatabase.delete(KANJIS_TABLE_NAME, null, null)
             for (kanji in kanjis) {
                 val kanjiCv = ContentValues()
