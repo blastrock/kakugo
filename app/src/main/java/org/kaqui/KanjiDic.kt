@@ -66,7 +66,7 @@ fun lineToKanji(levels: Map<Int, String>, line: String): Kanji? {
             literal.toString(),
             parts.filter { it.first == PartType.KatakanaReading || it.first == PartType.HiraganaReading }
                     .map { Reading(if (it.first == PartType.HiraganaReading) "ja_kun" else "ja_on", it.second) },
-            parts.filter { it.first == PartType.Meaning }.map { it.second },
+            parts.filter { it.first == PartType.Meaning }.map { it.second.replace('_', ' ') },
             parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0f, false) },
             getJlptLevel(levels, literal),
             0.0f,
