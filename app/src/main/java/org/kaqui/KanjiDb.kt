@@ -194,6 +194,33 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
+    data class DumpRow(val weight: Float, val enabled: Boolean)
+
+    fun dumpUserData(): Map<Char, DumpRow> {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "weight", "enabled"), null, null, null, null, null).use { cursor ->
+            val ret = mutableMapOf<Char, DumpRow>()
+            while (cursor.moveToNext()) {
+                ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getInt(2) != 0)
+            }
+            return ret
+        }
+    }
+
+    fun restoreUserDataDump(data: Map<Char, DumpRow>) {
+        writableDatabase.beginTransaction()
+        try {
+            val cv = ContentValues()
+            for ((kanji, row) in data) {
+                cv.put("weight", row.weight)
+                cv.put("enabled", if (row.enabled) 1 else 0)
+                writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji.toString()))
+            }
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
     private fun certaintyToWeight(certainty: Certainty): Double =
             when (certainty) {
                 Certainty.SURE -> 1.0
