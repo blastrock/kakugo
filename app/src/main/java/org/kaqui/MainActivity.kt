@@ -29,9 +29,6 @@ import java.util.*
 import java.util.zip.GZIPInputStream
 import android.util.TypedValue
 
-
-
-
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
@@ -53,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         val answerTexts = ArrayList<TextView>(NB_ANSWERS)
         for (i in 0 until NB_ANSWERS) {
-            val setGravity = fun (layoutParams: LinearLayout.LayoutParams): LinearLayout.LayoutParams {
+            val setGravity = fun(layoutParams: LinearLayout.LayoutParams): LinearLayout.LayoutParams {
                 layoutParams.gravity = Gravity.CENTER_VERTICAL
                 return layoutParams
             }
@@ -86,8 +83,8 @@ class MainActivity : AppCompatActivity() {
 
             separator.background = ResourcesCompat.getDrawable(resources, typedvalueattr.resourceId, null)
 
-            answers_layout.addView(layout, i*2)
-            answers_layout.addView(separator, i*2+1)
+            answers_layout.addView(layout, i * 2)
+            answers_layout.addView(separator, i * 2 + 1)
         }
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
