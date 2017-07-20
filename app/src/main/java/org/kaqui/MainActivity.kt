@@ -233,11 +233,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        currentQuestion = db.getKanji(questionId)
+        val currentQuestion = db.getKanji(questionId)
+        this.currentQuestion = currentQuestion
 
-        kanji_text.text = currentQuestion!!.kanji
+        kanji_text.text = currentQuestion.kanji
 
-        val currentAnswers = (pickRandom(ids.map { it.first }, NB_ANSWERS - 1, setOf(questionId)).map { db.getKanji(it) } + listOf(currentQuestion!!)).toMutableList()
+        val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
+        val similarKanjis =
+                if (similarKanjiIds.size >= NB_ANSWERS - 1)
+                    pickRandom(similarKanjiIds, NB_ANSWERS - 1)
+                else
+                    similarKanjiIds
+
+        val additionalAnswers = pickRandom(ids.map { it.first }, NB_ANSWERS - 1 - similarKanjis.size, setOf(questionId) + similarKanjis)
+
+        val currentAnswers = ((additionalAnswers + similarKanjis).map { db.getKanji(it) } + listOf(currentQuestion)).toMutableList()
+        if (currentAnswers.size != NB_ANSWERS)
+            Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
         shuffle(currentAnswers)
         this.currentAnswers = currentAnswers
         fillAnswers()

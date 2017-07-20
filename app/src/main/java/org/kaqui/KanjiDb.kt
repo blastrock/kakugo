@@ -220,6 +220,13 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         writableDatabase.update(KANJIS_TABLE_NAME, cv, "jlpt_level = ?", arrayOf(level.toString()))
     }
 
+    fun isKanjiEnabled(id: Int): Boolean {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            return cursor.getInt(0) != 0
+        }
+    }
+
     fun setSelection(kanjis: String) {
         writableDatabase.beginTransaction()
         try {
