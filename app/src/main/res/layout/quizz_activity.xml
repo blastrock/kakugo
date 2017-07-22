@@ -68,7 +68,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:backgroundTint="@android:color/holo_red_light"
-                    android:text="Don't know" />
+                    android:text="@string/dont_know" />
 
             </LinearLayout>
 

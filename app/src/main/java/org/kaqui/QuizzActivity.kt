@@ -49,41 +49,13 @@ class QuizzActivity : AppCompatActivity() {
 
         val answerTexts = ArrayList<TextView>(NB_ANSWERS)
         for (i in 0 until NB_ANSWERS) {
-            val setGravity = fun(layoutParams: LinearLayout.LayoutParams): LinearLayout.LayoutParams {
-                layoutParams.gravity = Gravity.CENTER_VERTICAL
-                return layoutParams
-            }
+            val answerLine = LayoutInflater.from(this).inflate(R.layout.kanji_answer_line, answers_layout, false)
 
-            answerTexts.add(TextView(this))
-            answerTexts[i].layoutParams = setGravity(LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f))
+            answerTexts.add(answerLine.findViewById(R.id.answer_text) as TextView)
+            answerLine.findViewById(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
+            answerLine.findViewById(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
 
-            val buttonMaybe = AppCompatButton(this)
-            buttonMaybe.text = "Maybe"
-            ViewCompat.setBackgroundTintList(buttonMaybe, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.holo_orange_light)))
-            buttonMaybe.setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
-            buttonMaybe.layoutParams = setGravity(LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.0f))
-            val buttonSure = AppCompatButton(this)
-            buttonSure.text = "Sure"
-            ViewCompat.setBackgroundTintList(buttonSure, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.holo_green_light)))
-            buttonSure.setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
-            buttonSure.layoutParams = setGravity(LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.0f))
-
-            val layout = LinearLayout(this)
-            layout.orientation = LinearLayout.HORIZONTAL
-            layout.addView(answerTexts[i])
-            layout.addView(buttonMaybe)
-            layout.addView(buttonSure)
-
-            val separator = View(this)
-            separator.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1, 0.0f)
-
-            val typedvalueattr = TypedValue()
-            theme.resolveAttribute(android.R.attr.listDivider, typedvalueattr, true)
-
-            separator.background = ResourcesCompat.getDrawable(resources, typedvalueattr.resourceId, null)
-
-            answers_layout.addView(layout, i * 2)
-            answers_layout.addView(separator, i * 2 + 1)
+            answers_layout.addView(answerLine, i)
         }
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
