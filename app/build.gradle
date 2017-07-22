@@ -8,7 +8,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
     defaultConfig {
-        applicationId "org.kaqui.kaqui"
+        applicationId "org.kaqui"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1

@@ -1,4 +1,4 @@
-package org.kaqui.kaqui.settings
+package org.kaqui.settings
 
 import android.content.Context
 import android.support.v4.content.ContextCompat
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import org.kaqui.BAD_WEIGHT
 import org.kaqui.GOOD_WEIGHT
 import org.kaqui.KanjiDb
-import org.kaqui.kaqui.R
+import org.kaqui.R
 import org.kaqui.getKanjiDescription
 
 class KanjiSelectionAdapter(private val context: Context) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {

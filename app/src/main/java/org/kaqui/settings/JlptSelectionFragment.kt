@@ -1,4 +1,4 @@
-package org.kaqui.kaqui.settings
+package org.kaqui.settings
 
 import android.Manifest
 import android.app.Activity
@@ -18,7 +18,7 @@ import android.widget.ListView
 import android.widget.SimpleAdapter
 import android.widget.Toast
 import org.kaqui.KanjiDb
-import org.kaqui.kaqui.R
+import org.kaqui.R
 import java.io.File
 
 class JlptSelectionFragment : ListFragment() {

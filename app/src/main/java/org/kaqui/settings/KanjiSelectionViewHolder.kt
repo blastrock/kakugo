@@ -1,11 +1,11 @@
-package org.kaqui.kaqui.settings
+package org.kaqui.settings
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.CheckBox
 import android.widget.TextView
 import org.kaqui.KanjiDb
-import org.kaqui.kaqui.R
+import org.kaqui.R
 
 class KanjiSelectionViewHolder(private val db: KanjiDb, v: View) : RecyclerView.ViewHolder(v) {
     val enabled: CheckBox = v.findViewById(R.id.kanji_item_checkbox) as CheckBox
