@@ -8,33 +8,42 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
+import android.support.v4.app.Fragment
 import android.support.v4.app.ListFragment
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.widget.ListView
-import android.widget.SimpleAdapter
-import android.widget.Toast
+import android.view.*
+import android.widget.*
+import kotlinx.android.synthetic.main.jlpt_selection_fragment.*
 import org.kaqui.KanjiDb
 import org.kaqui.R
 import java.io.File
 
-class JlptSelectionFragment : ListFragment() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+class JlptSelectionFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+
+        val view = inflater.inflate(R.layout.jlpt_selection_fragment, container, false)
         setHasOptionsMenu(true)
+
+        return view
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
 
         val itemList = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
                 mapOf("label" to "Additional kanjis", "level" to 0) +
                 mapOf("label" to "Search")
-        listAdapter = SimpleAdapter(
+        jlpt_selection_list.adapter = SimpleAdapter(
                 context,
                 itemList,
                 android.R.layout.simple_list_item_1,
                 arrayOf("label"),
                 intArrayOf(android.R.id.text1))
+
+        jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
+
+        updateGlobalStats()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -53,10 +62,8 @@ class JlptSelectionFragment : ListFragment() {
         }
     }
 
-    override fun onListItemClick(l: ListView?, v: View?, position: Int, id: Long) {
-        super.onListItemClick(l, v, position, id)
-
-        val item = listAdapter.getItem(position) as Map<String, Any>
+    private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
+        val item = l.adapter.getItem(position) as Map<String, Any>
 
         if ("level" !in item) { // search
             fragmentManager.beginTransaction()
@@ -69,6 +76,30 @@ class JlptSelectionFragment : ListFragment() {
                     .addToBackStack("kanjiSelection")
                     .commit()
         }
+    }
+
+    private fun updateGlobalStats() {
+        val db = KanjiDb.getInstance(context)
+        val stats = db.getStats()
+        val total = stats.bad + stats.meh + stats.good
+        bad_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.bad.toFloat() / total))
+        meh_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.meh.toFloat() / total))
+        good_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.good.toFloat() / total))
+        bad_count.text =
+                if (stats.bad > 0)
+                    stats.bad.toString()
+                else
+                    ""
+        meh_count.text =
+                if (stats.meh > 0)
+                    stats.meh.toString()
+                else
+                    ""
+        good_count.text =
+                if (stats.good > 0)
+                    stats.good.toString()
+                else
+                    ""
     }
 
     private fun importKanjis() {

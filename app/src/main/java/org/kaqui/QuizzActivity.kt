@@ -193,8 +193,6 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun showNewQuestion() {
-        updateGlobalStats()
-
         val db = KanjiDb.getInstance(this)
 
         val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0f - weight) }
@@ -329,30 +327,6 @@ class QuizzActivity : AppCompatActivity() {
         }
 
         return line
-    }
-
-    private fun updateGlobalStats() {
-        val db = KanjiDb.getInstance(this)
-        val stats = db.getStats()
-        val total = stats.bad + stats.meh + stats.good
-        bad_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.bad.toFloat() / total))
-        meh_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.meh.toFloat() / total))
-        good_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.good.toFloat() / total))
-        bad_count.text =
-                if (stats.bad > 0)
-                    stats.bad.toString()
-                else
-                    ""
-        meh_count.text =
-                if (stats.meh > 0)
-                    stats.meh.toString()
-                else
-                    ""
-        good_count.text =
-                if (stats.good > 0)
-                    stats.good.toString()
-                else
-                    ""
     }
 
     private fun updateSheetPeekHeight(v: View) {
