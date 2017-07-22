@@ -32,7 +32,6 @@
             android:layout_margin="8dp"
             android:layout_weight="0"
             android:gravity="center"
-            android:text="K"
             android:textSize="25sp" />
 
         <TextView
@@ -42,10 +41,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            android:layout_weight="1"
-            android:text="test1
-test2
-test3 test4" />
+            android:layout_weight="1" />
 
     </LinearLayout>
 

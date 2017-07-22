@@ -1,4 +1,4 @@
-package org.kaqui;
+package org.kaqui
 
 enum class Certainty {
     SURE,

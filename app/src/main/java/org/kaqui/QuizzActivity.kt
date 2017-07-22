@@ -1,27 +1,22 @@
 package org.kaqui
 
 import android.animation.ValueAnimator
-import android.app.ProgressDialog
-import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.*
-import android.widget.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.GridLayout
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.quizz_activity.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import org.kaqui.R
-import org.kaqui.settings.SettingsActivity
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.*
-import java.util.zip.GZIPInputStream
 
 class QuizzActivity : AppCompatActivity() {
     companion object {

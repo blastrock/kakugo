@@ -10,7 +10,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
-import org.kaqui.R
 import org.kaqui.settings.SettingsActivity
 import java.net.HttpURLConnection
 import java.net.URL

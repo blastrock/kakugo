@@ -2,21 +2,20 @@ package org.kaqui.settings
 
 import android.Manifest
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
-import android.support.v4.app.ListFragment
 import android.util.Log
 import android.view.*
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.LinearLayout
+import android.widget.SimpleAdapter
+import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_fragment.*
 import org.kaqui.KanjiDb
 import org.kaqui.R
-import java.io.File
 
 class JlptSelectionFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
