@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_columnWeight="1"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/answer_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0"
+        android:textSize="50sp" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/maybe_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:text="@string/maybe" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/sure_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0"
+        android:backgroundTint="@android:color/holo_green_light"
+        android:text="@string/sure" />
+
+    <View
+        android:id="@+id/kanji_item_separator"
+        style="@style/Separator" />
+
+</LinearLayout>

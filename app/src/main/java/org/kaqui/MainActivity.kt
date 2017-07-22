@@ -13,7 +13,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
 
         start_kanji_reading_quizz.setOnClickListener {
-            startActivity(Intent(this, QuizzActivity::class.java))
+            val intent = Intent(this, QuizzActivity::class.java)
+            intent.putExtra("kanji_reading", true)
+            startActivity(intent)
+        }
+        start_reading_kanji_quizz.setOnClickListener {
+            val intent = Intent(this, QuizzActivity::class.java)
+            intent.putExtra("kanji_reading", false)
+            startActivity(intent)
         }
     }
 }

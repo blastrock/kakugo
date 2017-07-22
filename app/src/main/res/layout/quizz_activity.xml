@@ -49,12 +49,11 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/kanji_text"
+                android:id="@+id/question_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="日本語"
-                android:textSize="50sp" />
+                android:textAlignment="center" />
 
             <LinearLayout
                 android:id="@+id/answers_layout"

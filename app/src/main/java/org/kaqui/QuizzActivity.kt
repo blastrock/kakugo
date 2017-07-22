@@ -3,16 +3,12 @@ package org.kaqui
 import android.animation.ValueAnimator
 import android.app.ProgressDialog
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.view.ViewCompat
 import android.support.v4.widget.NestedScrollView
-import android.support.v7.widget.AppCompatButton
 import android.util.Log
 import android.view.*
 import android.widget.*
@@ -26,7 +22,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import java.util.zip.GZIPInputStream
-import android.util.TypedValue
 
 class QuizzActivity : AppCompatActivity() {
     companion object {
@@ -42,23 +37,27 @@ class QuizzActivity : AppCompatActivity() {
 
     private var downloadProgress: ProgressDialog? = null
 
+    private val isKanjiReading
+        get() = intent.extras.getBoolean("kanji_reading")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.quizz_activity)
 
-        val answerTexts = ArrayList<TextView>(NB_ANSWERS)
-        for (i in 0 until NB_ANSWERS) {
-            val answerLine = LayoutInflater.from(this).inflate(R.layout.kanji_answer_line, answers_layout, false)
-
-            answerTexts.add(answerLine.findViewById(R.id.answer_text) as TextView)
-            answerLine.findViewById(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
-            answerLine.findViewById(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
-
-            answers_layout.addView(answerLine, i)
+        if (isKanjiReading) {
+            question_text.textSize = 50.0f
+            initButtons(answers_layout, R.layout.kanji_answer_line)
         }
-        this.answerTexts = answerTexts
-        dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
+        else {
+            question_text.textSize = 14.0f
+
+            val gridLayout = GridLayout(this)
+            gridLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            gridLayout.columnCount = 3
+            initButtons(gridLayout, R.layout.kanji_answer_block)
+            answers_layout.addView(gridLayout, 0)
+        }
 
         sheetBehavior = BottomSheetBehavior.from(history_scroll_view)
         if (savedInstanceState?.getBoolean("playerOpen", false) ?: false)
@@ -85,6 +84,21 @@ class QuizzActivity : AppCompatActivity() {
         } else {
             showNewQuestion()
         }
+    }
+
+    private fun initButtons(parentLayout: ViewGroup, layoutToInflate: Int) {
+        val answerTexts = ArrayList<TextView>(NB_ANSWERS)
+        for (i in 0 until NB_ANSWERS) {
+            val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, parentLayout, false)
+
+            answerTexts.add(answerLine.findViewById(R.id.answer_text) as TextView)
+            answerLine.findViewById(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
+            answerLine.findViewById(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
+
+            parentLayout.addView(answerLine, i)
+        }
+        this.answerTexts = answerTexts
+        dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
     }
 
     override fun onStart() {
@@ -207,7 +221,10 @@ class QuizzActivity : AppCompatActivity() {
         val currentQuestion = db.getKanji(questionId)
         this.currentQuestion = currentQuestion
 
-        kanji_text.text = currentQuestion.kanji
+        if (isKanjiReading)
+            question_text.text = currentQuestion.kanji
+        else
+            question_text.text = getKanjiReadings(currentQuestion)
 
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
@@ -223,7 +240,13 @@ class QuizzActivity : AppCompatActivity() {
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
         shuffle(currentAnswers)
         this.currentAnswers = currentAnswers
-        fillAnswers()
+
+        for (i in 0 until NB_ANSWERS) {
+            if (isKanjiReading)
+                answerTexts[i].text = getKanjiReadings(currentAnswers[i])
+            else
+                answerTexts[i].text = currentAnswers[i].kanji
+        }
     }
 
     private fun <T> shuffle(l: MutableList<T>) {
@@ -233,15 +256,6 @@ class QuizzActivity : AppCompatActivity() {
             val tmp = l[i]
             l[i] = l[target]
             l[target] = tmp
-        }
-    }
-
-    private fun fillAnswers() {
-        for (i in 0 until NB_ANSWERS) {
-            val kanji = currentAnswers!![i]
-            val answerText = kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
-                    kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ")
-            answerTexts[i].text = answerText
         }
     }
 
