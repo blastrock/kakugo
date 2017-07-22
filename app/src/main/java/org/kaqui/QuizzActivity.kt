@@ -35,8 +35,6 @@ class QuizzActivity : AppCompatActivity() {
     private var currentQuestion: Kanji? = null
     private var currentAnswers: List<Kanji>? = null
 
-    private var downloadProgress: ProgressDialog? = null
-
     private val isKanjiReading
         get() = intent.extras.getBoolean("kanji_reading")
 
@@ -74,16 +72,7 @@ class QuizzActivity : AppCompatActivity() {
             }
         })
 
-        val db = KanjiDb.getInstance(this)
-        if (db.empty) {
-            showDownloadProgressDialog()
-
-            async(CommonPool) {
-                downloadKanjiDic(true)
-            }
-        } else {
-            showNewQuestion()
-        }
+        showNewQuestion()
     }
 
     private fun initButtons(parentLayout: ViewGroup, layoutToInflate: Int) {
@@ -105,78 +94,11 @@ class QuizzActivity : AppCompatActivity() {
         super.onStart()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_settings -> {
-                startActivity(Intent(this, SettingsActivity::class.java))
-                return true
-            }
-            R.id.download_database -> {
-                showDownloadProgressDialog()
-                async(CommonPool) {
-                    downloadKanjiDic()
-                }
-                return true
-            }
-            else ->
-                return super.onOptionsItemSelected(item)
-        }
-    }
-
     override fun onBackPressed() {
         if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         else
             super.onBackPressed()
-    }
-
-    private fun showDownloadProgressDialog() {
-        downloadProgress = ProgressDialog(this)
-        downloadProgress!!.setMessage("Downloading kanjidic database")
-        downloadProgress!!.setCancelable(false)
-        downloadProgress!!.show()
-    }
-
-    private fun downloadKanjiDic(abortOnError: Boolean = false) {
-        try {
-            Log.v(TAG, "Downloading kanjidic")
-            val url = URL("https://axanux.net/kanjidic_.gz")
-            val urlConnection = url.openConnection() as HttpURLConnection
-            urlConnection.requestMethod = "GET"
-            urlConnection.connect()
-
-            urlConnection.inputStream.use { gzipStream ->
-                GZIPInputStream(gzipStream, 1024).use { textStream ->
-                    val db = KanjiDb.getInstance(this)
-                    val dump = db.dumpUserData()
-                    db.replaceKanjis(parseFile(textStream.bufferedReader()))
-                    db.restoreUserDataDump(dump)
-                }
-            }
-            Log.v(TAG, "Finished downloading kanjidic")
-            async(UI) {
-                downloadProgress!!.dismiss()
-                downloadProgress = null
-                showNewQuestion()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to download and parse kanjidic", e)
-            async(UI) {
-                Toast.makeText(this@QuizzActivity, "Failed to download and parse kanjidic: " + e.message, Toast.LENGTH_LONG).show()
-                if (abortOnError)
-                    finish()
-                else {
-                    downloadProgress!!.dismiss()
-                    downloadProgress = null
-                }
-            }
-        }
     }
 
     private fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
