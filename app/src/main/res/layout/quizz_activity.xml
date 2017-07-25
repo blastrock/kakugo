@@ -67,4 +67,18 @@
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/history_action_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:clickable="true"
+        android:scaleX="0"
+        android:scaleY="0"
+        app:elevation="12dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/history_scroll_view"
+        app:layout_anchorGravity="top|right"
+        app:srcCompat="@drawable/ic_arrow_upward" />
+
 </android.support.design.widget.CoordinatorLayout>

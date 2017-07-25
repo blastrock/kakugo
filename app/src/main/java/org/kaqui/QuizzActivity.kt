@@ -41,8 +41,7 @@ class QuizzActivity : AppCompatActivity() {
         if (isKanjiReading) {
             question_text.textSize = 50.0f
             initButtons(answers_layout, R.layout.kanji_answer_line)
-        }
-        else {
+        } else {
             question_text.textSize = 14.0f
 
             val gridLayout = GridLayout(this)
@@ -66,6 +65,10 @@ class QuizzActivity : AppCompatActivity() {
                     history_scroll_view.smoothScrollTo(0, 0)
             }
         })
+
+        history_action_button.setOnClickListener {
+            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
 
         showNewQuestion()
     }
@@ -249,6 +252,9 @@ class QuizzActivity : AppCompatActivity() {
 
     private fun updateSheetPeekHeight(v: View) {
         history_view.post {
+            if (sheetBehavior.peekHeight == 0)
+                history_action_button.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400).start()
+
             val va = ValueAnimator.ofInt(sheetBehavior.peekHeight, v.height)
             va.duration = 200 // ms
             va.addUpdateListener { sheetBehavior.peekHeight = it.animatedValue as Int }
