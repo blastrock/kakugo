@@ -208,8 +208,8 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun addWrongAnswerToHistory(correct: Kanji, wrong: Kanji) {
-        val layoutGood = makeHistoryLine(correct, R.drawable.round_yellow, false)
-        val layoutBad = makeHistoryLine(wrong, R.drawable.round_red)
+        val layoutGood = makeHistoryLine(correct, R.drawable.round_red, false)
+        val layoutBad = makeHistoryLine(wrong, null)
 
         history_view.addView(layoutBad, 0)
         history_view.addView(layoutGood, 0)
@@ -218,14 +218,14 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun addUnknownAnswerToHistory(correct: Kanji) {
-        val layout = makeHistoryLine(correct, R.drawable.round_yellow)
+        val layout = makeHistoryLine(correct, R.drawable.round_red)
 
         history_view.addView(layout, 0)
         updateSheetPeekHeight(layout)
         discardOldHistory()
     }
 
-    private fun makeHistoryLine(kanji: Kanji, style: Int, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(kanji: Kanji, style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.kanji_item, history_view, false)
 
         val checkbox = line.findViewById(R.id.kanji_item_checkbox)
@@ -233,7 +233,8 @@ class QuizzActivity : AppCompatActivity() {
 
         val kanjiView = line.findViewById(R.id.kanji_item_text) as TextView
         kanjiView.text = kanji.kanji
-        kanjiView.background = ContextCompat.getDrawable(this, style)
+        if (style != null)
+            kanjiView.background = ContextCompat.getDrawable(this, style)
 
         val detailView = line.findViewById(R.id.kanji_item_description) as TextView
         val detail = getKanjiDescription(kanji)
