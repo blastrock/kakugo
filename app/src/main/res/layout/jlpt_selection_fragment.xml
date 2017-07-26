@@ -1,38 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/global_stats"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/bad_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/holo_red_light"
-            android:textAlignment="center" />
-
-        <TextView
-            android:id="@+id/meh_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/holo_orange_light"
-            android:textAlignment="center" />
-
-        <TextView
-            android:id="@+id/good_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/holo_green_light"
-            android:textAlignment="center" />
-    </LinearLayout>
+        android:layout_weight="0" />
 
     <ListView
         android:id="@+id/jlpt_selection_list"

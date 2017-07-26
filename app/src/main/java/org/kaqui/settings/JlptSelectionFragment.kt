@@ -14,10 +14,19 @@ import android.widget.LinearLayout
 import android.widget.SimpleAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_fragment.*
+import org.kaqui.GlobalStatsFragment
 import org.kaqui.KanjiDb
 import org.kaqui.R
 
 class JlptSelectionFragment : Fragment() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        childFragmentManager.beginTransaction()
+                .add(R.id.global_stats, GlobalStatsFragment.newInstance())
+                .commit()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
@@ -41,8 +50,6 @@ class JlptSelectionFragment : Fragment() {
                 intArrayOf(android.R.id.text1))
 
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
-
-        updateGlobalStats()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -75,30 +82,6 @@ class JlptSelectionFragment : Fragment() {
                     .addToBackStack("kanjiSelection")
                     .commit()
         }
-    }
-
-    private fun updateGlobalStats() {
-        val db = KanjiDb.getInstance(context)
-        val stats = db.getStats()
-        val total = stats.bad + stats.meh + stats.good
-        bad_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.bad.toFloat() / total))
-        meh_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.meh.toFloat() / total))
-        good_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.good.toFloat() / total))
-        bad_count.text =
-                if (stats.bad > 0)
-                    stats.bad.toString()
-                else
-                    ""
-        meh_count.text =
-                if (stats.meh > 0)
-                    stats.meh.toString()
-                else
-                    ""
-        good_count.text =
-                if (stats.good > 0)
-                    stats.good.toString()
-                else
-                    ""
     }
 
     private fun importKanjis() {

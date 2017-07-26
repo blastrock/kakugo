@@ -25,6 +25,7 @@ class QuizzActivity : AppCompatActivity() {
         private const val MAX_HISTORY_SIZE = 40
     }
 
+    private lateinit var globalStatsFragment: GlobalStatsFragment
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
     private var currentQuestion: Kanji? = null
@@ -37,6 +38,11 @@ class QuizzActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.quizz_activity)
+
+        globalStatsFragment = GlobalStatsFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+                .add(R.id.global_stats, globalStatsFragment)
+                .commit()
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -71,8 +77,6 @@ class QuizzActivity : AppCompatActivity() {
         history_action_button.setOnClickListener {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
-
-        showNewQuestion()
     }
 
     private fun initButtons(parentLayout: ViewGroup, layoutToInflate: Int) {
@@ -92,6 +96,8 @@ class QuizzActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+
+        showNewQuestion()
     }
 
     override fun onBackPressed() {
@@ -115,6 +121,8 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun showNewQuestion() {
+        globalStatsFragment.updateGlobalStats()
+
         val db = KanjiDb.getInstance(this)
 
         val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0f - weight) }
