@@ -29,6 +29,20 @@
         android:text="@string/reading_kanji_quizz" />
 
     <Button
+        android:id="@+id/start_kanji_meaning_quizz"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/kanji_meaning_quizz" />
+
+    <Button
+        android:id="@+id/start_meaning_kanji_quizz"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/meaning_kanji_quizz" />
+
+    <Button
         android:id="@+id/settings_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

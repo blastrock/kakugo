@@ -47,11 +47,11 @@ class QuizzActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         when (quizzType) {
-            QuizzType.KANJI_TO_READING -> {
+            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> {
                 question_text.textSize = 50.0f
                 initButtons(answers_layout, R.layout.kanji_answer_line)
             }
-            QuizzType.READING_TO_KANJI -> {
+            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> {
                 question_text.textSize = 14.0f
 
                 val gridLayout = GridLayout(this)
@@ -152,12 +152,7 @@ class QuizzActivity : AppCompatActivity() {
         val currentQuestion = db.getKanji(questionId)
         this.currentQuestion = currentQuestion
 
-        when (quizzType) {
-            QuizzType.KANJI_TO_READING ->
-                question_text.text = currentQuestion.kanji
-            QuizzType.READING_TO_KANJI ->
-                question_text.text = getKanjiReadings(currentQuestion)
-        }
+        question_text.text = currentQuestion.getQuestionText(quizzType)
 
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
@@ -175,12 +170,7 @@ class QuizzActivity : AppCompatActivity() {
         this.currentAnswers = currentAnswers
 
         for (i in 0 until NB_ANSWERS) {
-            when (quizzType) {
-                QuizzType.KANJI_TO_READING ->
-                    answerTexts[i].text = getKanjiReadings(currentAnswers[i])
-                QuizzType.READING_TO_KANJI ->
-                    answerTexts[i].text = currentAnswers[i].kanji
-            }
+            answerTexts[i].text = currentAnswers[i].getAnswerText(quizzType)
         }
     }
 

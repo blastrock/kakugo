@@ -8,6 +8,8 @@
     <string name="download_database">Download Kanji database</string>
     <string name="kanji_reading_quizz">Kanji to reading (日→ひ)</string>
     <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
+    <string name="kanji_meaning_quizz">Kanji to meaning quizz (日→day)</string>
+    <string name="meaning_kanji_quizz">Meaning to kanji quizz (day→日)</string>
     <string name="sure">Sure</string>
     <string name="maybe">Maybe</string>
     <string name="dont_know">Don\'t know</string>
