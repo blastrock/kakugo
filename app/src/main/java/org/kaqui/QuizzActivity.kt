@@ -38,6 +38,8 @@ class QuizzActivity : AppCompatActivity() {
 
         setContentView(R.layout.quizz_activity)
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
         if (isKanjiReading) {
             question_text.textSize = 50.0f
             initButtons(answers_layout, R.layout.kanji_answer_line)

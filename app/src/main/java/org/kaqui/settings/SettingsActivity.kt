@@ -7,6 +7,8 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
         supportFragmentManager.beginTransaction()
                 .add(android.R.id.content, JlptSelectionFragment.newInstance())
                 .commit()
