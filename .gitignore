@@ -8,4 +8,4 @@
 /captures
 .externalNativeBuild
 
-app/src/main/res/xml/kanjidic2.xml
+/app/release
