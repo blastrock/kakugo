@@ -29,12 +29,12 @@ class MainActivity : AppCompatActivity() {
 
         start_kanji_reading_quizz.setOnClickListener {
             val intent = Intent(this, QuizzActivity::class.java)
-            intent.putExtra("kanji_reading", true)
+            intent.putExtra("quizz_type", QuizzType.KANJI_TO_READING)
             startActivity(intent)
         }
         start_reading_kanji_quizz.setOnClickListener {
             val intent = Intent(this, QuizzActivity::class.java)
-            intent.putExtra("kanji_reading", false)
+            intent.putExtra("quizz_type", QuizzType.READING_TO_KANJI)
             startActivity(intent)
         }
 

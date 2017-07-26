@@ -31,8 +31,8 @@ class QuizzActivity : AppCompatActivity() {
     private var currentQuestion: Kanji? = null
     private var currentAnswers: List<Kanji>? = null
 
-    private val isKanjiReading
-        get() = intent.extras.getBoolean("kanji_reading")
+    private val quizzType
+        get() = intent.extras.getSerializable("quizz_type") as QuizzType
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,17 +46,20 @@ class QuizzActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        if (isKanjiReading) {
-            question_text.textSize = 50.0f
-            initButtons(answers_layout, R.layout.kanji_answer_line)
-        } else {
-            question_text.textSize = 14.0f
+        when (quizzType) {
+            QuizzType.KANJI_TO_READING -> {
+                question_text.textSize = 50.0f
+                initButtons(answers_layout, R.layout.kanji_answer_line)
+            }
+            QuizzType.READING_TO_KANJI -> {
+                question_text.textSize = 14.0f
 
-            val gridLayout = GridLayout(this)
-            gridLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            gridLayout.columnCount = 3
-            initButtons(gridLayout, R.layout.kanji_answer_block)
-            answers_layout.addView(gridLayout, 0)
+                val gridLayout = GridLayout(this)
+                gridLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                gridLayout.columnCount = 3
+                initButtons(gridLayout, R.layout.kanji_answer_block)
+                answers_layout.addView(gridLayout, 0)
+            }
         }
 
         sheetBehavior = BottomSheetBehavior.from(history_scroll_view)
@@ -149,10 +152,12 @@ class QuizzActivity : AppCompatActivity() {
         val currentQuestion = db.getKanji(questionId)
         this.currentQuestion = currentQuestion
 
-        if (isKanjiReading)
-            question_text.text = currentQuestion.kanji
-        else
-            question_text.text = getKanjiReadings(currentQuestion)
+        when (quizzType) {
+            QuizzType.KANJI_TO_READING ->
+                question_text.text = currentQuestion.kanji
+            QuizzType.READING_TO_KANJI ->
+                question_text.text = getKanjiReadings(currentQuestion)
+        }
 
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
@@ -170,10 +175,12 @@ class QuizzActivity : AppCompatActivity() {
         this.currentAnswers = currentAnswers
 
         for (i in 0 until NB_ANSWERS) {
-            if (isKanjiReading)
-                answerTexts[i].text = getKanjiReadings(currentAnswers[i])
-            else
-                answerTexts[i].text = currentAnswers[i].kanji
+            when (quizzType) {
+                QuizzType.KANJI_TO_READING ->
+                    answerTexts[i].text = getKanjiReadings(currentAnswers[i])
+                QuizzType.READING_TO_KANJI ->
+                    answerTexts[i].text = currentAnswers[i].kanji
+            }
         }
     }
 
