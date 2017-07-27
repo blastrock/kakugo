@@ -31,6 +31,9 @@ class QuizzActivity : AppCompatActivity() {
     private var currentQuestion: Kanji? = null
     private var currentAnswers: List<Kanji>? = null
 
+    private var correctCount = 0
+    private var questionCount = 0
+
     private val quizzType
         get() = intent.extras.getSerializable("quizz_type") as QuizzType
 
@@ -125,6 +128,7 @@ class QuizzActivity : AppCompatActivity() {
 
     private fun showNewQuestion() {
         globalStatsFragment.updateGlobalStats()
+        updateSessionScore()
 
         val db = KanjiDb.getInstance(this)
 
@@ -174,6 +178,10 @@ class QuizzActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateSessionScore() {
+        session_score.text = getString(R.string.score_string, correctCount, questionCount)
+    }
+
     private fun <T> shuffle(l: MutableList<T>) {
         val rg = Random()
         for (i in l.size - 1 downTo 1) {
@@ -199,12 +207,15 @@ class QuizzActivity : AppCompatActivity() {
             // correct
             db.updateWeight(currentQuestion!!.kanji, certainty)
             addGoodAnswerToHistory(currentQuestion!!)
+            correctCount += 1
         } else {
             // wrong
             db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
             db.updateWeight(currentAnswers!![position].kanji, Certainty.DONTKNOW)
             addWrongAnswerToHistory(currentQuestion!!, currentAnswers!![position])
         }
+
+        questionCount += 1
 
         showNewQuestion()
     }
