@@ -52,7 +52,7 @@ class QuizzActivity : AppCompatActivity() {
                 initButtons(answers_layout, R.layout.kanji_answer_line)
             }
             QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> {
-                question_text.textSize = 14.0f
+                question_text.textSize = 20.0f
 
                 val gridLayout = GridLayout(this)
                 gridLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
