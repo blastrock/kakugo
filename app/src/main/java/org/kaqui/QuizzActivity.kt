@@ -90,9 +90,9 @@ class QuizzActivity : AppCompatActivity() {
         for (i in 0 until NB_ANSWERS) {
             val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, parentLayout, false)
 
-            answerTexts.add(answerLine.findViewById(R.id.answer_text) as TextView)
-            answerLine.findViewById(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
-            answerLine.findViewById(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
+            answerTexts.add(answerLine.findViewById<TextView>(R.id.answer_text))
+            answerLine.findViewById<View>(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
+            answerLine.findViewById<View>(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
 
             parentLayout.addView(answerLine, i)
         }
@@ -249,20 +249,20 @@ class QuizzActivity : AppCompatActivity() {
     private fun makeHistoryLine(kanji: Kanji, style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.kanji_item, history_view, false)
 
-        val checkbox = line.findViewById(R.id.kanji_item_checkbox)
+        val checkbox = line.findViewById<View>(R.id.kanji_item_checkbox)
         checkbox.visibility = View.GONE
 
-        val kanjiView = line.findViewById(R.id.kanji_item_text) as TextView
+        val kanjiView = line.findViewById<TextView>(R.id.kanji_item_text)
         kanjiView.text = kanji.kanji
         if (style != null)
             kanjiView.background = ContextCompat.getDrawable(this, style)
 
-        val detailView = line.findViewById(R.id.kanji_item_description) as TextView
+        val detailView = line.findViewById<TextView>(R.id.kanji_item_description)
         val detail = getKanjiDescription(kanji)
         detailView.text = detail
 
         if (!withSeparator) {
-            line.findViewById(R.id.kanji_item_separator).visibility = View.GONE
+            line.findViewById<View>(R.id.kanji_item_separator).visibility = View.GONE
         }
 
         return line
