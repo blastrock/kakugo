@@ -1,6 +1,7 @@
 package org.kaqui
 
 import android.animation.ValueAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
@@ -254,6 +255,13 @@ class QuizzActivity : AppCompatActivity() {
         kanjiView.text = kanji.kanji
         if (style != null)
             kanjiView.background = ContextCompat.getDrawable(this, style)
+        kanjiView.setOnClickListener {
+            val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+            intent.putExtra("kanjis", kanji.kanji)
+            intent.putExtra("search_in_kanjidic", true)
+            intent.putExtra("showEntryDetailOnSingleResult", true)
+            startActivity(intent)
+        }
 
         val detailView = line.findViewById<TextView>(R.id.kanji_item_description)
         val detail = getKanjiDescription(kanji)
