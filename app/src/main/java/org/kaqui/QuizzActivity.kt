@@ -83,6 +83,8 @@ class QuizzActivity : AppCompatActivity() {
         history_action_button.setOnClickListener {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
+
+        showNewQuestion()
     }
 
     private fun initButtons(parentLayout: ViewGroup, layoutToInflate: Int) {
@@ -98,12 +100,6 @@ class QuizzActivity : AppCompatActivity() {
         }
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        showNewQuestion()
     }
 
     override fun onBackPressed() {
@@ -127,7 +123,9 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun showNewQuestion() {
-        globalStatsFragment.updateGlobalStats()
+        // when showNewQuestion is called in onCreate, globalStatsFragment is not visible yet
+        if (globalStatsFragment.isVisible())
+            globalStatsFragment.updateGlobalStats()
         updateSessionScore()
 
         val db = KanjiDb.getInstance(this)
