@@ -1,58 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/app_name"
-        android:textAlignment="center"
-        android:textSize="50sp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-    <Button
-        android:id="@+id/start_kanji_reading_quizz"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/kanji_reading_quizz" />
 
-    <Button
-        android:id="@+id/start_reading_kanji_quizz"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/reading_kanji_quizz" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/app_name"
+            android:textAlignment="center"
+            android:textSize="50sp" />
 
-    <Button
-        android:id="@+id/start_kanji_meaning_quizz"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/kanji_meaning_quizz" />
+        <Button
+            android:id="@+id/start_kanji_reading_quizz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/kanji_reading_quizz" />
 
-    <Button
-        android:id="@+id/start_meaning_kanji_quizz"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/meaning_kanji_quizz" />
+        <Button
+            android:id="@+id/start_reading_kanji_quizz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/reading_kanji_quizz" />
 
-    <Button
-        android:id="@+id/settings_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/settings" />
+        <Button
+            android:id="@+id/start_kanji_meaning_quizz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/kanji_meaning_quizz" />
 
-    <Button
-        android:id="@+id/download_kanjidic_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/download_database" />
-</LinearLayout>
+        <Button
+            android:id="@+id/start_meaning_kanji_quizz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/meaning_kanji_quizz" />
+
+        <Button
+            android:id="@+id/settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/settings" />
+
+        <Button
+            android:id="@+id/download_kanjidic_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/download_database" />
+    </LinearLayout>
+</ScrollView>
