@@ -45,7 +45,7 @@ class QuizzActivity : AppCompatActivity() {
 
         globalStatsFragment = GlobalStatsFragment.newInstance()
         supportFragmentManager.beginTransaction()
-                .add(R.id.global_stats, globalStatsFragment)
+                .replace(R.id.global_stats, globalStatsFragment)
                 .commit()
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

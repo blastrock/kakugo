@@ -10,7 +10,7 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         supportFragmentManager.beginTransaction()
-                .add(android.R.id.content, JlptSelectionFragment.newInstance())
+                .replace(android.R.id.content, JlptSelectionFragment.newInstance())
                 .commit()
     }
 }

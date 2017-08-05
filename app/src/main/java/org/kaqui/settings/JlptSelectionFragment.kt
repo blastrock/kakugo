@@ -23,7 +23,7 @@ class JlptSelectionFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         childFragmentManager.beginTransaction()
-                .add(R.id.global_stats, GlobalStatsFragment.newInstance())
+                .replace(R.id.global_stats, GlobalStatsFragment.newInstance())
                 .commit()
     }
 
