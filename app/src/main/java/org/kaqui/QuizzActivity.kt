@@ -3,6 +3,8 @@ package org.kaqui
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
@@ -94,7 +96,17 @@ class QuizzActivity : AppCompatActivity() {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        showNewQuestion()
+        if (savedInstanceState == null)
+            showNewQuestion()
+        else {
+            val db = KanjiDb.getInstance(this)
+            currentQuestion = db.getKanji(savedInstanceState.getInt("question"))
+            currentAnswers = savedInstanceState.getIntArray("answers").map { db.getKanji(it) }
+            correctCount = savedInstanceState.getInt("correctCount")
+            questionCount = savedInstanceState.getInt("questionCount")
+            unserializeHistory(savedInstanceState.getByteArray("history"))
+            showCurrentQuestion()
+        }
     }
 
     private fun initButtons(parentLayout: ViewGroup, layoutToInflate: Int) {
@@ -110,6 +122,16 @@ class QuizzActivity : AppCompatActivity() {
         }
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("question", currentQuestion.id)
+        outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
+        outState.putInt("correctCount", correctCount)
+        outState.putInt("questionCount", questionCount)
+        outState.putByteArray("history", serializeHistory())
+
+        super.onSaveInstanceState(outState)
     }
 
     override fun onBackPressed() {
@@ -133,11 +155,6 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun showNewQuestion() {
-        // when showNewQuestion is called in onCreate, globalStatsFragment is not visible yet
-        if (globalStatsFragment.isVisible())
-            globalStatsFragment.updateGlobalStats()
-        updateSessionScore()
-
         val db = KanjiDb.getInstance(this)
 
         val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0f - weight) }
@@ -161,10 +178,7 @@ class QuizzActivity : AppCompatActivity() {
             }
         }
 
-        val currentQuestion = db.getKanji(questionId)
-        this.currentQuestion = currentQuestion
-
-        question_text.text = currentQuestion.getQuestionText(quizzType)
+        currentQuestion = db.getKanji(questionId)
 
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
@@ -180,6 +194,17 @@ class QuizzActivity : AppCompatActivity() {
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
         shuffle(currentAnswers)
         this.currentAnswers = currentAnswers
+
+        showCurrentQuestion()
+    }
+
+    private fun showCurrentQuestion() {
+        // when showNewQuestion is called in onCreate, globalStatsFragment is not visible yet
+        if (globalStatsFragment.isVisible)
+            globalStatsFragment.updateGlobalStats()
+        updateSessionScore()
+
+        question_text.text = currentQuestion.getQuestionText(quizzType)
 
         for (i in 0 until NB_ANSWERS) {
             answerTexts[i].text = currentAnswers[i].getAnswerText(quizzType)
@@ -303,5 +328,58 @@ class QuizzActivity : AppCompatActivity() {
             history_view.removeViewAt(position)
         while (history.size > MAX_HISTORY_SIZE)
             history.removeAt(0)
+    }
+
+    private fun serializeHistory(): ByteArray {
+        val parcel = Parcel.obtain()
+        parcel.writeInt(history.size)
+        for (line in history)
+            when (line) {
+                is HistoryLine.Correct -> {
+                    parcel.writeByte(0)
+                    parcel.writeInt(line.kanjiId)
+                }
+                is HistoryLine.Unknown -> {
+                    parcel.writeByte(1)
+                    parcel.writeInt(line.kanjiId)
+                }
+                is HistoryLine.Incorrect -> {
+                    parcel.writeByte(2)
+                    parcel.writeInt(line.correctKanjiId)
+                    parcel.writeInt(line.answerKanjiId)
+                }
+            }
+        val data = parcel.marshall()
+        parcel.recycle()
+        return data
+    }
+
+    private fun unserializeHistory(data: ByteArray) {
+        val parcel = Parcel.obtain()
+        parcel.unmarshall(data, 0, data.size)
+        parcel.setDataPosition(0)
+
+        history.clear()
+        history_view.removeAllViews()
+
+        val db = KanjiDb.getInstance(this)
+
+        val count = parcel.readInt()
+        repeat(count, {
+            val type = parcel.readByte()
+            when (type.toInt()) {
+                0 -> {
+                    addGoodAnswerToHistory(db.getKanji(parcel.readInt()))
+                }
+                1 -> {
+                    addUnknownAnswerToHistory(db.getKanji(parcel.readInt()))
+                }
+                2 -> {
+                    addWrongAnswerToHistory(db.getKanji(parcel.readInt()), db.getKanji(parcel.readInt()))
+                }
+            }
+        })
+
+        parcel.recycle()
     }
 }

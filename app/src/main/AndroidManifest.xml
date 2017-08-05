@@ -21,8 +21,7 @@
         </activity>
         <activity
             android:name="org.kaqui.QuizzActivity"
-            android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" />
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".settings.SettingsActivity"
             android:parentActivityName=".MainActivity" />
