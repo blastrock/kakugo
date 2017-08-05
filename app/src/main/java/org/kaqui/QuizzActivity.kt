@@ -29,8 +29,8 @@ class QuizzActivity : AppCompatActivity() {
     private lateinit var globalStatsFragment: GlobalStatsFragment
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
-    private var currentQuestion: Kanji? = null
-    private var currentAnswers: List<Kanji>? = null
+    private lateinit var currentQuestion: Kanji
+    private lateinit var currentAnswers: List<Kanji>
 
     private var correctCount = 0
     private var questionCount = 0
@@ -192,26 +192,21 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        if (currentQuestion == null || currentAnswers == null) {
-            showNewQuestion()
-            return
-        }
-
         val db = KanjiDb.getInstance(this)
 
         if (certainty == Certainty.DONTKNOW) {
-            db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
-            addUnknownAnswerToHistory(currentQuestion!!)
-        } else if (currentAnswers!![position] == currentQuestion) {
+            db.updateWeight(currentQuestion.kanji, Certainty.DONTKNOW)
+            addUnknownAnswerToHistory(currentQuestion)
+        } else if (currentAnswers[position] == currentQuestion) {
             // correct
-            db.updateWeight(currentQuestion!!.kanji, certainty)
-            addGoodAnswerToHistory(currentQuestion!!)
+            db.updateWeight(currentQuestion.kanji, certainty)
+            addGoodAnswerToHistory(currentQuestion)
             correctCount += 1
         } else {
             // wrong
-            db.updateWeight(currentQuestion!!.kanji, Certainty.DONTKNOW)
-            db.updateWeight(currentAnswers!![position].kanji, Certainty.DONTKNOW)
-            addWrongAnswerToHistory(currentQuestion!!, currentAnswers!![position])
+            db.updateWeight(currentQuestion.kanji, Certainty.DONTKNOW)
+            db.updateWeight(currentAnswers[position].kanji, Certainty.DONTKNOW)
+            addWrongAnswerToHistory(currentQuestion, currentAnswers[position])
         }
 
         questionCount += 1
