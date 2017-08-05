@@ -5,6 +5,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     compileSdkVersion 26
     buildToolsVersion "25.0.3"
     defaultConfig {
