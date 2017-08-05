@@ -20,6 +20,12 @@ import kotlinx.android.synthetic.main.quizz_activity.*
 import java.util.*
 
 class QuizzActivity : AppCompatActivity() {
+    private sealed class HistoryLine {
+        data class Correct(val kanjiId: Int) : HistoryLine()
+        data class Unknown(val kanjiId: Int) : HistoryLine()
+        data class Incorrect(val correctKanjiId: Int, val answerKanjiId: Int) : HistoryLine()
+    }
+
     companion object {
         private const val TAG = "QuizzActivity"
         private const val NB_ANSWERS = 6
@@ -29,11 +35,14 @@ class QuizzActivity : AppCompatActivity() {
     private lateinit var globalStatsFragment: GlobalStatsFragment
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
+
     private lateinit var currentQuestion: Kanji
     private lateinit var currentAnswers: List<Kanji>
 
     private var correctCount = 0
     private var questionCount = 0
+
+    private val history = ArrayList<HistoryLine>()
 
     private val quizzType
         get() = intent.extras.getSerializable("quizz_type") as QuizzType
@@ -215,6 +224,8 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun addGoodAnswerToHistory(correct: Kanji) {
+        history.add(HistoryLine.Correct(correct.id))
+
         val layout = makeHistoryLine(correct, R.drawable.round_green)
 
         history_view.addView(layout, 0)
@@ -223,6 +234,8 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun addWrongAnswerToHistory(correct: Kanji, wrong: Kanji) {
+        history.add(HistoryLine.Incorrect(correct.id, wrong.id))
+
         val layoutGood = makeHistoryLine(correct, R.drawable.round_red, false)
         val layoutBad = makeHistoryLine(wrong, null)
 
@@ -233,6 +246,8 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun addUnknownAnswerToHistory(correct: Kanji) {
+        history.add(HistoryLine.Unknown(correct.id))
+
         val layout = makeHistoryLine(correct, R.drawable.round_red)
 
         history_view.addView(layout, 0)
@@ -286,5 +301,7 @@ class QuizzActivity : AppCompatActivity() {
     private fun discardOldHistory() {
         for (position in history_view.childCount - 1 downTo MAX_HISTORY_SIZE - 1)
             history_view.removeViewAt(position)
+        while (history.size > MAX_HISTORY_SIZE)
+            history.removeAt(0)
     }
 }
