@@ -9,14 +9,14 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.*
-import android.widget.AdapterView
-import android.widget.LinearLayout
-import android.widget.SimpleAdapter
-import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_fragment.*
 import org.kaqui.GlobalStatsFragment
 import org.kaqui.KanjiDb
 import org.kaqui.R
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SearchView
+import android.widget.*
+
 
 class JlptSelectionFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,8 +40,7 @@ class JlptSelectionFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         val itemList = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
-                mapOf("label" to "Additional kanjis", "level" to 0) +
-                mapOf("label" to "Search")
+                mapOf("label" to "Additional kanjis", "level" to 0)
         jlpt_selection_list.adapter = SimpleAdapter(
                 context,
                 itemList,
@@ -50,11 +49,49 @@ class JlptSelectionFragment : Fragment() {
                 intArrayOf(android.R.id.text1))
 
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
+
+        kanji_list.adapter = KanjiSelectionAdapter(context)
+        kanji_list.layoutManager = LinearLayoutManager(context)
+
+        showCategoryList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.jlpt_selection_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
+
+        val searchItem = menu.findItem(R.id.search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.isSubmitButtonEnabled = false
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                if (newText.isEmpty()) {
+                    showCategoryList()
+                } else {
+                    searchKanjiList(newText)
+                }
+                return true
+            }
+        })
+
+        // ugly hack to have an always-expanded search view
+        // iconify is useless because the action view is show by Toolbar, it is not for SearchView to decide
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
+                activity.onBackPressed()
+                return true
+            }
+        })
+        searchItem.expandActionView()
+        searchView.clearFocus()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -68,20 +105,28 @@ class JlptSelectionFragment : Fragment() {
         }
     }
 
+    private fun showCategoryList() {
+        jlpt_selection_list.visibility = View.VISIBLE
+        kanji_list.visibility = View.GONE
+    }
+
+    private fun searchKanjiList(str: String) {
+        jlpt_selection_list.visibility = View.GONE
+        kanji_list.visibility = View.VISIBLE
+        val listAdapter = kanji_list.adapter as KanjiSelectionAdapter
+        if (str.isEmpty())
+            listAdapter.clearAll()
+        else
+            listAdapter.searchFor(str)
+    }
+
     private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
         val item = l.adapter.getItem(position) as Map<String, Any>
 
-        if ("level" !in item) { // search
-            fragmentManager.beginTransaction()
-                    .replace(android.R.id.content, KanjiSearchFragment.newInstance())
-                    .addToBackStack("kanjiSearch")
-                    .commit()
-        } else {
-            fragmentManager.beginTransaction()
-                    .replace(android.R.id.content, KanjiSelectionFragment.newInstance(item["level"] as Int))
-                    .addToBackStack("kanjiSelection")
-                    .commit()
-        }
+        fragmentManager.beginTransaction()
+                .replace(android.R.id.content, KanjiSelectionFragment.newInstance(item["level"] as Int))
+                .addToBackStack("kanjiSelection")
+                .commit()
     }
 
     private fun importKanjis() {

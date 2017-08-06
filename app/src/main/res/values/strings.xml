@@ -14,4 +14,6 @@
     <string name="maybe">Maybe</string>
     <string name="dont_know">Don\'t know</string>
     <string name="score_string">Session score: %1$d/%2$d</string>
+    <string name="jlpt_search">Search</string>
+    <string name="search_kanji_hint">Search kanji...</string>
 </resources>
