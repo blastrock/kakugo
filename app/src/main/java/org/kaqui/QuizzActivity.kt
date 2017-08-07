@@ -231,7 +231,10 @@ class QuizzActivity : AppCompatActivity() {
         if (certainty == Certainty.DONTKNOW) {
             db.updateWeight(currentQuestion.kanji, Certainty.DONTKNOW)
             addUnknownAnswerToHistory(currentQuestion)
-        } else if (currentAnswers[position] == currentQuestion) {
+        } else if (currentAnswers[position] == currentQuestion ||
+                // also compare answer texts because different answers can have the same readings
+                // like 副 and 福 and we don't want to penalize the user for that
+                currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
             db.updateWeight(currentQuestion.kanji, certainty)
             addGoodAnswerToHistory(currentQuestion)
