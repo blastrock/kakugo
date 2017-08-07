@@ -5,11 +5,18 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    signingConfigs {
+        debugconfig {
+            keyAlias 'androiddebugkey'
+            storeFile file('/home/blastrock/.android/debug.keystore')
+            keyPassword 'android'
+            storePassword 'android'
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     compileSdkVersion 26
     buildToolsVersion "25.0.3"
     defaultConfig {
@@ -24,9 +31,12 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debugconfig
+        }
+        debug {
+            signingConfig signingConfigs.debugconfig
         }
     }
-
     testOptions {
         unitTests {
             includeAndroidResources = true
