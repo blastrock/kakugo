@@ -82,15 +82,6 @@ class QuizzActivity : AppCompatActivity() {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         else
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        sheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            }
-
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
-                    history_scroll_view.smoothScrollTo(0, 0)
-            }
-        })
 
         history_action_button.setOnClickListener {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -135,9 +126,11 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            // smoothScrollTo doesn't work, it always scrolls at the end or does nothing
+            history_scroll_view.scrollTo(0, 0)
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        else
+        } else
             super.onBackPressed()
     }
 
