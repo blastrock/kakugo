@@ -66,10 +66,14 @@ class MainActivity : AppCompatActivity() {
         if (db.empty) {
             start_kanji_reading_quizz.isEnabled = false
             start_reading_kanji_quizz.isEnabled = false
+            start_kanji_meaning_quizz.isEnabled = false
+            start_meaning_kanji_quizz.isEnabled = false
             settings_button.isEnabled = false
         } else {
             start_kanji_reading_quizz.isEnabled = true
             start_reading_kanji_quizz.isEnabled = true
+            start_kanji_meaning_quizz.isEnabled = true
+            start_meaning_kanji_quizz.isEnabled = true
             settings_button.isEnabled = true
         }
     }
