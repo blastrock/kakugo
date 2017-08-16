@@ -21,6 +21,7 @@ import android.widget.*
 class KanjiSelectionActivity : AppCompatActivity() {
     private lateinit var db: KanjiDb
     private lateinit var listAdapter: KanjiSelectionAdapter
+    private lateinit var statsFragment: GlobalStatsFragment
 
     private var isSearching = false
     private var selectedCategory: Int? = null
@@ -32,8 +33,9 @@ class KanjiSelectionActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
+        statsFragment = GlobalStatsFragment.newInstance()
         supportFragmentManager.beginTransaction()
-                .replace(R.id.global_stats, GlobalStatsFragment.newInstance())
+                .replace(R.id.global_stats, statsFragment)
                 .commit()
 
         db = KanjiDb.getInstance(this)
@@ -49,7 +51,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
 
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
 
-        listAdapter = KanjiSelectionAdapter(this)
+        listAdapter = KanjiSelectionAdapter(this, statsFragment)
         kanji_list.adapter = listAdapter
         kanji_list.layoutManager = LinearLayoutManager(this)
 
@@ -103,11 +105,13 @@ class KanjiSelectionActivity : AppCompatActivity() {
             R.id.select_all -> {
                 db.setLevelEnabled(selectedCategory!!, true)
                 listAdapter.notifyDataSetChanged()
+                statsFragment.updateGlobalStats()
                 return true
             }
             R.id.select_none -> {
                 db.setLevelEnabled(selectedCategory!!, false)
                 listAdapter.notifyDataSetChanged()
+                statsFragment.updateGlobalStats()
                 return true
             }
             else ->

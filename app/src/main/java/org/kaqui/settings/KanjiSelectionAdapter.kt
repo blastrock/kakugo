@@ -5,13 +5,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import org.kaqui.BAD_WEIGHT
-import org.kaqui.GOOD_WEIGHT
-import org.kaqui.KanjiDb
-import org.kaqui.R
-import org.kaqui.getKanjiDescription
+import org.kaqui.*
 
-class KanjiSelectionAdapter(private val context: Context) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
+class KanjiSelectionAdapter(private val context: Context, private val statsFragment: GlobalStatsFragment) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
     private val db = KanjiDb.getInstance(context)
     private var ids: List<Int> = listOf()
 
@@ -33,7 +29,7 @@ class KanjiSelectionAdapter(private val context: Context) : RecyclerView.Adapter
     override fun getItemCount(): Int = ids.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KanjiSelectionViewHolder {
-        return KanjiSelectionViewHolder(db, LayoutInflater.from(parent.context).inflate(R.layout.kanji_item, parent, false))
+        return KanjiSelectionViewHolder(db, LayoutInflater.from(parent.context).inflate(R.layout.kanji_item, parent, false), statsFragment)
     }
 
     override fun onBindViewHolder(holder: KanjiSelectionViewHolder, position: Int) {
