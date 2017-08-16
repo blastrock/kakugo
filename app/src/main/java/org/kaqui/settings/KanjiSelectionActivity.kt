@@ -6,11 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
-import kotlinx.android.synthetic.main.jlpt_selection_fragment.*
+import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import org.kaqui.GlobalStatsFragment
 import org.kaqui.KanjiDb
 import org.kaqui.R
@@ -19,7 +18,7 @@ import android.support.v7.widget.SearchView
 import android.widget.*
 
 
-class JlptSelectionFragment : AppCompatActivity() {
+class KanjiSelectionActivity : AppCompatActivity() {
     private lateinit var db: KanjiDb
     private lateinit var listAdapter: KanjiSelectionAdapter
 
@@ -29,7 +28,7 @@ class JlptSelectionFragment : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.jlpt_selection_fragment)
+        setContentView(R.layout.jlpt_selection_activity)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 

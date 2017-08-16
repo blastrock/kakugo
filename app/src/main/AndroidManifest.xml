@@ -23,7 +23,7 @@
             android:name="org.kaqui.QuizzActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".settings.JlptSelectionFragment"
+            android:name=".settings.KanjiSelectionActivity"
             android:parentActivityName=".MainActivity" />
     </application>
 
