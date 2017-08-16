@@ -13,4 +13,10 @@ class SettingsActivity : AppCompatActivity() {
                 .replace(android.R.id.content, JlptSelectionFragment.newInstance())
                 .commit()
     }
+
+    override fun onBackPressed() {
+        val f = supportFragmentManager.findFragmentById(android.R.id.content) as JlptSelectionFragment
+        if (!f.onBackPressed())
+            super.onBackPressed()
+    }
 }

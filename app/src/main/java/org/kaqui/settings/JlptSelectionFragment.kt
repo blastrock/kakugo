@@ -19,6 +19,12 @@ import android.widget.*
 
 
 class JlptSelectionFragment : Fragment() {
+    private lateinit var db: KanjiDb
+    private lateinit var listAdapter: KanjiSelectionAdapter
+
+    private var isSearching = false
+    private var selectedCategory: Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -29,6 +35,8 @@ class JlptSelectionFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+
+        db = KanjiDb.getInstance(context)
 
         val view = inflater.inflate(R.layout.jlpt_selection_fragment, container, false)
         setHasOptionsMenu(true)
@@ -50,7 +58,8 @@ class JlptSelectionFragment : Fragment() {
 
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
 
-        kanji_list.adapter = KanjiSelectionAdapter(context)
+        listAdapter = KanjiSelectionAdapter(context)
+        kanji_list.adapter = listAdapter
         kanji_list.layoutManager = LinearLayoutManager(context)
 
         showCategoryList()
@@ -58,6 +67,8 @@ class JlptSelectionFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.jlpt_selection_menu, menu)
+        if (selectedCategory != null)
+            inflater.inflate(R.menu.kanji_selection_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
 
         val searchItem = menu.findItem(R.id.search)
@@ -69,17 +80,22 @@ class JlptSelectionFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                searchKanjiList(newText)
+                if (isSearching)
+                    searchKanjiList(newText)
                 return true
             }
         })
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+                selectedCategory = null
+                activity.invalidateOptionsMenu()
+                isSearching = true
                 showKanjiList()
                 return true
             }
 
             override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
+                isSearching = false
                 showCategoryList()
                 return true
             }
@@ -91,6 +107,16 @@ class JlptSelectionFragment : Fragment() {
         when (item.itemId) {
             R.id.import_kanji_selection -> {
                 importKanjis()
+                return true
+            }
+            R.id.select_all -> {
+                db.setLevelEnabled(selectedCategory!!, true)
+                listAdapter.notifyDataSetChanged()
+                return true
+            }
+            R.id.select_none -> {
+                db.setLevelEnabled(selectedCategory!!, false)
+                listAdapter.notifyDataSetChanged()
                 return true
             }
             else ->
@@ -109,7 +135,6 @@ class JlptSelectionFragment : Fragment() {
     }
 
     private fun searchKanjiList(str: String) {
-        val listAdapter = kanji_list.adapter as KanjiSelectionAdapter
         if (str.isEmpty())
             listAdapter.clearAll()
         else
@@ -118,11 +143,24 @@ class JlptSelectionFragment : Fragment() {
 
     private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
         val item = l.adapter.getItem(position) as Map<String, Any>
+        val level = item["level"] as Int
 
-        fragmentManager.beginTransaction()
-                .replace(android.R.id.content, KanjiSelectionFragment.newInstance(item["level"] as Int))
-                .addToBackStack("kanjiSelection")
-                .commit()
+        showKanjiList()
+        listAdapter.showLevel(level)
+        selectedCategory = level
+        activity.invalidateOptionsMenu()
+    }
+
+    fun onBackPressed(): Boolean {
+        if (isSearching)
+            return true
+        if (selectedCategory != null) {
+            selectedCategory = null
+            showCategoryList()
+            activity.invalidateOptionsMenu()
+            return true
+        }
+        return false
     }
 
     private fun importKanjis() {
