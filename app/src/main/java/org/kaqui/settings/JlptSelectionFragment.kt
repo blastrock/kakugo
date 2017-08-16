@@ -69,29 +69,22 @@ class JlptSelectionFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.isEmpty()) {
-                    showCategoryList()
-                } else {
-                    searchKanjiList(newText)
-                }
+                searchKanjiList(newText)
                 return true
             }
         })
-
-        // ugly hack to have an always-expanded search view
-        // iconify is useless because the action view is show by Toolbar, it is not for SearchView to decide
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+                showKanjiList()
                 return true
             }
 
             override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
-                activity.onBackPressed()
+                showCategoryList()
                 return true
             }
         })
-        searchItem.expandActionView()
-        searchView.clearFocus()
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -110,9 +103,12 @@ class JlptSelectionFragment : Fragment() {
         kanji_list.visibility = View.GONE
     }
 
-    private fun searchKanjiList(str: String) {
+    private fun showKanjiList() {
         jlpt_selection_list.visibility = View.GONE
         kanji_list.visibility = View.VISIBLE
+    }
+
+    private fun searchKanjiList(str: String) {
         val listAdapter = kanji_list.adapter as KanjiSelectionAdapter
         if (str.isEmpty())
             listAdapter.clearAll()
