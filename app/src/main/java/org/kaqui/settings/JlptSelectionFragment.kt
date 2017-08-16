@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
 import kotlinx.android.synthetic.main.jlpt_selection_fragment.*
@@ -18,7 +19,7 @@ import android.support.v7.widget.SearchView
 import android.widget.*
 
 
-class JlptSelectionFragment : Fragment() {
+class JlptSelectionFragment : AppCompatActivity() {
     private lateinit var db: KanjiDb
     private lateinit var listAdapter: KanjiSelectionAdapter
 
@@ -28,29 +29,20 @@ class JlptSelectionFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        childFragmentManager.beginTransaction()
+        setContentView(R.layout.jlpt_selection_fragment)
+
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, GlobalStatsFragment.newInstance())
                 .commit()
-    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
-
-        db = KanjiDb.getInstance(context)
-
-        val view = inflater.inflate(R.layout.jlpt_selection_fragment, container, false)
-        setHasOptionsMenu(true)
-
-        return view
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+        db = KanjiDb.getInstance(this)
 
         val itemList = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
                 mapOf("label" to "Additional kanjis", "level" to 0)
         jlpt_selection_list.adapter = SimpleAdapter(
-                context,
+                this,
                 itemList,
                 android.R.layout.simple_list_item_1,
                 arrayOf("label"),
@@ -58,18 +50,17 @@ class JlptSelectionFragment : Fragment() {
 
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
 
-        listAdapter = KanjiSelectionAdapter(context)
+        listAdapter = KanjiSelectionAdapter(this)
         kanji_list.adapter = listAdapter
-        kanji_list.layoutManager = LinearLayoutManager(context)
+        kanji_list.layoutManager = LinearLayoutManager(this)
 
         showCategoryList()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.jlpt_selection_menu, menu)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.jlpt_selection_menu, menu)
         if (selectedCategory != null)
-            inflater.inflate(R.menu.kanji_selection_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
+            menuInflater.inflate(R.menu.kanji_selection_menu, menu)
 
         val searchItem = menu.findItem(R.id.search)
         val searchView = searchItem.actionView as SearchView
@@ -88,7 +79,7 @@ class JlptSelectionFragment : Fragment() {
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
                 selectedCategory = null
-                activity.invalidateOptionsMenu()
+                invalidateOptionsMenu()
                 isSearching = true
                 showKanjiList()
                 return true
@@ -101,6 +92,7 @@ class JlptSelectionFragment : Fragment() {
             }
         })
 
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -148,24 +140,24 @@ class JlptSelectionFragment : Fragment() {
         showKanjiList()
         listAdapter.showLevel(level)
         selectedCategory = level
-        activity.invalidateOptionsMenu()
+        invalidateOptionsMenu()
     }
 
-    fun onBackPressed(): Boolean {
+    override fun onBackPressed() {
         if (isSearching)
-            return true
+            return
         if (selectedCategory != null) {
             selectedCategory = null
             showCategoryList()
-            activity.invalidateOptionsMenu()
-            return true
+            invalidateOptionsMenu()
+            return
         }
-        return false
+        super.onBackPressed()
     }
 
     private fun importKanjis() {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (context.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
                 return
             }
@@ -189,11 +181,11 @@ class JlptSelectionFragment : Fragment() {
             return
 
         try {
-            val kanjis = context.contentResolver.openInputStream(data.data).bufferedReader().readText()
-            KanjiDb.getInstance(context).setSelection(kanjis)
+            val kanjis = contentResolver.openInputStream(data.data).bufferedReader().readText()
+            db.setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
-            Toast.makeText(context, "Could not import file: " + e.toString(), Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Could not import file: " + e.toString(), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -201,10 +193,5 @@ class JlptSelectionFragment : Fragment() {
         private val TAG = this::class.java.simpleName!!
 
         private const val PICK_IMPORT_FILE = 1
-
-        fun newInstance(): JlptSelectionFragment {
-            val f = JlptSelectionFragment()
-            return f
-        }
     }
 }

@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
-import org.kaqui.settings.SettingsActivity
+import org.kaqui.settings.JlptSelectionFragment
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPInputStream
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         settings_button.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            startActivity(Intent(this, JlptSelectionFragment::class.java))
         }
         download_kanjidic_button.setOnClickListener {
             showDownloadProgressDialog()
