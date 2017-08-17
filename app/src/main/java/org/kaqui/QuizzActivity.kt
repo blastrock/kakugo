@@ -1,6 +1,7 @@
 package org.kaqui
 
 import android.animation.ValueAnimator
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
@@ -9,9 +10,11 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
@@ -131,7 +134,27 @@ class QuizzActivity : AppCompatActivity() {
             history_scroll_view.scrollTo(0, 0)
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         } else
-            super.onBackPressed()
+            confirmActivityClose()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                confirmActivityClose()
+                true
+            }
+            else ->
+                super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun confirmActivityClose() {
+        AlertDialog.Builder(this)
+                .setTitle(R.string.confirm_quizz_stop_title)
+                .setMessage(R.string.confirm_quizz_stop_message)
+                .setPositiveButton(android.R.string.yes, { _, _ -> finish() })
+                .setNegativeButton(android.R.string.no, null)
+                .show()
     }
 
     private fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {

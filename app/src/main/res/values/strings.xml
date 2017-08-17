@@ -15,5 +15,7 @@
     <string name="dont_know">Don\'t know</string>
     <string name="score_string">Session score: %1$d/%2$d</string>
     <string name="jlpt_search">Search</string>
-    <string name="search_kanji_hint">Search kanji...</string>
+    <string name="search_kanji_hint">Search kanji&#8230;</string>
+    <string name="confirm_quizz_stop_title">Terminate quizz</string>
+    <string name="confirm_quizz_stop_message">Are you sure you want to end this quizz session?</string>
 </resources>
