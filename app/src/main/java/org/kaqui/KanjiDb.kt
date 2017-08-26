@@ -115,6 +115,13 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
+    fun getEnabledCount(): Int {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = 1", null, null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            return cursor.getInt(0)
+        }
+    }
+
     data class Stats(val bad: Int, val meh: Int, val good: Int)
 
     fun getStats(): Stats =
