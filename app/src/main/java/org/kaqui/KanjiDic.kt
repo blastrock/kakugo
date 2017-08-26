@@ -9,7 +9,7 @@ data class Kanji(
         var meanings: List<String>,
         var similarities: List<Kanji>,
         var jlptLevel: Int,
-        var weight: Float,
+        var weight: Double,
         var enabled: Boolean
 )
 
@@ -38,7 +38,7 @@ private fun letterToPartType(letter: Char): PartType {
 }
 
 fun getJlptLevel(jlptLevels: Map<Int, String>, kanji: Char): Int {
-    var jlptLevel: Int = 0
+    var jlptLevel = 0
     for ((level, kanjis) in jlptLevels) {
         if (kanji in kanjis) {
             jlptLevel = level
@@ -67,9 +67,9 @@ fun lineToKanji(levels: Map<Int, String>, line: String): Kanji? {
             parts.filter { it.first == PartType.KatakanaReading || it.first == PartType.HiraganaReading }
                     .map { Reading(if (it.first == PartType.HiraganaReading) "ja_kun" else "ja_on", it.second) },
             parts.filter { it.first == PartType.Meaning }.map { it.second.replace('_', ' ') },
-            parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0f, false) },
+            parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0, false) },
             getJlptLevel(levels, literal),
-            0.0f,
+            0.0,
             true)
 }
 

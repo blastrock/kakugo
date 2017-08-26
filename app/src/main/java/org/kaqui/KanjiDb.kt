@@ -157,16 +157,16 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("similar_kanji"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0f, false))
+                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, false))
         }
-        val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0f, false)
+        val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0, false)
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "weight", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
             ret.kanji = cursor.getString(0)
             ret.jlptLevel = cursor.getInt(1)
-            ret.weight = cursor.getFloat(2)
+            ret.weight = cursor.getDouble(2)
             ret.enabled = cursor.getInt(3) != 0
         }
         return ret

@@ -184,7 +184,7 @@ class QuizzActivity : AppCompatActivity() {
         val questionPos = Math.random() * totalWeight
         var questionId = ids[0].first
         run {
-            var currentWeight = 0.0f
+            var currentWeight = 0.0
             for ((id, weight) in ids) {
                 currentWeight += weight
                 if (currentWeight >= questionPos) {
