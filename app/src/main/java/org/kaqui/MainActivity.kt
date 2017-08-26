@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -27,26 +28,10 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.main_activity)
 
-        start_kanji_reading_quizz.setOnClickListener {
-            val intent = Intent(this, QuizzActivity::class.java)
-            intent.putExtra("quizz_type", QuizzType.KANJI_TO_READING)
-            startActivity(intent)
-        }
-        start_reading_kanji_quizz.setOnClickListener {
-            val intent = Intent(this, QuizzActivity::class.java)
-            intent.putExtra("quizz_type", QuizzType.READING_TO_KANJI)
-            startActivity(intent)
-        }
-        start_kanji_meaning_quizz.setOnClickListener {
-            val intent = Intent(this, QuizzActivity::class.java)
-            intent.putExtra("quizz_type", QuizzType.KANJI_TO_MEANING)
-            startActivity(intent)
-        }
-        start_meaning_kanji_quizz.setOnClickListener {
-            val intent = Intent(this, QuizzActivity::class.java)
-            intent.putExtra("quizz_type", QuizzType.MEANING_TO_KANJI)
-            startActivity(intent)
-        }
+        start_kanji_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_READING)))
+        start_reading_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_KANJI)))
+        start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_MEANING)))
+        start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_KANJI)))
 
         settings_button.setOnClickListener {
             startActivity(Intent(this, KanjiSelectionActivity::class.java))
@@ -59,6 +44,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateButtonStatuses()
+    }
+
+    private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
+        return {
+            val intent = Intent(this, QuizzActivity::class.java)
+            intent.putExtra("quizz_type", type)
+            startActivity(intent)
+        }
     }
 
     private fun updateButtonStatuses() {
