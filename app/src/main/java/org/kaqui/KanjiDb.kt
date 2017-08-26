@@ -106,7 +106,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getEnabledIdsAndWeights(): List<Pair<Int, Float>> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "weight"), "enabled = ?", arrayOf("1"), null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "weight"), "enabled = 1", null, null, null, null).use { cursor ->
             val ret = mutableListOf<Pair<Int, Float>>()
             while (cursor.moveToNext()) {
                 ret.add(Pair(cursor.getInt(0), cursor.getFloat(1)))
@@ -128,7 +128,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             Stats(getCountForWeight(0.0f, BAD_WEIGHT), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT), getCountForWeight(GOOD_WEIGHT, 1.0f))
 
     private fun getCountForWeight(from: Float, to: Float): Int {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = ? AND weight BETWEEN ? AND ?", arrayOf("1", from.toString(), to.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = 1 AND weight BETWEEN ? AND ?", arrayOf(from.toString(), to.toString()), null, null, null).use { cursor ->
             cursor.moveToNext()
             return cursor.getInt(0)
         }
