@@ -176,7 +176,7 @@ class QuizzActivity : AppCompatActivity() {
         val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0f - weight) }
 
         if (ids.size < NB_ANSWERS) {
-            Toast.makeText(this, "You must select at least $NB_ANSWERS kanjis", Toast.LENGTH_LONG).show()
+            Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return
         }
 
