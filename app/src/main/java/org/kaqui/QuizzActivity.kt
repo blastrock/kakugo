@@ -34,6 +34,7 @@ class QuizzActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "QuizzActivity"
         private const val NB_ANSWERS = 6
+        private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         private const val MAX_HISTORY_SIZE = 40
     }
 
@@ -48,6 +49,7 @@ class QuizzActivity : AppCompatActivity() {
     private var questionCount = 0
 
     private val history = ArrayList<HistoryLine>()
+    private val lastQuestionsIds = ArrayDeque<Int>()
 
     private val quizzType
         get() = intent.extras.getSerializable("quizz_type") as QuizzType
@@ -89,6 +91,8 @@ class QuizzActivity : AppCompatActivity() {
         history_action_button.setOnClickListener {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
+
+        lastQuestionsIds.clear()
 
         if (savedInstanceState == null)
             showNewQuestion()
@@ -182,16 +186,20 @@ class QuizzActivity : AppCompatActivity() {
         currentQuestion = pickQuestion(db, ids)
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
+        addIdToLastQuestions(currentQuestion.id)
+
         showCurrentQuestion()
     }
 
     private fun pickQuestion(db: KanjiDb, ids: List<Pair<Int, Double>>): Kanji {
-        val totalWeight = ids.map { it.second }.sum()
+        val idsWithoutRecent = ids.filter { it.first !in lastQuestionsIds }
+
+        val totalWeight = idsWithoutRecent.map { it.second }.sum()
         val questionPos = Math.random() * totalWeight
-        var questionId = ids[0].first
+        var questionId = idsWithoutRecent.last().first // take last, it is probably safer with float arithmetic
         run {
             var currentWeight = 0.0
-            for ((id, weight) in ids) {
+            for ((id, weight) in idsWithoutRecent) {
                 currentWeight += weight
                 if (currentWeight >= questionPos) {
                     questionId = id
@@ -219,6 +227,12 @@ class QuizzActivity : AppCompatActivity() {
         shuffle(currentAnswers)
 
         return currentAnswers
+    }
+
+    private fun addIdToLastQuestions(id: Int) {
+        while (lastQuestionsIds.size > LAST_QUESTIONS_TO_AVOID_COUNT - 1)
+            lastQuestionsIds.removeFirst()
+        lastQuestionsIds.add(id)
     }
 
     private fun showCurrentQuestion() {
