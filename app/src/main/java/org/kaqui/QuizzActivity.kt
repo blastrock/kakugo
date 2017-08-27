@@ -173,13 +173,19 @@ class QuizzActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0f - weight) }
-
+        val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0 - weight) }
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return
         }
 
+        currentQuestion = pickQuestion(db, ids)
+        currentAnswers = pickAnswers(db, ids, currentQuestion)
+
+        showCurrentQuestion()
+    }
+
+    private fun pickQuestion(db: KanjiDb, ids: List<Pair<Int, Double>>): Kanji {
         val totalWeight = ids.map { it.second }.sum()
         val questionPos = Math.random() * totalWeight
         var questionId = ids[0].first
@@ -194,8 +200,10 @@ class QuizzActivity : AppCompatActivity() {
             }
         }
 
-        currentQuestion = db.getKanji(questionId)
+        return db.getKanji(questionId)
+    }
 
+    private fun pickAnswers(db: KanjiDb, ids: List<Pair<Int, Double>>, currentQuestion: Kanji): List<Kanji> {
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
                 if (similarKanjiIds.size >= NB_ANSWERS - 1)
@@ -203,15 +211,14 @@ class QuizzActivity : AppCompatActivity() {
                 else
                     similarKanjiIds
 
-        val additionalAnswers = pickRandom(ids.map { it.first }, NB_ANSWERS - 1 - similarKanjis.size, setOf(questionId) + similarKanjis)
+        val additionalAnswers = pickRandom(ids.map { it.first }, NB_ANSWERS - 1 - similarKanjis.size, setOf(currentQuestion.id) + similarKanjis)
 
         val currentAnswers = ((additionalAnswers + similarKanjis).map { db.getKanji(it) } + listOf(currentQuestion)).toMutableList()
         if (currentAnswers.size != NB_ANSWERS)
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
         shuffle(currentAnswers)
-        this.currentAnswers = currentAnswers
 
-        showCurrentQuestion()
+        return currentAnswers
     }
 
     private fun showCurrentQuestion() {
