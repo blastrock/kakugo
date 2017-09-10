@@ -67,7 +67,7 @@ fun lineToKanji(levels: Map<Int, String>, line: String): Kanji? {
     if (parts.filter { it.first == PartType.Frequency }.count() == 0)
         return null
 
-    val literal = parts.filter { it.first == PartType.Kanji }.first().second.first()
+    val literal = parts.first { it.first == PartType.Kanji }.second.first()
 
     return Kanji(
             0,
