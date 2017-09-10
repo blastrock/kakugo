@@ -15,7 +15,9 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER NOT NULL,"
-                        + "weight FLOAT NOT NULL DEFAULT 0.0,"
+                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
@@ -43,6 +45,17 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         if (oldVersion < 3) {
             database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
             onCreate(database)
+            return
+        }
+        if (oldVersion < 4) {
+            database.execSQL("DROP TABLE IF EXISTS tmptable")
+            database.execSQL("ALTER TABLE $KANJIS_TABLE_NAME RENAME TO tmptable")
+            onCreate(database)
+            database.execSQL(
+                    "INSERT INTO $KANJIS_TABLE_NAME (id_kanji, kanji, jlpt_level, short_score, enabled) "
+                    + "SELECT id_kanji, kanji, jlpt_level, weight, enabled FROM tmptable")
+            database.execSQL("DROP TABLE tmptable")
+            return
         }
     }
 
@@ -106,7 +119,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getEnabledIdsAndWeights(): List<Pair<Int, Float>> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "weight"), "enabled = 1", null, null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score"), "enabled = 1", null, null, null, null).use { cursor ->
             val ret = mutableListOf<Pair<Int, Float>>()
             while (cursor.moveToNext()) {
                 ret.add(Pair(cursor.getInt(0), cursor.getFloat(1)))
@@ -128,7 +141,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             Stats(getCountForWeight(0.0f, BAD_WEIGHT), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT), getCountForWeight(GOOD_WEIGHT, 1.0f))
 
     private fun getCountForWeight(from: Float, to: Float): Int {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = 1 AND weight BETWEEN ? AND ?", arrayOf(from.toString(), to.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = 1 AND short_score BETWEEN ? AND ?", arrayOf(from.toString(), to.toString()), null, null, null).use { cursor ->
             cursor.moveToNext()
             return cursor.getInt(0)
         }
@@ -167,7 +180,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, false))
         }
         val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0, false)
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "weight", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "short_score", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
@@ -190,7 +203,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun updateWeight(kanji: String, certainty: Certainty) {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("weight"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("short_score"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
             cursor.moveToFirst()
             val previousWeight = cursor.getDouble(0)
             val targetWeight = certaintyToWeight(certainty)
@@ -211,7 +224,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             Log.v(TAG, "Weight of $kanji going from $previousWeight to $newWeight")
 
             val cv = ContentValues()
-            cv.put("weight", newWeight.toFloat())
+            cv.put("short_score", newWeight.toFloat())
             writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
         }
     }
@@ -254,7 +267,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     data class DumpRow(val weight: Float, val enabled: Boolean)
 
     fun dumpUserData(): Map<Char, DumpRow> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "weight", "enabled"), null, null, null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "enabled"), null, null, null, null, null).use { cursor ->
             val ret = mutableMapOf<Char, DumpRow>()
             while (cursor.moveToNext()) {
                 ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getInt(2) != 0)
@@ -268,7 +281,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         try {
             val cv = ContentValues()
             for ((kanji, row) in data) {
-                cv.put("weight", row.weight)
+                cv.put("short_score", row.weight)
                 cv.put("enabled", if (row.enabled) 1 else 0)
                 writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji.toString()))
             }
@@ -289,7 +302,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KanjiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val READINGS_TABLE_NAME = "readings"
