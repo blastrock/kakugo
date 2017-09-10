@@ -264,13 +264,13 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    data class DumpRow(val weight: Float, val enabled: Boolean)
+    data class DumpRow(val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
     fun dumpUserData(): Map<Char, DumpRow> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "enabled"), null, null, null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             val ret = mutableMapOf<Char, DumpRow>()
             while (cursor.moveToNext()) {
-                ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getInt(2) != 0)
+                ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3),cursor.getInt(4) != 0)
             }
             return ret
         }
@@ -281,7 +281,9 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         try {
             val cv = ContentValues()
             for ((kanji, row) in data) {
-                cv.put("short_score", row.weight)
+                cv.put("short_score", row.shortScore)
+                cv.put("long_score", row.longScore)
+                cv.put("last_correct", row.lastCorrect)
                 cv.put("enabled", if (row.enabled) 1 else 0)
                 writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji.toString()))
             }
