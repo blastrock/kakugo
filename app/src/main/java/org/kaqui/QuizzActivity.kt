@@ -1,11 +1,9 @@
 package org.kaqui
 
 import android.animation.ValueAnimator
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
-import android.os.Parcelable
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
@@ -20,7 +18,6 @@ import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import kotlinx.android.synthetic.main.quizz_activity.*
 import java.util.*
 
@@ -177,7 +174,7 @@ class QuizzActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val ids = db.getEnabledIdsAndWeights().map { (id, weight) -> Pair(id, 1.0 - weight) }
+        val ids = db.getEnabledIdsAndScores().map { (id, scores) -> Pair(id, 1.0 - scores.shortScore) }
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return

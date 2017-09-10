@@ -9,11 +9,19 @@ data class Kanji(
         var meanings: List<String>,
         var similarities: List<Kanji>,
         var jlptLevel: Int,
-        var weight: Double,
+        var shortScore: Double,
+        var longScore: Double,
+        var lastCorrect: Long,
         var enabled: Boolean
 )
 
 data class Reading(var readingType: String, var reading: String)
+
+data class Scores(
+        var shortScore: Double,
+        var longScore: Double,
+        var lastCorrect: Long
+)
 
 private enum class PartType {
     Unknown,
@@ -67,9 +75,11 @@ fun lineToKanji(levels: Map<Int, String>, line: String): Kanji? {
             parts.filter { it.first == PartType.KatakanaReading || it.first == PartType.HiraganaReading }
                     .map { Reading(if (it.first == PartType.HiraganaReading) "ja_kun" else "ja_on", it.second) },
             parts.filter { it.first == PartType.Meaning }.map { it.second.replace('_', ' ') },
-            parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0, false) },
+            parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0, 0.0, 0, false) },
             getJlptLevel(levels, literal),
             0.0,
+            0.0,
+            0,
             true)
 }
 

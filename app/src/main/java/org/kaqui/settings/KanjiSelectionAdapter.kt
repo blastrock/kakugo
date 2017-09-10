@@ -38,7 +38,7 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
         holder.enabled.isChecked = kanji.enabled
         holder.kanjiText.text = kanji.kanji
         val background =
-                when (kanji.weight) {
+                when (kanji.shortScore) {
                     in 0.0f..BAD_WEIGHT -> R.drawable.round_red
                     in BAD_WEIGHT..GOOD_WEIGHT -> R.drawable.round_yellow
                     in GOOD_WEIGHT..1.0f -> R.drawable.round_green

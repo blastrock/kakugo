@@ -118,11 +118,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getEnabledIdsAndWeights(): List<Pair<Int, Float>> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score"), "enabled = 1", null, null, null, null).use { cursor ->
-            val ret = mutableListOf<Pair<Int, Float>>()
+    fun getEnabledIdsAndScores(): List<Pair<Int, Scores>> {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
+            val ret = mutableListOf<Pair<Int, Scores>>()
             while (cursor.moveToNext()) {
-                ret.add(Pair(cursor.getInt(0), cursor.getFloat(1)))
+                ret.add(Pair(cursor.getInt(0), Scores(cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3))))
             }
             return ret
         }
@@ -177,17 +177,19 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("similar_kanji"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, false))
+                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, 0.0, 0,false))
         }
-        val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0, false)
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "short_score", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0, 0.0, 0,false)
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "short_score", "long_score", "last_correct", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
             ret.kanji = cursor.getString(0)
             ret.jlptLevel = cursor.getInt(1)
-            ret.weight = cursor.getDouble(2)
-            ret.enabled = cursor.getInt(3) != 0
+            ret.shortScore = cursor.getDouble(2)
+            ret.longScore = cursor.getDouble(3)
+            ret.lastCorrect = cursor.getLong(4)
+            ret.enabled = cursor.getInt(5) != 0
         }
         return ret
     }
