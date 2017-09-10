@@ -54,7 +54,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             onCreate(database)
             database.execSQL(
                     "INSERT INTO $KANJIS_TABLE_NAME (id_kanji, kanji, jlpt_level, short_score, enabled) "
-                    + "SELECT id_kanji, kanji, jlpt_level, weight, enabled FROM tmptable")
+                            + "SELECT id_kanji, kanji, jlpt_level, weight, enabled FROM tmptable")
             database.execSQL("DROP TABLE tmptable")
             return
         }
@@ -178,9 +178,9 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("similar_kanji"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, 0.0, 0,false))
+                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, 0.0, 0, false))
         }
-        val ret = Kanji(id,"", readings, meanings, similarities,0, 0.0, 0.0, 0,false)
+        val ret = Kanji(id, "", readings, meanings, similarities, 0, 0.0, 0.0, 0, false)
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "short_score", "long_score", "last_correct", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
@@ -290,7 +290,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             val ret = mutableMapOf<Char, DumpRow>()
             while (cursor.moveToNext()) {
-                ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3),cursor.getInt(4) != 0)
+                ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0)
             }
             return ret
         }
