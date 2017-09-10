@@ -6,6 +6,7 @@ import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import java.util.*
 
 class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -205,28 +206,45 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun updateWeight(kanji: String, certainty: Certainty) {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("short_score"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("short_score", "long_score", "last_correct"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
             cursor.moveToFirst()
-            val previousWeight = cursor.getDouble(0)
-            val targetWeight = certaintyToWeight(certainty)
-            if (targetWeight == previousWeight) {
-                Log.v(TAG, "Weight of $kanji stays unchanged at $previousWeight")
-                return
-            }
-            val newWeight =
-                    if (targetWeight > previousWeight)
-                        targetWeight - Math.exp(-1.0 + Math.log(targetWeight - previousWeight))
-                    else
-                        targetWeight + Math.exp(-1.0 + Math.log(-targetWeight + previousWeight))
+            val previousShortScore = cursor.getDouble(0)
+            val targetScore = certaintyToWeight(certainty)
 
-            if (newWeight !in 0..1) {
-                Log.wtf(TAG, "Weight calculation error, previousWeight = $previousWeight, targetWeight = $targetWeight, newWeight = $newWeight")
+            // short score reduces the distance by half to target score
+            val newShortScore = previousShortScore + (targetScore - previousShortScore) / 2
+            if (newShortScore !in 0..1) {
+                Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
             }
 
-            Log.v(TAG, "Weight of $kanji going from $previousWeight to $newWeight")
+            val previousLongScore = cursor.getDouble(1)
+            val now = Calendar.getInstance().timeInMillis / 1000
+            val daysSinceCorrect = (now - cursor.getLong(2)) / 3600.0 / 24.0
+            // long score goes down by one third of the distance to the target score
+            // and it goes up by one half of that distance prorated by an inverted exponential of
+            // the number of days since the last correct answer
+            val newLongScore =
+                    when {
+                        previousLongScore < targetScore ->
+                            previousLongScore + (targetScore - previousLongScore) / 2 * (1 - Math.exp(-daysSinceCorrect))
+                        previousLongScore > targetScore ->
+                            previousLongScore - (-targetScore + previousLongScore) / 3
+                        else ->
+                            previousLongScore
+                    }
+            if (newLongScore !in 0..1) {
+                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceCorrect = $daysSinceCorrect, targetScore = $targetScore, newShortScore = $newShortScore")
+            }
+
+            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceCorrect: $daysSinceCorrect")
+            Log.v(TAG, "Short score of $kanji going from $previousShortScore to $newShortScore")
+            Log.v(TAG, "Long score of $kanji going from $previousLongScore to $newLongScore")
 
             val cv = ContentValues()
-            cv.put("short_score", newWeight.toFloat())
+            cv.put("short_score", newShortScore.toFloat())
+            cv.put("long_score", newShortScore.toFloat())
+            if (certainty != Certainty.DONTKNOW)
+                cv.put("last_correct", now)
             writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
         }
     }
