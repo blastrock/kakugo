@@ -263,20 +263,20 @@ class QuizzActivity : AppCompatActivity() {
         val db = KanjiDb.getInstance(this)
 
         if (certainty == Certainty.DONTKNOW) {
-            db.updateWeight(currentQuestion.kanji, Certainty.DONTKNOW)
+            db.updateScores(currentQuestion.kanji, Certainty.DONTKNOW)
             addUnknownAnswerToHistory(currentQuestion)
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
-            db.updateWeight(currentQuestion.kanji, certainty)
+            db.updateScores(currentQuestion.kanji, certainty)
             addGoodAnswerToHistory(currentQuestion)
             correctCount += 1
         } else {
             // wrong
-            db.updateWeight(currentQuestion.kanji, Certainty.DONTKNOW)
-            db.updateWeight(currentAnswers[position].kanji, Certainty.DONTKNOW)
+            db.updateScores(currentQuestion.kanji, Certainty.DONTKNOW)
+            db.updateScores(currentAnswers[position].kanji, Certainty.DONTKNOW)
             addWrongAnswerToHistory(currentQuestion, currentAnswers[position])
         }
 

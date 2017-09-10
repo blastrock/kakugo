@@ -205,7 +205,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return ret
     }
 
-    fun updateWeight(kanji: String, certainty: Certainty) {
+    fun updateScores(kanji: String, certainty: Certainty) {
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("short_score", "long_score", "last_correct"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
             cursor.moveToFirst()
             val previousShortScore = cursor.getDouble(0)
