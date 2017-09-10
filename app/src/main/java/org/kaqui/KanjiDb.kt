@@ -119,14 +119,43 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getEnabledIdsAndScores(): List<Pair<Int, Scores>> {
+    fun getEnabledIdsAndProbalities(): List<Pair<Int, Double>> {
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
-            val ret = mutableListOf<Pair<Int, Scores>>()
+            val enabledKanjis = cursor.count
+            val ret = mutableListOf<Pair<Int, Double>>()
             while (cursor.moveToNext()) {
-                ret.add(Pair(cursor.getInt(0), Scores(cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3))))
+                ret.add(Pair(cursor.getInt(0), getProbabilityData(enabledKanjis, cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)).finalProbability))
             }
             return ret
         }
+    }
+
+    private fun sigmoid(x: Double) = Math.exp(x) / (1 + Math.exp(x))
+
+    data class ProbabilityData(var shortScore: Double, var shortProbability: Double, var longScore: Double, var longProbability: Double, var daysSinceCorrect: Double, var finalProbability: Double)
+
+    private fun getProbabilityData(enabledKanjis: Int, shortScore: Double, longScore: Double, lastCorrect: Long): ProbabilityData {
+        val shortProbability = 1 - shortScore
+        if (shortProbability !in 0..1)
+            Log.wtf(TAG, "Invalid shortProbability: $shortProbability, shortScore: $shortScore")
+
+        val now = Calendar.getInstance().timeInMillis / 1000
+        val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
+        // +1 to avoid division by 0
+        val sigmoidArg = 200 * (daysSinceCorrect - 1) / (enabledKanjis * longScore + 1) - 3
+        // cap it to avoid overflow on Math.exp in the sigmoid
+        val longProbability = Math.pow(sigmoid(Math.min(sigmoidArg, 10.0)), 1.3)
+        if (longProbability !in 0..1)
+            Log.wtf(TAG, "Invalid longProbability: $longProbability, lastCorrect: $lastCorrect, now: $now, longScore: $longScore")
+
+        val finalProbability = shortProbability * 0.8 + longProbability * 0.2
+        if (finalProbability !in 0..1)
+            Log.wtf(TAG, "Invalid finalProbability: $finalProbability, shortProbability: $shortProbability, longProbability: $longProbability")
+        return ProbabilityData(shortScore, shortProbability, longScore, longProbability, daysSinceCorrect, finalProbability)
+    }
+
+    fun getProbabilityData(kanji: Kanji): ProbabilityData {
+        return getProbabilityData(getEnabledCount(), kanji.shortScore, kanji.longScore, kanji.lastCorrect)
     }
 
     fun getEnabledCount(): Int {
@@ -212,23 +241,32 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             val targetScore = certaintyToWeight(certainty)
 
             // short score reduces the distance by half to target score
-            val newShortScore = previousShortScore + (targetScore - previousShortScore) / 2
+            var newShortScore = previousShortScore + (targetScore - previousShortScore) / 2
             if (newShortScore !in 0..1) {
                 Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
+            }
+            if (newShortScore >= 0.98) {
+                newShortScore = 1.0
             }
 
             val previousLongScore = cursor.getDouble(1)
             val now = Calendar.getInstance().timeInMillis / 1000
-            val daysSinceCorrect = (now - cursor.getLong(2)) / 3600.0 / 24.0
-            // long score goes down by one third of the distance to the target score
-            // and it goes up by one half of that distance prorated by an inverted exponential of
-            // the number of days since the last correct answer
+            // if lastCorrect wasn't initialized, set it to now
+            val lastCorrect =
+                    if (cursor.getLong(2) > 0)
+                        cursor.getLong(2)
+                    else
+                        now
+            val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
+            // long score goes down by one half of the distance to the target score
+            // and it goes up by one half of that distance prorated by the time since the last
+            // correct answer
             val newLongScore =
                     when {
                         previousLongScore < targetScore ->
-                            previousLongScore + (targetScore - previousLongScore) / 2 * (1 - Math.exp(-daysSinceCorrect))
+                            previousLongScore + ((targetScore - previousLongScore) / 2) * Math.min((daysSinceCorrect / 15) / (previousLongScore + 0.01), 1.0)
                         previousLongScore > targetScore ->
-                            previousLongScore - (-targetScore + previousLongScore) / 3
+                            previousLongScore - (-targetScore + previousLongScore) / 2
                         else ->
                             previousLongScore
                     }
@@ -242,7 +280,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
             val cv = ContentValues()
             cv.put("short_score", newShortScore.toFloat())
-            cv.put("long_score", newShortScore.toFloat())
+            cv.put("long_score", newLongScore.toFloat())
             if (certainty != Certainty.DONTKNOW)
                 cv.put("last_correct", now)
             writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))

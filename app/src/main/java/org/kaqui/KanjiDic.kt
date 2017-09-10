@@ -17,12 +17,6 @@ data class Kanji(
 
 data class Reading(var readingType: String, var reading: String)
 
-data class Scores(
-        var shortScore: Double,
-        var longScore: Double,
-        var lastCorrect: Long
-)
-
 private enum class PartType {
     Unknown,
     Kanji,

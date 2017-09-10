@@ -174,7 +174,7 @@ class QuizzActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val ids = db.getEnabledIdsAndScores().map { (id, scores) -> Pair(id, 1.0 - scores.shortScore) }
+        val ids = db.getEnabledIdsAndProbalities()
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return
