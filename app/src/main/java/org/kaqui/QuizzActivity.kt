@@ -37,11 +37,14 @@ class QuizzActivity : AppCompatActivity() {
         private const val MAX_HISTORY_SIZE = 40
     }
 
+    data class DebugData(var probabilityData: KanjiDb.ProbabilityData, var probaParams: KanjiDb.ProbaParams, var probaParams2: KanjiDb.ProbaParams2, var totalWeight: Double)
+
     private lateinit var statsFragment: StatsFragment
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
 
     private lateinit var currentQuestion: Kanji
+    private var currentDebugData: DebugData? = null
     private lateinit var currentAnswers: List<Kanji>
 
     private var correctCount = 0
@@ -119,6 +122,12 @@ class QuizzActivity : AppCompatActivity() {
         }
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
+
+        question_text.setOnLongClickListener { _ ->
+            if (currentDebugData != null)
+                showKanjiProbabilityData(currentQuestion.kanji, currentDebugData!!)
+            true
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -176,13 +185,16 @@ class QuizzActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val ids = db.getEnabledIdsAndProbalities()
+        val (ids, debugParams) = db.getEnabledIdsAndProbalities()
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return
         }
 
-        currentQuestion = pickQuestion(db, ids)
+        val question = pickQuestion(db, ids)
+        Log.v(TAG, "Selected question: $question")
+        currentQuestion = question.kanji
+        currentDebugData = DebugData(question.probabilityData, debugParams.probaParams, debugParams.probaParams2, question.totalWeight)
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
         addIdToLastQuestions(currentQuestion.id)
@@ -190,24 +202,29 @@ class QuizzActivity : AppCompatActivity() {
         showCurrentQuestion()
     }
 
-    private fun pickQuestion(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>): Kanji {
+    data class PickedQuestion(val kanji: Kanji, val probabilityData: KanjiDb.ProbabilityData, val totalWeight: Double)
+
+    private fun pickQuestion(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.kanjiId !in lastQuestionsIds }
 
         val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
         val questionPos = Math.random() * totalWeight
-        var questionId = idsWithoutRecent.last().kanjiId // take last, it is probably safer with float arithmetic
+        Log.v(TAG, "Picking a question, questionPos: $questionPos, totalWeight: $totalWeight")
+        var question = idsWithoutRecent.last() // take last, it is probably safer with float arithmetic
         run {
             var currentWeight = 0.0
             for (kanjiData in idsWithoutRecent) {
                 currentWeight += kanjiData.finalProbability
                 if (currentWeight >= questionPos) {
-                    questionId = kanjiData.kanjiId
+                    question = kanjiData
                     break
                 }
             }
+            if (currentWeight < questionPos)
+                Log.v(TAG, "Couldn't pick a question")
         }
 
-        return db.getKanji(questionId)
+        return PickedQuestion(db.getKanji(question.kanjiId), question, totalWeight)
     }
 
     private fun pickAnswers(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
@@ -266,20 +283,20 @@ class QuizzActivity : AppCompatActivity() {
 
         if (certainty == Certainty.DONTKNOW) {
             db.updateScores(currentQuestion.kanji, Certainty.DONTKNOW)
-            addUnknownAnswerToHistory(currentQuestion)
+            addUnknownAnswerToHistory(currentQuestion, currentDebugData)
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
             db.updateScores(currentQuestion.kanji, certainty)
-            addGoodAnswerToHistory(currentQuestion)
+            addGoodAnswerToHistory(currentQuestion, currentDebugData)
             correctCount += 1
         } else {
             // wrong
             db.updateScores(currentQuestion.kanji, Certainty.DONTKNOW)
             db.updateScores(currentAnswers[position].kanji, Certainty.DONTKNOW)
-            addWrongAnswerToHistory(currentQuestion, currentAnswers[position])
+            addWrongAnswerToHistory(currentQuestion, currentDebugData, currentAnswers[position])
         }
 
         questionCount += 1
@@ -287,21 +304,21 @@ class QuizzActivity : AppCompatActivity() {
         showNewQuestion()
     }
 
-    private fun addGoodAnswerToHistory(correct: Kanji) {
+    private fun addGoodAnswerToHistory(correct: Kanji, probabilityData: DebugData?) {
         history.add(HistoryLine.Correct(correct.id))
 
-        val layout = makeHistoryLine(correct, R.drawable.round_green)
+        val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
 
         history_view.addView(layout, 0)
         updateSheetPeekHeight(layout)
         discardOldHistory()
     }
 
-    private fun addWrongAnswerToHistory(correct: Kanji, wrong: Kanji) {
+    private fun addWrongAnswerToHistory(correct: Kanji, probabilityData: DebugData?, wrong: Kanji) {
         history.add(HistoryLine.Incorrect(correct.id, wrong.id))
 
-        val layoutGood = makeHistoryLine(correct, R.drawable.round_red, false)
-        val layoutBad = makeHistoryLine(wrong, null)
+        val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
+        val layoutBad = makeHistoryLine(wrong, null, null)
 
         history_view.addView(layoutBad, 0)
         history_view.addView(layoutGood, 0)
@@ -309,17 +326,17 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addUnknownAnswerToHistory(correct: Kanji) {
+    private fun addUnknownAnswerToHistory(correct: Kanji, probabilityData: DebugData?) {
         history.add(HistoryLine.Unknown(correct.id))
 
-        val layout = makeHistoryLine(correct, R.drawable.round_red)
+        val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
 
         history_view.addView(layout, 0)
         updateSheetPeekHeight(layout)
         discardOldHistory()
     }
 
-    private fun makeHistoryLine(kanji: Kanji, style: Int?, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(kanji: Kanji, probabilityData: DebugData?, style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.kanji_item, history_view, false)
 
         val checkbox = line.findViewById<View>(R.id.kanji_item_checkbox)
@@ -336,10 +353,14 @@ class QuizzActivity : AppCompatActivity() {
             intent.putExtra("showEntryDetailOnSingleResult", true)
             try {
                 startActivity(intent)
-            }
-            catch (e: ActivityNotFoundException) {
+            } catch (e: ActivityNotFoundException) {
                 Toast.makeText(this, R.string.aedict_not_installed, Toast.LENGTH_SHORT).show()
             }
+        }
+        kanjiView.setOnLongClickListener {
+            if (probabilityData != null)
+                showKanjiProbabilityData(kanji.kanji, probabilityData)
+            true
         }
 
         val detailView = line.findViewById<TextView>(R.id.kanji_item_description)
@@ -351,6 +372,21 @@ class QuizzActivity : AppCompatActivity() {
         }
 
         return line
+    }
+
+    private fun showKanjiProbabilityData(kanji: String, probabilityData: DebugData) {
+        AlertDialog.Builder(this)
+                .setTitle(kanji)
+                .setMessage(
+                        getString(R.string.debug_info,
+                                probabilityData.probabilityData.daysSinceCorrect,
+                                probabilityData.probabilityData.longScore,
+                                probabilityData.probabilityData.longProbability,
+                                probabilityData.probabilityData.shortScore,
+                                probabilityData.probabilityData.shortProbability,
+                                probabilityData.probabilityData.finalProbability,
+                                probabilityData.totalWeight))
+                .show()
     }
 
     private fun updateSheetPeekHeight(v: View) {
@@ -413,13 +449,13 @@ class QuizzActivity : AppCompatActivity() {
             val type = parcel.readByte()
             when (type.toInt()) {
                 0 -> {
-                    addGoodAnswerToHistory(db.getKanji(parcel.readInt()))
+                    addGoodAnswerToHistory(db.getKanji(parcel.readInt()), null)
                 }
                 1 -> {
-                    addUnknownAnswerToHistory(db.getKanji(parcel.readInt()))
+                    addUnknownAnswerToHistory(db.getKanji(parcel.readInt()), null)
                 }
                 2 -> {
-                    addWrongAnswerToHistory(db.getKanji(parcel.readInt()), db.getKanji(parcel.readInt()))
+                    addWrongAnswerToHistory(db.getKanji(parcel.readInt()), null, db.getKanji(parcel.readInt()))
                 }
             }
         })
