@@ -18,4 +18,5 @@
     <string name="search_kanji_hint">Search kanji&#8230;</string>
     <string name="confirm_quizz_stop_title">Terminate quizz</string>
     <string name="confirm_quizz_stop_message">Are you sure you want to end this quizz session?</string>
+    <string name="aedict_not_installed">Please, install the aedict3 dictionnary (non-free) to show kanji definitions</string>
 </resources>

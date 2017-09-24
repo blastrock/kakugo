@@ -1,6 +1,7 @@
 package org.kaqui
 
 import android.animation.ValueAnimator
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
@@ -18,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.quizz_activity.*
 import java.util.*
 
@@ -332,7 +334,12 @@ class QuizzActivity : AppCompatActivity() {
             intent.putExtra("kanjis", kanji.kanji)
             intent.putExtra("search_in_kanjidic", true)
             intent.putExtra("showEntryDetailOnSingleResult", true)
-            startActivity(intent)
+            try {
+                startActivity(intent)
+            }
+            catch (e: ActivityNotFoundException) {
+                Toast.makeText(this, R.string.aedict_not_installed, Toast.LENGTH_SHORT).show()
+            }
         }
 
         val detailView = line.findViewById<TextView>(R.id.kanji_item_description)
