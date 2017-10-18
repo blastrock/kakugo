@@ -245,7 +245,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             if (newShortScore !in 0..1) {
                 Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
             }
-            if (newShortScore >= 0.98) {
+            if (newShortScore >= 0.92) {
                 newShortScore = 1.0
             }
 
