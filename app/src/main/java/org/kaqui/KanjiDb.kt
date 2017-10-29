@@ -120,11 +120,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getEnabledIdsAndProbalities(): List<Pair<Int, Double>> {
+        val minLastCorrect = getMinLastCorrect()
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
-            val enabledKanjis = cursor.count
             val ret = mutableListOf<Pair<Int, Double>>()
             while (cursor.moveToNext()) {
-                ret.add(Pair(cursor.getInt(0), getProbabilityData(enabledKanjis, cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)).finalProbability))
+                ret.add(Pair(cursor.getInt(0), getProbabilityData(minLastCorrect, cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)).finalProbability))
             }
             return ret
         }
@@ -139,18 +139,17 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         if (shortProbability !in 0..1)
             Log.wtf(TAG, "Invalid shortProbability: $shortProbability, shortScore: $shortScore")
 
+        val probaParams = getProbaParams(minLastCorrect)
+
         val now = Calendar.getInstance().timeInMillis / 1000
-
-        val probaDaysEnd = (now - minLastCorrect) / 3600.0 / 24.0
-        val spreadEnd = PROBA_SPREAD_END(probaDaysEnd)
-
         val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
 
-        val sigmoidArg = (daysSinceCorrect - PROBA_DAYS_BEGIN - (probaDaysEnd - PROBA_DAYS_BEGIN) * longScore) / (PROBA_SPREAD_BEGIN + (spreadEnd - PROBA_SPREAD_BEGIN) * longScore)
+        val sigmoidArg = (daysSinceCorrect - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * longScore) /
+                (probaParams.spreadBegin + (probaParams.spreadEnd - probaParams.spreadBegin) * longScore)
         // cap it to avoid overflow on Math.exp in the sigmoid
         val longProbability = sigmoid(Math.min(sigmoidArg, 10.0))
         if (longProbability !in 0..1)
-            Log.wtf(TAG, "Invalid longProbability: $longProbability, lastCorrect: $lastCorrect, now: $now, longScore: $longScore")
+            Log.wtf(TAG, "Invalid longProbability: $longProbability, lastCorrect: $lastCorrect, now: $now, longScore: $longScore, probaParams: $probaParams")
 
         val finalProbability = shortProbability * 0.8 + longProbability * 0.2
         if (finalProbability !in 0..1)
@@ -246,6 +245,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun updateScores(kanji: String, certainty: Certainty) {
+        val probaParams = getProbaParams(getMinLastCorrect())
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("short_score", "long_score", "last_correct"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
             cursor.moveToFirst()
             val previousShortScore = cursor.getDouble(0)
@@ -275,17 +275,19 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             val newLongScore =
                     when {
                         previousLongScore < targetScore ->
-                            previousLongScore + ((targetScore - previousLongScore) / 2) * Math.min((daysSinceCorrect / 50) / (previousLongScore + 0.001), 1.0)
+                            previousLongScore + ((targetScore - previousLongScore) / 2) *
+                                    Math.min(daysSinceCorrect / 2.0 /
+                                            (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)
                         previousLongScore > targetScore ->
                             previousLongScore - (-targetScore + previousLongScore) / 2
                         else ->
                             previousLongScore
                     }
             if (newLongScore !in 0..1) {
-                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceCorrect = $daysSinceCorrect, targetScore = $targetScore, newShortScore = $newShortScore")
+                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceCorrect = $daysSinceCorrect, targetScore = $targetScore, probaParams: $probaParams, newLongScore = $newLongScore")
             }
 
-            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceCorrect: $daysSinceCorrect")
+            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceCorrect: $daysSinceCorrect, probaParams: $probaParams")
             Log.v(TAG, "Short score of $kanji going from $previousShortScore to $newShortScore")
             Log.v(TAG, "Long score of $kanji going from $previousLongScore to $newLongScore")
 
@@ -369,6 +371,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 Certainty.DONTKNOW -> 0.0
             }
 
+    data class ProbaParams(val daysBegin: Double, val daysEnd: Double, val spreadBegin: Double, val spreadEnd: Double)
+
     companion object {
         private const val TAG = "KanjiDb"
 
@@ -380,15 +384,14 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val MEANINGS_TABLE_NAME = "meanings"
         private const val SIMILARITIES_TABLE_NAME = "similarities"
 
-        // after how long a kanji with a long score of 0 must be asked?
-        private const val PROBA_DAYS_BEGIN = 1
-        // PROBA_DAYS_END would be after how long a kanji with a long score of 1 must be asked
-        // but it is dynamically calculated as the max(daysSinceCorrect)
+        private fun getProbaParams(minLastCorrect: Int): ProbaParams {
+            val now = Calendar.getInstance().timeInMillis / 1000
 
-        // how spread the sigmoid function should be for a long score of 0
-        private const val PROBA_SPREAD_BEGIN = 1/7.0
-        // how spread the sigmoid function should be for a long score of 1
-        private fun PROBA_SPREAD_END(daysEnd: Double): Double = (daysEnd * 0.8) / 7.0
+            val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0 / 2.0
+            val spreadEnd = (daysEnd * 0.8) / 7.0
+
+            return ProbaParams(1.0, daysEnd, 1/7.0, spreadEnd)
+        }
 
         private var singleton: KanjiDb? = null
 
