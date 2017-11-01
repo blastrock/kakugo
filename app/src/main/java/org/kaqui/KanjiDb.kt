@@ -387,7 +387,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private fun getProbaParams(minLastCorrect: Int): ProbaParams {
             val now = Calendar.getInstance().timeInMillis / 1000
 
-            val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0 / 2.0
+            val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0
             val spreadEnd = (daysEnd * 0.8) / 7.0
 
             return ProbaParams(1.0, daysEnd, 1/7.0, spreadEnd)
