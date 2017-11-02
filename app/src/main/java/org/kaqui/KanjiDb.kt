@@ -119,12 +119,12 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getEnabledIdsAndProbalities(): List<Pair<Int, Double>> {
+    fun getEnabledIdsAndProbalities(): List<ProbabilityData> {
         val minLastCorrect = getMinLastCorrect()
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
-            val ret = mutableListOf<Pair<Int, Double>>()
+            val ret = mutableListOf<ProbabilityData>()
             while (cursor.moveToNext()) {
-                ret.add(Pair(cursor.getInt(0), getProbabilityData(minLastCorrect, cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)).finalProbability))
+                ret.add(getProbabilityData(minLastCorrect, cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)))
             }
             return ret
         }
@@ -132,9 +132,9 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     private fun sigmoid(x: Double) = Math.exp(x) / (1 + Math.exp(x))
 
-    data class ProbabilityData(var shortScore: Double, var shortProbability: Double, var longScore: Double, var longProbability: Double, var daysSinceCorrect: Double, var finalProbability: Double)
+    data class ProbabilityData(var kanjiId: Int, var shortScore: Double, var shortProbability: Double, var longScore: Double, var longProbability: Double, var daysSinceCorrect: Double, var finalProbability: Double)
 
-    private fun getProbabilityData(minLastCorrect: Int, shortScore: Double, longScore: Double, lastCorrect: Long): ProbabilityData {
+    private fun getProbabilityData(minLastCorrect: Int, kanjiId: Int, shortScore: Double, longScore: Double, lastCorrect: Long): ProbabilityData {
         val shortProbability = 1 - shortScore
         if (shortProbability !in 0..1)
             Log.wtf(TAG, "Invalid shortProbability: $shortProbability, shortScore: $shortScore")
@@ -154,11 +154,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         val finalProbability = shortProbability * 0.8 + longProbability * 0.2
         if (finalProbability !in 0..1)
             Log.wtf(TAG, "Invalid finalProbability: $finalProbability, shortProbability: $shortProbability, longProbability: $longProbability")
-        return ProbabilityData(shortScore, shortProbability, longScore, longProbability, daysSinceCorrect, finalProbability)
+        return ProbabilityData(kanjiId, shortScore, shortProbability, longScore, longProbability, daysSinceCorrect, finalProbability)
     }
 
     fun getProbabilityData(kanji: Kanji): ProbabilityData {
-        return getProbabilityData(getMinLastCorrect(), kanji.shortScore, kanji.longScore, kanji.lastCorrect)
+        return getProbabilityData(getMinLastCorrect(), kanji.id, kanji.shortScore, kanji.longScore, kanji.lastCorrect)
     }
 
     fun getMinLastCorrect(): Int {

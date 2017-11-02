@@ -190,18 +190,18 @@ class QuizzActivity : AppCompatActivity() {
         showCurrentQuestion()
     }
 
-    private fun pickQuestion(db: KanjiDb, ids: List<Pair<Int, Double>>): Kanji {
-        val idsWithoutRecent = ids.filter { it.first !in lastQuestionsIds }
+    private fun pickQuestion(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>): Kanji {
+        val idsWithoutRecent = ids.filter { it.kanjiId !in lastQuestionsIds }
 
-        val totalWeight = idsWithoutRecent.map { it.second }.sum()
+        val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
         val questionPos = Math.random() * totalWeight
-        var questionId = idsWithoutRecent.last().first // take last, it is probably safer with float arithmetic
+        var questionId = idsWithoutRecent.last().kanjiId // take last, it is probably safer with float arithmetic
         run {
             var currentWeight = 0.0
-            for ((id, weight) in idsWithoutRecent) {
-                currentWeight += weight
+            for (kanjiData in idsWithoutRecent) {
+                currentWeight += kanjiData.finalProbability
                 if (currentWeight >= questionPos) {
-                    questionId = id
+                    questionId = kanjiData.kanjiId
                     break
                 }
             }
@@ -210,7 +210,7 @@ class QuizzActivity : AppCompatActivity() {
         return db.getKanji(questionId)
     }
 
-    private fun pickAnswers(db: KanjiDb, ids: List<Pair<Int, Double>>, currentQuestion: Kanji): List<Kanji> {
+    private fun pickAnswers(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
                 if (similarKanjiIds.size >= NB_ANSWERS - 1)
@@ -218,7 +218,7 @@ class QuizzActivity : AppCompatActivity() {
                 else
                     similarKanjiIds
 
-        val additionalAnswers = pickRandom(ids.map { it.first }, NB_ANSWERS - 1 - similarKanjis.size, setOf(currentQuestion.id) + similarKanjis)
+        val additionalAnswers = pickRandom(ids.map { it.kanjiId }, NB_ANSWERS - 1 - similarKanjis.size, setOf(currentQuestion.id) + similarKanjis)
 
         val currentAnswers = ((additionalAnswers + similarKanjis).map { db.getKanji(it) } + listOf(currentQuestion)).toMutableList()
         if (currentAnswers.size != NB_ANSWERS)
