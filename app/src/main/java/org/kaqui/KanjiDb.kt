@@ -121,10 +121,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     fun getEnabledIdsAndProbalities(): List<ProbabilityData> {
         val minLastCorrect = getMinLastCorrect()
+        val probaParams = getProbaParams(minLastCorrect)
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
             val ret = mutableListOf<ProbabilityData>()
             while (cursor.moveToNext()) {
-                ret.add(getProbabilityData(minLastCorrect, cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)))
+                ret.add(getProbabilityData(probaParams, cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)))
             }
             return ret
         }
@@ -134,12 +135,10 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     data class ProbabilityData(var kanjiId: Int, var shortScore: Double, var shortProbability: Double, var longScore: Double, var longProbability: Double, var daysSinceCorrect: Double, var finalProbability: Double)
 
-    private fun getProbabilityData(minLastCorrect: Int, kanjiId: Int, shortScore: Double, longScore: Double, lastCorrect: Long): ProbabilityData {
+    private fun getProbabilityData(probaParams: ProbaParams, kanjiId: Int, shortScore: Double, longScore: Double, lastCorrect: Long): ProbabilityData {
         val shortProbability = 1 - shortScore
         if (shortProbability !in 0..1)
             Log.wtf(TAG, "Invalid shortProbability: $shortProbability, shortScore: $shortScore")
-
-        val probaParams = getProbaParams(minLastCorrect)
 
         val now = Calendar.getInstance().timeInMillis / 1000
         val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
@@ -158,7 +157,9 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getProbabilityData(kanji: Kanji): ProbabilityData {
-        return getProbabilityData(getMinLastCorrect(), kanji.id, kanji.shortScore, kanji.longScore, kanji.lastCorrect)
+        val minLastCorrect = getMinLastCorrect()
+        val probaParams = getProbaParams(minLastCorrect)
+        return getProbabilityData(probaParams, kanji.id, kanji.shortScore, kanji.longScore, kanji.lastCorrect)
     }
 
     fun getMinLastCorrect(): Int {
