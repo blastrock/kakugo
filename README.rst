@@ -17,6 +17,7 @@ Features include:
 
 What makes it different from other apps:
 
+- a custom SRS formula that adapts to each person's level and learning pace
 - a "don't know" button which will make the question pop again soon without having to click on a random answer (which would make the answer pop again soon too)
 - a "maybe" button which will make the question more likely to appear soon if the answer is correct
 - a harsher penalty when the answer is wrong (you will need to get it right a lot of time for it to stop popping)
