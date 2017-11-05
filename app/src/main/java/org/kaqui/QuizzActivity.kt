@@ -58,7 +58,7 @@ class QuizzActivity : AppCompatActivity() {
 
         setContentView(R.layout.quizz_activity)
 
-        statsFragment = StatsFragment.newInstance()
+        statsFragment = StatsFragment.newInstance(null)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()

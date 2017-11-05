@@ -186,11 +186,22 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     data class Stats(val bad: Int, val meh: Int, val good: Int)
 
-    fun getStats(): Stats =
-            Stats(getCountForWeight(0.0f, BAD_WEIGHT), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT), getCountForWeight(GOOD_WEIGHT, 1.0f))
+    fun getStats(level: Int?): Stats =
+            Stats(getCountForWeight(0.0f, BAD_WEIGHT, level), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForWeight(GOOD_WEIGHT, 1.0f, level))
 
-    private fun getCountForWeight(from: Float, to: Float): Int {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), "enabled = 1 AND short_score BETWEEN ? AND ?", arrayOf(from.toString(), to.toString()), null, null, null).use { cursor ->
+    private fun getCountForWeight(from: Float, to: Float, level: Int?): Int {
+        val selection = "enabled = 1 AND short_score BETWEEN ? AND ?" +
+                if (level != null)
+                    " AND jlpt_level = ?"
+                else
+                    ""
+        val selectionArgsBase = arrayOf(from.toString(), to.toString())
+        val selectionArgs =
+                if (level != null)
+                    selectionArgsBase + level.toString()
+                else
+                    selectionArgsBase
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), selection, selectionArgs, null, null, null).use { cursor ->
             cursor.moveToNext()
             return cursor.getInt(0)
         }

@@ -33,7 +33,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        statsFragment = StatsFragment.newInstance()
+        statsFragment = StatsFragment.newInstance(null)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
@@ -74,7 +74,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
                 selectedCategory = null
                 invalidateOptionsMenu()
                 isSearching = true
-                showKanjiList()
+                showKanjiList(null)
                 return true
             }
 
@@ -114,11 +114,13 @@ class KanjiSelectionActivity : AppCompatActivity() {
     private fun showCategoryList() {
         jlpt_selection_list.visibility = View.VISIBLE
         kanji_list.visibility = View.GONE
+        statsFragment.setLevel(null)
     }
 
-    private fun showKanjiList() {
+    private fun showKanjiList(level: Int?) {
         jlpt_selection_list.visibility = View.GONE
         kanji_list.visibility = View.VISIBLE
+        statsFragment.setLevel(level)
     }
 
     private fun searchKanjiList(str: String) {
@@ -132,7 +134,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
         val item = l.adapter.getItem(position) as Map<String, Any>
         val level = item["level"] as Int
 
-        showKanjiList()
+        showKanjiList(level)
         listAdapter.showLevel(level)
         selectedCategory = level
         invalidateOptionsMenu()

@@ -9,8 +9,13 @@ import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.stats_fragment.*
 
 class StatsFragment : Fragment() {
+    private var level: Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (arguments != null && arguments.containsKey("level"))
+            level = arguments.getInt("level")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -25,9 +30,15 @@ class StatsFragment : Fragment() {
         updateStats()
     }
 
+    fun setLevel(l: Int?) {
+        level = l
+        if (context != null)
+            updateStats()
+    }
+
     fun updateStats() {
         val db = KanjiDb.getInstance(context)
-        val stats = db.getStats()
+        val stats = db.getStats(level)
         val total = stats.bad + stats.meh + stats.good
         bad_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.bad.toFloat() / total))
         meh_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.meh.toFloat() / total))
@@ -50,8 +61,10 @@ class StatsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(): StatsFragment {
+        fun newInstance(level: Int?): StatsFragment {
             val fragment = StatsFragment()
+            if (level != null)
+                fragment.arguments.putInt("level", level)
             return fragment
         }
     }
