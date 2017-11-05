@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
-import org.kaqui.GlobalStatsFragment
+import org.kaqui.StatsFragment
 import org.kaqui.KanjiDb
 import org.kaqui.R
 import android.support.v7.widget.LinearLayoutManager
@@ -21,7 +21,7 @@ import android.widget.*
 class KanjiSelectionActivity : AppCompatActivity() {
     private lateinit var db: KanjiDb
     private lateinit var listAdapter: KanjiSelectionAdapter
-    private lateinit var statsFragment: GlobalStatsFragment
+    private lateinit var statsFragment: StatsFragment
 
     private var isSearching = false
     private var selectedCategory: Int? = null
@@ -33,7 +33,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        statsFragment = GlobalStatsFragment.newInstance()
+        statsFragment = StatsFragment.newInstance()
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
@@ -97,13 +97,13 @@ class KanjiSelectionActivity : AppCompatActivity() {
             R.id.select_all -> {
                 db.setLevelEnabled(selectedCategory!!, true)
                 listAdapter.notifyDataSetChanged()
-                statsFragment.updateGlobalStats()
+                statsFragment.updateStats()
                 return true
             }
             R.id.select_none -> {
                 db.setLevelEnabled(selectedCategory!!, false)
                 listAdapter.notifyDataSetChanged()
-                statsFragment.updateGlobalStats()
+                statsFragment.updateStats()
                 return true
             }
             else ->

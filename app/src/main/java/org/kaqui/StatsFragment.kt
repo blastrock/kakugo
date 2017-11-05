@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.global_stats_fragment.*
+import kotlinx.android.synthetic.main.stats_fragment.*
 
-class GlobalStatsFragment : Fragment() {
+class StatsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -16,16 +16,16 @@ class GlobalStatsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.global_stats_fragment, container, false)
+        return inflater.inflate(R.layout.stats_fragment, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        updateGlobalStats()
+        updateStats()
     }
 
-    fun updateGlobalStats() {
+    fun updateStats() {
         val db = KanjiDb.getInstance(context)
         val stats = db.getStats()
         val total = stats.bad + stats.meh + stats.good
@@ -50,8 +50,8 @@ class GlobalStatsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(): GlobalStatsFragment {
-            val fragment = GlobalStatsFragment()
+        fun newInstance(): StatsFragment {
+            val fragment = StatsFragment()
             return fragment
         }
     }

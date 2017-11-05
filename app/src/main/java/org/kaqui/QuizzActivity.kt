@@ -37,7 +37,7 @@ class QuizzActivity : AppCompatActivity() {
         private const val MAX_HISTORY_SIZE = 40
     }
 
-    private lateinit var globalStatsFragment: GlobalStatsFragment
+    private lateinit var statsFragment: StatsFragment
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
 
@@ -58,9 +58,9 @@ class QuizzActivity : AppCompatActivity() {
 
         setContentView(R.layout.quizz_activity)
 
-        globalStatsFragment = GlobalStatsFragment.newInstance()
+        statsFragment = StatsFragment.newInstance()
         supportFragmentManager.beginTransaction()
-                .replace(R.id.global_stats, globalStatsFragment)
+                .replace(R.id.global_stats, statsFragment)
                 .commit()
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -235,9 +235,9 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun showCurrentQuestion() {
-        // when showNewQuestion is called in onCreate, globalStatsFragment is not visible yet
-        if (globalStatsFragment.isVisible)
-            globalStatsFragment.updateGlobalStats()
+        // when showNewQuestion is called in onCreate, statsFragment is not visible yet
+        if (statsFragment.isVisible)
+            statsFragment.updateStats()
         updateSessionScore()
 
         question_text.text = currentQuestion.getQuestionText(quizzType)

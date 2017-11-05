@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import org.kaqui.*
 
-class KanjiSelectionAdapter(private val context: Context, private val statsFragment: GlobalStatsFragment) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
+class KanjiSelectionAdapter(private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
     private val db = KanjiDb.getInstance(context)
     private var ids: List<Int> = listOf()
 
