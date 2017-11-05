@@ -40,15 +40,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
 
         db = KanjiDb.getInstance(this)
 
-        val itemList = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
-                mapOf("label" to "Additional kanjis", "level" to 0)
-        jlpt_selection_list.adapter = SimpleAdapter(
-                this,
-                itemList,
-                android.R.layout.simple_list_item_1,
-                arrayOf("label"),
-                intArrayOf(android.R.id.text1))
-
+        jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this)
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
 
         listAdapter = KanjiSelectionAdapter(this, statsFragment)
