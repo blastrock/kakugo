@@ -184,10 +184,10 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    data class Stats(val bad: Int, val meh: Int, val good: Int)
+    data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
 
     fun getStats(level: Int?): Stats =
-            Stats(getCountForWeight(0.0f, BAD_WEIGHT, level), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForWeight(GOOD_WEIGHT, 1.0f, level))
+            Stats(getCountForWeight(0.0f, BAD_WEIGHT, level), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForWeight(GOOD_WEIGHT, 1.0f, level), getDisabledCount(level))
 
     private fun getCountForWeight(from: Float, to: Float, level: Int?): Int {
         val selection = "enabled = 1 AND short_score BETWEEN ? AND ?" +
@@ -196,6 +196,24 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 else
                     ""
         val selectionArgsBase = arrayOf(from.toString(), to.toString())
+        val selectionArgs =
+                if (level != null)
+                    selectionArgsBase + level.toString()
+                else
+                    selectionArgsBase
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(id_kanji)"), selection, selectionArgs, null, null, null).use { cursor ->
+            cursor.moveToNext()
+            return cursor.getInt(0)
+        }
+    }
+
+    private fun getDisabledCount(level: Int?): Int {
+        val selection = "enabled = 0" +
+                if (level != null)
+                    " AND jlpt_level = ?"
+                else
+                    ""
+        val selectionArgsBase = arrayOf<String>()
         val selectionArgs =
                 if (level != null)
                     selectionArgsBase + level.toString()

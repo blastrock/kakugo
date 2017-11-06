@@ -20,6 +20,7 @@ class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.jlpt_level_item, parent, false)
         val textView = view.findViewById<TextView>(R.id.jlpt_level_label)
         textView.text = levels[position]["label"] as String
+        val disabledCount = view.findViewById<TextView>(R.id.disabled_count)
         val badCount = view.findViewById<TextView>(R.id.bad_count)
         val mehCount = view.findViewById<TextView>(R.id.meh_count)
         val goodCount = view.findViewById<TextView>(R.id.good_count)
@@ -27,7 +28,7 @@ class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
         statsLayout.elevation = 8.0f
         statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
         val db = KanjiDb.getInstance(context)
-        StatsFragment.updateStats(db.getStats(levels[position]["level"] as Int), badCount, mehCount, goodCount)
+        StatsFragment.updateStats(db.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view
     }
