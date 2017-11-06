@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import kotlinx.android.synthetic.main.stats_fragment.*
 
 class StatsFragment : Fragment() {
@@ -38,26 +39,7 @@ class StatsFragment : Fragment() {
 
     fun updateStats() {
         val db = KanjiDb.getInstance(context)
-        val stats = db.getStats(level)
-        val total = stats.bad + stats.meh + stats.good
-        bad_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.bad.toFloat() / total))
-        meh_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.meh.toFloat() / total))
-        good_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.good.toFloat() / total))
-        bad_count.text =
-                if (stats.bad > 0)
-                    stats.bad.toString()
-                else
-                    ""
-        meh_count.text =
-                if (stats.meh > 0)
-                    stats.meh.toString()
-                else
-                    ""
-        good_count.text =
-                if (stats.good > 0)
-                    stats.good.toString()
-                else
-                    ""
+        updateStats(db.getStats(level), bad_count, meh_count, good_count)
     }
 
     companion object {
@@ -66,6 +48,28 @@ class StatsFragment : Fragment() {
             if (level != null)
                 fragment.arguments.putInt("level", level)
             return fragment
+        }
+
+        fun updateStats(stats: KanjiDb.Stats, bad_count: TextView, meh_count: TextView, good_count: TextView) {
+            val total = stats.bad + stats.meh + stats.good
+            bad_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.bad.toFloat() / total))
+            meh_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.meh.toFloat() / total))
+            good_count.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, (stats.good.toFloat() / total))
+            bad_count.text =
+                    if (stats.bad > 0)
+                        stats.bad.toString()
+                    else
+                        ""
+            meh_count.text =
+                    if (stats.meh > 0)
+                        stats.meh.toString()
+                    else
+                        ""
+            good_count.text =
+                    if (stats.good > 0)
+                        stats.good.toString()
+                    else
+                        ""
         }
     }
 }

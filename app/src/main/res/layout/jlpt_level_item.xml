@@ -17,4 +17,11 @@
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
+    <include
+        layout="@layout/stats_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_weight="0" />
+
 </LinearLayout>
