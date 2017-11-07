@@ -9,9 +9,9 @@ import org.kaqui.KanjiDb
 import org.kaqui.R
 
 class KanjiSelectionViewHolder(private val db: KanjiDb, v: View, private val statsFragment: StatsFragment) : RecyclerView.ViewHolder(v) {
-    val enabled: CheckBox = v.findViewById<CheckBox>(R.id.kanji_item_checkbox)
-    val kanjiText: TextView = v.findViewById<TextView>(R.id.kanji_item_text)
-    val kanjiDescription: TextView = v.findViewById<TextView>(R.id.kanji_item_description)
+    val enabled: CheckBox = v.findViewById(R.id.kanji_item_checkbox)
+    val kanjiText: TextView = v.findViewById(R.id.kanji_item_text)
+    val kanjiDescription: TextView = v.findViewById(R.id.kanji_item_description)
     var kanji: String = ""
 
     init {

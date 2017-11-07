@@ -85,10 +85,7 @@ class QuizzActivity : AppCompatActivity() {
         }
 
         sheetBehavior = BottomSheetBehavior.from(history_scroll_view)
-        if (savedInstanceState?.getBoolean("playerOpen", false) ?: false)
-            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        else
-            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         history_action_button.setOnClickListener {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -114,7 +111,7 @@ class QuizzActivity : AppCompatActivity() {
         for (i in 0 until NB_ANSWERS) {
             val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, parentLayout, false)
 
-            answerTexts.add(answerLine.findViewById<TextView>(R.id.answer_text))
+            answerTexts.add(answerLine.findViewById(R.id.answer_text))
             answerLine.findViewById<View>(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
             answerLine.findViewById<View>(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
 

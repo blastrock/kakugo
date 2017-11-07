@@ -1,13 +1,13 @@
 package org.kaqui
 
 fun getKanjiDescription(kanji: Kanji) =
-        kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
-                kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ") + "\n" +
+        kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
+                kanji.readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading }) + "\n" +
                 kanji.meanings.joinToString(", ")
 
 fun getKanjiReadings(kanji: Kanji) =
-        kanji.readings.filter { it.readingType == "ja_on" }.map { it.reading }.joinToString(", ") + "\n" +
-                kanji.readings.filter { it.readingType == "ja_kun" }.map { it.reading }.joinToString(", ")
+        kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
+                kanji.readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading })
 
 fun getKanjiMeanings(kanji: Kanji) =
         kanji.meanings.joinToString(", ")

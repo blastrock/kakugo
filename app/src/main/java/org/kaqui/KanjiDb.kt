@@ -108,13 +108,13 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getKanjiId(kanji: Char): Int? {
+    private fun getKanjiId(kanji: Char): Int? {
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), "kanji = ?", arrayOf(kanji.toString()), null, null, null).use { cursor ->
-            if (cursor.count == 0)
-                return null
+            return if (cursor.count == 0)
+                null
             else {
                 cursor.moveToFirst()
-                return cursor.getInt(0)
+                cursor.getInt(0)
             }
         }
     }
@@ -168,7 +168,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return stage1
     }
 
-    fun getMinLastCorrect(): Int {
+    private fun getMinLastCorrect(): Int {
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("MIN(last_correct)"), "enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)

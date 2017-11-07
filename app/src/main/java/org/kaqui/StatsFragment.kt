@@ -39,7 +39,7 @@ class StatsFragment : Fragment() {
     }
 
     fun setShowDisabled(v: Boolean) {
-        showDisabled = v;
+        showDisabled = v
         if (context != null)
             updateStats()
     }
