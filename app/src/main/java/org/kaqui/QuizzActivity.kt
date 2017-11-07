@@ -37,7 +37,7 @@ class QuizzActivity : AppCompatActivity() {
         private const val MAX_HISTORY_SIZE = 40
     }
 
-    data class DebugData(var probabilityData: KanjiDb.ProbabilityData, var probaParams: KanjiDb.ProbaParams, var probaParams2: KanjiDb.ProbaParams2, var totalWeight: Double)
+    data class DebugData(var probabilityData: KanjiDb.ProbabilityData, var probaParamsStage1: KanjiDb.ProbaParamsStage1, var probaParamsStage2: KanjiDb.ProbaParamsStage2, var totalWeight: Double)
 
     private lateinit var statsFragment: StatsFragment
     private lateinit var answerTexts: List<TextView>
@@ -194,7 +194,7 @@ class QuizzActivity : AppCompatActivity() {
         val question = pickQuestion(db, ids)
         Log.v(TAG, "Selected question: $question")
         currentQuestion = question.kanji
-        currentDebugData = DebugData(question.probabilityData, debugParams.probaParams, debugParams.probaParams2, question.totalWeight)
+        currentDebugData = DebugData(question.probabilityData, debugParams.probaParamsStage1, debugParams.probaParamsStage2, question.totalWeight)
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
         addIdToLastQuestions(currentQuestion.id)
@@ -381,9 +381,9 @@ class QuizzActivity : AppCompatActivity() {
                         getString(R.string.debug_info,
                                 probabilityData.probabilityData.daysSinceCorrect,
                                 probabilityData.probabilityData.longScore,
-                                probabilityData.probabilityData.longProbability,
+                                probabilityData.probabilityData.longWeight,
                                 probabilityData.probabilityData.shortScore,
-                                probabilityData.probabilityData.shortProbability,
+                                probabilityData.probabilityData.shortWeight,
                                 probabilityData.probabilityData.finalProbability,
                                 probabilityData.totalWeight))
                 .show()
