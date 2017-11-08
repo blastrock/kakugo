@@ -18,8 +18,8 @@ android {
         applicationId "org.kaqui"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 19
-        versionName "1.6"
+        versionCode 20
+        versionName "1.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
