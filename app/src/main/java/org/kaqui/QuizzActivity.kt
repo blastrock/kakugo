@@ -37,7 +37,7 @@ class QuizzActivity : AppCompatActivity() {
         private const val MAX_HISTORY_SIZE = 40
     }
 
-    data class DebugData(var probabilityData: KanjiDb.ProbabilityData, var probaParamsStage1: KanjiDb.ProbaParamsStage1, var probaParamsStage2: KanjiDb.ProbaParamsStage2, var totalWeight: Double)
+    data class DebugData(var probabilityData: SrsCalculator.ProbabilityData, var probaParamsStage1: SrsCalculator.ProbaParamsStage1, var probaParamsStage2: SrsCalculator.ProbaParamsStage2, var totalWeight: Double)
 
     private lateinit var statsFragment: StatsFragment
     private lateinit var answerTexts: List<TextView>
@@ -182,7 +182,7 @@ class QuizzActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
 
-        val (ids, debugParams) = db.getEnabledIdsAndProbalities()
+        val (ids, debugParams) = SrsCalculator.fillProbalities(db.getEnabledKanjisAndScores(), db.getMinLastCorrect())
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return
@@ -199,9 +199,9 @@ class QuizzActivity : AppCompatActivity() {
         showCurrentQuestion()
     }
 
-    data class PickedQuestion(val kanji: Kanji, val probabilityData: KanjiDb.ProbabilityData, val totalWeight: Double)
+    data class PickedQuestion(val kanji: Kanji, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
-    private fun pickQuestion(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>): PickedQuestion {
+    private fun pickQuestion(db: KanjiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.kanjiId !in lastQuestionsIds }
 
         val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
@@ -224,7 +224,7 @@ class QuizzActivity : AppCompatActivity() {
         return PickedQuestion(db.getKanji(question.kanjiId), question, totalWeight)
     }
 
-    private fun pickAnswers(db: KanjiDb, ids: List<KanjiDb.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
+    private fun pickAnswers(db: KanjiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
         val similarKanjis =
                 if (similarKanjiIds.size >= NB_ANSWERS - 1)
@@ -278,21 +278,23 @@ class QuizzActivity : AppCompatActivity() {
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
         val db = KanjiDb.getInstance(this)
 
+        val minLastCorrect = db.getMinLastCorrect()
+
         if (certainty == Certainty.DONTKNOW) {
-            db.updateScores(currentQuestion.kanji, Certainty.DONTKNOW)
+            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
             addUnknownAnswerToHistory(currentQuestion, currentDebugData)
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
-            db.updateScores(currentQuestion.kanji, certainty)
+            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty))
             addGoodAnswerToHistory(currentQuestion, currentDebugData)
             correctCount += 1
         } else {
             // wrong
-            db.updateScores(currentQuestion.kanji, Certainty.DONTKNOW)
-            db.updateScores(currentAnswers[position].kanji, Certainty.DONTKNOW)
+            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
+            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW))
             addWrongAnswerToHistory(currentQuestion, currentDebugData, currentAnswers[position])
         }
 

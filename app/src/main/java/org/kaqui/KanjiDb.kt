@@ -119,56 +119,17 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    data class DebugParams(var probaParamsStage1: ProbaParamsStage1, var probaParamsStage2: ProbaParamsStage2)
-
-    fun getEnabledIdsAndProbalities(): Pair<List<ProbabilityData>, DebugParams> {
-        val minLastCorrect = getMinLastCorrect()
-        val probaParams = getProbaParamsStage1(minLastCorrect)
-        Log.v(TAG, "probaParamsStage1: $probaParams, minLastCorrect: $minLastCorrect")
-        val ret = readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
-            val ret = mutableListOf<ProbabilityData>()
+    fun getEnabledKanjisAndScores(): List<SrsCalculator.ProbabilityData> {
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji", "short_score", "long_score", "last_correct"), "enabled = 1", null, null, null, null).use { cursor ->
+            val ret = mutableListOf<SrsCalculator.ProbabilityData>()
             while (cursor.moveToNext()) {
-                ret.add(getProbabilityDataStage1(probaParams, cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2), cursor.getLong(3)))
+                ret.add(SrsCalculator.ProbabilityData(cursor.getInt(0), cursor.getDouble(1), 0.0, cursor.getDouble(2), 0.0, cursor.getLong(3), 0.0, 0.0))
             }
-            ret
+            return ret
         }
-        val (totalShortProba, totalLongProba) = ret.fold(Pair(0.0, 0.0), { acc, v ->
-            Pair(acc.first + v.shortWeight, acc.second + v.longWeight)
-        })
-        val countUnknown = ret.count { it.shortScore < 1.0 }
-        val probaParams2 = getProbaParamsStage2(countUnknown, totalShortProba, totalLongProba)
-        Log.v(TAG, "probaParamsStage2: $probaParams2, totalShortProba: $totalShortProba, totalLongProba: $totalLongProba, countUnknown: $countUnknown")
-        return Pair(ret.map { getProbabilityDataStage2(probaParams2, it) }, DebugParams(probaParams, probaParams2))
     }
 
-    private fun sigmoid(x: Double) = Math.exp(x) / (1 + Math.exp(x))
-
-    data class ProbabilityData(var kanjiId: Int, var shortScore: Double, var shortWeight: Double, var longScore: Double, var longWeight: Double, var daysSinceCorrect: Double, var finalProbability: Double)
-
-    private fun getProbabilityDataStage1(probaParams: ProbaParamsStage1, kanjiId: Int, shortScore: Double, longScore: Double, lastCorrect: Long): ProbabilityData {
-        val shortWeight = 1 - shortScore
-        if (shortWeight !in 0..1)
-            Log.wtf(TAG, "Invalid shortWeight: $shortWeight, shortScore: $shortScore")
-
-        val now = Calendar.getInstance().timeInMillis / 1000
-        val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
-
-        val sigmoidArg = (daysSinceCorrect - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * longScore) /
-                (probaParams.spreadBegin + (probaParams.spreadEnd - probaParams.spreadBegin) * longScore)
-        // cap it to avoid overflow on Math.exp in the sigmoid
-        val longWeight = sigmoid(Math.min(sigmoidArg, 10.0))
-        if (longWeight !in 0..1)
-            Log.wtf(TAG, "Invalid longWeight: $longWeight, lastCorrect: $lastCorrect, now: $now, longScore: $longScore, probaParamsStage1: $probaParams")
-
-        return ProbabilityData(kanjiId, shortScore, shortWeight, longScore, longWeight, daysSinceCorrect, 0.0)
-    }
-
-    private fun getProbabilityDataStage2(probaParams: ProbaParamsStage2, stage1: ProbabilityData): ProbabilityData {
-        stage1.finalProbability = probaParams.shortCoefficient * stage1.shortWeight + probaParams.longCoefficient * stage1.longWeight
-        return stage1
-    }
-
-    private fun getMinLastCorrect(): Int {
+    fun getMinLastCorrect(): Int {
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("MIN(last_correct)"), "enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)
@@ -180,6 +141,15 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             cursor.moveToFirst()
             return cursor.getInt(0)
         }
+    }
+
+    fun applyScoreUpdate(scoreUpdate: SrsCalculator.ScoreUpdate) {
+        val cv = ContentValues()
+        cv.put("short_score", scoreUpdate.shortScore)
+        cv.put("long_score", scoreUpdate.longScore)
+        if (scoreUpdate.lastCorrect != null)
+            cv.put("last_correct", scoreUpdate.lastCorrect)
+        writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(scoreUpdate.kanjiId.toString()))
     }
 
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
@@ -280,62 +250,6 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return ret
     }
 
-    fun updateScores(kanji: String, certainty: Certainty) {
-        val probaParams = getProbaParamsStage1(getMinLastCorrect())
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("short_score", "long_score", "last_correct"), "kanji = ?", arrayOf(kanji), null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            val previousShortScore = cursor.getDouble(0)
-            val targetScore = certaintyToWeight(certainty)
-
-            // short score reduces the distance by half to target score
-            var newShortScore = previousShortScore + (targetScore - previousShortScore) / 2
-            if (newShortScore !in 0..1) {
-                Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
-            }
-            if (newShortScore >= 0.92) {
-                newShortScore = 1.0
-            }
-
-            val previousLongScore = cursor.getDouble(1)
-            val now = Calendar.getInstance().timeInMillis / 1000
-            // if lastCorrect wasn't initialized, set it to now
-            val lastCorrect =
-                    if (cursor.getLong(2) > 0)
-                        cursor.getLong(2)
-                    else
-                        now
-            val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
-            // long score goes down by one half of the distance to the target score
-            // and it goes up by one half of that distance prorated by the time since the last
-            // correct answer
-            val newLongScore =
-                    when {
-                        previousLongScore < targetScore ->
-                            previousLongScore + ((targetScore - previousLongScore) / 2) *
-                                    Math.min(daysSinceCorrect / 2.0 /
-                                            (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)
-                        previousLongScore > targetScore ->
-                            previousLongScore - (-targetScore + previousLongScore) / 2
-                        else ->
-                            previousLongScore
-                    }
-            if (newLongScore !in 0..1) {
-                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceCorrect = $daysSinceCorrect, targetScore = $targetScore, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
-            }
-
-            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceCorrect: $daysSinceCorrect, probaParamsStage1: $probaParams")
-            Log.v(TAG, "Short score of $kanji going from $previousShortScore to $newShortScore")
-            Log.v(TAG, "Long score of $kanji going from $previousLongScore to $newLongScore")
-
-            val cv = ContentValues()
-            cv.put("short_score", newShortScore.toFloat())
-            cv.put("long_score", newLongScore.toFloat())
-            if (certainty != Certainty.DONTKNOW)
-                cv.put("last_correct", now)
-            writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
-        }
-    }
-
     fun setKanjiEnabled(kanji: String, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
@@ -400,16 +314,6 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    private fun certaintyToWeight(certainty: Certainty): Double =
-            when (certainty) {
-                Certainty.SURE -> 1.0
-                Certainty.MAYBE -> 0.7
-                Certainty.DONTKNOW -> 0.0
-            }
-
-    data class ProbaParamsStage1(val daysBegin: Double, val daysEnd: Double, val spreadBegin: Double, val spreadEnd: Double)
-    data class ProbaParamsStage2(val shortCoefficient: Double, val longCoefficient: Double)
-
     companion object {
         private const val TAG = "KanjiDb"
 
@@ -420,33 +324,6 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val READINGS_TABLE_NAME = "readings"
         private const val MEANINGS_TABLE_NAME = "meanings"
         private const val SIMILARITIES_TABLE_NAME = "similarities"
-
-        private const val MIN_PROBA_SHORT_UNKNOWN = 0.1
-        private const val MAX_PROBA_SHORT_UNKNOWN = 0.5
-        private const val MAX_COUNT_SHORT_UNKNOWN = 30
-
-        private fun getProbaParamsStage1(minLastCorrect: Int): ProbaParamsStage1 {
-            val now = Calendar.getInstance().timeInMillis / 1000
-
-            val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0
-            val spreadEnd = (daysEnd * 0.8) / 7.0
-
-            return ProbaParamsStage1(1.0, daysEnd, 1 / 7.0, spreadEnd)
-        }
-
-        private fun lerp(start: Double, end: Double, value: Double): Double = start + value * (end - start)
-
-        private fun getProbaParamsStage2(countUnknown: Int, totalShortProba: Double, totalLongProba: Double): ProbaParamsStage2 {
-            if (totalShortProba == 0.0 || totalLongProba == 0.0)
-                return ProbaParamsStage2(1.0, 1.0)
-
-            val neededShortProba = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, Math.min(countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
-            val neededLongProba = 1 - neededShortProba
-            val total = totalShortProba + totalLongProba
-            val shortCoefficient = neededShortProba * total / totalShortProba
-            val longCoefficient = neededLongProba * total / totalLongProba
-            return ProbaParamsStage2(shortCoefficient, longCoefficient)
-        }
 
         private var singleton: KanjiDb? = null
 
