@@ -123,7 +123,7 @@ class SrsCalculator {
             val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0
             val spreadEnd = (daysEnd * 0.8) / 7.0
 
-            return ProbaParamsStage1(1.0, daysEnd, 1 / 7.0, spreadEnd)
+            return ProbaParamsStage1(0.5, daysEnd, 0.5 / 7.0, spreadEnd)
         }
 
         private fun lerp(start: Double, end: Double, value: Double): Double = start + value * (end - start)
