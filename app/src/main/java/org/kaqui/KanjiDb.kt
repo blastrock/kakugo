@@ -149,7 +149,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         cv.put("long_score", scoreUpdate.longScore)
         if (scoreUpdate.lastCorrect != null)
             cv.put("last_correct", scoreUpdate.lastCorrect)
-        writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(scoreUpdate.kanjiId.toString()))
+        writableDatabase.update(KANJIS_TABLE_NAME, cv, "id_kanji = ?", arrayOf(scoreUpdate.kanjiId.toString()))
     }
 
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
