@@ -383,6 +383,8 @@ class QuizzActivity : AppCompatActivity() {
                                 probabilityData.probabilityData.longWeight,
                                 probabilityData.probabilityData.shortScore,
                                 probabilityData.probabilityData.shortWeight,
+                                probabilityData.probaParamsStage2.shortCoefficient,
+                                probabilityData.probaParamsStage2.longCoefficient,
                                 probabilityData.probabilityData.finalProbability,
                                 probabilityData.totalWeight))
                 .show()
