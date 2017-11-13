@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import org.kaqui.data.Hiraganas
 
 class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -14,16 +15,6 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER NOT NULL,"
-                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
-                        + "enabled INTEGER NOT NULL DEFAULT 1"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $HIRAGANAS_TABLE_NAME ("
-                        + "id_hiragana INTEGER PRIMARY KEY,"
-                        + "hiragana TEXT NOT NULL UNIQUE,"
-                        + "romaji TEXT NOT NULL,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
@@ -48,6 +39,29 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "similar_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji)"
                         + ")")
+
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $HIRAGANAS_TABLE_NAME ("
+                        + "id_hiragana INTEGER PRIMARY KEY,"
+                        + "hiragana TEXT NOT NULL UNIQUE,"
+                        + "romaji TEXT NOT NULL,"
+                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
+                        + "enabled INTEGER NOT NULL DEFAULT 1"
+                        + ")")
+        val hiraganaCount = database.query(HIRAGANAS_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use {
+            it.moveToFirst()
+            it.getInt(0)
+        }
+        if (hiraganaCount == 0) {
+            for (hiragana in Hiraganas) {
+                val cv = ContentValues()
+                cv.put("hiragana", hiragana.kana)
+                cv.put("romaji", hiragana.romaji)
+                database.insertOrThrow(HIRAGANAS_TABLE_NAME, null, cv)
+            }
+        }
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -65,6 +79,9 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                             + "SELECT id_kanji, kanji, jlpt_level, weight, enabled FROM tmptable")
             database.execSQL("DROP TABLE tmptable")
             return
+        }
+        if (oldVersion < 5) {
+            onCreate(database)
         }
     }
 
@@ -226,7 +243,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KanjiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 4
+        private const val DATABASE_VERSION = 5
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
 
