@@ -3,21 +3,6 @@ package org.kaqui
 import org.kaqui.data.getJlptLevels
 import java.io.BufferedReader
 
-data class Kanji(
-        var id: Int,
-        var kanji: String,
-        var readings: List<Reading>,
-        var meanings: List<String>,
-        var similarities: List<Kanji>,
-        var jlptLevel: Int,
-        var shortScore: Double,
-        var longScore: Double,
-        var lastCorrect: Long,
-        var enabled: Boolean
-)
-
-data class Reading(var readingType: String, var reading: String)
-
 private enum class PartType {
     Unknown,
     Kanji,
