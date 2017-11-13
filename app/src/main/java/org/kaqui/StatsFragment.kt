@@ -46,7 +46,7 @@ class StatsFragment : Fragment() {
 
     fun updateStats() {
         val db = KanjiDb.getInstance(context)
-        updateStats(db.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
     }
 
     companion object {
@@ -57,7 +57,7 @@ class StatsFragment : Fragment() {
             return fragment
         }
 
-        fun updateStats(stats: KanjiDb.Stats, disabled_count: TextView, bad_count: TextView, meh_count: TextView, good_count: TextView, showDisabled: Boolean = false) {
+        fun updateStats(stats: LearningDbView.Stats, disabled_count: TextView, bad_count: TextView, meh_count: TextView, good_count: TextView, showDisabled: Boolean = false) {
             val disabledCount =
                     if (showDisabled)
                         stats.disabled

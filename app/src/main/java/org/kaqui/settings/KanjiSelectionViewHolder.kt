@@ -16,7 +16,7 @@ class KanjiSelectionViewHolder(private val db: KanjiDb, v: View, private val sta
 
     init {
         enabled.setOnCheckedChangeListener { _, isChecked ->
-            db.setKanjiEnabled(kanjiId, isChecked)
+            db.kanjiView.setItemEnabled(kanjiId, isChecked)
             statsFragment.updateStats()
         }
     }

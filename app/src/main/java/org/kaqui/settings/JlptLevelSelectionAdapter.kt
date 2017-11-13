@@ -28,7 +28,7 @@ class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
         statsLayout.elevation = 8.0f
         statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
         val db = KanjiDb.getInstance(context)
-        StatsFragment.updateStats(db.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
+        StatsFragment.updateStats(db.kanjiView.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view
     }

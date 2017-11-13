@@ -5,14 +5,14 @@ import java.util.*
 
 class SrsCalculator {
 
-    data class ProbabilityData(var kanjiId: Int, var shortScore: Double, var shortWeight: Double, var longScore: Double, var longWeight: Double, var lastCorrect: Long, var daysSinceCorrect: Double, var finalProbability: Double)
+    data class ProbabilityData(var itemId: Int, var shortScore: Double, var shortWeight: Double, var longScore: Double, var longWeight: Double, var lastCorrect: Long, var daysSinceCorrect: Double, var finalProbability: Double)
 
     data class ProbaParamsStage1(val daysBegin: Double, val daysEnd: Double, val spreadBegin: Double, val spreadEnd: Double)
     data class ProbaParamsStage2(val shortCoefficient: Double, val longCoefficient: Double)
 
     data class DebugParams(var probaParamsStage1: ProbaParamsStage1, var probaParamsStage2: ProbaParamsStage2)
 
-    data class ScoreUpdate(val kanjiId: Int, val shortScore: Float, val longScore: Float, val lastCorrect: Long?)
+    data class ScoreUpdate(val itemId: Int, val shortScore: Float, val longScore: Float, val lastCorrect: Long?)
 
     companion object {
         private const val TAG = "SrsCalculator"

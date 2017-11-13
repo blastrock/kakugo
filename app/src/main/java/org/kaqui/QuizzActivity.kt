@@ -181,8 +181,9 @@ class QuizzActivity : AppCompatActivity() {
 
     private fun showNewQuestion() {
         val db = KanjiDb.getInstance(this)
+        val itemView = db.kanjiView
 
-        val (ids, debugParams) = SrsCalculator.fillProbalities(db.getEnabledKanjisAndScores(), db.getMinLastCorrect())
+        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getMinLastCorrect())
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
             return
@@ -202,7 +203,7 @@ class QuizzActivity : AppCompatActivity() {
     data class PickedQuestion(val kanji: Kanji, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
     private fun pickQuestion(db: KanjiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
-        val idsWithoutRecent = ids.filter { it.kanjiId !in lastQuestionsIds }
+        val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
 
         val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
         val questionPos = Math.random() * totalWeight
@@ -221,18 +222,18 @@ class QuizzActivity : AppCompatActivity() {
                 Log.v(TAG, "Couldn't pick a question")
         }
 
-        return PickedQuestion(db.getKanji(question.kanjiId), question, totalWeight)
+        return PickedQuestion(db.getKanji(question.itemId), question, totalWeight)
     }
 
     private fun pickAnswers(db: KanjiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
-        val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.isKanjiEnabled(it) }
+        val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.kanjiView.isItemEnabled(it) }
         val similarKanjis =
                 if (similarKanjiIds.size >= NB_ANSWERS - 1)
                     pickRandom(similarKanjiIds, NB_ANSWERS - 1)
                 else
                     similarKanjiIds
 
-        val additionalAnswers = pickRandom(ids.map { it.kanjiId }, NB_ANSWERS - 1 - similarKanjis.size, setOf(currentQuestion.id) + similarKanjis)
+        val additionalAnswers = pickRandom(ids.map { it.itemId }, NB_ANSWERS - 1 - similarKanjis.size, setOf(currentQuestion.id) + similarKanjis)
 
         val currentAnswers = ((additionalAnswers + similarKanjis).map { db.getKanji(it) } + listOf(currentQuestion)).toMutableList()
         if (currentAnswers.size != NB_ANSWERS)
@@ -276,25 +277,25 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        val db = KanjiDb.getInstance(this)
+        val dbView = KanjiDb.getInstance(this).kanjiView
 
-        val minLastCorrect = db.getMinLastCorrect()
+        val minLastCorrect = dbView.getMinLastCorrect()
 
         if (certainty == Certainty.DONTKNOW) {
-            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
+            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
             addUnknownAnswerToHistory(currentQuestion, currentDebugData)
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
-            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty))
+            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty))
             addGoodAnswerToHistory(currentQuestion, currentDebugData)
             correctCount += 1
         } else {
             // wrong
-            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
-            db.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW))
+            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
+            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW))
             addWrongAnswerToHistory(currentQuestion, currentDebugData, currentAnswers[position])
         }
 

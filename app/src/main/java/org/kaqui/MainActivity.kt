@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
         return {
             val db = KanjiDb.getInstance(this)
-            if (db.getEnabledCount() < 10) {
+            if (db.kanjiView.getEnabledCount() < 10) {
                 Toast.makeText(this, "You must enable at least 10 kanjis in settings", Toast.LENGTH_LONG).show()
             } else {
                 val intent = Intent(this, QuizzActivity::class.java)
