@@ -22,6 +22,16 @@ data class Kanji(
 
 data class Reading(var readingType: String, var reading: String)
 
+data class Kana(
+        var id: Int,
+        var kana: String,
+        var romaji: String,
+        var shortScore: Double,
+        var longScore: Double,
+        var lastCorrect: Long,
+        var enabled: Boolean
+)
+
 class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(database: SQLiteDatabase) {
@@ -161,6 +171,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     val kanjiView: LearningDbView
             get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id_kanji")
+    val hiraganaView: LearningDbView
+        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_hiragana")
 
     fun search(text: String): List<Int> {
         readableDatabase.rawQuery(
@@ -176,6 +188,22 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             }
             return ret
         }
+    }
+
+    fun getHiragana(id: Int): Kana {
+        val ret = Kana(id, "", "", 0.0, 0.0, 0, false)
+        readableDatabase.query(HIRAGANAS_TABLE_NAME, arrayOf("hiragana", "romaji", "short_score", "long_score", "last_correct", "enabled"), "id_hiragana = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+            if (cursor.count == 0)
+                throw RuntimeException("Can't find hiragana with id " + id)
+            cursor.moveToFirst()
+            ret.kana = cursor.getString(0)
+            ret.romaji = cursor.getString(1)
+            ret.shortScore = cursor.getDouble(2)
+            ret.longScore = cursor.getDouble(3)
+            ret.lastCorrect = cursor.getLong(4)
+            ret.enabled = cursor.getInt(5) != 0
+        }
+        return ret
     }
 
     fun getKanji(id: Int): Kanji {
@@ -282,6 +310,22 @@ class LearningDbView(
         private val writableDatabase: SQLiteDatabase,
         private val tableName: String,
         private val idColumnName: String) {
+
+    fun getAllItems(): List<Int> {
+        val ret = mutableListOf<Int>()
+        readableDatabase.query(tableName, arrayOf(idColumnName), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+        }
+        return ret
+    }
+
+    fun setAllEnabled(enabled: Boolean) {
+        val cv = ContentValues()
+        cv.put("enabled", if (enabled) 1 else 0)
+        writableDatabase.update(tableName, cv, null, null)
+    }
 
     fun getItemsForLevel(level: Int): List<Int> {
         val ret = mutableListOf<Int>()

@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import org.kaqui.settings.KanaSelectionActivity
 import org.kaqui.settings.KanjiSelectionActivity
 import java.net.HttpURLConnection
 import java.net.URL
@@ -33,7 +34,10 @@ class MainActivity : AppCompatActivity() {
         start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_MEANING)))
         start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_KANJI)))
 
-        settings_button.setOnClickListener {
+        hiragana_selection_button.setOnClickListener {
+            startActivity(Intent(this, KanaSelectionActivity::class.java))
+        }
+        kanji_selection_button.setOnClickListener {
             startActivity(Intent(this, KanjiSelectionActivity::class.java))
         }
         download_kanjidic_button.setOnClickListener {
@@ -66,13 +70,13 @@ class MainActivity : AppCompatActivity() {
             start_reading_kanji_quizz.isEnabled = false
             start_kanji_meaning_quizz.isEnabled = false
             start_meaning_kanji_quizz.isEnabled = false
-            settings_button.isEnabled = false
+            kanji_selection_button.isEnabled = false
         } else {
             start_kanji_reading_quizz.isEnabled = true
             start_reading_kanji_quizz.isEnabled = true
             start_kanji_meaning_quizz.isEnabled = true
             start_meaning_kanji_quizz.isEnabled = true
-            settings_button.isEnabled = true
+            kanji_selection_button.isEnabled = true
         }
     }
 

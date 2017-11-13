@@ -26,6 +26,9 @@
         <activity
             android:name=".settings.KanjiSelectionActivity"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".settings.KanaSelectionActivity"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>

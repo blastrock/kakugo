@@ -48,11 +48,18 @@
             android:text="@string/meaning_kanji_quizz" />
 
         <Button
-            android:id="@+id/settings_button"
+            android:id="@+id/hiragana_selection_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="@string/settings" />
+            android:text="@string/hiragana_selection" />
+
+        <Button
+            android:id="@+id/kanji_selection_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/kanji_selection" />
 
         <Button
             android:id="@+id/download_kanjidic_button"

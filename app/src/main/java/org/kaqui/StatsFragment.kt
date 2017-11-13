@@ -10,6 +10,7 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.stats_fragment.*
 
 class StatsFragment : Fragment() {
+    private var hiraganas: Boolean = false
     private var level: Int? = null
     private var showDisabled: Boolean = false
 
@@ -32,6 +33,12 @@ class StatsFragment : Fragment() {
         updateStats()
     }
 
+    fun setHiraganaMode(h: Boolean) {
+        hiraganas = h
+        if (context != null)
+            updateStats()
+    }
+
     fun setLevel(l: Int?) {
         level = l
         if (context != null)
@@ -46,7 +53,10 @@ class StatsFragment : Fragment() {
 
     fun updateStats() {
         val db = KaquiDb.getInstance(context)
-        updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        if (hiraganas)
+            updateStats(db.hiraganaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        else
+            updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
     }
 
     companion object {
