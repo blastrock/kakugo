@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import org.kaqui.*
 
-class KanjiSelectionAdapter(private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<KanjiSelectionViewHolder>() {
+class KanjiSelectionAdapter(private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
     private val db = KanjiDb.getInstance(context)
     private var ids: List<Int> = listOf()
 
@@ -22,29 +22,23 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
     }
 
     fun showLevel(level: Int) {
-        ids = db.getKanjisForJlptLevel(level)
+        ids = db.kanjiView.getItemsForLevel(level)
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int = ids.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KanjiSelectionViewHolder {
-        return KanjiSelectionViewHolder(db, LayoutInflater.from(parent.context).inflate(R.layout.kanji_item, parent, false), statsFragment)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemSelectionViewHolder {
+        return ItemSelectionViewHolder(db.kanjiView, LayoutInflater.from(parent.context).inflate(R.layout.selection_item, parent, false), statsFragment)
     }
 
-    override fun onBindViewHolder(holder: KanjiSelectionViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ItemSelectionViewHolder, position: Int) {
         val kanji = db.getKanji(ids[position])
-        holder.kanjiId = kanji.id
+        holder.itemId = kanji.id
         holder.enabled.isChecked = kanji.enabled
-        holder.kanjiText.text = kanji.kanji
-        val background =
-                when (kanji.shortScore) {
-                    in 0.0f..BAD_WEIGHT -> R.drawable.round_red
-                    in BAD_WEIGHT..GOOD_WEIGHT -> R.drawable.round_yellow
-                    in GOOD_WEIGHT..1.0f -> R.drawable.round_green
-                    else -> R.drawable.round_red
-                }
-        holder.kanjiText.background = ContextCompat.getDrawable(context, background)
-        holder.kanjiDescription.text = getKanjiDescription(kanji)
+        holder.itemText.text = kanji.kanji
+        val background = getBackgroundFromScore(kanji.shortScore)
+        holder.itemText.background = ContextCompat.getDrawable(context, background)
+        holder.itemDescription.text = getKanjiDescription(kanji)
     }
 }

@@ -35,7 +35,7 @@
     </LinearLayout>
 
     <View
-        android:id="@+id/kanji_item_separator"
+        android:id="@+id/item_separator"
         style="@style/Separator" />
 
 </LinearLayout>

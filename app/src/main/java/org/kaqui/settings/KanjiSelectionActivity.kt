@@ -17,7 +17,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.widget.*
 
-
 class KanjiSelectionActivity : AppCompatActivity() {
     private lateinit var db: KanjiDb
     private lateinit var listAdapter: KanjiSelectionAdapter
@@ -96,13 +95,13 @@ class KanjiSelectionActivity : AppCompatActivity() {
                 return true
             }
             R.id.select_all -> {
-                db.setLevelEnabled(selectedCategory!!, true)
+                db.kanjiView.setLevelEnabled(selectedCategory!!, true)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
                 return true
             }
             R.id.select_none -> {
-                db.setLevelEnabled(selectedCategory!!, false)
+                db.kanjiView.setLevelEnabled(selectedCategory!!, false)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
                 return true

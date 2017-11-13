@@ -337,12 +337,12 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun makeHistoryLine(kanji: Kanji, probabilityData: DebugData?, style: Int?, withSeparator: Boolean = true): View {
-        val line = LayoutInflater.from(this).inflate(R.layout.kanji_item, history_view, false)
+        val line = LayoutInflater.from(this).inflate(R.layout.selection_item, history_view, false)
 
-        val checkbox = line.findViewById<View>(R.id.kanji_item_checkbox)
+        val checkbox = line.findViewById<View>(R.id.item_checkbox)
         checkbox.visibility = View.GONE
 
-        val kanjiView = line.findViewById<TextView>(R.id.kanji_item_text)
+        val kanjiView = line.findViewById<TextView>(R.id.item_text)
         kanjiView.text = kanji.kanji
         if (style != null)
             kanjiView.background = ContextCompat.getDrawable(this, style)
@@ -363,12 +363,12 @@ class QuizzActivity : AppCompatActivity() {
             true
         }
 
-        val detailView = line.findViewById<TextView>(R.id.kanji_item_description)
+        val detailView = line.findViewById<TextView>(R.id.item_description)
         val detail = getKanjiDescription(kanji)
         detailView.text = detail
 
         if (!withSeparator) {
-            line.findViewById<View>(R.id.kanji_item_separator).visibility = View.GONE
+            line.findViewById<View>(R.id.item_separator).visibility = View.GONE
         }
 
         return line

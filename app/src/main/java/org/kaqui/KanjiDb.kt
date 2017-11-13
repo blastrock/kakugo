@@ -167,22 +167,6 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return ret
     }
 
-    fun getKanjisForJlptLevel(level: Int): List<Int> {
-        val ret = mutableListOf<Int>()
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id_kanji"), "jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
-            while (cursor.moveToNext()) {
-                ret.add(cursor.getInt(0))
-            }
-        }
-        return ret
-    }
-
-    fun setLevelEnabled(level: Int, enabled: Boolean) {
-        val cv = ContentValues()
-        cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(KANJIS_TABLE_NAME, cv, "jlpt_level = ?", arrayOf(level.toString()))
-    }
-
     fun setSelection(kanjis: String) {
         writableDatabase.beginTransaction()
         try {
@@ -255,10 +239,26 @@ class LearningDbView(
         private val tableName: String,
         private val idColumnName: String) {
 
+    fun getItemsForLevel(level: Int): List<Int> {
+        val ret = mutableListOf<Int>()
+        readableDatabase.query(tableName, arrayOf(idColumnName), "jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+        }
+        return ret
+    }
+
     fun setItemEnabled(itemId: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
         writableDatabase.update(tableName, cv, idColumnName + " = ?", arrayOf(itemId.toString()))
+    }
+
+    fun setLevelEnabled(level: Int, enabled: Boolean) {
+        val cv = ContentValues()
+        cv.put("enabled", if (enabled) 1 else 0)
+        writableDatabase.update(tableName, cv, "jlpt_level = ?", arrayOf(level.toString()))
     }
 
     fun isItemEnabled(id: Int): Boolean {
