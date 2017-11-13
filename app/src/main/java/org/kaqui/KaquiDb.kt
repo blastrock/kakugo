@@ -7,31 +7,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.kaqui.data.Hiraganas
 
-data class Kanji(
-        var id: Int,
-        var kanji: String,
-        var readings: List<Reading>,
-        var meanings: List<String>,
-        var similarities: List<Kanji>,
-        var jlptLevel: Int,
-        var shortScore: Double,
-        var longScore: Double,
-        var lastCorrect: Long,
-        var enabled: Boolean
-)
-
-data class Reading(var readingType: String, var reading: String)
-
-data class Kana(
-        var id: Int,
-        var kana: String,
-        var romaji: String,
-        var shortScore: Double,
-        var longScore: Double,
-        var lastCorrect: Long,
-        var enabled: Boolean
-)
-
 class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(database: SQLiteDatabase) {
