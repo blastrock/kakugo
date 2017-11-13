@@ -34,7 +34,7 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
 
     override fun onBindViewHolder(holder: KanjiSelectionViewHolder, position: Int) {
         val kanji = db.getKanji(ids[position])
-        holder.kanji = kanji.kanji
+        holder.kanjiId = kanji.id
         holder.enabled.isChecked = kanji.enabled
         holder.kanjiText.text = kanji.kanji
         val background =

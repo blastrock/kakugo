@@ -12,11 +12,11 @@ class KanjiSelectionViewHolder(private val db: KanjiDb, v: View, private val sta
     val enabled: CheckBox = v.findViewById(R.id.kanji_item_checkbox)
     val kanjiText: TextView = v.findViewById(R.id.kanji_item_text)
     val kanjiDescription: TextView = v.findViewById(R.id.kanji_item_description)
-    var kanji: String = ""
+    var kanjiId: Int = 0
 
     init {
         enabled.setOnCheckedChangeListener { _, isChecked ->
-            db.setKanjiEnabled(kanji, isChecked)
+            db.setKanjiEnabled(kanjiId, isChecked)
             statsFragment.updateStats()
         }
     }

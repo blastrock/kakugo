@@ -250,10 +250,10 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return ret
     }
 
-    fun setKanjiEnabled(kanji: String, enabled: Boolean) {
+    fun setKanjiEnabled(kanjiId: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji))
+        writableDatabase.update(KANJIS_TABLE_NAME, cv, "id_kanji = ?", arrayOf(kanjiId.toString()))
     }
 
     fun setLevelEnabled(level: Int, enabled: Boolean) {
