@@ -28,9 +28,8 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
 
     override fun getItemCount(): Int = ids.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemSelectionViewHolder {
-        return ItemSelectionViewHolder(db.kanjiView, LayoutInflater.from(parent.context).inflate(R.layout.selection_item, parent, false), statsFragment)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            ItemSelectionViewHolder(db.kanjiView, LayoutInflater.from(parent.context).inflate(R.layout.selection_item, parent, false), statsFragment)
 
     override fun onBindViewHolder(holder: ItemSelectionViewHolder, position: Int) {
         val kanji = db.getKanji(ids[position])
