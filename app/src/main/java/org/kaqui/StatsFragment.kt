@@ -45,7 +45,7 @@ class StatsFragment : Fragment() {
     }
 
     fun updateStats() {
-        val db = KanjiDb.getInstance(context)
+        val db = KaquiDb.getInstance(context)
         updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
     }
 

@@ -11,14 +11,14 @@ import android.util.Log
 import android.view.*
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import org.kaqui.StatsFragment
-import org.kaqui.KanjiDb
+import org.kaqui.KaquiDb
 import org.kaqui.R
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.widget.*
 
 class KanjiSelectionActivity : AppCompatActivity() {
-    private lateinit var db: KanjiDb
+    private lateinit var db: KaquiDb
     private lateinit var listAdapter: KanjiSelectionAdapter
     private lateinit var statsFragment: StatsFragment
 
@@ -38,7 +38,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
 
-        db = KanjiDb.getInstance(this)
+        db = KaquiDb.getInstance(this)
 
         jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this)
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.kaqui.data.Hiraganas
 
-class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
@@ -240,7 +240,7 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     companion object {
-        private const val TAG = "KanjiDb"
+        private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
         private const val DATABASE_VERSION = 5
@@ -252,11 +252,11 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val MEANINGS_TABLE_NAME = "meanings"
         private const val SIMILARITIES_TABLE_NAME = "similarities"
 
-        private var singleton: KanjiDb? = null
+        private var singleton: KaquiDb? = null
 
-        fun getInstance(context: Context): KanjiDb {
+        fun getInstance(context: Context): KaquiDb {
             if (singleton == null)
-                singleton = KanjiDb(context)
+                singleton = KaquiDb(context)
             return singleton!!
         }
     }

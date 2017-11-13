@@ -96,7 +96,7 @@ class QuizzActivity : AppCompatActivity() {
         if (savedInstanceState == null)
             showNewQuestion()
         else {
-            val db = KanjiDb.getInstance(this)
+            val db = KaquiDb.getInstance(this)
             currentQuestion = db.getKanji(savedInstanceState.getInt("question"))
             currentAnswers = savedInstanceState.getIntArray("answers").map { db.getKanji(it) }
             correctCount = savedInstanceState.getInt("correctCount")
@@ -180,7 +180,7 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun showNewQuestion() {
-        val db = KanjiDb.getInstance(this)
+        val db = KaquiDb.getInstance(this)
         val itemView = db.kanjiView
 
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getMinLastCorrect())
@@ -202,7 +202,7 @@ class QuizzActivity : AppCompatActivity() {
 
     data class PickedQuestion(val kanji: Kanji, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
-    private fun pickQuestion(db: KanjiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
+    private fun pickQuestion(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
 
         val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
@@ -225,7 +225,7 @@ class QuizzActivity : AppCompatActivity() {
         return PickedQuestion(db.getKanji(question.itemId), question, totalWeight)
     }
 
-    private fun pickAnswers(db: KanjiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
+    private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.kanjiView.isItemEnabled(it) }
         val similarKanjis =
                 if (similarKanjiIds.size >= NB_ANSWERS - 1)
@@ -277,7 +277,7 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        val dbView = KanjiDb.getInstance(this).kanjiView
+        val dbView = KaquiDb.getInstance(this).kanjiView
 
         val minLastCorrect = dbView.getMinLastCorrect()
 
@@ -444,7 +444,7 @@ class QuizzActivity : AppCompatActivity() {
         history.clear()
         history_view.removeAllViews()
 
-        val db = KanjiDb.getInstance(this)
+        val db = KaquiDb.getInstance(this)
 
         val count = parcel.readInt()
         repeat(count, {

@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
         return {
-            val db = KanjiDb.getInstance(this)
+            val db = KaquiDb.getInstance(this)
             if (db.kanjiView.getEnabledCount() < 10) {
                 Toast.makeText(this, "You must enable at least 10 kanjis in settings", Toast.LENGTH_LONG).show()
             } else {
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateButtonStatuses() {
-        val db = KanjiDb.getInstance(this)
+        val db = KaquiDb.getInstance(this)
         if (db.empty) {
             start_kanji_reading_quizz.isEnabled = false
             start_reading_kanji_quizz.isEnabled = false
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
             urlConnection.inputStream.use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
-                    val db = KanjiDb.getInstance(this)
+                    val db = KaquiDb.getInstance(this)
                     val dump = db.dumpUserData()
                     db.replaceKanjis(parseFile(textStream.bufferedReader()))
                     db.restoreUserDataDump(dump)

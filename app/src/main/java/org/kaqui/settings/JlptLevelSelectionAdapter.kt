@@ -8,7 +8,7 @@ import android.view.ViewOutlineProvider
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
-import org.kaqui.KanjiDb
+import org.kaqui.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
 
@@ -27,7 +27,7 @@ class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
         val statsLayout = view.findViewById<LinearLayout>(R.id.stats_layout)
         statsLayout.elevation = 8.0f
         statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
-        val db = KanjiDb.getInstance(context)
+        val db = KaquiDb.getInstance(context)
         StatsFragment.updateStats(db.kanjiView.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view

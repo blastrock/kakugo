@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import org.kaqui.*
 
 class KanjiSelectionAdapter(private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
-    private val db = KanjiDb.getInstance(context)
+    private val db = KaquiDb.getInstance(context)
     private var ids: List<Int> = listOf()
 
     fun searchFor(text: String) {
