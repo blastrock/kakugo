@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.data
 
 fun getJlptLevels() = mapOf(
         5 to "一七万三上下中九二五人今休何先入八六円出分前北十千午半南友右名四国土外大天女子学小山川左年後日時書月木本来東校母毎気水火父生男白百聞行西見話語読車金長間雨電食高",

@@ -1,5 +1,6 @@
 package org.kaqui
 
+import org.kaqui.data.getJlptLevels
 import java.io.BufferedReader
 
 data class Kanji(

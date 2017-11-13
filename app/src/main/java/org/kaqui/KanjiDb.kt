@@ -20,6 +20,16 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $HIRAGANAS_TABLE_NAME ("
+                        + "id_hiragana INTEGER PRIMARY KEY,"
+                        + "hiragana TEXT NOT NULL UNIQUE,"
+                        + "romaji TEXT NOT NULL,"
+                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
+                        + "enabled INTEGER NOT NULL DEFAULT 1"
+                        + ")")
+        database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $READINGS_TABLE_NAME ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
@@ -217,6 +227,8 @@ class KanjiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
         private const val DATABASE_NAME = "kanjis"
         private const val DATABASE_VERSION = 4
+
+        private const val HIRAGANAS_TABLE_NAME = "hiraganas"
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val READINGS_TABLE_NAME = "readings"
