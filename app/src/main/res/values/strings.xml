@@ -6,6 +6,8 @@
     <string name="select_none">Select none</string>
     <string name="import_selection">Import kanji selection</string>
     <string name="download_database">Download Kanji database</string>
+    <string name="hiragana_romaji_quizz">Hiragana to romaji (ひ→hi)</string>
+    <string name="romaji_hiragana_quizz">Romaji to hiragana (hi→ひ)</string>
     <string name="kanji_reading_quizz">Kanji to reading (日→ひ)</string>
     <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
     <string name="kanji_meaning_quizz">Kanji to meaning quizz (日→day)</string>

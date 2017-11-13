@@ -35,6 +35,8 @@ fun getKanjiMeanings(kanji: Kanji) =
 
 fun Item.getQuestionText(quizzType: QuizzType): String =
         when (quizzType) {
+            QuizzType.HIRAGANA_TO_ROMAJI -> (this.contents as Kana).kana
+            QuizzType.ROMAJI_TO_HIRAGANA -> (this.contents as Kana).romaji
             QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> (this.contents as Kanji).kanji
             QuizzType.READING_TO_KANJI -> getKanjiReadings(this.contents as Kanji)
             QuizzType.MEANING_TO_KANJI -> getKanjiMeanings(this.contents as Kanji)
@@ -42,6 +44,8 @@ fun Item.getQuestionText(quizzType: QuizzType): String =
 
 fun Item.getAnswerText(quizzType: QuizzType): String =
         when (quizzType) {
+            QuizzType.HIRAGANA_TO_ROMAJI -> (this.contents as Kana).romaji
+            QuizzType.ROMAJI_TO_HIRAGANA -> (this.contents as Kana).kana
             QuizzType.KANJI_TO_READING -> getKanjiReadings(this.contents as Kanji)
             QuizzType.KANJI_TO_MEANING -> getKanjiMeanings(this.contents as Kanji)
             QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> (this.contents as Kanji).kanji

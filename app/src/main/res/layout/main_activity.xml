@@ -20,6 +20,20 @@
             android:textSize="50sp" />
 
         <Button
+            android:id="@+id/start_hiragana_to_romaji_quizz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/hiragana_romaji_quizz" />
+
+        <Button
+            android:id="@+id/start_romaji_to_hiragana_quizz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/romaji_hiragana_quizz" />
+
+        <Button
             android:id="@+id/start_kanji_reading_quizz"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

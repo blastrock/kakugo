@@ -62,6 +62,10 @@ class QuizzActivity : AppCompatActivity() {
         setContentView(R.layout.quizz_activity)
 
         statsFragment = StatsFragment.newInstance(null)
+        when (quizzType) {
+            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> statsFragment.setHiraganaMode(false)
+            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> statsFragment.setHiraganaMode(true)
+        }
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
@@ -73,8 +77,14 @@ class QuizzActivity : AppCompatActivity() {
                 question_text.textSize = 50.0f
                 initButtons(answers_layout, R.layout.kanji_answer_line)
             }
-            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> {
-                question_text.textSize = 20.0f
+            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> {
+                when (quizzType) {
+                    QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI ->
+                        question_text.textSize = 20.0f
+                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA ->
+                        question_text.textSize = 50.0f
+                    else -> Unit
+                }
 
                 val gridLayout = GridLayout(this)
                 gridLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -97,8 +107,8 @@ class QuizzActivity : AppCompatActivity() {
             showNewQuestion()
         else {
             val db = KaquiDb.getInstance(this)
-            currentQuestion = db.getKanji(savedInstanceState.getInt("question"))
-            currentAnswers = savedInstanceState.getIntArray("answers").map { db.getKanji(it) }
+            currentQuestion = getItem(db, savedInstanceState.getInt("question"))
+            currentAnswers = savedInstanceState.getIntArray("answers").map { getItem(db, it) }
             correctCount = savedInstanceState.getInt("correctCount")
             questionCount = savedInstanceState.getInt("questionCount")
             unserializeHistory(savedInstanceState.getByteArray("history"))
@@ -181,11 +191,10 @@ class QuizzActivity : AppCompatActivity() {
 
     private fun showNewQuestion() {
         val db = KaquiDb.getInstance(this)
-        val itemView = db.kanjiView
 
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getMinLastCorrect())
         if (ids.size < NB_ANSWERS) {
-            Log.wtf(TAG, "Too few kanjis selected for a quizz: ${ids.size}")
+            Log.wtf(TAG, "Too few items selected for a quizz: ${ids.size}")
             return
         }
 
@@ -211,10 +220,10 @@ class QuizzActivity : AppCompatActivity() {
         var question = idsWithoutRecent.last() // take last, it is probably safer with float arithmetic
         run {
             var currentWeight = 0.0
-            for (kanjiData in idsWithoutRecent) {
-                currentWeight += kanjiData.finalProbability
+            for (itemData in idsWithoutRecent) {
+                currentWeight += itemData.finalProbability
                 if (currentWeight >= questionPos) {
-                    question = kanjiData
+                    question = itemData
                     break
                 }
             }
@@ -222,20 +231,20 @@ class QuizzActivity : AppCompatActivity() {
                 Log.v(TAG, "Couldn't pick a question")
         }
 
-        return PickedQuestion(db.getKanji(question.itemId), question, totalWeight)
+        return PickedQuestion(getItem(db, question.itemId), question, totalWeight)
     }
 
     private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
-        val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.kanjiView.isItemEnabled(it) }
-        val similarKanjis =
-                if (similarKanjiIds.size >= NB_ANSWERS - 1)
-                    pickRandom(similarKanjiIds, NB_ANSWERS - 1)
+        val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) }
+        val similarItems =
+                if (similarItemIds.size >= NB_ANSWERS - 1)
+                    pickRandom(similarItemIds, NB_ANSWERS - 1)
                 else
-                    similarKanjiIds
+                    similarItemIds
 
-        val additionalAnswers = pickRandom(ids.map { it.itemId }, NB_ANSWERS - 1 - similarKanjis.size, setOf(currentQuestion.id) + similarKanjis)
+        val additionalAnswers = pickRandom(ids.map { it.itemId }, NB_ANSWERS - 1 - similarItems.size, setOf(currentQuestion.id) + similarItems)
 
-        val currentAnswers = ((additionalAnswers + similarKanjis).map { db.getKanji(it) } + listOf(currentQuestion)).toMutableList()
+        val currentAnswers = ((additionalAnswers + similarItems).map { getItem(db, it) } + listOf(currentQuestion)).toMutableList()
         if (currentAnswers.size != NB_ANSWERS)
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
         shuffle(currentAnswers)
@@ -277,25 +286,23 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        val dbView = KaquiDb.getInstance(this).kanjiView
-
-        val minLastCorrect = dbView.getMinLastCorrect()
+        val minLastCorrect = itemView.getMinLastCorrect()
 
         if (certainty == Certainty.DONTKNOW) {
-            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
+            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
             addUnknownAnswerToHistory(currentQuestion, currentDebugData)
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
-            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty))
+            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty))
             addGoodAnswerToHistory(currentQuestion, currentDebugData)
             correctCount += 1
         } else {
             // wrong
-            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
-            dbView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW))
+            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
+            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW))
             addWrongAnswerToHistory(currentQuestion, currentDebugData, currentAnswers[position])
         }
 
@@ -452,17 +459,33 @@ class QuizzActivity : AppCompatActivity() {
             val type = parcel.readByte()
             when (type.toInt()) {
                 0 -> {
-                    addGoodAnswerToHistory(db.getKanji(parcel.readInt()), null)
+                    addGoodAnswerToHistory(getItem(db, parcel.readInt()), null)
                 }
                 1 -> {
-                    addUnknownAnswerToHistory(db.getKanji(parcel.readInt()), null)
+                    addUnknownAnswerToHistory(getItem(db, parcel.readInt()), null)
                 }
                 2 -> {
-                    addWrongAnswerToHistory(db.getKanji(parcel.readInt()), null, db.getKanji(parcel.readInt()))
+                    addWrongAnswerToHistory(getItem(db, parcel.readInt()), null, getItem(db, parcel.readInt()))
                 }
             }
         })
 
         parcel.recycle()
     }
+
+    private fun getItem(db: KaquiDb, id: Int): Item =
+            when (quizzType) {
+                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.getKanji(id)
+                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.getHiragana(id)
+            }
+
+    private val itemView: LearningDbView
+        get() {
+            val db = KaquiDb.getInstance(this)
+
+            return when (quizzType) {
+                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
+                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
+            }
+        }
 }
