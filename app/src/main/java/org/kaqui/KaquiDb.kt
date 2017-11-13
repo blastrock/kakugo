@@ -118,7 +118,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             for (kanji in kanjis) {
                 for (similarity in kanji.similarities) {
                     val kanjiId = getKanjiId(kanji.kanji[0])!!
-                    val similarityId = getKanjiId(similarity.kanji[0])
+                    val similarityId = getKanjiId((similarity.contents as Kanji).kanji[0])
                     similarityId ?: continue
 
                     val similarityCv = ContentValues()
@@ -165,26 +165,27 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    fun getHiragana(id: Int): Kana {
-        val ret = Kana(id, "", "", 0.0, 0.0, 0, false)
+    fun getHiragana(id: Int): Item {
+        val contents = Kana("", "")
+        val item = Item(id, contents, 0.0, 0.0, 0, false)
         readableDatabase.query(HIRAGANAS_TABLE_NAME, arrayOf("hiragana", "romaji", "short_score", "long_score", "last_correct", "enabled"), "id_hiragana = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find hiragana with id " + id)
             cursor.moveToFirst()
-            ret.kana = cursor.getString(0)
-            ret.romaji = cursor.getString(1)
-            ret.shortScore = cursor.getDouble(2)
-            ret.longScore = cursor.getDouble(3)
-            ret.lastCorrect = cursor.getLong(4)
-            ret.enabled = cursor.getInt(5) != 0
+            contents.kana = cursor.getString(0)
+            contents.romaji = cursor.getString(1)
+            item.shortScore = cursor.getDouble(2)
+            item.longScore = cursor.getDouble(3)
+            item.lastCorrect = cursor.getLong(4)
+            item.enabled = cursor.getInt(5) != 0
         }
-        return ret
+        return item
     }
 
-    fun getKanji(id: Int): Kanji {
+    fun getKanji(id: Int): Item {
         val readings = mutableListOf<Reading>()
         val meanings = mutableListOf<String>()
-        val similarities = mutableListOf<Kanji>()
+        val similarities = mutableListOf<Item>()
         readableDatabase.query(READINGS_TABLE_NAME, arrayOf("reading_type", "reading"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 readings.add(Reading(cursor.getString(0), cursor.getString(1)))
@@ -195,21 +196,22 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("similar_kanji"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Kanji(cursor.getInt(0), "", listOf(), listOf(), listOf(), 0, 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
-        val ret = Kanji(id, "", readings, meanings, similarities, 0, 0.0, 0.0, 0, false)
+        val contents = Kanji("", readings, meanings, similarities, 0)
+        val item = Item(id, contents, 0.0, 0.0, 0, false)
         readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "jlpt_level", "short_score", "long_score", "last_correct", "enabled"), "id_kanji = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id " + id)
             cursor.moveToFirst()
-            ret.kanji = cursor.getString(0)
-            ret.jlptLevel = cursor.getInt(1)
-            ret.shortScore = cursor.getDouble(2)
-            ret.longScore = cursor.getDouble(3)
-            ret.lastCorrect = cursor.getLong(4)
-            ret.enabled = cursor.getInt(5) != 0
+            contents.kanji = cursor.getString(0)
+            contents.jlptLevel = cursor.getInt(1)
+            item.shortScore = cursor.getDouble(2)
+            item.longScore = cursor.getDouble(3)
+            item.lastCorrect = cursor.getLong(4)
+            item.enabled = cursor.getInt(5) != 0
         }
-        return ret
+        return item
     }
 
     fun setSelection(kanjis: String) {

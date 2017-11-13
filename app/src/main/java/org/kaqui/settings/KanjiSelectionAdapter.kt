@@ -35,9 +35,9 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
         val kanji = db.getKanji(ids[position])
         holder.itemId = kanji.id
         holder.enabled.isChecked = kanji.enabled
-        holder.itemText.text = kanji.kanji
+        holder.itemText.text = getItemText(kanji)
         val background = getBackgroundFromScore(kanji.shortScore)
         holder.itemText.background = ContextCompat.getDrawable(context, background)
-        holder.itemDescription.text = getKanjiDescription(kanji)
+        holder.itemDescription.text = getItemDescription(kanji)
     }
 }

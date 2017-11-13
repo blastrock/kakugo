@@ -50,17 +50,12 @@ fun lineToKanji(levels: Map<Int, String>, line: String): Kanji? {
     val literal = parts.first { it.first == PartType.Kanji }.second.first()
 
     return Kanji(
-            0,
             literal.toString(),
             parts.filter { it.first == PartType.KatakanaReading || it.first == PartType.HiraganaReading }
                     .map { Reading(if (it.first == PartType.HiraganaReading) "ja_kun" else "ja_on", it.second) },
             parts.filter { it.first == PartType.Meaning }.map { it.second.replace('_', ' ') },
-            parts.filter { it.first == PartType.Similarities }.map { Kanji(0, it.second[0].toString(), listOf(), listOf(), listOf(), 0, 0.0, 0.0, 0, false) },
-            getJlptLevel(levels, literal),
-            0.0,
-            0.0,
-            0,
-            true)
+            parts.filter { it.first == PartType.Similarities }.map { Item(0, Kanji(it.second[0].toString(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false) },
+            getJlptLevel(levels, literal))
 }
 
 fun parseFile(stream: BufferedReader): List<Kanji> {

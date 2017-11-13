@@ -1,26 +1,33 @@
 package org.kaqui
 
+sealed class ItemContents
+
 data class Kanji(
-        var id: Int,
         var kanji: String,
         var readings: List<Reading>,
         var meanings: List<String>,
-        var similarities: List<Kanji>,
-        var jlptLevel: Int,
-        var shortScore: Double,
-        var longScore: Double,
-        var lastCorrect: Long,
-        var enabled: Boolean
-)
+        var similarities: List<Item>,
+        var jlptLevel: Int
+) : ItemContents()
 
 data class Reading(var readingType: String, var reading: String)
 
 data class Kana(
-        var id: Int,
         var kana: String,
-        var romaji: String,
+        var romaji: String
+) : ItemContents()
+
+data class Item(
+        var id: Int,
+        var contents: ItemContents,
         var shortScore: Double,
         var longScore: Double,
         var lastCorrect: Long,
         var enabled: Boolean
 )
+
+val Item.similarities: List<Item>
+    get() = when (contents) {
+        is Kana -> listOf()
+        is Kanji -> (contents as Kanji).similarities
+    }

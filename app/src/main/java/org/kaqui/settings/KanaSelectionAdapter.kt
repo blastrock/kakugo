@@ -25,9 +25,9 @@ class KanaSelectionAdapter(private val context: Context, private val statsFragme
         val hiragana = db.getHiragana(ids[position])
         holder.itemId = hiragana.id
         holder.enabled.isChecked = hiragana.enabled
-        holder.itemText.text = hiragana.kana
+        holder.itemText.text = getItemText(hiragana)
         val background = getBackgroundFromScore(hiragana.shortScore)
         holder.itemText.background = ContextCompat.getDrawable(context, background)
-        holder.itemDescription.text = hiragana.romaji
+        holder.itemDescription.text = getItemDescription(hiragana)
     }
 }

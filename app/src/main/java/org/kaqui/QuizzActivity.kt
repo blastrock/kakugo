@@ -25,9 +25,9 @@ import java.util.*
 
 class QuizzActivity : AppCompatActivity() {
     private sealed class HistoryLine {
-        data class Correct(val kanjiId: Int) : HistoryLine()
-        data class Unknown(val kanjiId: Int) : HistoryLine()
-        data class Incorrect(val correctKanjiId: Int, val answerKanjiId: Int) : HistoryLine()
+        data class Correct(val itemId: Int) : HistoryLine()
+        data class Unknown(val itemId: Int) : HistoryLine()
+        data class Incorrect(val correctItemId: Int, val answerItemId: Int) : HistoryLine()
     }
 
     companion object {
@@ -43,9 +43,9 @@ class QuizzActivity : AppCompatActivity() {
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
 
-    private lateinit var currentQuestion: Kanji
+    private lateinit var currentQuestion: Item
     private var currentDebugData: DebugData? = null
-    private lateinit var currentAnswers: List<Kanji>
+    private lateinit var currentAnswers: List<Item>
 
     private var correctCount = 0
     private var questionCount = 0
@@ -122,7 +122,7 @@ class QuizzActivity : AppCompatActivity() {
 
         question_text.setOnLongClickListener { _ ->
             if (currentDebugData != null)
-                showKanjiProbabilityData(currentQuestion.kanji, currentDebugData!!)
+                showItemProbabilityData(getItemText(currentQuestion), currentDebugData!!)
             true
         }
     }
@@ -191,7 +191,7 @@ class QuizzActivity : AppCompatActivity() {
 
         val question = pickQuestion(db, ids)
         Log.v(TAG, "Selected question: $question")
-        currentQuestion = question.kanji
+        currentQuestion = question.item
         currentDebugData = DebugData(question.probabilityData, debugParams.probaParamsStage1, debugParams.probaParamsStage2, question.totalWeight)
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
@@ -200,7 +200,7 @@ class QuizzActivity : AppCompatActivity() {
         showCurrentQuestion()
     }
 
-    data class PickedQuestion(val kanji: Kanji, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
+    data class PickedQuestion(val item: Item, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
     private fun pickQuestion(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
@@ -225,7 +225,7 @@ class QuizzActivity : AppCompatActivity() {
         return PickedQuestion(db.getKanji(question.itemId), question, totalWeight)
     }
 
-    private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Kanji): List<Kanji> {
+    private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
         val similarKanjiIds = currentQuestion.similarities.map { it.id }.filter { db.kanjiView.isItemEnabled(it) }
         val similarKanjis =
                 if (similarKanjiIds.size >= NB_ANSWERS - 1)
@@ -304,7 +304,7 @@ class QuizzActivity : AppCompatActivity() {
         showNewQuestion()
     }
 
-    private fun addGoodAnswerToHistory(correct: Kanji, probabilityData: DebugData?) {
+    private fun addGoodAnswerToHistory(correct: Item, probabilityData: DebugData?) {
         history.add(HistoryLine.Correct(correct.id))
 
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
@@ -314,7 +314,7 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addWrongAnswerToHistory(correct: Kanji, probabilityData: DebugData?, wrong: Kanji) {
+    private fun addWrongAnswerToHistory(correct: Item, probabilityData: DebugData?, wrong: Item) {
         history.add(HistoryLine.Incorrect(correct.id, wrong.id))
 
         val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
@@ -326,7 +326,7 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addUnknownAnswerToHistory(correct: Kanji, probabilityData: DebugData?) {
+    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: DebugData?) {
         history.add(HistoryLine.Unknown(correct.id))
 
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
@@ -336,35 +336,36 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun makeHistoryLine(kanji: Kanji, probabilityData: DebugData?, style: Int?, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(item: Item, probabilityData: DebugData?, style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.selection_item, history_view, false)
 
         val checkbox = line.findViewById<View>(R.id.item_checkbox)
         checkbox.visibility = View.GONE
 
-        val kanjiView = line.findViewById<TextView>(R.id.item_text)
-        kanjiView.text = kanji.kanji
+        val itemView = line.findViewById<TextView>(R.id.item_text)
+        itemView.text = getItemText(item)
         if (style != null)
-            kanjiView.background = ContextCompat.getDrawable(this, style)
-        kanjiView.setOnClickListener {
-            val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-            intent.putExtra("kanjis", kanji.kanji)
-            intent.putExtra("search_in_kanjidic", true)
-            intent.putExtra("showEntryDetailOnSingleResult", true)
-            try {
-                startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(this, R.string.aedict_not_installed, Toast.LENGTH_SHORT).show()
+            itemView.background = ContextCompat.getDrawable(this, style)
+        if (item.contents is Kanji)
+            itemView.setOnClickListener {
+                val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+                intent.putExtra("kanjis", (item.contents as Kanji).kanji)
+                intent.putExtra("search_in_kanjidic", true)
+                intent.putExtra("showEntryDetailOnSingleResult", true)
+                try {
+                    startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(this, R.string.aedict_not_installed, Toast.LENGTH_SHORT).show()
+                }
             }
-        }
-        kanjiView.setOnLongClickListener {
+        itemView.setOnLongClickListener {
             if (probabilityData != null)
-                showKanjiProbabilityData(kanji.kanji, probabilityData)
+                showItemProbabilityData(getItemText(item), probabilityData)
             true
         }
 
         val detailView = line.findViewById<TextView>(R.id.item_description)
-        val detail = getKanjiDescription(kanji)
+        val detail = getItemDescription(item)
         detailView.text = detail
 
         if (!withSeparator) {
@@ -374,9 +375,9 @@ class QuizzActivity : AppCompatActivity() {
         return line
     }
 
-    private fun showKanjiProbabilityData(kanji: String, probabilityData: DebugData) {
+    private fun showItemProbabilityData(item: String, probabilityData: DebugData) {
         AlertDialog.Builder(this)
-                .setTitle(kanji)
+                .setTitle(item)
                 .setMessage(
                         getString(R.string.debug_info,
                                 probabilityData.probabilityData.daysSinceCorrect,
@@ -419,16 +420,16 @@ class QuizzActivity : AppCompatActivity() {
             when (line) {
                 is HistoryLine.Correct -> {
                     parcel.writeByte(0)
-                    parcel.writeInt(line.kanjiId)
+                    parcel.writeInt(line.itemId)
                 }
                 is HistoryLine.Unknown -> {
                     parcel.writeByte(1)
-                    parcel.writeInt(line.kanjiId)
+                    parcel.writeInt(line.itemId)
                 }
                 is HistoryLine.Incorrect -> {
                     parcel.writeByte(2)
-                    parcel.writeInt(line.correctKanjiId)
-                    parcel.writeInt(line.answerKanjiId)
+                    parcel.writeInt(line.correctItemId)
+                    parcel.writeInt(line.answerItemId)
                 }
             }
         val data = parcel.marshall()

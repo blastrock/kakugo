@@ -1,9 +1,30 @@
 package org.kaqui
 
-fun getKanjiDescription(kanji: Kanji) =
-        kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
-                kanji.readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading }) + "\n" +
-                kanji.meanings.joinToString(", ")
+fun getItemText(item: Item) =
+        when (item.contents) {
+            is Kana -> {
+                val kana = item.contents as Kana
+                kana.kana
+            }
+            is Kanji -> {
+                val kanji = item.contents as Kanji
+                kanji.kanji
+            }
+        }
+
+fun getItemDescription(item: Item) =
+        when (item.contents) {
+            is Kana -> {
+                val kana = item.contents as Kana
+                kana.romaji
+            }
+            is Kanji -> {
+                val kanji = item.contents as Kanji
+                kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
+                        kanji.readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading }) + "\n" +
+                        kanji.meanings.joinToString(", ")
+            }
+        }
 
 fun getKanjiReadings(kanji: Kanji) =
         kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
@@ -12,18 +33,18 @@ fun getKanjiReadings(kanji: Kanji) =
 fun getKanjiMeanings(kanji: Kanji) =
         kanji.meanings.joinToString(", ")
 
-fun Kanji.getQuestionText(quizzType: QuizzType): String =
+fun Item.getQuestionText(quizzType: QuizzType): String =
         when (quizzType) {
-            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> this.kanji
-            QuizzType.READING_TO_KANJI -> getKanjiReadings(this)
-            QuizzType.MEANING_TO_KANJI -> getKanjiMeanings(this)
+            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> (this.contents as Kanji).kanji
+            QuizzType.READING_TO_KANJI -> getKanjiReadings(this.contents as Kanji)
+            QuizzType.MEANING_TO_KANJI -> getKanjiMeanings(this.contents as Kanji)
         }
 
-fun Kanji.getAnswerText(quizzType: QuizzType): String =
+fun Item.getAnswerText(quizzType: QuizzType): String =
         when (quizzType) {
-            QuizzType.KANJI_TO_READING -> getKanjiReadings(this)
-            QuizzType.KANJI_TO_MEANING -> getKanjiMeanings(this)
-            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> this.kanji
+            QuizzType.KANJI_TO_READING -> getKanjiReadings(this.contents as Kanji)
+            QuizzType.KANJI_TO_MEANING -> getKanjiMeanings(this.contents as Kanji)
+            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> (this.contents as Kanji).kanji
         }
 
 fun getBackgroundFromScore(score: Double) =

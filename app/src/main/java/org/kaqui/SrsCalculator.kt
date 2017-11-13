@@ -21,10 +21,10 @@ class SrsCalculator {
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.5
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
 
-        fun fillProbalities(kanjis: List<ProbabilityData>, minLastCorrect: Int): Pair<List<ProbabilityData>, DebugParams> {
+        fun fillProbalities(items: List<ProbabilityData>, minLastCorrect: Int): Pair<List<ProbabilityData>, DebugParams> {
             val probaParams = getProbaParamsStage1(minLastCorrect)
             Log.v(TAG, "probaParamsStage1: $probaParams, minLastCorrect: $minLastCorrect")
-            val ret = kanjis.map({ getProbabilityDataStage1(probaParams, it) })
+            val ret = items.map({ getProbabilityDataStage1(probaParams, it) })
             val (totalShortProba, totalLongProba) = ret.fold(Pair(0.0, 0.0), { acc, v ->
                 Pair(acc.first + v.shortWeight, acc.second + v.longWeight)
             })
@@ -57,11 +57,11 @@ class SrsCalculator {
             return stage1
         }
 
-        fun getScoreUpdate(minLastCorrect: Int, kanji: Kanji, certainty: Certainty): ScoreUpdate {
+        fun getScoreUpdate(minLastCorrect: Int, item: Item, certainty: Certainty): ScoreUpdate {
             val probaParams = getProbaParamsStage1(minLastCorrect)
             val targetScore = certaintyToWeight(certainty)
 
-            val previousShortScore = kanji.shortScore
+            val previousShortScore = item.shortScore
             // short score reduces the distance by half to target score
             var newShortScore = previousShortScore + (targetScore - previousShortScore) / 2
             if (newShortScore !in 0..1) {
@@ -71,12 +71,12 @@ class SrsCalculator {
                 newShortScore = 1.0
             }
 
-            val previousLongScore = kanji.longScore
+            val previousLongScore = item.longScore
             val now = Calendar.getInstance().timeInMillis / 1000
             // if lastCorrect wasn't initialized, set it to now
             val lastCorrect =
-                    if (kanji.lastCorrect > 0)
-                        kanji.lastCorrect
+                    if (item.lastCorrect > 0)
+                        item.lastCorrect
                     else
                         now
             val daysSinceCorrect = (now - lastCorrect) / 3600.0 / 24.0
@@ -99,10 +99,10 @@ class SrsCalculator {
             }
 
             Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceCorrect: $daysSinceCorrect, probaParamsStage1: $probaParams")
-            Log.v(TAG, "Short score of $kanji going from $previousShortScore to $newShortScore")
-            Log.v(TAG, "Long score of $kanji going from $previousLongScore to $newLongScore")
+            Log.v(TAG, "Short score of $item going from $previousShortScore to $newShortScore")
+            Log.v(TAG, "Long score of $item going from $previousLongScore to $newLongScore")
 
-            return ScoreUpdate(kanji.id, newShortScore.toFloat(), newLongScore.toFloat(),
+            return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(),
                     if (certainty != Certainty.DONTKNOW)
                         now
                     else null)
