@@ -133,7 +133,7 @@ class QuizzActivity : AppCompatActivity() {
 
         question_text.setOnLongClickListener { _ ->
             if (currentDebugData != null)
-                showItemProbabilityData(getItemText(currentQuestion), currentDebugData!!)
+                showItemProbabilityData(currentQuestion.text, currentDebugData!!)
             true
         }
     }
@@ -351,7 +351,7 @@ class QuizzActivity : AppCompatActivity() {
         checkbox.visibility = View.GONE
 
         val itemView = line.findViewById<TextView>(R.id.item_text)
-        itemView.text = getItemText(item)
+        itemView.text = item.text
         if (style != null)
             itemView.background = ContextCompat.getDrawable(this, style)
         if (item.contents is Kanji)
@@ -368,12 +368,12 @@ class QuizzActivity : AppCompatActivity() {
             }
         itemView.setOnLongClickListener {
             if (probabilityData != null)
-                showItemProbabilityData(getItemText(item), probabilityData)
+                showItemProbabilityData(item.text, probabilityData)
             true
         }
 
         val detailView = line.findViewById<TextView>(R.id.item_description)
-        val detail = getItemDescription(item)
+        val detail = item.description
         detailView.text = detail
 
         if (!withSeparator) {

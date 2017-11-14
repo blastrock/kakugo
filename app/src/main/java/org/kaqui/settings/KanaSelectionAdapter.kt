@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import org.kaqui.*
 import org.kaqui.model.KaquiDb
+import org.kaqui.model.description
+import org.kaqui.model.text
 
 class KanaSelectionAdapter(private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
     private val db = KaquiDb.getInstance(context)
@@ -26,9 +28,9 @@ class KanaSelectionAdapter(private val context: Context, private val statsFragme
         val hiragana = db.getHiragana(ids[position])
         holder.itemId = hiragana.id
         holder.enabled.isChecked = hiragana.enabled
-        holder.itemText.text = getItemText(hiragana)
+        holder.itemText.text = hiragana.text
         val background = getBackgroundFromScore(hiragana.shortScore)
         holder.itemText.background = ContextCompat.getDrawable(context, background)
-        holder.itemDescription.text = getItemDescription(hiragana)
+        holder.itemDescription.text = hiragana.description
     }
 }

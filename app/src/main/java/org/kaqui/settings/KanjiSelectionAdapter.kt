@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import org.kaqui.*
 import org.kaqui.model.KaquiDb
+import org.kaqui.model.description
+import org.kaqui.model.text
 
 class KanjiSelectionAdapter(private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
     private val db = KaquiDb.getInstance(context)
@@ -36,9 +38,9 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
         val kanji = db.getKanji(ids[position])
         holder.itemId = kanji.id
         holder.enabled.isChecked = kanji.enabled
-        holder.itemText.text = getItemText(kanji)
+        holder.itemText.text = kanji.text
         val background = getBackgroundFromScore(kanji.shortScore)
         holder.itemText.background = ContextCompat.getDrawable(context, background)
-        holder.itemDescription.text = getItemDescription(kanji)
+        holder.itemDescription.text = kanji.description
     }
 }

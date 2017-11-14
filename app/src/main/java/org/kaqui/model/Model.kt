@@ -31,3 +31,54 @@ val Item.similarities: List<Item>
         is Kana -> listOf()
         is Kanji -> (contents as Kanji).similarities
     }
+
+fun Item.getQuestionText(quizzType: QuizzType): String =
+        when (quizzType) {
+            QuizzType.HIRAGANA_TO_ROMAJI -> (contents as Kana).kana
+            QuizzType.ROMAJI_TO_HIRAGANA -> (contents as Kana).romaji
+            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> (contents as Kanji).kanji
+            QuizzType.READING_TO_KANJI -> (contents as Kanji).readingsText
+            QuizzType.MEANING_TO_KANJI -> (contents as Kanji).meaningsText
+        }
+
+fun Item.getAnswerText(quizzType: QuizzType): String =
+        when (quizzType) {
+            QuizzType.HIRAGANA_TO_ROMAJI -> (contents as Kana).romaji
+            QuizzType.ROMAJI_TO_HIRAGANA -> (contents as Kana).kana
+            QuizzType.KANJI_TO_READING -> (contents as Kanji).readingsText
+            QuizzType.KANJI_TO_MEANING -> (contents as Kanji).meaningsText
+            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> (contents as Kanji).kanji
+        }
+
+private val Kanji.readingsText: String
+    get() = readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
+            readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading })
+
+private val Kanji.meaningsText: String
+    get() = meanings.joinToString(", ")
+
+val Item.text: String
+    get() = when (contents) {
+        is Kana -> {
+            val kana = contents as Kana
+            kana.kana
+        }
+        is Kanji -> {
+            val kanji = contents as Kanji
+            kanji.kanji
+        }
+    }
+
+val Item.description: String
+    get() = when (contents) {
+        is Kana -> {
+            val kana = contents as Kana
+            kana.romaji
+        }
+        is Kanji -> {
+            val kanji = contents as Kanji
+            kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
+                    kanji.readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading }) + "\n" +
+                    kanji.meanings.joinToString(", ")
+        }
+    }
