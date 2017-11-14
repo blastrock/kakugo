@@ -50,3 +50,45 @@ val Hiraganas = arrayOf(
         RawKana("を", "wo"),
         RawKana("ん", "n")
 )
+
+data class SimilarKana(val kana: String, val similar: String)
+
+val SimilarHiraganas = arrayOf(
+        SimilarKana("a", "o"),
+        SimilarKana("a", "ya"), // katakana
+
+        SimilarKana("i", "ri"),
+
+        SimilarKana("u", "tsu"),
+        SimilarKana("u", "ra"), // katakana
+
+        SimilarKana("ki", "sa"),
+        SimilarKana("ki", "ma"),
+
+        SimilarKana("ku", "he"),
+
+        SimilarKana("se", "sa"), // katakana
+
+        SimilarKana("sa", "chi"),
+
+        SimilarKana("su", "o"),
+        SimilarKana("su", "mu"),
+
+        SimilarKana("so", "ro"),
+
+        SimilarKana("no", "me"),
+        SimilarKana("no", "nu"),
+        SimilarKana("me", "nu"),
+
+        SimilarKana("wa", "ne"),
+        SimilarKana("wa", "re"),
+        SimilarKana("ne", "re"),
+
+        SimilarKana("fu", "tsu"), // katakana
+
+        SimilarKana("ma", "ha"),
+        SimilarKana("ma", "ho"),
+        SimilarKana("ha", "ho"),
+
+        SimilarKana("ru", "ro")
+)

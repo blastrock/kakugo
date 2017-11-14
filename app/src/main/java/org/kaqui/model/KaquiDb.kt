@@ -5,8 +5,8 @@ import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import org.kaqui.SrsCalculator
 import org.kaqui.data.Hiraganas
+import org.kaqui.data.SimilarHiraganas
 
 class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -51,6 +51,14 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${SIMILAR_HIRAGANAS_TABLE_NAME} ("
+                        + "id_similar_hiragana INTEGER PRIMARY KEY,"
+                        + "id_hiragana INTEGER NOT NULL REFERENCES ${HIRAGANAS_TABLE_NAME}(id_hiragana),"
+                        + "similar_hiragana INTEGER NOT NULL REFERENCES ${HIRAGANAS_TABLE_NAME}(id_hiragana),"
+                        + "UNIQUE (id_hiragana, similar_hiragana)"
+                        + ")")
+
         val hiraganaCount = database.query(HIRAGANAS_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use {
             it.moveToFirst()
             it.getInt(0)
@@ -61,6 +69,30 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 cv.put("hiragana", hiragana.kana)
                 cv.put("romaji", hiragana.romaji)
                 database.insertOrThrow(HIRAGANAS_TABLE_NAME, null, cv)
+            }
+        }
+        val similarHiraganaCount = database.query(SIMILAR_HIRAGANAS_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use {
+            it.moveToFirst()
+            it.getInt(0)
+        }
+        if (similarHiraganaCount == 0) {
+            for (similarHiragana in SimilarHiraganas) {
+                val id1 = database.query(HIRAGANAS_TABLE_NAME, arrayOf("id_hiragana"), "romaji = ?", arrayOf(similarHiragana.kana), null, null, null).use {
+                    it.moveToFirst()
+                    it.getInt(0)
+                }
+                val id2 = database.query(HIRAGANAS_TABLE_NAME, arrayOf("id_hiragana"), "romaji = ?", arrayOf(similarHiragana.similar), null, null, null).use {
+                    it.moveToFirst()
+                    it.getInt(0)
+                }
+
+                val cv = ContentValues()
+                cv.put("id_hiragana", id1)
+                cv.put("similar_hiragana", id2)
+                database.insertOrThrow(SIMILAR_HIRAGANAS_TABLE_NAME, null, cv)
+                cv.put("id_hiragana", id2)
+                cv.put("similar_hiragana", id1)
+                database.insertOrThrow(SIMILAR_HIRAGANAS_TABLE_NAME, null, cv)
             }
         }
     }
@@ -82,6 +114,9 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             return
         }
         if (oldVersion < 5) {
+            onCreate(database)
+        }
+        if (oldVersion < 6) {
             onCreate(database)
         }
     }
@@ -264,9 +299,10 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 5
+        private const val DATABASE_VERSION = 6
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
+        private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val READINGS_TABLE_NAME = "readings"
