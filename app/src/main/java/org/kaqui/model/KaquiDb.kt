@@ -181,7 +181,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     val kanjiView: LearningDbView
-            get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id_kanji")
+        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id_kanji")
     val hiraganaView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_hiragana")
 
@@ -202,7 +202,12 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getHiragana(id: Int): Item {
-        val contents = Kana("", "")
+        val similarities = mutableListOf<Item>()
+        readableDatabase.query(SIMILAR_HIRAGANAS_TABLE_NAME, arrayOf("similar_hiragana"), "id_hiragana = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                similarities.add(Item(cursor.getInt(0), Kana("", "", listOf()), 0.0, 0.0, 0, false))
+        }
+        val contents = Kana("", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         readableDatabase.query(HIRAGANAS_TABLE_NAME, arrayOf("hiragana", "romaji", "short_score", "long_score", "last_correct", "enabled"), "id_hiragana = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)

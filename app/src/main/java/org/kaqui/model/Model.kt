@@ -14,7 +14,8 @@ data class Reading(var readingType: String, var reading: String)
 
 data class Kana(
         var kana: String,
-        var romaji: String
+        var romaji: String,
+        var similarities: List<Item>
 ) : ItemContents()
 
 data class Item(
@@ -28,7 +29,7 @@ data class Item(
 
 val Item.similarities: List<Item>
     get() = when (contents) {
-        is Kana -> listOf()
+        is Kana -> (contents as Kana).similarities
         is Kanji -> (contents as Kanji).similarities
     }
 
