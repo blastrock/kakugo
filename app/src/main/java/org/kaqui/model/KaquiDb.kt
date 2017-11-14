@@ -1,17 +1,18 @@
-package org.kaqui
+package org.kaqui.model
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import org.kaqui.SrsCalculator
 import org.kaqui.data.Hiraganas
 
 class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $KANJIS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS ${KANJIS_TABLE_NAME} ("
                         + "id_kanji INTEGER PRIMARY KEY,"
                         + "kanji TEXT NOT NULL UNIQUE,"
                         + "jlpt_level INTEGER NOT NULL,"
@@ -21,27 +22,27 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $READINGS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS ${READINGS_TABLE_NAME} ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "reading_type TEXT NOT NULL,"
                         + "reading TEXT NOT NULL"
                         + ")")
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $MEANINGS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS ${MEANINGS_TABLE_NAME} ("
                         + "id_reading INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "meaning TEXT NOT NULL"
                         + ")")
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $SIMILARITIES_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS ${SIMILARITIES_TABLE_NAME} ("
                         + "id_similarity INTEGER PRIMARY KEY,"
                         + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji),"
                         + "similar_kanji INTEGER NOT NULL REFERENCES kanjis(id_kanji)"
                         + ")")
 
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $HIRAGANAS_TABLE_NAME ("
+                "CREATE TABLE IF NOT EXISTS ${HIRAGANAS_TABLE_NAME} ("
                         + "id_hiragana INTEGER PRIMARY KEY,"
                         + "hiragana TEXT NOT NULL UNIQUE,"
                         + "romaji TEXT NOT NULL,"
@@ -66,16 +67,16 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 3) {
-            database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
+            database.execSQL("DROP TABLE IF EXISTS ${SIMILARITIES_TABLE_NAME}")
             onCreate(database)
             return
         }
         if (oldVersion < 4) {
             database.execSQL("DROP TABLE IF EXISTS tmptable")
-            database.execSQL("ALTER TABLE $KANJIS_TABLE_NAME RENAME TO tmptable")
+            database.execSQL("ALTER TABLE ${KANJIS_TABLE_NAME} RENAME TO tmptable")
             onCreate(database)
             database.execSQL(
-                    "INSERT INTO $KANJIS_TABLE_NAME (id_kanji, kanji, jlpt_level, short_score, enabled) "
+                    "INSERT INTO ${KANJIS_TABLE_NAME} (id_kanji, kanji, jlpt_level, short_score, enabled) "
                             + "SELECT id_kanji, kanji, jlpt_level, weight, enabled FROM tmptable")
             database.execSQL("DROP TABLE tmptable")
             return

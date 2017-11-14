@@ -6,7 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.kana_selection_activity.*
-import org.kaqui.KaquiDb
+import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
 

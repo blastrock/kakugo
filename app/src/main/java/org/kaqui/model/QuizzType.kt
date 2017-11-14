@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.model
 
 enum class QuizzType {
     HIRAGANA_TO_ROMAJI,

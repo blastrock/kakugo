@@ -11,6 +11,9 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import org.kaqui.model.KaquiDb
+import org.kaqui.model.QuizzType
+import org.kaqui.model.parseFile
 import org.kaqui.settings.KanaSelectionActivity
 import org.kaqui.settings.KanjiSelectionActivity
 import java.net.HttpURLConnection

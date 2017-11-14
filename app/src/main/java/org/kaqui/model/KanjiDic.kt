@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.model
 
 import org.kaqui.data.getJlptLevels
 import java.io.BufferedReader

@@ -21,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.quizz_activity.*
+import org.kaqui.model.*
 import java.util.*
 
 class QuizzActivity : AppCompatActivity() {

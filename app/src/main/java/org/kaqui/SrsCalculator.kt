@@ -1,6 +1,8 @@
 package org.kaqui
 
 import android.util.Log
+import org.kaqui.model.Certainty
+import org.kaqui.model.Item
 import java.util.*
 
 class SrsCalculator {

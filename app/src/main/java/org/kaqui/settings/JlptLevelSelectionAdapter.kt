@@ -8,7 +8,7 @@ import android.view.ViewOutlineProvider
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
-import org.kaqui.KaquiDb
+import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
 

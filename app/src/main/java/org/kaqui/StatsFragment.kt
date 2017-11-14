@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.stats_fragment.*
+import org.kaqui.model.KaquiDb
+import org.kaqui.model.LearningDbView
 
 class StatsFragment : Fragment() {
     private var hiraganas: Boolean = false

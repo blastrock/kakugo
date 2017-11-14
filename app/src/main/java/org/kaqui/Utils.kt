@@ -1,5 +1,7 @@
 package org.kaqui
 
+import org.kaqui.model.*
+
 fun getItemText(item: Item) =
         when (item.contents) {
             is Kana -> {

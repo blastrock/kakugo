@@ -11,7 +11,7 @@ import android.util.Log
 import android.view.*
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import org.kaqui.StatsFragment
-import org.kaqui.KaquiDb
+import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
