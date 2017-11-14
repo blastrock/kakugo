@@ -9,7 +9,6 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
@@ -19,67 +18,104 @@
             android:textAlignment="center"
             android:textSize="50sp" />
 
-        <Button
-            android:id="@+id/start_hiragana_to_romaji_quizz"
+        <LinearLayout
+            android:id="@+id/main_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/hiragana_romaji_quizz" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/start_romaji_to_hiragana_quizz"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/romaji_hiragana_quizz" />
+            <Button
+                android:id="@+id/hiragana_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/hiragana" />
 
-        <Button
-            android:id="@+id/start_kanji_reading_quizz"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/kanji_reading_quizz" />
+            <Button
+                android:id="@+id/kanji_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/kanji" />
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/start_reading_kanji_quizz"
+        <LinearLayout
+            android:id="@+id/hiragana_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/reading_kanji_quizz" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/start_kanji_meaning_quizz"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/kanji_meaning_quizz" />
+            <Button
+                android:id="@+id/start_hiragana_to_romaji_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/hiragana_romaji_quizz" />
 
-        <Button
-            android:id="@+id/start_meaning_kanji_quizz"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/meaning_kanji_quizz" />
+            <Button
+                android:id="@+id/start_romaji_to_hiragana_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/romaji_hiragana_quizz" />
 
-        <Button
-            android:id="@+id/hiragana_selection_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/hiragana_selection" />
+            <Button
+                android:id="@+id/hiragana_selection_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/hiragana_selection" />
 
-        <Button
-            android:id="@+id/kanji_selection_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/kanji_selection" />
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/download_kanjidic_button"
+        <LinearLayout
+            android:id="@+id/kanji_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/download_database" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/start_kanji_reading_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/kanji_reading_quizz" />
+
+            <Button
+                android:id="@+id/start_reading_kanji_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/reading_kanji_quizz" />
+
+            <Button
+                android:id="@+id/start_kanji_meaning_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/kanji_meaning_quizz" />
+
+            <Button
+                android:id="@+id/start_meaning_kanji_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/meaning_kanji_quizz" />
+
+            <Button
+                android:id="@+id/kanji_selection_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/kanji_selection" />
+
+            <Button
+                android:id="@+id/download_kanjidic_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/download_database" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

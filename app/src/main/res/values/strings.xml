@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">KaQui</string>
+    <string name="hiragana"><font size="30">ひらがな</font>\nHIRAGANA</string>
+    <string name="kanji"><font size="30">漢字</font>\nKANJI</string>
     <string name="hiragana_selection">Hiragana selection</string>
     <string name="kanji_selection">Kanji selection</string>
     <string name="select_all">Select all</string>

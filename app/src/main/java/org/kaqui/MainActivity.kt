@@ -25,6 +25,12 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
     }
 
+    private enum class Mode {
+        MAIN,
+        HIRAGANA,
+        KANJI,
+    }
+
     private var downloadProgress: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +38,11 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.main_activity)
 
+        hiragana_quizz.transformationMethod = null
+        kanji_quizz.transformationMethod = null
+
+        hiragana_quizz.setOnClickListener { setMode(Mode.HIRAGANA) }
+        kanji_quizz.setOnClickListener { setMode(Mode.KANJI) }
         start_hiragana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.HIRAGANA_TO_ROMAJI)))
         start_romaji_to_hiragana_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.ROMAJI_TO_HIRAGANA)))
         start_kanji_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_READING)))
@@ -53,6 +64,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateButtonStatuses()
+        setMode(Mode.MAIN)
+    }
+
+    private fun setMode(mode: Mode) {
+        main_layout.visibility = if (mode == Mode.MAIN) View.VISIBLE else View.GONE
+        hiragana_layout.visibility = if (mode == Mode.HIRAGANA) View.VISIBLE else View.GONE
+        kanji_layout.visibility = if (mode == Mode.KANJI) View.VISIBLE else View.GONE
+    }
+
+    override fun onBackPressed() {
+        if (main_layout.visibility != View.VISIBLE)
+            setMode(Mode.MAIN)
+        else
+            super.onBackPressed()
     }
 
     private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
