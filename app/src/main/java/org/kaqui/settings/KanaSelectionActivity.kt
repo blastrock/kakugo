@@ -31,7 +31,7 @@ class KanaSelectionActivity : AppCompatActivity() {
 
         db = KaquiDb.getInstance(this)
 
-        listAdapter = KanaSelectionAdapter(this, statsFragment)
+        listAdapter = KanaSelectionAdapter(db.hiraganaView, this, statsFragment)
         item_list.adapter = listAdapter
         item_list.layoutManager = LinearLayoutManager(this)
         listAdapter.setup()
