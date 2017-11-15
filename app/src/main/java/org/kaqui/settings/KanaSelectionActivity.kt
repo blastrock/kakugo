@@ -9,9 +9,10 @@ import kotlinx.android.synthetic.main.kana_selection_activity.*
 import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.model.LearningDbView
 
 class KanaSelectionActivity : AppCompatActivity() {
-    private lateinit var db: KaquiDb
+    private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: KanaSelectionAdapter
     private lateinit var statsFragment: StatsFragment
 
@@ -29,9 +30,9 @@ class KanaSelectionActivity : AppCompatActivity() {
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
 
-        db = KaquiDb.getInstance(this)
+        dbView = KaquiDb.getInstance(this).hiraganaView
 
-        listAdapter = KanaSelectionAdapter(db.hiraganaView, this, statsFragment)
+        listAdapter = KanaSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter
         item_list.layoutManager = LinearLayoutManager(this)
         listAdapter.setup()
@@ -45,13 +46,13 @@ class KanaSelectionActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.select_all -> {
-                db.hiraganaView.setAllEnabled(true)
+                dbView.setAllEnabled(true)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
                 return true
             }
             R.id.select_none -> {
-                db.hiraganaView.setAllEnabled(false)
+                dbView.setAllEnabled(false)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
                 return true
