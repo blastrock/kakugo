@@ -63,9 +63,10 @@ class QuizzActivity : AppCompatActivity() {
         setContentView(R.layout.quizz_activity)
 
         statsFragment = StatsFragment.newInstance(null)
-        when (quizzType) {
-            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> statsFragment.setHiraganaMode(false)
-            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> statsFragment.setHiraganaMode(true)
+        statsFragment.mode = when (quizzType) {
+            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> StatsFragment.Mode.KANJI
+            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> StatsFragment.Mode.HIRAGANA
+            QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> StatsFragment.Mode.KATAKANA
         }
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
@@ -78,11 +79,11 @@ class QuizzActivity : AppCompatActivity() {
                 question_text.textSize = 50.0f
                 initButtons(answers_layout, R.layout.kanji_answer_line)
             }
-            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> {
+            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> {
                 when (quizzType) {
                     QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI ->
                         question_text.textSize = 20.0f
-                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA ->
+                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA ->
                         question_text.textSize = 50.0f
                     else -> Unit
                 }
@@ -478,6 +479,7 @@ class QuizzActivity : AppCompatActivity() {
             when (quizzType) {
                 QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.getKanji(id)
                 QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.getHiragana(id)
+                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.getKatakana(id)
             }
 
     private val itemView: LearningDbView
@@ -487,6 +489,7 @@ class QuizzActivity : AppCompatActivity() {
             return when (quizzType) {
                 QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
                 QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
+                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
             }
         }
 }

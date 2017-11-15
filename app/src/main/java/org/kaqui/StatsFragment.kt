@@ -12,9 +12,15 @@ import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 
 class StatsFragment : Fragment() {
-    private var hiraganas: Boolean = false
+    private var _mode: Mode = Mode.KANJI
     private var level: Int? = null
     private var showDisabled: Boolean = false
+
+    enum class Mode {
+        HIRAGANA,
+        KATAKANA,
+        KANJI,
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,11 +41,13 @@ class StatsFragment : Fragment() {
         updateStats()
     }
 
-    fun setHiraganaMode(h: Boolean) {
-        hiraganas = h
-        if (context != null)
-            updateStats()
-    }
+    var mode: Mode
+        get() = _mode
+        set(m) {
+            _mode = m
+            if (context != null)
+                updateStats()
+        }
 
     fun setLevel(l: Int?) {
         level = l
@@ -55,10 +63,14 @@ class StatsFragment : Fragment() {
 
     fun updateStats() {
         val db = KaquiDb.getInstance(context)
-        if (hiraganas)
-            updateStats(db.hiraganaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
-        else
-            updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        when (mode) {
+            Mode.HIRAGANA ->
+                updateStats(db.hiraganaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+            Mode.KATAKANA ->
+                updateStats(db.katakanaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+            Mode.KANJI ->
+                updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        }
     }
 
     companion object {

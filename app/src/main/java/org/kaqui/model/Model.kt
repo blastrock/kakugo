@@ -35,8 +35,8 @@ val Item.similarities: List<Item>
 
 fun Item.getQuestionText(quizzType: QuizzType): String =
         when (quizzType) {
-            QuizzType.HIRAGANA_TO_ROMAJI -> (contents as Kana).kana
-            QuizzType.ROMAJI_TO_HIRAGANA -> (contents as Kana).romaji
+            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.KATAKANA_TO_ROMAJI -> (contents as Kana).kana
+            QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
             QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> (contents as Kanji).kanji
             QuizzType.READING_TO_KANJI -> (contents as Kanji).readingsText
             QuizzType.MEANING_TO_KANJI -> (contents as Kanji).meaningsText
@@ -44,8 +44,8 @@ fun Item.getQuestionText(quizzType: QuizzType): String =
 
 fun Item.getAnswerText(quizzType: QuizzType): String =
         when (quizzType) {
-            QuizzType.HIRAGANA_TO_ROMAJI -> (contents as Kana).romaji
-            QuizzType.ROMAJI_TO_HIRAGANA -> (contents as Kana).kana
+            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.KATAKANA_TO_ROMAJI -> (contents as Kana).romaji
+            QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.ROMAJI_TO_KATAKANA -> (contents as Kana).kana
             QuizzType.KANJI_TO_READING -> (contents as Kanji).readingsText
             QuizzType.KANJI_TO_MEANING -> (contents as Kanji).meaningsText
             QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> (contents as Kanji).kanji

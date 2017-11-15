@@ -16,21 +16,34 @@ class KanaSelectionActivity : AppCompatActivity() {
     private lateinit var listAdapter: KanaSelectionAdapter
     private lateinit var statsFragment: StatsFragment
 
+    enum class Mode {
+        HIRAGANA,
+        KATAKANA
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val mode = intent.getSerializableExtra("mode") as Mode
 
         setContentView(R.layout.kana_selection_activity)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         statsFragment = StatsFragment.newInstance(null)
-        statsFragment.setHiraganaMode(true)
+        statsFragment.mode = when (mode) {
+            Mode.HIRAGANA -> StatsFragment.Mode.HIRAGANA
+            Mode.KATAKANA -> StatsFragment.Mode.KATAKANA
+        }
         statsFragment.setShowDisabled(true)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
 
-        dbView = KaquiDb.getInstance(this).hiraganaView
+        dbView = when (mode) {
+            Mode.HIRAGANA -> KaquiDb.getInstance(this).hiraganaView
+            Mode.KATAKANA -> KaquiDb.getInstance(this).katakanaView
+        }
 
         listAdapter = KanaSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter

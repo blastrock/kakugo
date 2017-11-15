@@ -32,6 +32,13 @@
                 android:text="@string/hiragana" />
 
             <Button
+                android:id="@+id/katakana_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/katakana" />
+
+            <Button
                 android:id="@+id/kanji_quizz"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -65,6 +72,35 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:text="@string/hiragana_selection" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/katakana_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/start_katakana_to_romaji_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/katakana_romaji_quizz" />
+
+            <Button
+                android:id="@+id/start_romaji_to_katakana_quizz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/romaji_katakana_quizz" />
+
+            <Button
+                android:id="@+id/katakana_selection_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/katakana_selection" />
 
         </LinearLayout>
 

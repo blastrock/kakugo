@@ -1,6 +1,7 @@
 package org.kaqui.data
 
 data class RawKana(val kana: String, val romaji: String)
+data class SimilarKana(val kana: String, val similar: String)
 
 val Hiraganas = arrayOf(
         RawKana("あ", "a"),
@@ -51,8 +52,6 @@ val Hiraganas = arrayOf(
         RawKana("ん", "n")
 )
 
-data class SimilarKana(val kana: String, val similar: String)
-
 val SimilarHiraganas = arrayOf(
         SimilarKana("a", "o"),
         SimilarKana("a", "ya"), // katakana
@@ -70,6 +69,8 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("se", "sa"), // katakana
 
         SimilarKana("sa", "chi"),
+
+        SimilarKana("shi", "re"), // katakana
 
         SimilarKana("su", "o"),
         SimilarKana("su", "mu"),
@@ -91,4 +92,88 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("ha", "ho"),
 
         SimilarKana("ru", "ro")
+)
+
+val Katakanas = arrayOf(
+        RawKana("ア", "a"),
+        RawKana("イ", "i"),
+        RawKana("ウ", "u"),
+        RawKana("エ", "e"),
+        RawKana("オ", "o"),
+        RawKana("カ", "ka"),
+        RawKana("キ", "ki"),
+        RawKana("ク", "ku"),
+        RawKana("ケ", "ke"),
+        RawKana("コ", "ko"),
+        RawKana("サ", "sa"),
+        RawKana("シ", "shi"),
+        RawKana("ス", "su"),
+        RawKana("セ", "se"),
+        RawKana("ソ", "so"),
+        RawKana("タ", "ta"),
+        RawKana("チ", "chi"),
+        RawKana("ツ", "tsu"),
+        RawKana("テ", "te"),
+        RawKana("ト", "to"),
+        RawKana("ナ", "na"),
+        RawKana("ニ", "ni"),
+        RawKana("ヌ", "nu"),
+        RawKana("ネ", "ne"),
+        RawKana("ノ", "no"),
+        RawKana("ハ", "ha"),
+        RawKana("ヒ", "hi"),
+        RawKana("フ", "fu"),
+        RawKana("ヘ", "he"),
+        RawKana("ホ", "ho"),
+        RawKana("マ", "ma"),
+        RawKana("ミ", "mi"),
+        RawKana("ム", "mu"),
+        RawKana("メ", "me"),
+        RawKana("モ", "mo"),
+        RawKana("ヤ", "ya"),
+        RawKana("ユ", "yu"),
+        RawKana("ヨ", "yo"),
+        RawKana("ラ", "ra"),
+        RawKana("リ", "ri"),
+        RawKana("ル", "ru"),
+        RawKana("レ", "re"),
+        RawKana("ロ", "ro"),
+        RawKana("ワ", "wa"),
+        RawKana("ヲ", "wo"),
+        RawKana("ン", "n")
+)
+
+val SimilarKatakanas = arrayOf(
+        SimilarKana("a", "ya"),
+
+        SimilarKana("u", "wa"),
+        SimilarKana("u", "ra"), // hiragana
+
+        SimilarKana("o", "ho"),
+
+        SimilarKana("ku", "ke"),
+        SimilarKana("ku", "ta"),
+
+        SimilarKana("ko", "yu"),
+
+        SimilarKana("se", "sa"), // hiragana
+
+        SimilarKana("shi", "tsu"),
+        SimilarKana("shi", "so"),
+        SimilarKana("shi", "no"),
+        SimilarKana("shi", "n"),
+        SimilarKana("tsu", "so"),
+        SimilarKana("tsu", "no"),
+        SimilarKana("tsu", "n"),
+        SimilarKana("so", "no"),
+        SimilarKana("so", "n"),
+        SimilarKana("no", "n"),
+
+        SimilarKana("se", "hi"),
+
+        SimilarKana("chi", "te"),
+
+        SimilarKana("fu", "tsu"), // hiragana
+
+        SimilarKana("re", "shi") // hiragana
 )

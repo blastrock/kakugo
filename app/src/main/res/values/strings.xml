@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">KaQui</string>
     <string name="hiragana"><font size="30">ひらがな</font>\nHIRAGANA</string>
+    <string name="katakana"><font size="30">カタカナ</font>\nKATAKANA</string>
     <string name="kanji"><font size="30">漢字</font>\nKANJI</string>
     <string name="hiragana_selection">Hiragana selection</string>
+    <string name="katakana_selection">Katakana selection</string>
     <string name="kanji_selection">Kanji selection</string>
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>
@@ -10,6 +12,8 @@
     <string name="download_database">Download Kanji database</string>
     <string name="hiragana_romaji_quizz">Hiragana to romaji (ひ→hi)</string>
     <string name="romaji_hiragana_quizz">Romaji to hiragana (hi→ひ)</string>
+    <string name="katakana_romaji_quizz">Katakana to romaji (ヒ→hi)</string>
+    <string name="romaji_katakana_quizz">Romaji to katakana (hi→ヒ)</string>
     <string name="kanji_reading_quizz">Kanji to reading (日→ひ)</string>
     <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
     <string name="kanji_meaning_quizz">Kanji to meaning quizz (日→day)</string>

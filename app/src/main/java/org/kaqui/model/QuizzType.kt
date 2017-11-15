@@ -3,6 +3,8 @@ package org.kaqui.model
 enum class QuizzType {
     HIRAGANA_TO_ROMAJI,
     ROMAJI_TO_HIRAGANA,
+    KATAKANA_TO_ROMAJI,
+    ROMAJI_TO_KATAKANA,
     KANJI_TO_READING,
     READING_TO_KANJI,
     KANJI_TO_MEANING,
