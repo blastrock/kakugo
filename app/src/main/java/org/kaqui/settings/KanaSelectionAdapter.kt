@@ -25,7 +25,7 @@ class KanaSelectionAdapter(private val context: Context, private val statsFragme
             ItemSelectionViewHolder(db.hiraganaView, LayoutInflater.from(parent.context).inflate(R.layout.selection_item, parent, false), statsFragment)
 
     override fun onBindViewHolder(holder: ItemSelectionViewHolder, position: Int) {
-        val hiragana = db.getHiragana(ids[position])
+        val hiragana = db.hiraganaView.getItem(ids[position])
         holder.itemId = hiragana.id
         holder.enabled.isChecked = hiragana.enabled
         holder.itemText.text = hiragana.text

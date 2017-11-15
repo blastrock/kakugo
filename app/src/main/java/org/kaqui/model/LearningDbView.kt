@@ -8,7 +8,10 @@ class LearningDbView(
         private val readableDatabase: SQLiteDatabase,
         private val writableDatabase: SQLiteDatabase,
         private val tableName: String,
-        private val idColumnName: String) {
+        private val idColumnName: String,
+        private val itemGetter: (id: Int) -> Item) {
+
+    fun getItem(id: Int): Item = itemGetter(id)
 
     fun getAllItems(): List<Int> {
         val ret = mutableListOf<Int>()

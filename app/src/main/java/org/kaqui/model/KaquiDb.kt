@@ -181,9 +181,9 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     val kanjiView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id_kanji")
+        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id_kanji", this::getKanji)
     val hiraganaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_hiragana")
+        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_hiragana", this::getHiragana)
 
     fun search(text: String): List<Int> {
         readableDatabase.rawQuery(
