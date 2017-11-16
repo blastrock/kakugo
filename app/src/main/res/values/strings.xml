@@ -27,5 +27,5 @@
     <string name="confirm_quizz_stop_title">Terminate quizz</string>
     <string name="confirm_quizz_stop_message">Are you sure you want to end this quizz session?</string>
     <string name="aedict_not_installed">Please, install the aedict3 dictionnary (non-free) to show kanji definitions</string>
-    <string name="debug_info">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f</string>
+    <string name="debug_info">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nNew short score: %10$.2f\nNew long score: %11$.2f</string>
 </resources>

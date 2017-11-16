@@ -38,7 +38,12 @@ class QuizzActivity : AppCompatActivity() {
         private const val MAX_HISTORY_SIZE = 40
     }
 
-    data class DebugData(var probabilityData: SrsCalculator.ProbabilityData, var probaParamsStage1: SrsCalculator.ProbaParamsStage1, var probaParamsStage2: SrsCalculator.ProbaParamsStage2, var totalWeight: Double)
+    data class DebugData(
+            var probabilityData: SrsCalculator.ProbabilityData,
+            var probaParamsStage1: SrsCalculator.ProbaParamsStage1,
+            var probaParamsStage2: SrsCalculator.ProbaParamsStage2,
+            var totalWeight: Double,
+            var scoreUpdate: SrsCalculator.ScoreUpdate?)
 
     private lateinit var statsFragment: StatsFragment
     private lateinit var answerTexts: List<TextView>
@@ -203,7 +208,7 @@ class QuizzActivity : AppCompatActivity() {
         val question = pickQuestion(db, ids)
         Log.v(TAG, "Selected question: $question")
         currentQuestion = question.item
-        currentDebugData = DebugData(question.probabilityData, debugParams.probaParamsStage1, debugParams.probaParamsStage2, question.totalWeight)
+        currentDebugData = DebugData(question.probabilityData, debugParams.probaParamsStage1, debugParams.probaParamsStage2, question.totalWeight, null)
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
         addIdToLastQuestions(currentQuestion.id)
@@ -291,20 +296,27 @@ class QuizzActivity : AppCompatActivity() {
         val minLastCorrect = itemView.getMinLastCorrect()
 
         if (certainty == Certainty.DONTKNOW) {
-            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
+            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
+            itemView.applyScoreUpdate(scoreUpdate)
+            currentDebugData?.scoreUpdate = scoreUpdate
             addUnknownAnswerToHistory(currentQuestion, currentDebugData)
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
             // correct
-            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty))
+            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
+            itemView.applyScoreUpdate(scoreUpdate)
+            currentDebugData?.scoreUpdate = scoreUpdate
             addGoodAnswerToHistory(currentQuestion, currentDebugData)
             correctCount += 1
         } else {
             // wrong
-            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW))
-            itemView.applyScoreUpdate(SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW))
+            val scoreUpdateGood = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
+            itemView.applyScoreUpdate(scoreUpdateGood)
+            val scoreUpdateBad = SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW)
+            itemView.applyScoreUpdate(scoreUpdateBad)
+            currentDebugData?.scoreUpdate = scoreUpdateGood
             addWrongAnswerToHistory(currentQuestion, currentDebugData, currentAnswers[position])
         }
 
@@ -397,7 +409,9 @@ class QuizzActivity : AppCompatActivity() {
                                 probabilityData.probaParamsStage2.shortCoefficient,
                                 probabilityData.probaParamsStage2.longCoefficient,
                                 probabilityData.probabilityData.finalProbability,
-                                probabilityData.totalWeight))
+                                probabilityData.totalWeight,
+                                probabilityData.scoreUpdate?.shortScore,
+                                probabilityData.scoreUpdate?.longScore))
                 .show()
     }
 
