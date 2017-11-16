@@ -173,6 +173,8 @@ val SimilarKatakanas = arrayOf(
 
         SimilarKana("chi", "te"),
 
+        SimilarKana("na", "me"),
+
         SimilarKana("fu", "tsu"), // hiragana
 
         SimilarKana("re", "shi") // hiragana
