@@ -88,9 +88,9 @@ class SrsCalculator {
             val newLongScore =
                     when {
                         previousLongScore < targetScore ->
-                            previousLongScore + ((targetScore - previousLongScore) / 2) *
+                            Math.min(1.0, previousLongScore + (1.0/10.0 *
                                     Math.min(daysSinceCorrect / 2.0 /
-                                            (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)
+                                            (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)))
                         previousLongScore > targetScore ->
                             previousLongScore - (-targetScore + previousLongScore) / 2
                         else ->
