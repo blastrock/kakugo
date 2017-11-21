@@ -81,11 +81,11 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
         if (similarKanaCount == 0) {
             for (similarKana in similarKanas) {
-                val id1 = database.query(tableName, arrayOf("id_kana"), "romaji = ?", arrayOf(similarKana.kana), null, null, null).use {
+                val id1 = database.query(tableName, arrayOf("id_kana"), "kana = ?", arrayOf(similarKana.kana), null, null, null).use {
                     it.moveToFirst()
                     it.getInt(0)
                 }
-                val id2 = database.query(tableName, arrayOf("id_kana"), "romaji = ?", arrayOf(similarKana.similar), null, null, null).use {
+                val id2 = database.query(tableName, arrayOf("id_kana"), "kana = ?", arrayOf(similarKana.similar), null, null, null).use {
                     it.moveToFirst()
                     it.getInt(0)
                 }

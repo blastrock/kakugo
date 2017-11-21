@@ -53,45 +53,45 @@ val Hiraganas = arrayOf(
 )
 
 val SimilarHiraganas = arrayOf(
-        SimilarKana("a", "o"),
-        SimilarKana("a", "ya"), // katakana
+        SimilarKana("あ", "お"),
+        SimilarKana("あ", "や"), // katakana
 
-        SimilarKana("i", "ri"),
+        SimilarKana("い", "り"),
 
-        SimilarKana("u", "tsu"),
-        SimilarKana("u", "ra"), // katakana
+        SimilarKana("う", "つ"),
+        SimilarKana("う", "ら"), // katakana
 
-        SimilarKana("ki", "sa"),
-        SimilarKana("ki", "ma"),
+        SimilarKana("き", "さ"),
+        SimilarKana("き", "ま"),
 
-        SimilarKana("ku", "he"),
+        SimilarKana("く", "へ"),
 
-        SimilarKana("se", "sa"), // katakana
+        SimilarKana("せ", "さ"), // katakana
 
-        SimilarKana("sa", "chi"),
+        SimilarKana("さ", "ち"),
 
-        SimilarKana("shi", "re"), // katakana
+        SimilarKana("し", "れ"), // katakana
 
-        SimilarKana("su", "o"),
-        SimilarKana("su", "mu"),
+        SimilarKana("す", "お"),
+        SimilarKana("す", "む"),
 
-        SimilarKana("so", "ro"),
+        SimilarKana("そ", "ろ"),
 
-        SimilarKana("no", "me"),
-        SimilarKana("no", "nu"),
-        SimilarKana("me", "nu"),
+        SimilarKana("つ", "ふ"), // katakana
 
-        SimilarKana("wa", "ne"),
-        SimilarKana("wa", "re"),
-        SimilarKana("ne", "re"),
+        SimilarKana("の", "め"),
+        SimilarKana("の", "ぬ"),
+        SimilarKana("め", "ぬ"),
 
-        SimilarKana("fu", "tsu"), // katakana
+        SimilarKana("わ", "ね"),
+        SimilarKana("わ", "れ"),
+        SimilarKana("ね", "れ"),
 
-        SimilarKana("ma", "ha"),
-        SimilarKana("ma", "ho"),
-        SimilarKana("ha", "ho"),
+        SimilarKana("ま", "は"),
+        SimilarKana("ま", "ほ"),
+        SimilarKana("は", "ほ"),
 
-        SimilarKana("ru", "ro")
+        SimilarKana("る", "ろ")
 )
 
 val Katakanas = arrayOf(
@@ -144,38 +144,38 @@ val Katakanas = arrayOf(
 )
 
 val SimilarKatakanas = arrayOf(
-        SimilarKana("a", "ya"),
+        SimilarKana("ア", "ヤ"),
 
-        SimilarKana("u", "wa"),
-        SimilarKana("u", "ra"), // hiragana
+        SimilarKana("ウ", "ワ"),
+        SimilarKana("ウ", "ラ"), // hiragana
 
-        SimilarKana("o", "ho"),
+        SimilarKana("オ", "ホ"),
 
-        SimilarKana("ku", "ke"),
-        SimilarKana("ku", "ta"),
+        SimilarKana("ク", "ケ"),
+        SimilarKana("ク", "タ"),
 
-        SimilarKana("ko", "yu"),
+        SimilarKana("コ", "ユ"),
 
-        SimilarKana("se", "sa"), // hiragana
+        SimilarKana("セ", "サ"), // hiragana
 
-        SimilarKana("shi", "tsu"),
-        SimilarKana("shi", "so"),
-        SimilarKana("shi", "no"),
-        SimilarKana("shi", "n"),
-        SimilarKana("tsu", "so"),
-        SimilarKana("tsu", "no"),
-        SimilarKana("tsu", "n"),
-        SimilarKana("so", "no"),
-        SimilarKana("so", "n"),
-        SimilarKana("no", "n"),
+        SimilarKana("シ", "ツ"),
+        SimilarKana("シ", "ソ"),
+        SimilarKana("シ", "ノ"),
+        SimilarKana("シ", "ン"),
+        SimilarKana("ツ", "ソ"),
+        SimilarKana("ツ", "ノ"),
+        SimilarKana("ツ", "ン"),
+        SimilarKana("ソ", "ノ"),
+        SimilarKana("ソ", "ン"),
+        SimilarKana("ノ", "ン"),
 
-        SimilarKana("se", "hi"),
+        SimilarKana("セ", "ヒ"),
 
-        SimilarKana("chi", "te"),
+        SimilarKana("チ", "テ"),
 
-        SimilarKana("na", "me"),
+        SimilarKana("ナ", "メ"),
 
-        SimilarKana("fu", "tsu"), // hiragana
+        SimilarKana("フ", "ツ"), // hiragana
 
-        SimilarKana("re", "shi") // hiragana
+        SimilarKana("レ", "シ") // hiragana
 )
