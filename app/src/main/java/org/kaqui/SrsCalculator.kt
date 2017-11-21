@@ -56,6 +56,8 @@ class SrsCalculator {
 
         private fun getProbabilityDataStage2(probaParams: ProbaParamsStage2, stage1: ProbabilityData): ProbabilityData {
             stage1.finalProbability = probaParams.shortCoefficient * stage1.shortWeight + probaParams.longCoefficient * stage1.longWeight
+            if (stage1.finalProbability < 0)
+                Log.wtf(TAG,"Invalid finalProbability: ${stage1.finalProbability}, shortCoefficient: ${probaParams.shortCoefficient}, longCoefficient: ${probaParams.longCoefficient}, shortWeight: ${stage1.shortWeight}, longWeight: ${stage1.longWeight}")
             return stage1
         }
 
