@@ -412,6 +412,7 @@ class QuizzActivity : AppCompatActivity() {
                                 probabilityData.totalWeight,
                                 probabilityData.scoreUpdate?.shortScore,
                                 probabilityData.scoreUpdate?.longScore))
+                .setPositiveButton(android.R.string.ok, null)
                 .show()
     }
 
