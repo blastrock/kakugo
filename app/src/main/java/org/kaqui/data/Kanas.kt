@@ -54,30 +54,30 @@ val Hiraganas = arrayOf(
 
 val SimilarHiraganas = arrayOf(
         SimilarKana("あ", "お"),
-        SimilarKana("あ", "や"), // katakana
+        SimilarKana("あ", "や" /* ヤ */),
 
         SimilarKana("い", "り"),
 
         SimilarKana("う", "つ"),
-        SimilarKana("う", "ら"), // katakana
+        SimilarKana("う", "ら" /* ラ */),
 
         SimilarKana("き", "さ"),
         SimilarKana("き", "ま"),
 
         SimilarKana("く", "へ"),
 
-        SimilarKana("せ", "さ"), // katakana
+        SimilarKana("せ", "さ" /* サ */),
 
         SimilarKana("さ", "ち"),
 
-        SimilarKana("し", "れ"), // katakana
+        SimilarKana("し", "れ" /* レ */),
 
         SimilarKana("す", "お"),
         SimilarKana("す", "む"),
 
         SimilarKana("そ", "ろ"),
 
-        SimilarKana("つ", "ふ"), // katakana
+        SimilarKana("つ", "ふ" /* フ */),
 
         SimilarKana("の", "め"),
         SimilarKana("の", "ぬ"),
@@ -147,7 +147,7 @@ val SimilarKatakanas = arrayOf(
         SimilarKana("ア", "ヤ"),
 
         SimilarKana("ウ", "ワ"),
-        SimilarKana("ウ", "ラ"), // hiragana
+        SimilarKana("ラ", "ウ" /* う */),
 
         SimilarKana("オ", "ホ"),
 
@@ -156,7 +156,7 @@ val SimilarKatakanas = arrayOf(
 
         SimilarKana("コ", "ユ"),
 
-        SimilarKana("セ", "サ"), // hiragana
+        SimilarKana("サ", "セ" /* せ */),
 
         SimilarKana("シ", "ツ"),
         SimilarKana("シ", "ソ"),
@@ -175,7 +175,7 @@ val SimilarKatakanas = arrayOf(
 
         SimilarKana("ナ", "メ"),
 
-        SimilarKana("フ", "ツ"), // hiragana
+        SimilarKana("フ", "ツ" /* つ */),
 
-        SimilarKana("レ", "シ") // hiragana
+        SimilarKana("レ", "シ" /* し */)
 )
