@@ -49,7 +49,34 @@ val Hiraganas = arrayOf(
         RawKana("ろ", "ro"),
         RawKana("わ", "wa"),
         RawKana("を", "wo"),
-        RawKana("ん", "n")
+        RawKana("ん", "n"),
+
+        RawKana("が", "ga"),
+        RawKana("ぎ", "gi"),
+        RawKana("ぐ", "gu"),
+        RawKana("げ", "ge"),
+        RawKana("ご", "go"),
+        RawKana("ざ", "za"),
+        RawKana("じ", "ji"),
+        RawKana("ず", "zu"),
+        RawKana("ぜ", "ze"),
+        RawKana("ぞ", "zo"),
+        RawKana("だ", "da"),
+        RawKana("ぢ", "ji"),
+        RawKana("づ", "zu"),
+        RawKana("で", "de"),
+        RawKana("ど", "do"),
+        RawKana("ば", "ba"),
+        RawKana("び", "bi"),
+        RawKana("ぶ", "bu"),
+        RawKana("べ", "be"),
+        RawKana("ぼ", "bo"),
+
+        RawKana("ぱ", "pa"),
+        RawKana("ぴ", "pi"),
+        RawKana("ぷ", "pu"),
+        RawKana("ぺ", "pe"),
+        RawKana("ぽ", "po")
 )
 
 val SimilarHiraganas = arrayOf(
@@ -62,13 +89,17 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("う", "ら" /* ラ */),
 
         SimilarKana("き", "さ"),
+        SimilarKana("ぎ", "ざ"),
         SimilarKana("き", "ま"),
 
         SimilarKana("く", "へ"),
+        SimilarKana("ぐ", "べ"),
 
         SimilarKana("せ", "さ" /* サ */),
+        SimilarKana("ぜ", "ざ" /* ザ */), // katakana
 
         SimilarKana("さ", "ち"),
+        SimilarKana("ざ", "ぢ"),
 
         SimilarKana("し", "れ" /* レ */),
 
@@ -78,6 +109,7 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("そ", "ろ"),
 
         SimilarKana("つ", "ふ" /* フ */),
+        SimilarKana("づ", "ぶ" /* ブ */),
 
         SimilarKana("の", "め"),
         SimilarKana("の", "ぬ"),
@@ -90,6 +122,7 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("ま", "は"),
         SimilarKana("ま", "ほ"),
         SimilarKana("は", "ほ"),
+        SimilarKana("ば", "ぼ"),
 
         SimilarKana("る", "ろ")
 )
@@ -140,7 +173,34 @@ val Katakanas = arrayOf(
         RawKana("ロ", "ro"),
         RawKana("ワ", "wa"),
         RawKana("ヲ", "wo"),
-        RawKana("ン", "n")
+        RawKana("ン", "n"),
+
+        RawKana("ガ", "ga"),
+        RawKana("ギ", "gi"),
+        RawKana("グ", "gu"),
+        RawKana("ゲ", "ge"),
+        RawKana("ゴ", "go"),
+        RawKana("ザ", "za"),
+        RawKana("ジ", "ji"),
+        RawKana("ズ", "zu"),
+        RawKana("ゼ", "ze"),
+        RawKana("ゾ", "zo"),
+        RawKana("ダ", "da"),
+        RawKana("ヂ", "ji"),
+        RawKana("ヅ", "zu"),
+        RawKana("デ", "de"),
+        RawKana("ド", "do"),
+        RawKana("バ", "ba"),
+        RawKana("ビ", "bi"),
+        RawKana("ブ", "bu"),
+        RawKana("ベ", "be"),
+        RawKana("ボ", "bo"),
+
+        RawKana("パ", "pa"),
+        RawKana("ピ", "pi"),
+        RawKana("プ", "pu"),
+        RawKana("ペ", "pe"),
+        RawKana("ポ", "po")
 )
 
 val SimilarKatakanas = arrayOf(
@@ -153,10 +213,13 @@ val SimilarKatakanas = arrayOf(
 
         SimilarKana("ク", "ケ"),
         SimilarKana("ク", "タ"),
+        SimilarKana("グ", "ゲ"),
+        SimilarKana("グ", "ダ"),
 
         SimilarKana("コ", "ユ"),
 
         SimilarKana("サ", "セ" /* せ */),
+        SimilarKana("ザ", "ゼ" /* ぜ */),
 
         SimilarKana("シ", "ツ"),
         SimilarKana("シ", "ソ"),
@@ -169,13 +232,20 @@ val SimilarKatakanas = arrayOf(
         SimilarKana("ソ", "ン"),
         SimilarKana("ノ", "ン"),
 
+        SimilarKana("ジ", "ヅ"),
+        SimilarKana("ジ", "ゾ"),
+        SimilarKana("ヅ", "ゾ"),
+
         SimilarKana("セ", "ヒ"),
+        SimilarKana("ゼ", "ビ"),
 
         SimilarKana("チ", "テ"),
+        SimilarKana("ヂ", "デ"),
 
         SimilarKana("ナ", "メ"),
 
         SimilarKana("フ", "ツ" /* つ */),
+        SimilarKana("ブ", "ヅ" /* づ */),
 
         SimilarKana("レ", "シ" /* し */)
 )
