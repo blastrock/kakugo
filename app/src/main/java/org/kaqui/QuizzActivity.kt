@@ -303,7 +303,9 @@ class QuizzActivity : AppCompatActivity() {
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
-                currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType)) {
+                currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType) ||
+                // same for question text
+                currentAnswers[position].getQuestionText(quizzType) == currentQuestion.getQuestionText(quizzType)) {
             // correct
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
             itemView.applyScoreUpdate(scoreUpdate)
