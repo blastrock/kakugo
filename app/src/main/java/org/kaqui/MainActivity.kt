@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                     val db = KaquiDb.getInstance(this)
                     val dump = db.dumpUserData()
                     db.replaceKanjis(parseFile(textStream.bufferedReader()))
-                    db.restoreUserDataDump(dump)
+                    db.restoreUserData(dump)
                 }
             }
             Log.v(TAG, "Finished downloading kanjidic")

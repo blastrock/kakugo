@@ -123,6 +123,15 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             database.execSQL("DROP TABLE IF EXISTS similar_hiraganas")
             onCreate(database)
         }
+        if (oldVersion < 9) {
+            val dump = dumpUserData(database)
+            database.execSQL("DROP TABLE IF EXISTS hiraganas")
+            database.execSQL("DROP TABLE IF EXISTS similar_hiraganas")
+            database.execSQL("DROP TABLE IF EXISTS katakanas")
+            database.execSQL("DROP TABLE IF EXISTS similar_katakanas")
+            onCreate(database)
+            restoreUserData(database, dump)
+        }
     }
 
     val empty: Boolean
@@ -280,40 +289,17 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    data class DumpRow(val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
+    data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>)
+    data class DumpRow(val char: Char, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
-    fun dumpUserData(): Map<Char, DumpRow> {
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-            val ret = mutableMapOf<Char, DumpRow>()
-            while (cursor.moveToNext()) {
-                ret[cursor.getString(0)[0]] = DumpRow(cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0)
-            }
-            return ret
-        }
-    }
-
-    fun restoreUserDataDump(data: Map<Char, DumpRow>) {
-        writableDatabase.beginTransaction()
-        try {
-            val cv = ContentValues()
-            for ((kanji, row) in data) {
-                cv.put("short_score", row.shortScore)
-                cv.put("long_score", row.longScore)
-                cv.put("last_correct", row.lastCorrect)
-                cv.put("enabled", if (row.enabled) 1 else 0)
-                writableDatabase.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(kanji.toString()))
-            }
-            writableDatabase.setTransactionSuccessful()
-        } finally {
-            writableDatabase.endTransaction()
-        }
-    }
+    fun dumpUserData(): Dump = dumpUserData(readableDatabase)
+    fun restoreUserData(data: Dump) = restoreUserData(writableDatabase, data)
 
     companion object {
         private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 8
+        private const val DATABASE_VERSION = 9
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
         private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
@@ -332,6 +318,64 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             if (singleton == null)
                 singleton = KaquiDb(context)
             return singleton!!
+        }
+
+        fun dumpUserData(database: SQLiteDatabase): Dump {
+            val hiraganas = mutableListOf<DumpRow>()
+            database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+                while (cursor.moveToNext())
+                    hiraganas.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+            }
+            val katakanas = mutableListOf<DumpRow>()
+            database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+                while (cursor.moveToNext())
+                    katakanas.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+            }
+            val kanjis = mutableListOf<DumpRow>()
+            database.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+                while (cursor.moveToNext())
+                    kanjis.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+            }
+            return Dump(hiraganas, katakanas, kanjis)
+        }
+
+        fun restoreUserData(database: SQLiteDatabase, data: Dump) {
+            database.beginTransaction()
+            try {
+                run {
+                    val cv = ContentValues()
+                    for (row in data.hiraganas) {
+                        cv.put("short_score", row.shortScore)
+                        cv.put("long_score", row.longScore)
+                        cv.put("last_correct", row.lastCorrect)
+                        cv.put("enabled", if (row.enabled) 1 else 0)
+                        database.update(HIRAGANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.char.toString()))
+                    }
+                }
+                run {
+                    val cv = ContentValues()
+                    for (row in data.katakanas) {
+                        cv.put("short_score", row.shortScore)
+                        cv.put("long_score", row.longScore)
+                        cv.put("last_correct", row.lastCorrect)
+                        cv.put("enabled", if (row.enabled) 1 else 0)
+                        database.update(KATAKANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.char.toString()))
+                    }
+                }
+                run {
+                    val cv = ContentValues()
+                    for (row in data.kanjis) {
+                        cv.put("short_score", row.shortScore)
+                        cv.put("long_score", row.longScore)
+                        cv.put("last_correct", row.lastCorrect)
+                        cv.put("enabled", if (row.enabled) 1 else 0)
+                        database.update(KANJIS_TABLE_NAME, cv, "kanji = ?", arrayOf(row.char.toString()))
+                    }
+                }
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
         }
     }
 }
