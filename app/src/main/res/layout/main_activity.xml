@@ -145,12 +145,6 @@
                 android:layout_margin="8dp"
                 android:text="@string/kanji_selection" />
 
-            <Button
-                android:id="@+id/download_kanjidic_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/download_database" />
         </LinearLayout>
 
     </LinearLayout>

@@ -17,8 +17,6 @@ import org.kaqui.model.parseFile
 import org.kaqui.settings.KanaSelectionActivity
 import org.kaqui.settings.KanjiSelectionActivity
 import java.io.Serializable
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.zip.GZIPInputStream
 
 class MainActivity : AppCompatActivity() {
@@ -33,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         KANJI,
     }
 
-    private var downloadProgress: ProgressDialog? = null
+    private var initProgress: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,14 +63,7 @@ class MainActivity : AppCompatActivity() {
         kanji_selection_button.setOnClickListener {
             startActivity(Intent(this, KanjiSelectionActivity::class.java))
         }
-        download_kanjidic_button.setOnClickListener {
-            showDownloadProgressDialog()
-            async(CommonPool) {
-                downloadKanjiDic()
-            }
-        }
 
-        updateButtonStatuses()
         setMode(Mode.MAIN)
     }
 
@@ -81,6 +72,16 @@ class MainActivity : AppCompatActivity() {
         hiragana_layout.visibility = if (mode == Mode.HIRAGANA) View.VISIBLE else View.GONE
         katakana_layout.visibility = if (mode == Mode.KATAKANA) View.VISIBLE else View.GONE
         kanji_layout.visibility = if (mode == Mode.KANJI) View.VISIBLE else View.GONE
+
+        if (mode == Mode.KANJI) {
+            val db = KaquiDb.getInstance(this)
+            if (db.empty) {
+                showDownloadProgressDialog()
+                async(CommonPool) {
+                    initKanjiDic()
+                }
+            }
+        }
     }
 
     override fun onBackPressed() {
@@ -103,39 +104,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateButtonStatuses() {
-        val db = KaquiDb.getInstance(this)
-        if (db.empty) {
-            start_kanji_reading_quizz.isEnabled = false
-            start_reading_kanji_quizz.isEnabled = false
-            start_kanji_meaning_quizz.isEnabled = false
-            start_meaning_kanji_quizz.isEnabled = false
-            kanji_selection_button.isEnabled = false
-        } else {
-            start_kanji_reading_quizz.isEnabled = true
-            start_reading_kanji_quizz.isEnabled = true
-            start_kanji_meaning_quizz.isEnabled = true
-            start_meaning_kanji_quizz.isEnabled = true
-            kanji_selection_button.isEnabled = true
-        }
-    }
-
     private fun showDownloadProgressDialog() {
-        downloadProgress = ProgressDialog(this)
-        downloadProgress!!.setMessage("Downloading kanjidic database")
-        downloadProgress!!.setCancelable(false)
-        downloadProgress!!.show()
+        initProgress = ProgressDialog(this)
+        initProgress!!.setMessage("Initializing kanji database, this can take up to a minute.")
+        initProgress!!.setCancelable(false)
+        initProgress!!.show()
     }
 
-    private fun downloadKanjiDic() {
+    private fun initKanjiDic() {
         try {
-            Log.v(TAG, "Downloading kanjidic")
-            val url = URL("https://axanux.net/kanjidic_.gz")
-            val urlConnection = url.openConnection() as HttpURLConnection
-            urlConnection.requestMethod = "GET"
-            urlConnection.connect()
-
-            urlConnection.inputStream.use { gzipStream ->
+            resources.openRawResource(R.raw.kanjidic).use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
                     val db = KaquiDb.getInstance(this)
                     val dump = db.dumpUserData()
@@ -143,22 +121,16 @@ class MainActivity : AppCompatActivity() {
                     db.restoreUserData(dump)
                 }
             }
-            Log.v(TAG, "Finished downloading kanjidic")
-            async(UI) {
-                downloadProgress!!.dismiss()
-                downloadProgress = null
-                updateButtonStatuses()
-            }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to download and parse kanjidic", e)
+            Log.e(TAG, "Failed to initialize kanji database", e)
             async(UI) {
-                Toast.makeText(this@MainActivity, "Failed to download and parse kanjidic: " + e.message, Toast.LENGTH_LONG).show()
-                downloadProgress!!.dismiss()
-                downloadProgress = null
-                updateButtonStatuses()
+                Toast.makeText(this@MainActivity, "Failed to initialize kanji database: " + e.message, Toast.LENGTH_LONG).show()
             }
         }
+
+        async(UI) {
+            initProgress!!.dismiss()
+            initProgress = null
+        }
     }
-
 }
-
