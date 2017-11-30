@@ -125,7 +125,7 @@ class SrsCalculator {
             val now = Calendar.getInstance().timeInMillis / 1000
 
             val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0
-            val spreadEnd = (daysEnd * 0.8) / 7.0
+            val spreadEnd = (daysEnd * 0.5) / 7.0
 
             return ProbaParamsStage1(0.5, daysEnd, 0.5 / 7.0, spreadEnd)
         }
