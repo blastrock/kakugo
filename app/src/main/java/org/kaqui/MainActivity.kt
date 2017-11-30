@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         return {
             val db = KaquiDb.getInstance(this)
             if (db.kanjiView.getEnabledCount() < 10) {
-                Toast.makeText(this, "You must enable at least 10 kanjis in settings", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.enable_a_few_kanji, Toast.LENGTH_LONG).show()
             } else {
                 val intent = Intent(this, QuizzActivity::class.java)
                 intent.putExtra("quizz_type", type)
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showDownloadProgressDialog() {
         initProgress = ProgressDialog(this)
-        initProgress!!.setMessage("Initializing kanji database, this can take up to a minute.")
+        initProgress!!.setMessage(getString(R.string.initializing_kanji_db))
         initProgress!!.setCancelable(false)
         initProgress!!.show()
     }
@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize kanji database", e)
             async(UI) {
-                Toast.makeText(this@MainActivity, "Failed to initialize kanji database: " + e.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, getString(R.string.failed_to_init_kanji_db, e.message), Toast.LENGTH_LONG).show()
             }
         }
 
