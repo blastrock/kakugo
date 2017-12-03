@@ -3,6 +3,7 @@ package org.kaqui
 import android.animation.ValueAnimator
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcel
 import android.support.design.widget.BottomSheetBehavior
@@ -371,15 +372,7 @@ class QuizzActivity : AppCompatActivity() {
             itemView.background = ContextCompat.getDrawable(this, style)
         if (item.contents is Kanji)
             itemView.setOnClickListener {
-                val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-                intent.putExtra("kanjis", (item.contents as Kanji).kanji)
-                intent.putExtra("search_in_kanjidic", true)
-                intent.putExtra("showEntryDetailOnSingleResult", true)
-                try {
-                    startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(this, R.string.aedict_not_installed, Toast.LENGTH_SHORT).show()
-                }
+                showItemInDict(item.contents as Kanji)
             }
         itemView.setOnLongClickListener {
             if (probabilityData != null)
@@ -396,6 +389,18 @@ class QuizzActivity : AppCompatActivity() {
         }
 
         return line
+    }
+
+    private fun showItemInDict(kanji: Kanji) {
+        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+        intent.putExtra("kanjis", kanji.kanji)
+        intent.putExtra("search_in_kanjidic", true)
+        intent.putExtra("showEntryDetailOnSingleResult", true)
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${kanji.kanji}%20%23kanji")))
+        }
     }
 
     private fun showItemProbabilityData(item: String, probabilityData: DebugData) {
