@@ -96,7 +96,7 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("ぐ", "べ"),
 
         SimilarKana("せ", "さ" /* サ */),
-        SimilarKana("ぜ", "ざ" /* ザ */), // katakana
+        SimilarKana("ぜ", "ざ" /* ザ */),
 
         SimilarKana("さ", "ち"),
         SimilarKana("ざ", "ぢ"),

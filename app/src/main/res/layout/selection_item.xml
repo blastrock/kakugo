@@ -38,7 +38,6 @@
                 android:layout_width="35sp"
                 android:layout_height="35sp"
                 android:layout_gravity="center"
-                android:layout_weight="0"
                 android:gravity="center"
                 android:textSize="25sp" />
 
@@ -49,6 +48,7 @@
                 android:layout_alignBottom="@+id/item_text"
                 android:layout_alignEnd="@+id/item_text"
                 android:layout_alignParentEnd="false"
+                android:contentDescription="@string/info_button"
                 android:tint="@color/colorPrimary"
                 android:visibility="invisible"
                 app:srcCompat="@android:drawable/ic_dialog_info" />

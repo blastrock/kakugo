@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import org.kaqui.*
-import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
 import org.kaqui.model.text
