@@ -199,7 +199,7 @@ class QuizzActivity : AppCompatActivity() {
     private fun showNewQuestion() {
         val db = KaquiDb.getInstance(this)
 
-        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getMinLastCorrect())
+        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
         if (ids.size < NB_ANSWERS) {
             Log.wtf(TAG, "Too few items selected for a quizz: ${ids.size}")
             return
@@ -293,7 +293,7 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        val minLastCorrect = itemView.getMinLastCorrect()
+        val minLastCorrect = itemView.getLastCorrectFirstDecile()
 
         if (certainty == Certainty.DONTKNOW) {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)

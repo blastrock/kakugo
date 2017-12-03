@@ -68,8 +68,13 @@ class LearningDbView(
         }
     }
 
-    fun getMinLastCorrect(): Int {
-        readableDatabase.query(tableName, arrayOf("MIN(last_correct)"), "enabled = 1", null, null, null, null).use { cursor ->
+    fun getLastCorrectFirstDecile(): Int {
+        val count = readableDatabase.query(tableName, arrayOf("COUNT(*)"), "enabled = 1", null, null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            cursor.getInt(0)
+        }
+        val decile1 = count / 10
+        readableDatabase.query(tableName, arrayOf("last_correct"), "enabled = 1", null, null, null, "last_correct ASC", "$decile1, 1").use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)
         }
