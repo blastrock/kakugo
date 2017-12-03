@@ -81,7 +81,7 @@ class LearningDbView(
     }
 
     fun getEnabledCount(): Int {
-        readableDatabase.query(tableName, arrayOf("COUNT(id_kanji)"), "enabled = 1", null, null, null, null).use { cursor ->
+        readableDatabase.query(tableName, arrayOf("COUNT(*)"), "enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)
         }

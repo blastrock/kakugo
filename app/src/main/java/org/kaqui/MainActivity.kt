@@ -94,8 +94,8 @@ class MainActivity : AppCompatActivity() {
     private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
         return {
             val db = KaquiDb.getInstance(this)
-            if (db.kanjiView.getEnabledCount() < 10) {
-                Toast.makeText(this, R.string.enable_a_few_kanji, Toast.LENGTH_LONG).show()
+            if (QuizzActivity.getItemView(db, type).getEnabledCount() < 10) {
+                Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
             } else {
                 val intent = Intent(this, QuizzActivity::class.java)
                 intent.putExtra("quizz_type", type)

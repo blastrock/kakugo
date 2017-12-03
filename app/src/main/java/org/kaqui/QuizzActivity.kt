@@ -34,6 +34,14 @@ class QuizzActivity : AppCompatActivity() {
         private const val NB_ANSWERS = 6
         private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         private const val MAX_HISTORY_SIZE = 40
+
+        fun getItemView(db: KaquiDb, quizzType: QuizzType): LearningDbView {
+                return when (quizzType) {
+                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
+                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
+                    QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
+                }
+            }
     }
 
     data class DebugData(
@@ -506,11 +514,6 @@ class QuizzActivity : AppCompatActivity() {
     private val itemView: LearningDbView
         get() {
             val db = KaquiDb.getInstance(this)
-
-            return when (quizzType) {
-                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
-                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
-                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
-            }
+            return getItemView(db, quizzType)
         }
 }
