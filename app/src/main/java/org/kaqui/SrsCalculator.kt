@@ -57,7 +57,7 @@ class SrsCalculator {
         private fun getProbabilityDataStage2(probaParams: ProbaParamsStage2, stage1: ProbabilityData): ProbabilityData {
             stage1.finalProbability = probaParams.shortCoefficient * stage1.shortWeight + probaParams.longCoefficient * stage1.longWeight
             if (stage1.finalProbability < 0)
-                Log.wtf(TAG,"Invalid finalProbability: ${stage1.finalProbability}, shortCoefficient: ${probaParams.shortCoefficient}, longCoefficient: ${probaParams.longCoefficient}, shortWeight: ${stage1.shortWeight}, longWeight: ${stage1.longWeight}")
+                Log.wtf(TAG, "Invalid finalProbability: ${stage1.finalProbability}, shortCoefficient: ${probaParams.shortCoefficient}, longCoefficient: ${probaParams.longCoefficient}, shortWeight: ${stage1.shortWeight}, longWeight: ${stage1.longWeight}")
             return stage1
         }
 
@@ -90,7 +90,7 @@ class SrsCalculator {
             val newLongScore =
                     when {
                         previousLongScore < targetScore ->
-                            Math.min(1.0, previousLongScore + (1.0/10.0 *
+                            Math.min(1.0, previousLongScore + (1.0 / 10.0 *
                                     Math.min(daysSinceCorrect / 2.0 /
                                             (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)))
                         previousLongScore > targetScore ->
@@ -106,10 +106,7 @@ class SrsCalculator {
             Log.v(TAG, "Short score of $item going from $previousShortScore to $newShortScore")
             Log.v(TAG, "Long score of $item going from $previousLongScore to $newLongScore")
 
-            return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(),
-                    if (certainty != Certainty.DONTKNOW)
-                        now
-                    else null)
+            return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(), now)
         }
 
         private fun certaintyToWeight(certainty: Certainty): Double =
