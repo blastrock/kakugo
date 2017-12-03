@@ -115,6 +115,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
         jlpt_selection_list.visibility = View.VISIBLE
         kanji_list.visibility = View.GONE
         statsFragment.setLevel(null)
+        (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
     }
 
     private fun showKanjiList(level: Int?) {
