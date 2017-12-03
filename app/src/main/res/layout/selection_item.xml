@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -24,15 +25,34 @@
             android:scaleX="1.5"
             android:scaleY="1.5" />
 
-        <TextView
-            android:id="@+id/item_text"
-            android:layout_width="35sp"
-            android:layout_height="35sp"
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="8dp"
             android:layout_weight="0"
-            android:gravity="center"
-            android:textSize="25sp" />
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/item_text"
+                android:layout_width="35sp"
+                android:layout_height="35sp"
+                android:layout_gravity="center"
+                android:layout_weight="0"
+                android:gravity="center"
+                android:textSize="25sp" />
+
+            <ImageView
+                android:id="@+id/item_info"
+                android:layout_width="10sp"
+                android:layout_height="10sp"
+                android:layout_alignBottom="@+id/item_text"
+                android:layout_alignEnd="@+id/item_text"
+                android:layout_alignParentEnd="false"
+                android:tint="@color/colorPrimary"
+                android:visibility="invisible"
+                app:srcCompat="@android:drawable/ic_dialog_info" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/item_description"

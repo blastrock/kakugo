@@ -17,10 +17,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.GridLayout
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import kotlinx.android.synthetic.main.quizz_activity.*
 import org.kaqui.model.*
 import java.util.*
@@ -370,10 +367,12 @@ class QuizzActivity : AppCompatActivity() {
         itemView.text = item.text
         if (style != null)
             itemView.background = ContextCompat.getDrawable(this, style)
-        if (item.contents is Kanji)
+        if (item.contents is Kanji) {
+            line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
             itemView.setOnClickListener {
                 showItemInDict(item.contents as Kanji)
             }
+        }
         itemView.setOnLongClickListener {
             if (probabilityData != null)
                 showItemProbabilityData(item.text, probabilityData)
