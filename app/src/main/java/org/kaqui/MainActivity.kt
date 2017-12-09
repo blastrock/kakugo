@@ -112,10 +112,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initKanjiDic() {
-        val tmpFile = File.createTempFile("kanjidic", "", cacheDir)
+        val tmpFile = File.createTempFile("dict", "", cacheDir)
         try {
             val db = KaquiDb.getInstance(this)
-            resources.openRawResource(R.raw.kanjidic).use { gzipStream ->
+            resources.openRawResource(R.raw.dict).use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
                     tmpFile.outputStream().use { outputStream ->
                         textStream.copyTo(outputStream)

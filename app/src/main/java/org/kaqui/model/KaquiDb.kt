@@ -29,6 +29,18 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "id_kanji2 INTEGER NOT NULL REFERENCES kanjis(id),"
                         + "UNIQUE(id_kanji1, id_kanji2)"
                         + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $WORDS_TABLE_NAME ("
+                        + "id INTEGER PRIMARY KEY,"
+                        + "item TEXT NOT NULL,"
+                        + "reading TEXT NOT NULL DEFAULT '',"
+                        + "meanings TEXT NOT NULL DEFAULT '',"
+                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
+                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
+                        + "enabled INTEGER NOT NULL DEFAULT 1,"
+                        + "UNIQUE(item, reading)"
+                        + ")")
 
         initKanas(database, HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, Hiraganas, SimilarHiraganas)
         initKanas(database, KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, Katakanas, SimilarKatakanas)
@@ -116,8 +128,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             }
         }
 
-    fun replaceKanjis(kanjiDb: String) {
-        writableDatabase.execSQL("ATTACH DATABASE ? AS kanjiData", arrayOf(kanjiDb))
+    fun replaceKanjis(dictDb: String) {
+        writableDatabase.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
         writableDatabase.beginTransaction()
         try {
             val dump = dumpUserData()
@@ -127,19 +139,39 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                     "INSERT INTO $KANJIS_TABLE_NAME "
                             + "(id, item, on_readings, kun_readings, meanings, jlpt_level) "
                             + "SELECT id, item, on_readings, kun_readings, meanings, jlpt_level "
-                            + "FROM kanjiData.kanjis"
+                            + "FROM dict.kanjis"
             )
             writableDatabase.execSQL(
                     "INSERT INTO $SIMILARITIES_TABLE_NAME "
                             + "(id_kanji1, id_kanji2) "
                             + "SELECT id_kanji1, id_kanji2 "
-                            + "FROM kanjiData.kanjis_similars "
+                            + "FROM dict.kanjis_similars "
             )
             restoreUserData(dump)
             writableDatabase.setTransactionSuccessful()
         } finally {
             writableDatabase.endTransaction()
-            writableDatabase.execSQL("DETACH DATABASE kanjiData")
+            writableDatabase.execSQL("DETACH DATABASE dict")
+        }
+    }
+
+    fun replaceWords(dictDb: String) {
+        writableDatabase.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
+        writableDatabase.beginTransaction()
+        try {
+            val dump = dumpUserData()
+            writableDatabase.delete(WORDS_TABLE_NAME, null, null)
+            writableDatabase.execSQL(
+                    "INSERT INTO $WORDS_TABLE_NAME "
+                            + "(id, item, reading, meanings) "
+                            + "SELECT id, item, reading, meanings "
+                            + "FROM dict.words"
+            )
+            restoreUserData(dump)
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+            writableDatabase.execSQL("DETACH DATABASE dict")
         }
     }
 
@@ -253,6 +285,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val SIMILARITIES_TABLE_NAME = "similarities"
+
+        private const val WORDS_TABLE_NAME = "words"
 
         private var singleton: KaquiDb? = null
 
