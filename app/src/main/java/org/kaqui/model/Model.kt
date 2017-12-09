@@ -4,13 +4,12 @@ sealed class ItemContents
 
 data class Kanji(
         var kanji: String,
-        var readings: List<Reading>,
+        var on_readings: List<String>,
+        var kun_readings: List<String>,
         var meanings: List<String>,
         var similarities: List<Item>,
         var jlptLevel: Int
 ) : ItemContents()
-
-data class Reading(var readingType: String, var reading: String)
 
 data class Kana(
         var kana: String,
@@ -52,8 +51,8 @@ fun Item.getAnswerText(quizzType: QuizzType): String =
         }
 
 private val Kanji.readingsText: String
-    get() = readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
-            readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading })
+    get() = on_readings.joinToString(", ") + "\n" +
+            kun_readings.joinToString(", ")
 
 private val Kanji.meaningsText: String
     get() = meanings.joinToString(", ")
@@ -78,8 +77,8 @@ val Item.description: String
         }
         is Kanji -> {
             val kanji = contents as Kanji
-            kanji.readings.filter { it.readingType == "ja_on" }.joinToString(", ", transform = { it.reading }) + "\n" +
-                    kanji.readings.filter { it.readingType == "ja_kun" }.joinToString(", ", transform = { it.reading }) + "\n" +
+            kanji.on_readings.joinToString(", ") + "\n" +
+                    kanji.kun_readings.joinToString(", ") + "\n" +
                     kanji.meanings.joinToString(", ")
         }
     }

@@ -13,9 +13,9 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.QuizzType
-import org.kaqui.model.parseFile
 import org.kaqui.settings.KanaSelectionActivity
 import org.kaqui.settings.KanjiSelectionActivity
+import java.io.File
 import java.io.Serializable
 import java.util.zip.GZIPInputStream
 
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         if (mode == Mode.KANJI) {
             val db = KaquiDb.getInstance(this)
-            if (db.empty) {
+            if (db.needsInit) {
                 showDownloadProgressDialog()
                 async(CommonPool) {
                     initKanjiDic()
@@ -112,20 +112,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initKanjiDic() {
+        val tmpFile = File.createTempFile("kanjidic", "", cacheDir)
         try {
+            val db = KaquiDb.getInstance(this)
             resources.openRawResource(R.raw.kanjidic).use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
-                    val db = KaquiDb.getInstance(this)
-                    val dump = db.dumpUserData()
-                    db.replaceKanjis(parseFile(textStream.bufferedReader()))
-                    db.restoreUserData(dump)
+                    tmpFile.outputStream().use { outputStream ->
+                        textStream.copyTo(outputStream)
+                    }
                 }
             }
+            db.replaceKanjis(tmpFile.absolutePath)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize kanji database", e)
             async(UI) {
                 Toast.makeText(this@MainActivity, getString(R.string.failed_to_init_kanji_db, e.message), Toast.LENGTH_LONG).show()
             }
+        } finally {
+            tmpFile.delete()
         }
 
         async(UI) {
