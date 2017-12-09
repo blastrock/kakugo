@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         HIRAGANA,
         KATAKANA,
         KANJI,
+        WORD,
     }
 
     private var initProgress: ProgressDialog? = null
@@ -41,18 +42,28 @@ class MainActivity : AppCompatActivity() {
         hiragana_quizz.transformationMethod = null
         katakana_quizz.transformationMethod = null
         kanji_quizz.transformationMethod = null
+        word_quizz.transformationMethod = null
 
         hiragana_quizz.setOnClickListener { setMode(Mode.HIRAGANA) }
         katakana_quizz.setOnClickListener { setMode(Mode.KATAKANA) }
         kanji_quizz.setOnClickListener { setMode(Mode.KANJI) }
+        word_quizz.setOnClickListener { setMode(Mode.WORD) }
+
         start_hiragana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.HIRAGANA_TO_ROMAJI)))
         start_romaji_to_hiragana_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.ROMAJI_TO_HIRAGANA)))
+
         start_katakana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KATAKANA_TO_ROMAJI)))
         start_romaji_to_katakana_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.ROMAJI_TO_KATAKANA)))
+
         start_kanji_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_READING)))
         start_reading_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_KANJI)))
         start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_MEANING)))
         start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_KANJI)))
+
+        start_word_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.WORD_TO_READING)))
+        start_reading_word_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_WORD)))
+        start_word_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.WORD_TO_MEANING)))
+        start_meaning_word_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_WORD)))
 
         hiragana_selection_button.setOnClickListener {
             startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.HIRAGANA as Serializable))
@@ -63,6 +74,8 @@ class MainActivity : AppCompatActivity() {
         kanji_selection_button.setOnClickListener {
             startActivity(Intent(this, KanjiSelectionActivity::class.java))
         }
+        word_selection_button.setOnClickListener {
+        }
 
         setMode(Mode.MAIN)
     }
@@ -72,13 +85,14 @@ class MainActivity : AppCompatActivity() {
         hiragana_layout.visibility = if (mode == Mode.HIRAGANA) View.VISIBLE else View.GONE
         katakana_layout.visibility = if (mode == Mode.KATAKANA) View.VISIBLE else View.GONE
         kanji_layout.visibility = if (mode == Mode.KANJI) View.VISIBLE else View.GONE
+        word_layout.visibility = if (mode == Mode.WORD) View.VISIBLE else View.GONE
 
-        if (mode == Mode.KANJI) {
+        if (mode == Mode.KANJI || mode == Mode.WORD) {
             val db = KaquiDb.getInstance(this)
             if (db.needsInit) {
                 showDownloadProgressDialog()
                 async(CommonPool) {
-                    initKanjiDic()
+                    initDic()
                 }
             }
         }
@@ -111,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         initProgress!!.show()
     }
 
-    private fun initKanjiDic() {
+    private fun initDic() {
         val tmpFile = File.createTempFile("dict", "", cacheDir)
         try {
             val db = KaquiDb.getInstance(this)
@@ -123,10 +137,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             db.replaceKanjis(tmpFile.absolutePath)
+            db.replaceWords(tmpFile.absolutePath)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize kanji database", e)
+            Log.e(TAG, "Failed to initialize database", e)
             async(UI) {
-                Toast.makeText(this@MainActivity, getString(R.string.failed_to_init_kanji_db, e.message), Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, getString(R.string.failed_to_init_db, e.message), Toast.LENGTH_LONG).show()
             }
         } finally {
             tmpFile.delete()

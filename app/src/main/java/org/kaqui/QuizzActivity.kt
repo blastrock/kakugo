@@ -37,9 +37,12 @@ class QuizzActivity : AppCompatActivity() {
 
         fun getItemView(db: KaquiDb, quizzType: QuizzType): LearningDbView {
                 return when (quizzType) {
-                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
                     QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
                     QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
+
+                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
+
+                    QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
                 }
             }
     }
@@ -75,9 +78,12 @@ class QuizzActivity : AppCompatActivity() {
 
         statsFragment = StatsFragment.newInstance(null)
         statsFragment.mode = when (quizzType) {
-            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> StatsFragment.Mode.KANJI
             QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> StatsFragment.Mode.HIRAGANA
             QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> StatsFragment.Mode.KATAKANA
+
+            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> StatsFragment.Mode.KANJI
+
+            QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> StatsFragment.Mode.WORD
         }
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
@@ -86,13 +92,14 @@ class QuizzActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         when (quizzType) {
-            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> {
+            QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> {
                 question_text.textSize = 50.0f
                 initButtons(answers_layout, R.layout.kanji_answer_line)
             }
-            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> {
+
+            QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> {
                 when (quizzType) {
-                    QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI ->
+                    QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI ->
                         question_text.textSize = 20.0f
                     QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA ->
                         question_text.textSize = 50.0f
@@ -506,9 +513,12 @@ class QuizzActivity : AppCompatActivity() {
 
     private fun getItem(db: KaquiDb, id: Int): Item =
             when (quizzType) {
-                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.getKanji(id)
                 QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.getHiragana(id)
                 QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.getKatakana(id)
+
+                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.getKanji(id)
+
+                QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.getWord(id)
             }
 
     private val itemView: LearningDbView

@@ -124,8 +124,15 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         get() {
             readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "on_readings <> ''", null, null, null, null).use { cursor ->
                 cursor.moveToFirst()
-                return cursor.getInt(0) == 0
+                if (cursor.getInt(0) == 0)
+                    return true
             }
+            readableDatabase.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "reading <> ''", null, null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                if (cursor.getInt(0) == 0)
+                    return true
+            }
+            return false
         }
 
     fun replaceKanjis(dictDb: String) {
@@ -181,6 +188,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", this::getKatakana)
     val kanjiView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", this::getKanji)
+    val wordView: LearningDbView
+        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", this::getWord)
 
     fun search(text: String): List<Int> {
         readableDatabase.rawQuery(
@@ -245,6 +254,27 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             item.longScore = cursor.getDouble(3)
             item.lastCorrect = cursor.getLong(4)
             item.enabled = cursor.getInt(5) != 0
+        }
+        return item
+    }
+
+    fun getWord(id: Int): Item {
+        val contents = Word("", "", listOf())
+        val item = Item(id, contents, 0.0, 0.0, 0, false)
+        readableDatabase.query(WORDS_TABLE_NAME,
+                arrayOf("item", "reading", "meanings", "short_score", "long_score", "last_correct", "enabled"),
+                "id = ?", arrayOf(id.toString()),
+                null, null, null).use { cursor ->
+            if (cursor.count == 0)
+                throw RuntimeException("Can't find kanji with id " + id)
+            cursor.moveToFirst()
+            contents.word = cursor.getString(0)
+            contents.reading = cursor.getString(1)
+            contents.meanings = cursor.getString(2).split('_')
+            item.shortScore = cursor.getDouble(3)
+            item.longScore = cursor.getDouble(4)
+            item.lastCorrect = cursor.getLong(5)
+            item.enabled = cursor.getInt(6) != 0
         }
         return item
     }

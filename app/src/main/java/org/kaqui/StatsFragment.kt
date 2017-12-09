@@ -20,6 +20,7 @@ class StatsFragment : Fragment() {
         HIRAGANA,
         KATAKANA,
         KANJI,
+        WORD,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +71,8 @@ class StatsFragment : Fragment() {
                 updateStats(db.katakanaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
             Mode.KANJI ->
                 updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+            Mode.WORD ->
+                updateStats(db.wordView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
         }
     }
 
