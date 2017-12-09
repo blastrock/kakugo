@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, KanjiSelectionActivity::class.java))
         }
         word_selection_button.setOnClickListener {
+            startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.WORD as Serializable))
         }
 
         setMode(Mode.MAIN)

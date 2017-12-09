@@ -3,8 +3,11 @@ package org.kaqui.settings
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import org.kaqui.*
 import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
@@ -28,6 +31,8 @@ class KanaSelectionAdapter(private val view: LearningDbView, private val context
         holder.itemId = item.id
         holder.enabled.isChecked = item.enabled
         holder.itemText.text = item.text
+        if (item.text.length > 1)
+            (holder.itemText.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         val background = getBackgroundFromScore(item.shortScore)
         holder.itemText.background = ContextCompat.getDrawable(context, background)
         holder.itemDescription.text = item.description

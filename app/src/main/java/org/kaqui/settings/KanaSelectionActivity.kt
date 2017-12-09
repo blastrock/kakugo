@@ -18,7 +18,8 @@ class KanaSelectionActivity : AppCompatActivity() {
 
     enum class Mode {
         HIRAGANA,
-        KATAKANA
+        KATAKANA,
+        WORD,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +35,7 @@ class KanaSelectionActivity : AppCompatActivity() {
         statsFragment.mode = when (mode) {
             Mode.HIRAGANA -> StatsFragment.Mode.HIRAGANA
             Mode.KATAKANA -> StatsFragment.Mode.KATAKANA
+            Mode.WORD -> StatsFragment.Mode.WORD
         }
         statsFragment.setShowDisabled(true)
         supportFragmentManager.beginTransaction()
@@ -43,6 +45,7 @@ class KanaSelectionActivity : AppCompatActivity() {
         dbView = when (mode) {
             Mode.HIRAGANA -> KaquiDb.getInstance(this).hiraganaView
             Mode.KATAKANA -> KaquiDb.getInstance(this).katakanaView
+            Mode.WORD -> KaquiDb.getInstance(this).wordView
         }
 
         listAdapter = KanaSelectionAdapter(dbView, this, statsFragment)
