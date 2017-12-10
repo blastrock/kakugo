@@ -1,11 +1,15 @@
 package org.kaqui.settings
 
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.kana_selection_activity.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
@@ -15,6 +19,7 @@ class KanaSelectionActivity : AppCompatActivity() {
     private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: KanaSelectionAdapter
     private lateinit var statsFragment: StatsFragment
+    private lateinit var mode: Mode
 
     enum class Mode {
         HIRAGANA,
@@ -25,7 +30,7 @@ class KanaSelectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val mode = intent.getSerializableExtra("mode") as Mode
+        mode = intent.getSerializableExtra("mode") as Mode
 
         setContentView(R.layout.kana_selection_activity)
 
@@ -56,6 +61,10 @@ class KanaSelectionActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.kanji_selection_menu, menu)
+        if (mode == Mode.WORD) {
+            val autoselect = menu.findItem(R.id.autoselect)
+            autoselect.isVisible = true
+        }
         return true
     }
 
@@ -71,6 +80,22 @@ class KanaSelectionActivity : AppCompatActivity() {
                 dbView.setAllEnabled(false)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
+                return true
+            }
+            R.id.autoselect -> {
+                async(UI) {
+                    val progressDialog = ProgressDialog(this@KanaSelectionActivity)
+                    progressDialog.setMessage(getString(R.string.autoselecting_words))
+                    progressDialog.setCancelable(false)
+                    progressDialog.show()
+
+                    async(CommonPool) { KaquiDb.getInstance(this@KanaSelectionActivity).autoSelectWords() }.await()
+
+                    listAdapter.notifyDataSetChanged()
+                    statsFragment.updateStats()
+
+                    progressDialog.dismiss()
+                }
                 return true
             }
             else ->

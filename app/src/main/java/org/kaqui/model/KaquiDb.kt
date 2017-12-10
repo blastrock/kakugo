@@ -295,6 +295,39 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
+    fun autoSelectWords() {
+        val enabledKanjis = HashSet<Char>()
+        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("item"), "enabled = 1", null, null, null, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                enabledKanjis.add(cursor.getString(0)[0])
+            }
+        }
+        var allWords =
+                readableDatabase.query(WORDS_TABLE_NAME, arrayOf("id, item"), null, null, null, null, null).use { cursor ->
+                    val ret = mutableListOf<Pair<Long, String>>()
+                    while (cursor.moveToNext()) {
+                        ret.add(Pair(cursor.getLong(0), cursor.getString(1)))
+                    }
+                    ret.toList()
+                }
+        allWords = allWords.map { Pair(it.first, it.second.filter { isKanji(it) }) }
+        allWords = allWords.filter { it.second.all { it in enabledKanjis } }
+
+        writableDatabase.beginTransaction()
+        try {
+            val cv = ContentValues()
+            cv.put("enabled", false)
+            writableDatabase.update(WORDS_TABLE_NAME, cv, null, null)
+            cv.put("enabled", true)
+            for (word in allWords) {
+                writableDatabase.update(WORDS_TABLE_NAME, cv, "id = ?", arrayOf(word.first.toString()))
+            }
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
     data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>)
     data class DumpRow(val char: Char, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
@@ -319,6 +352,11 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val WORDS_TABLE_NAME = "words"
 
         private var singleton: KaquiDb? = null
+
+        private fun isKanji(c: Char): Boolean {
+            // This is the hiragana/katakana range
+            return c.toInt() !in 0x3040..0x3100
+        }
 
         fun getInstance(context: Context): KaquiDb {
             if (singleton == null)
