@@ -26,8 +26,8 @@ class StatsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (arguments != null && arguments.containsKey("level"))
-            level = arguments.getInt("level")
+        if (arguments != null && arguments!!.containsKey("level"))
+            level = arguments!!.getInt("level")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -63,7 +63,7 @@ class StatsFragment : Fragment() {
     }
 
     fun updateStats() {
-        val db = KaquiDb.getInstance(context)
+        val db = KaquiDb.getInstance(context!!)
         when (mode) {
             Mode.HIRAGANA ->
                 updateStats(db.hiraganaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
@@ -80,7 +80,7 @@ class StatsFragment : Fragment() {
         fun newInstance(level: Int?): StatsFragment {
             val fragment = StatsFragment()
             if (level != null)
-                fragment.arguments.putInt("level", level)
+                fragment.arguments!!.putInt("level", level)
             return fragment
         }
 
