@@ -380,6 +380,8 @@ class QuizzActivity : AppCompatActivity() {
 
         val itemView = line.findViewById<TextView>(R.id.item_text)
         itemView.text = item.text
+        if (item.text.length > 1)
+            (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         if (style != null)
             itemView.background = ContextCompat.getDrawable(this, style)
         if (item.contents is Kanji) {
