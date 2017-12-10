@@ -7,10 +7,10 @@ import java.util.*
 
 class SrsCalculator {
 
-    data class ProbabilityData(var itemId: Int, var shortScore: Double, var shortWeight: Double, var longScore: Double, var longWeight: Double, var lastCorrect: Long, var daysSinceCorrect: Double, var finalProbability: Double)
+    data class ProbabilityData(@JvmField var itemId: Int, @JvmField var shortScore: Double, @JvmField var shortWeight: Double, @JvmField var longScore: Double, @JvmField var longWeight: Double, @JvmField var lastCorrect: Long, @JvmField var daysSinceCorrect: Double, @JvmField var finalProbability: Double)
 
-    data class ProbaParamsStage1(val daysBegin: Double, val daysEnd: Double, val spreadBegin: Double, val spreadEnd: Double)
-    data class ProbaParamsStage2(val shortCoefficient: Double, val longCoefficient: Double)
+    data class ProbaParamsStage1(@JvmField val daysBegin: Double, @JvmField val daysEnd: Double, @JvmField val spreadBegin: Double, @JvmField val spreadEnd: Double)
+    data class ProbaParamsStage2(@JvmField val shortCoefficient: Double, @JvmField val longCoefficient: Double)
 
     data class DebugParams(var probaParamsStage1: ProbaParamsStage1, var probaParamsStage2: ProbaParamsStage2)
 
