@@ -16,6 +16,8 @@ class SrsCalculator {
 
     data class ScoreUpdate(val itemId: Int, val shortScore: Float, val longScore: Float, val lastCorrect: Long?)
 
+    private data class Stage1Stats(@JvmField val totalShortWeight: Double, @JvmField val totalLongWeight: Double, @JvmField val countUnknown: Int)
+
     companion object {
         private const val TAG = "SrsCalculator"
 
@@ -29,12 +31,9 @@ class SrsCalculator {
             val probaParams = getProbaParamsStage1(now, minLastCorrect)
             Log.v(TAG, "probaParamsStage1: $probaParams, minLastCorrect: $minLastCorrect")
             val ret = items.map({ getProbabilityDataStage1(now, probaParams, it) })
-            val (totalShortProba, totalLongProba) = ret.fold(Pair(0.0, 0.0), { acc, v ->
-                Pair(acc.first + v.shortWeight, acc.second + v.longWeight)
-            })
-            val countUnknown = ret.count { it.shortScore < 1.0 }
-            val probaParams2 = getProbaParamsStage2(countUnknown, totalShortProba, totalLongProba)
-            Log.v(TAG, "probaParamsStage2: $probaParams2, totalShortProba: $totalShortProba, totalLongProba: $totalLongProba, countUnknown: $countUnknown")
+            val stage1Stats = getStage1Stats(ret)
+            val probaParams2 = getProbaParamsStage2(stage1Stats)
+            Log.v(TAG, "probaParamsStage2: $probaParams2, stage1Stats: $stage1Stats")
             return Pair(ret.map { getProbabilityDataStage2(probaParams2, it) }, DebugParams(probaParams, probaParams2))
         }
 
@@ -53,6 +52,19 @@ class SrsCalculator {
                 Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastCorrect: ${stage0.lastCorrect}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
 
             return stage0
+        }
+
+        private fun getStage1Stats(items: List<ProbabilityData>): Stage1Stats {
+            var totalShortWeight = 0.0
+            var totalLongWeight = 0.0
+            var countUnknown = 0
+            for (item in items) {
+                totalShortWeight += item.shortWeight
+                totalLongWeight += item.longWeight
+                if (item.shortScore < 1.0)
+                    countUnknown += 1
+            }
+            return Stage1Stats(totalShortWeight, totalLongWeight, countUnknown)
         }
 
         private fun getProbabilityDataStage2(probaParams: ProbaParamsStage2, stage1: ProbabilityData): ProbabilityData {
@@ -129,15 +141,15 @@ class SrsCalculator {
 
         private fun lerp(start: Double, end: Double, value: Double): Double = start + value * (end - start)
 
-        private fun getProbaParamsStage2(countUnknown: Int, totalShortProba: Double, totalLongProba: Double): ProbaParamsStage2 {
-            if (totalShortProba == 0.0 || totalLongProba == 0.0)
+        private fun getProbaParamsStage2(stage1Stats: Stage1Stats): ProbaParamsStage2 {
+            if (stage1Stats.totalShortWeight == 0.0 || stage1Stats.totalLongWeight == 0.0)
                 return ProbaParamsStage2(1.0, 1.0)
 
-            val neededShortProba = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, Math.min(countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
-            val neededLongProba = 1 - neededShortProba
-            val total = totalShortProba + totalLongProba
-            val shortCoefficient = neededShortProba * total / totalShortProba
-            val longCoefficient = neededLongProba * total / totalLongProba
+            val neededShortWeight = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, Math.min(stage1Stats.countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
+            val neededLongWeight = 1 - neededShortWeight
+            val total = stage1Stats.totalShortWeight + stage1Stats.totalLongWeight
+            val shortCoefficient = neededShortWeight * total / stage1Stats.totalShortWeight
+            val longCoefficient = neededLongWeight * total / stage1Stats.totalLongWeight
             return ProbaParamsStage2(shortCoefficient, longCoefficient)
         }
     }
