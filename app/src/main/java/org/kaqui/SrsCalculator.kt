@@ -24,9 +24,11 @@ class SrsCalculator {
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
 
         fun fillProbalities(items: List<ProbabilityData>, minLastCorrect: Int): Pair<List<ProbabilityData>, DebugParams> {
-            val probaParams = getProbaParamsStage1(minLastCorrect)
+            val now = Calendar.getInstance().timeInMillis / 1000
+
+            val probaParams = getProbaParamsStage1(now, minLastCorrect)
             Log.v(TAG, "probaParamsStage1: $probaParams, minLastCorrect: $minLastCorrect")
-            val ret = items.map({ getProbabilityDataStage1(probaParams, it) })
+            val ret = items.map({ getProbabilityDataStage1(now, probaParams, it) })
             val (totalShortProba, totalLongProba) = ret.fold(Pair(0.0, 0.0), { acc, v ->
                 Pair(acc.first + v.shortWeight, acc.second + v.longWeight)
             })
@@ -36,19 +38,18 @@ class SrsCalculator {
             return Pair(ret.map { getProbabilityDataStage2(probaParams2, it) }, DebugParams(probaParams, probaParams2))
         }
 
-        private fun getProbabilityDataStage1(probaParams: ProbaParamsStage1, stage0: ProbabilityData): ProbabilityData {
+        private fun getProbabilityDataStage1(now: Long, probaParams: ProbaParamsStage1, stage0: ProbabilityData): ProbabilityData {
             stage0.shortWeight = 1 - stage0.shortScore
-            if (stage0.shortWeight !in 0..1)
+            if (stage0.shortWeight < 0 || stage0.shortWeight > 1)
                 Log.wtf(TAG, "Invalid shortWeight: ${stage0.shortWeight}, shortScore: ${stage0.shortScore}")
 
-            val now = Calendar.getInstance().timeInMillis / 1000
             stage0.daysSinceCorrect = (now - stage0.lastCorrect) / 3600.0 / 24.0
 
             val sigmoidArg = (stage0.daysSinceCorrect - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * stage0.longScore) /
                     (probaParams.spreadBegin + (probaParams.spreadEnd - probaParams.spreadBegin) * stage0.longScore)
             // cap it to avoid overflow on Math.exp in the sigmoid
             stage0.longWeight = sigmoid(Math.min(sigmoidArg, 10.0))
-            if (stage0.longWeight !in 0..1)
+            if (stage0.longWeight < 0 || stage0.longWeight > 1)
                 Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastCorrect: ${stage0.lastCorrect}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
 
             return stage0
@@ -62,7 +63,9 @@ class SrsCalculator {
         }
 
         fun getScoreUpdate(minLastCorrect: Int, item: Item, certainty: Certainty): ScoreUpdate {
-            val probaParams = getProbaParamsStage1(minLastCorrect)
+            val now = Calendar.getInstance().timeInMillis / 1000
+
+            val probaParams = getProbaParamsStage1(now, minLastCorrect)
             val targetScore = certaintyToWeight(certainty)
 
             val previousShortScore = item.shortScore
@@ -76,7 +79,6 @@ class SrsCalculator {
             }
 
             val previousLongScore = item.longScore
-            val now = Calendar.getInstance().timeInMillis / 1000
             // if lastCorrect wasn't initialized, set it to now
             val lastCorrect =
                     if (item.lastCorrect > 0)
@@ -118,9 +120,7 @@ class SrsCalculator {
 
         private fun sigmoid(x: Double) = Math.exp(x) / (1 + Math.exp(x))
 
-        private fun getProbaParamsStage1(minLastCorrect: Int): ProbaParamsStage1 {
-            val now = Calendar.getInstance().timeInMillis / 1000
-
+        private fun getProbaParamsStage1(now: Long, minLastCorrect: Int): ProbaParamsStage1 {
             val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0
             val spreadEnd = (daysEnd * 0.5) / 7.0
 
