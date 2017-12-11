@@ -154,7 +154,12 @@ class QuizzActivity : AppCompatActivity() {
             val currentLine = lineLayouts[i / columns]
             val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, currentLine, false)
 
-            answerTexts.add(answerLine.findViewById(R.id.answer_text))
+            val textView: TextView = answerLine.findViewById(R.id.answer_text)
+            when (quizzType) {
+                QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> textView.textSize = 30.0f
+                else -> Unit
+            }
+            answerTexts.add(textView)
             answerLine.findViewById<View>(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
             answerLine.findViewById<View>(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
 

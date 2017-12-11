@@ -172,7 +172,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:visibility="gone"
                 android:text="@string/reading_word_quizz" />
 
             <Button
@@ -187,7 +186,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:visibility="gone"
                 android:text="@string/meaning_word_quizz" />
 
             <Button
