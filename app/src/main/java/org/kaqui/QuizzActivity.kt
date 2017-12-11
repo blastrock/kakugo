@@ -389,6 +389,11 @@ class QuizzActivity : AppCompatActivity() {
             itemView.setOnClickListener {
                 showItemInDict(item.contents as Kanji)
             }
+        } else if (item.contents is Word) {
+            line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
+            itemView.setOnClickListener {
+                showItemInDict(item.contents as Word)
+            }
         }
         itemView.setOnLongClickListener {
             if (probabilityData != null)
@@ -416,6 +421,17 @@ class QuizzActivity : AppCompatActivity() {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${kanji.kanji}%20%23kanji")))
+        }
+    }
+
+    private fun showItemInDict(word: Word) {
+        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+        intent.putExtra("kanjis", word.word)
+        intent.putExtra("showEntryDetailOnSingleResult", true)
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${word.word}")))
         }
     }
 
