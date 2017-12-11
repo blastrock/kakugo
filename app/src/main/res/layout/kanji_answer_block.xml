@@ -3,33 +3,52 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_columnWeight="1"
+    android:layout_weight="1.0"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/answer_text"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_weight="0"
-        android:textSize="50sp" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/maybe_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0"
-        android:backgroundTint="@android:color/holo_orange_light"
-        android:text="@string/maybe" />
+        <TextView
+            android:id="@+id/answer_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:textAlignment="center"
+            android:textSize="50sp" />
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/sure_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0"
-        android:backgroundTint="@android:color/holo_green_light"
-        android:text="@string/sure" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/sure_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:backgroundTint="@android:color/holo_green_light"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:text="@string/sure" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/maybe_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:backgroundTint="@android:color/holo_orange_light"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:text="@string/maybe" />
+        </LinearLayout>
+
+    </LinearLayout>
 
     <View
         android:id="@+id/item_separator"

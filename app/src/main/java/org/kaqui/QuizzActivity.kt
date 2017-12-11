@@ -13,6 +13,7 @@ import android.support.v4.widget.NestedScrollView
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -32,6 +33,7 @@ class QuizzActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "QuizzActivity"
         private const val NB_ANSWERS = 6
+        private const val COLUMNS = 2
         private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         private const val MAX_HISTORY_SIZE = 40
 
@@ -93,23 +95,34 @@ class QuizzActivity : AppCompatActivity() {
         when (quizzType) {
             QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> {
                 question_text.textSize = 50.0f
-                initButtons(answers_layout, R.layout.kanji_answer_line)
+                initButtons(listOf(answers_layout), NB_ANSWERS, R.layout.kanji_answer_line)
             }
 
             QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> {
                 when (quizzType) {
-                    QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI ->
+                    QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> {
                         question_text.textSize = 20.0f
+                        (question_text.layoutParams as LinearLayout.LayoutParams).topMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, resources.displayMetrics).toInt()
+                        (question_text.layoutParams as LinearLayout.LayoutParams).bottomMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, resources.displayMetrics).toInt()
+                    }
                     QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA ->
                         question_text.textSize = 50.0f
                     else -> Unit
                 }
 
-                val gridLayout = GridLayout(this)
-                gridLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                gridLayout.columnCount = 3
-                initButtons(gridLayout, R.layout.kanji_answer_block)
-                answers_layout.addView(gridLayout, 0)
+                val answersLayout = LinearLayout(this)
+                answersLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                answersLayout.orientation = LinearLayout.VERTICAL
+                val lineLayouts = (0..NB_ANSWERS / COLUMNS).map {
+                    val line = LinearLayout(this)
+                    line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                    line.orientation = LinearLayout.HORIZONTAL
+                    line
+                }
+                for (line in lineLayouts)
+                    answersLayout.addView(line)
+                initButtons(lineLayouts, COLUMNS, R.layout.kanji_answer_block)
+                answers_layout.addView(answersLayout, 0)
             }
         }
 
@@ -135,16 +148,17 @@ class QuizzActivity : AppCompatActivity() {
         }
     }
 
-    private fun initButtons(parentLayout: ViewGroup, layoutToInflate: Int) {
+    private fun initButtons(lineLayouts: List<LinearLayout>, columns: Int, layoutToInflate: Int) {
         val answerTexts = ArrayList<TextView>(NB_ANSWERS)
         for (i in 0 until NB_ANSWERS) {
-            val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, parentLayout, false)
+            val currentLine = lineLayouts[i / columns]
+            val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, currentLine, false)
 
             answerTexts.add(answerLine.findViewById(R.id.answer_text))
             answerLine.findViewById<View>(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
             answerLine.findViewById<View>(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
 
-            parentLayout.addView(answerLine, i)
+            currentLine.addView(answerLine, i % columns)
         }
         this.answerTexts = answerTexts
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }

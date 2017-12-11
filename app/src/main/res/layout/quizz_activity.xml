@@ -34,7 +34,6 @@
                 android:id="@+id/session_score"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 android:textAlignment="center" />
 
             <TextView
