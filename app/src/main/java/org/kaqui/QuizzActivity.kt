@@ -446,6 +446,8 @@ class QuizzActivity : AppCompatActivity() {
         val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
         intent.putExtra("kanjis", word.word)
         intent.putExtra("showEntryDetailOnSingleResult", true)
+        intent.putExtra("match_jp", "Exact")
+        intent.putExtra("deinflect", false)
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
