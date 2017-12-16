@@ -41,8 +41,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "UNIQUE(item, reading)"
                         + ")")
 
-        initKanas(database, HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, Hiraganas, SimilarHiraganas)
-        initKanas(database, KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, Katakanas, SimilarKatakanas)
+        initKanas(database, HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, getHiraganas(), getSimilarHiraganas())
+        initKanas(database, KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, getKatakanas(), getSimilarKatakanas())
     }
 
     private fun initKanas(database: SQLiteDatabase, tableName: String, similarKanaTableName: String, kanas: Array<RawKana>, similarKanas: Array<SimilarKana>) {

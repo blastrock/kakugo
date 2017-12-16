@@ -3,7 +3,7 @@ package org.kaqui.data
 data class RawKana(val kana: String, val romaji: String)
 data class SimilarKana(val kana: String, val similar: String)
 
-val Hiraganas = arrayOf(
+fun getHiraganas() = arrayOf(
         RawKana("あ", "a"),
         RawKana("い", "i"),
         RawKana("う", "u"),
@@ -79,7 +79,7 @@ val Hiraganas = arrayOf(
         RawKana("ぽ", "po")
 )
 
-val SimilarHiraganas = arrayOf(
+fun getSimilarHiraganas() = arrayOf(
         SimilarKana("あ", "お"),
         SimilarKana("あ", "や" /* ヤ */),
 
@@ -127,7 +127,7 @@ val SimilarHiraganas = arrayOf(
         SimilarKana("る", "ろ")
 )
 
-val Katakanas = arrayOf(
+fun getKatakanas() = arrayOf(
         RawKana("ア", "a"),
         RawKana("イ", "i"),
         RawKana("ウ", "u"),
@@ -203,7 +203,7 @@ val Katakanas = arrayOf(
         RawKana("ポ", "po")
 )
 
-val SimilarKatakanas = arrayOf(
+fun getSimilarKatakanas() = arrayOf(
         SimilarKana("ア", "ヤ"),
 
         SimilarKana("ウ", "ワ"),
