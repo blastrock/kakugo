@@ -2,7 +2,6 @@ package org.kaqui.model
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.kaqui.data.*
@@ -331,8 +330,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>)
     data class DumpRow(val char: Char, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
-    fun dumpUserData(): Dump = dumpUserData(readableDatabase)
-    fun restoreUserData(data: Dump) = restoreUserData(writableDatabase, data)
+    private fun dumpUserData(): Dump = dumpUserData(readableDatabase)
+    private fun restoreUserData(data: Dump) = restoreUserData(writableDatabase, data)
 
     companion object {
         private const val TAG = "KaquiDb"
@@ -364,7 +363,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             return singleton!!
         }
 
-        fun dumpUserDataV9(database: SQLiteDatabase): Dump {
+        private fun dumpUserDataV9(database: SQLiteDatabase): Dump {
             val hiraganas = mutableListOf<DumpRow>()
             database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
@@ -383,7 +382,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             return Dump(hiraganas, katakanas, kanjis)
         }
 
-        fun dumpUserData(database: SQLiteDatabase): Dump {
+        private fun dumpUserData(database: SQLiteDatabase): Dump {
             val hiraganas = mutableListOf<DumpRow>()
             database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
@@ -402,7 +401,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             return Dump(hiraganas, katakanas, kanjis)
         }
 
-        fun restoreUserData(database: SQLiteDatabase, data: Dump) {
+        private fun restoreUserData(database: SQLiteDatabase, data: Dump) {
             database.beginTransaction()
             try {
                 run {

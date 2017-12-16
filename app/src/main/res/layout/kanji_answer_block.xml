@@ -9,7 +9,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -31,7 +30,6 @@
                 android:id="@+id/sure_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
                 android:backgroundTint="@android:color/holo_green_light"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
@@ -42,7 +40,6 @@
                 android:id="@+id/maybe_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
                 android:backgroundTint="@android:color/holo_orange_light"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
