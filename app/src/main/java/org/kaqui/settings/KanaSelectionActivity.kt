@@ -17,7 +17,7 @@ import org.kaqui.model.LearningDbView
 
 class KanaSelectionActivity : AppCompatActivity() {
     private lateinit var dbView: LearningDbView
-    private lateinit var listAdapter: KanaSelectionAdapter
+    private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
 
@@ -53,7 +53,7 @@ class KanaSelectionActivity : AppCompatActivity() {
             Mode.WORD -> KaquiDb.getInstance(this).wordView
         }
 
-        listAdapter = KanaSelectionAdapter(dbView, this, statsFragment)
+        listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter
         item_list.layoutManager = LinearLayoutManager(this)
         listAdapter.setup()

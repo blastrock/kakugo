@@ -13,11 +13,26 @@ import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
 import org.kaqui.model.text
 
-class KanaSelectionAdapter(private val view: LearningDbView, private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
+class ItemSelectionAdapter(private val view: LearningDbView, private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
     private var ids: List<Int> = listOf()
 
     fun setup() {
         ids = view.getAllItems()
+        notifyDataSetChanged()
+    }
+
+    fun searchFor(text: String) {
+        ids = view.search(text)
+        notifyDataSetChanged()
+    }
+
+    fun clearAll() {
+        ids = listOf()
+        notifyDataSetChanged()
+    }
+
+    fun showLevel(level: Int) {
+        ids = view.getItemsForLevel(level)
         notifyDataSetChanged()
     }
 

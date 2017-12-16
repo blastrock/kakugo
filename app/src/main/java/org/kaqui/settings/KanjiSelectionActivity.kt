@@ -19,7 +19,7 @@ import android.widget.*
 
 class KanjiSelectionActivity : AppCompatActivity() {
     private lateinit var db: KaquiDb
-    private lateinit var listAdapter: KanjiSelectionAdapter
+    private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
 
     private var isSearching = false
@@ -43,7 +43,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
         jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this)
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
 
-        listAdapter = KanjiSelectionAdapter(this, statsFragment)
+        listAdapter = ItemSelectionAdapter(db.kanjiView, this, statsFragment)
         kanji_list.adapter = listAdapter
         kanji_list.layoutManager = LinearLayoutManager(this)
 
