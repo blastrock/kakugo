@@ -1,6 +1,7 @@
 package org.kaqui.settings
 
 import android.content.Context
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,8 +26,10 @@ class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
         val mehCount = view.findViewById<TextView>(R.id.meh_count)
         val goodCount = view.findViewById<TextView>(R.id.good_count)
         val statsLayout = view.findViewById<LinearLayout>(R.id.stats_layout)
-        statsLayout.elevation = 8.0f
-        statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            statsLayout.elevation = 8.0f
+            statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
+        }
         val db = KaquiDb.getInstance(context)
         StatsFragment.updateStats(db.kanjiView.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
