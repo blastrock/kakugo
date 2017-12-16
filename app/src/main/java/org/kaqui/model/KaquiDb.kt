@@ -144,8 +144,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             writableDatabase.delete(KANJIS_TABLE_NAME, null, null)
             writableDatabase.execSQL(
                     "INSERT INTO $KANJIS_TABLE_NAME "
-                            + "(id, item, on_readings, kun_readings, meanings, jlpt_level) "
-                            + "SELECT id, item, on_readings, kun_readings, meanings, jlpt_level "
+                            + "(id, item, on_readings, kun_readings, meanings, jlpt_level, enabled) "
+                            + "SELECT id, item, on_readings, kun_readings, meanings, jlpt_level, jlpt_level = 5 "
                             + "FROM dict.kanjis"
             )
             writableDatabase.execSQL(
