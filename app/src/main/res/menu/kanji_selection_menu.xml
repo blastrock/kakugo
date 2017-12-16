@@ -11,7 +11,7 @@
     <item
         android:id="@+id/autoselect"
         android:visible="false"
-        android:icon="@android:drawable/ic_menu_add"
         app:showAsAction="always"
-        android:title="@string/autoselect_from_kanji" />
+        android:title="@string/autoselect_from_kanji"
+        android:titleCondensed="@string/autoselect_from_kanji_short"/>
 </menu>

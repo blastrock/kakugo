@@ -11,6 +11,7 @@
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>
     <string name="autoselect_from_kanji">Automatically select words from selected kanji</string>
+    <string name="autoselect_from_kanji_short">Auto</string>
     <string name="import_selection">Import kanji selection</string>
     <string name="hiragana_romaji_quizz">Hiragana to romaji (ひ→hi)</string>
     <string name="romaji_hiragana_quizz">Romaji to hiragana (hi→ひ)</string>
