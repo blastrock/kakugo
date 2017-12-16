@@ -15,7 +15,7 @@ class KanjiSelectionAdapter(private val context: Context, private val statsFragm
     private var ids: List<Int> = listOf()
 
     fun searchFor(text: String) {
-        ids = db.search(text)
+        ids = db.searchKanji(text)
         notifyDataSetChanged()
     }
 
