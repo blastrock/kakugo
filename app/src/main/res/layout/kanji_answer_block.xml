@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_columnWeight="1"
     android:layout_weight="1.0"
     android:orientation="vertical">
 
@@ -35,7 +35,8 @@
                 android:backgroundTint="@android:color/holo_green_light"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
-                android:text="@string/sure" />
+                android:text="@string/sure"
+                tools:targetApi="lollipop" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/maybe_button"
@@ -45,7 +46,8 @@
                 android:backgroundTint="@android:color/holo_orange_light"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
-                android:text="@string/maybe" />
+                android:text="@string/maybe"
+                tools:targetApi="lollipop" />
         </LinearLayout>
 
     </LinearLayout>
