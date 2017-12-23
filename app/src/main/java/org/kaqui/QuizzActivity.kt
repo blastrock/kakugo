@@ -548,15 +548,18 @@ class QuizzActivity : AppCompatActivity() {
         parcel.recycle()
     }
 
-    private fun getItem(db: KaquiDb, id: Int): Item =
+    private fun getDbView(db: KaquiDb): LearningDbView =
             when (quizzType) {
-                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.getHiragana(id)
-                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.getKatakana(id)
+                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
+                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
-                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.getKanji(id)
+                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
 
-                QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.getWord(id)
+                QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
             }
+
+    private fun getItem(db: KaquiDb, id: Int): Item =
+            getDbView(db).getItem(id)
 
     private val itemView: LearningDbView
         get() {
