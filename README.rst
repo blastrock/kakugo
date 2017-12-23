@@ -11,6 +11,7 @@ Features include:
 
 - Hiragana, Katakana quizzes
 - Kanji quizzes by reading and meaning
+- Vocabulary quizzes by reading and meaning
 - Unique spaced repetition formula that adapts to your learning pace
 - Unlimited quiz sessions that allow you to take a quiz at any time, for how long you want, useful to efficiently spend commuting time
 - Show similar-looking kanji in answers to teach you the difference
@@ -40,6 +41,8 @@ Screenshots
 .. image:: https://github.com/blastrock/kaqui/raw/sc/Screenshot2.png
     :width: 30%
 .. image:: https://github.com/blastrock/kaqui/raw/sc/Screenshot3.png
+    :width: 30%
+.. image:: https://github.com/blastrock/kaqui/raw/sc/Screenshot7.png
     :width: 30%
 .. image:: https://github.com/blastrock/kaqui/raw/sc/Screenshot4.png
     :width: 30%
