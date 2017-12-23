@@ -35,7 +35,13 @@
             android:name="org.kaqui.QuizzActivity"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".settings.JlptSelectionActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
             android:name=".settings.KanjiSelectionActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".settings.KanjiSearchActivity"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".settings.KanaSelectionActivity"

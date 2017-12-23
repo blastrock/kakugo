@@ -79,8 +79,11 @@ class StatsFragment : Fragment() {
     companion object {
         fun newInstance(level: Int?): StatsFragment {
             val fragment = StatsFragment()
-            if (level != null)
-                fragment.arguments!!.putInt("level", level)
+            if (level != null) {
+                val args = Bundle()
+                args.putInt("level", level)
+                fragment.arguments = args
+            }
             return fragment
         }
 

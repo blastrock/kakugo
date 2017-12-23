@@ -13,6 +13,7 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.QuizzType
+import org.kaqui.settings.JlptSelectionActivity
 import org.kaqui.settings.KanaSelectionActivity
 import org.kaqui.settings.KanjiSelectionActivity
 import java.io.File
@@ -72,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.KATAKANA as Serializable))
         }
         kanji_selection_button.setOnClickListener {
-            startActivity(Intent(this, KanjiSelectionActivity::class.java))
+            startActivity(Intent(this, JlptSelectionActivity::class.java))
         }
         word_selection_button.setOnClickListener {
             startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.WORD as Serializable))
