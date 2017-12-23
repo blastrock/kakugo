@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
-import kotlinx.android.synthetic.main.kana_selection_activity.*
+import kotlinx.android.synthetic.main.item_selection_activity.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -40,7 +40,7 @@ class ItemSelectionActivity : AppCompatActivity() {
                 throw RuntimeException("Invalid level $selectedLevel")
         }
 
-        setContentView(R.layout.kana_selection_activity)
+        setContentView(R.layout.item_selection_activity)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
