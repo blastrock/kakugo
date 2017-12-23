@@ -15,7 +15,7 @@ import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.LearningDbView
 
-class KanaSelectionActivity : AppCompatActivity() {
+class ItemSelectionActivity : AppCompatActivity() {
     private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
@@ -94,12 +94,12 @@ class KanaSelectionActivity : AppCompatActivity() {
             }
             R.id.autoselect -> {
                 async(UI) {
-                    val progressDialog = ProgressDialog(this@KanaSelectionActivity)
+                    val progressDialog = ProgressDialog(this@ItemSelectionActivity)
                     progressDialog.setMessage(getString(R.string.autoselecting_words))
                     progressDialog.setCancelable(false)
                     progressDialog.show()
 
-                    async(CommonPool) { KaquiDb.getInstance(this@KanaSelectionActivity).autoSelectWords() }.await()
+                    async(CommonPool) { KaquiDb.getInstance(this@ItemSelectionActivity).autoSelectWords() }.await()
 
                     listAdapter.notifyDataSetChanged()
                     statsFragment.updateStats(dbView)
@@ -114,6 +114,6 @@ class KanaSelectionActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "KanaSelectionActivity"
+        private const val TAG = "ItemSelectionActivity"
     }
 }

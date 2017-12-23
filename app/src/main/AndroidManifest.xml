@@ -41,7 +41,7 @@
             android:name=".settings.KanjiSearchActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".settings.KanaSelectionActivity"
+            android:name=".settings.ItemSelectionActivity"
             android:parentActivityName=".MainActivity" />
     </application>
 

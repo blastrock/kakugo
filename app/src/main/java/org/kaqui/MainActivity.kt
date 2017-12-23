@@ -14,7 +14,7 @@ import kotlinx.coroutines.experimental.async
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.QuizzType
 import org.kaqui.settings.JlptSelectionActivity
-import org.kaqui.settings.KanaSelectionActivity
+import org.kaqui.settings.ItemSelectionActivity
 import java.io.File
 import java.io.Serializable
 import java.util.zip.GZIPInputStream
@@ -66,16 +66,16 @@ class MainActivity : AppCompatActivity() {
         start_meaning_word_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_WORD)))
 
         hiragana_selection_button.setOnClickListener {
-            startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.HIRAGANA as Serializable))
+            startActivity(Intent(this, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.HIRAGANA as Serializable))
         }
         katakana_selection_button.setOnClickListener {
-            startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.KATAKANA as Serializable))
+            startActivity(Intent(this, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.KATAKANA as Serializable))
         }
         kanji_selection_button.setOnClickListener {
             startActivity(Intent(this, JlptSelectionActivity::class.java))
         }
         word_selection_button.setOnClickListener {
-            startActivity(Intent(this, KanaSelectionActivity::class.java).putExtra("mode", KanaSelectionActivity.Mode.WORD as Serializable))
+            startActivity(Intent(this, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.WORD as Serializable))
         }
 
         setMode(Mode.MAIN)

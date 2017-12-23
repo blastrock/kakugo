@@ -73,8 +73,8 @@ class JlptSelectionActivity : AppCompatActivity() {
         val item = l.adapter.getItem(position) as Map<String, Any>
         val level = item["level"] as Int
 
-        startActivity(Intent(this, KanaSelectionActivity::class.java)
-                .putExtra("mode", KanaSelectionActivity.Mode.KANJI as Serializable)
+        startActivity(Intent(this, ItemSelectionActivity::class.java)
+                .putExtra("mode", ItemSelectionActivity.Mode.KANJI as Serializable)
                 .putExtra("level", level))
     }
 
