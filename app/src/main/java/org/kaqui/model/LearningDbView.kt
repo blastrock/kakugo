@@ -9,6 +9,7 @@ class LearningDbView(
         private val writableDatabase: SQLiteDatabase,
         private val tableName: String,
         private val idColumnName: String,
+        private val level: Int?,
         private val itemGetter: (id: Int) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
 
@@ -16,7 +17,13 @@ class LearningDbView(
 
     fun search(text: String): List<Int> = itemSearcher!!(text)
 
-    fun getAllItems(): List<Int> {
+    fun getAllItems(): List<Int> =
+            if (level != null)
+                getItemsForLevel(level)
+            else
+                getAllItemsForAnyLevel()
+
+    private fun getAllItemsForAnyLevel(): List<Int> {
         val ret = mutableListOf<Int>()
         readableDatabase.query(tableName, arrayOf(idColumnName), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
@@ -26,13 +33,7 @@ class LearningDbView(
         return ret
     }
 
-    fun setAllEnabled(enabled: Boolean) {
-        val cv = ContentValues()
-        cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(tableName, cv, null, null)
-    }
-
-    fun getItemsForLevel(level: Int): List<Int> {
+    private fun getItemsForLevel(level: Int): List<Int> {
         val ret = mutableListOf<Int>()
         readableDatabase.query(tableName, arrayOf(idColumnName), "jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
@@ -42,16 +43,28 @@ class LearningDbView(
         return ret
     }
 
+    fun setAllEnabled(enabled: Boolean) =
+            if (level != null)
+                setLevelEnabled(level, enabled)
+            else
+                setAllAnyLevelEnabled(enabled)
+
+    private fun setAllAnyLevelEnabled(enabled: Boolean) {
+        val cv = ContentValues()
+        cv.put("enabled", if (enabled) 1 else 0)
+        writableDatabase.update(tableName, cv, null, null)
+    }
+
+    private fun setLevelEnabled(level: Int, enabled: Boolean) {
+        val cv = ContentValues()
+        cv.put("enabled", if (enabled) 1 else 0)
+        writableDatabase.update(tableName, cv, "jlpt_level = ?", arrayOf(level.toString()))
+    }
+
     fun setItemEnabled(itemId: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
         writableDatabase.update(tableName, cv, idColumnName + " = ?", arrayOf(itemId.toString()))
-    }
-
-    fun setLevelEnabled(level: Int, enabled: Boolean) {
-        val cv = ContentValues()
-        cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(tableName, cv, "jlpt_level = ?", arrayOf(level.toString()))
     }
 
     fun isItemEnabled(id: Int): Boolean {

@@ -9,9 +9,10 @@ import kotlinx.android.synthetic.main.kanji_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
+import org.kaqui.model.LearningDbView
 
 class KanjiSelectionActivity : AppCompatActivity() {
-    private lateinit var db: KaquiDb
+    private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
 
@@ -34,12 +35,12 @@ class KanjiSelectionActivity : AppCompatActivity() {
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
 
-        db = KaquiDb.getInstance(this)
+        dbView = KaquiDb.getInstance(this).getKanjiView(selectedLevel)
 
-        listAdapter = ItemSelectionAdapter(db.kanjiView, this, statsFragment)
+        listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
         kanji_list.adapter = listAdapter
         kanji_list.layoutManager = LinearLayoutManager(this)
-        listAdapter.showLevel(selectedLevel)
+        listAdapter.setup()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -50,13 +51,13 @@ class KanjiSelectionActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.select_all -> {
-                db.kanjiView.setLevelEnabled(selectedLevel, true)
+                dbView.setAllEnabled(true)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
                 true
             }
             R.id.select_none -> {
-                db.kanjiView.setLevelEnabled(selectedLevel, false)
+                dbView.setAllEnabled(false)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats()
                 true

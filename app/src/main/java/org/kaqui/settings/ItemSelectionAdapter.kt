@@ -30,11 +30,6 @@ class ItemSelectionAdapter(private val view: LearningDbView, private val context
         notifyDataSetChanged()
     }
 
-    fun showLevel(level: Int) {
-        ids = view.getItemsForLevel(level)
-        notifyDataSetChanged()
-    }
-
     override fun getItemCount(): Int = ids.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
