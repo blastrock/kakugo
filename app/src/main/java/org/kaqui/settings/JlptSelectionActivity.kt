@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
+import java.io.Serializable
 
 class JlptSelectionActivity : AppCompatActivity() {
     private lateinit var db: KaquiDb
@@ -72,7 +73,9 @@ class JlptSelectionActivity : AppCompatActivity() {
         val item = l.adapter.getItem(position) as Map<String, Any>
         val level = item["level"] as Int
 
-        startActivity(Intent(this, KanjiSelectionActivity::class.java).putExtra("level", level))
+        startActivity(Intent(this, KanaSelectionActivity::class.java)
+                .putExtra("mode", KanaSelectionActivity.Mode.KANJI as Serializable)
+                .putExtra("level", level))
     }
 
     private fun importKanjis() {

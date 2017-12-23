@@ -15,7 +15,6 @@ import org.kaqui.model.KaquiDb
 import org.kaqui.model.QuizzType
 import org.kaqui.settings.JlptSelectionActivity
 import org.kaqui.settings.KanaSelectionActivity
-import org.kaqui.settings.KanjiSelectionActivity
 import java.io.File
 import java.io.Serializable
 import java.util.zip.GZIPInputStream

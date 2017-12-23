@@ -20,10 +20,12 @@ class KanaSelectionActivity : AppCompatActivity() {
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
+    private var selectedLevel: Int? = null
 
     enum class Mode {
         HIRAGANA,
         KATAKANA,
+        KANJI,
         WORD,
     }
 
@@ -31,6 +33,12 @@ class KanaSelectionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         mode = intent.getSerializableExtra("mode") as Mode
+
+        if (mode == Mode.KANJI) {
+            selectedLevel = intent.getIntExtra("level", -1)
+            if (selectedLevel!! < 0)
+                throw RuntimeException("Invalid level $selectedLevel")
+        }
 
         setContentView(R.layout.kana_selection_activity)
 
@@ -45,6 +53,7 @@ class KanaSelectionActivity : AppCompatActivity() {
         dbView = when (mode) {
             Mode.HIRAGANA -> KaquiDb.getInstance(this).hiraganaView
             Mode.KATAKANA -> KaquiDb.getInstance(this).katakanaView
+            Mode.KANJI -> KaquiDb.getInstance(this).getKanjiView(selectedLevel!!)
             Mode.WORD -> KaquiDb.getInstance(this).wordView
         }
 
