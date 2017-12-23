@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.view.ContextThemeWrapper
-import kotlinx.android.synthetic.main.kanji_selection_activity.*
+import kotlinx.android.synthetic.main.kana_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
@@ -19,7 +19,7 @@ class KanjiSearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.kanji_selection_activity)
+        setContentView(R.layout.kana_selection_activity)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -32,8 +32,8 @@ class KanjiSearchActivity : AppCompatActivity() {
         db = KaquiDb.getInstance(this)
 
         listAdapter = ItemSelectionAdapter(db.kanjiView, this, statsFragment)
-        kanji_list.adapter = listAdapter
-        kanji_list.layoutManager = LinearLayoutManager(this)
+        item_list.adapter = listAdapter
+        item_list.layoutManager = LinearLayoutManager(this)
 
         val searchView = SearchView(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Dark))
         searchView.isSubmitButtonEnabled = false
