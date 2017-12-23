@@ -44,7 +44,7 @@ class JlptSelectionActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        statsFragment.updateStats()
+        statsFragment.updateStats(db.kanjiView)
         (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
     }
 

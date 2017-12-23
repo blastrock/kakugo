@@ -12,16 +12,8 @@ import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 
 class StatsFragment : Fragment() {
-    private var _mode: Mode = Mode.KANJI
     private var level: Int? = null
     private var showDisabled: Boolean = false
-
-    enum class Mode {
-        HIRAGANA,
-        KATAKANA,
-        KANJI,
-        WORD,
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,44 +28,12 @@ class StatsFragment : Fragment() {
         return inflater.inflate(R.layout.stats_fragment, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        updateStats()
-    }
-
-    var mode: Mode
-        get() = _mode
-        set(m) {
-            _mode = m
-            if (context != null)
-                updateStats()
-        }
-
-    fun setLevel(l: Int?) {
-        level = l
-        if (context != null)
-            updateStats()
-    }
-
     fun setShowDisabled(v: Boolean) {
         showDisabled = v
-        if (context != null)
-            updateStats()
     }
 
-    fun updateStats() {
-        val db = KaquiDb.getInstance(context!!)
-        when (mode) {
-            Mode.HIRAGANA ->
-                updateStats(db.hiraganaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
-            Mode.KATAKANA ->
-                updateStats(db.katakanaView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
-            Mode.KANJI ->
-                updateStats(db.kanjiView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
-            Mode.WORD ->
-                updateStats(db.wordView.getStats(null), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
-        }
+    fun updateStats(dbView: LearningDbView) {
+        updateStats(dbView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
     }
 
     companion object {

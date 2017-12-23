@@ -56,6 +56,12 @@ class KanjiSearchActivity : AppCompatActivity() {
         searchView.requestFocusFromTouch()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        statsFragment.updateStats(db.kanjiView)
+    }
+
     private fun searchKanjiList(str: String) {
         if (str.isEmpty())
             listAdapter.clearAll()

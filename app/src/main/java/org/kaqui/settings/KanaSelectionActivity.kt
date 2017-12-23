@@ -37,11 +37,6 @@ class KanaSelectionActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         statsFragment = StatsFragment.newInstance(null)
-        statsFragment.mode = when (mode) {
-            Mode.HIRAGANA -> StatsFragment.Mode.HIRAGANA
-            Mode.KATAKANA -> StatsFragment.Mode.KATAKANA
-            Mode.WORD -> StatsFragment.Mode.WORD
-        }
         statsFragment.setShowDisabled(true)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
@@ -59,6 +54,12 @@ class KanaSelectionActivity : AppCompatActivity() {
         listAdapter.setup()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        statsFragment.updateStats(dbView)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.kanji_selection_menu, menu)
         if (mode == Mode.WORD) {
@@ -73,13 +74,13 @@ class KanaSelectionActivity : AppCompatActivity() {
             R.id.select_all -> {
                 dbView.setAllEnabled(true)
                 listAdapter.notifyDataSetChanged()
-                statsFragment.updateStats()
+                statsFragment.updateStats(dbView)
                 return true
             }
             R.id.select_none -> {
                 dbView.setAllEnabled(false)
                 listAdapter.notifyDataSetChanged()
-                statsFragment.updateStats()
+                statsFragment.updateStats(dbView)
                 return true
             }
             R.id.autoselect -> {
@@ -92,7 +93,7 @@ class KanaSelectionActivity : AppCompatActivity() {
                     async(CommonPool) { KaquiDb.getInstance(this@KanaSelectionActivity).autoSelectWords() }.await()
 
                     listAdapter.notifyDataSetChanged()
-                    statsFragment.updateStats()
+                    statsFragment.updateStats(dbView)
 
                     progressDialog.dismiss()
                 }

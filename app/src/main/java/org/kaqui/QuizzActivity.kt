@@ -77,14 +77,6 @@ class QuizzActivity : AppCompatActivity() {
         setContentView(R.layout.quizz_activity)
 
         statsFragment = StatsFragment.newInstance(null)
-        statsFragment.mode = when (quizzType) {
-            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> StatsFragment.Mode.HIRAGANA
-            QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> StatsFragment.Mode.KATAKANA
-
-            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> StatsFragment.Mode.KANJI
-
-            QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> StatsFragment.Mode.WORD
-        }
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
@@ -172,6 +164,12 @@ class QuizzActivity : AppCompatActivity() {
                 showItemProbabilityData(currentQuestion.text, currentDebugData!!)
             true
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        statsFragment.updateStats(getDbView(KaquiDb.getInstance(this)))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -298,7 +296,7 @@ class QuizzActivity : AppCompatActivity() {
     private fun showCurrentQuestion() {
         // when showNewQuestion is called in onCreate, statsFragment is not visible yet
         if (statsFragment.isVisible)
-            statsFragment.updateStats()
+            statsFragment.updateStats(getDbView(KaquiDb.getInstance(this)))
         updateSessionScore()
 
         question_text.text = currentQuestion.getQuestionText(quizzType)

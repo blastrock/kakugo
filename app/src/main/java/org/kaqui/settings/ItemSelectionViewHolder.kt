@@ -17,7 +17,7 @@ class ItemSelectionViewHolder(private val dbView: LearningDbView, v: View, priva
     init {
         enabled.setOnCheckedChangeListener { _, isChecked ->
             dbView.setItemEnabled(itemId, isChecked)
-            statsFragment.updateStats()
+            statsFragment.updateStats(dbView)
         }
     }
 }

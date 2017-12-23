@@ -53,13 +53,13 @@ class KanjiSelectionActivity : AppCompatActivity() {
             R.id.select_all -> {
                 dbView.setAllEnabled(true)
                 listAdapter.notifyDataSetChanged()
-                statsFragment.updateStats()
+                statsFragment.updateStats(dbView)
                 true
             }
             R.id.select_none -> {
                 dbView.setAllEnabled(false)
                 listAdapter.notifyDataSetChanged()
-                statsFragment.updateStats()
+                statsFragment.updateStats(dbView)
                 true
             }
             else ->
