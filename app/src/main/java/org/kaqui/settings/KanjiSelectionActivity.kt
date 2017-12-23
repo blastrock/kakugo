@@ -29,7 +29,7 @@ class KanjiSelectionActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        statsFragment = StatsFragment.newInstance(selectedLevel)
+        statsFragment = StatsFragment.newInstance()
         statsFragment.setShowDisabled(true)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)

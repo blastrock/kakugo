@@ -12,15 +12,7 @@ import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 
 class StatsFragment : Fragment() {
-    private var level: Int? = null
     private var showDisabled: Boolean = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        if (arguments != null && arguments!!.containsKey("level"))
-            level = arguments!!.getInt("level")
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -33,18 +25,12 @@ class StatsFragment : Fragment() {
     }
 
     fun updateStats(dbView: LearningDbView) {
-        updateStats(dbView.getStats(level), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        updateStats(dbView.getStats(), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
     }
 
     companion object {
-        fun newInstance(level: Int?): StatsFragment {
-            val fragment = StatsFragment()
-            if (level != null) {
-                val args = Bundle()
-                args.putInt("level", level)
-                fragment.arguments = args
-            }
-            return fragment
+        fun newInstance(): StatsFragment {
+            return StatsFragment()
         }
 
         fun updateStats(stats: LearningDbView.Stats, disabled_count: TextView, bad_count: TextView, meh_count: TextView, good_count: TextView, showDisabled: Boolean = false) {

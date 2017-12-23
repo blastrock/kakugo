@@ -115,7 +115,7 @@ class LearningDbView(
 
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
 
-    fun getStats(level: Int?): Stats =
+    fun getStats(): Stats =
             Stats(getCountForWeight(0.0f, BAD_WEIGHT, level), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForWeight(GOOD_WEIGHT, 1.0f, level), getDisabledCount(level))
 
     private fun getCountForWeight(from: Float, to: Float, level: Int?): Int {

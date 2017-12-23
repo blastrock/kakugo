@@ -36,7 +36,7 @@ class KanaSelectionActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        statsFragment = StatsFragment.newInstance(null)
+        statsFragment = StatsFragment.newInstance()
         statsFragment.setShowDisabled(true)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
