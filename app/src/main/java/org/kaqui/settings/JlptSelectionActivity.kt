@@ -63,7 +63,7 @@ class JlptSelectionActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (mode == Mode.KANJI)
-            menuInflater.inflate(R.menu.jlpt_selection_menu, menu)
+            menuInflater.inflate(R.menu.kanji_jlpt_selection_menu, menu)
         return true
     }
 
