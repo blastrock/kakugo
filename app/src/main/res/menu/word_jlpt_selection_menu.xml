@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/jlpt_search"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/autoselect"
         app:showAsAction="always"
         android:title="@string/autoselect_from_kanji"

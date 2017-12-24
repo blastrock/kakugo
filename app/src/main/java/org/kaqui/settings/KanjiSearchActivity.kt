@@ -10,14 +10,23 @@ import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
+import org.kaqui.model.LearningDbView
 
 class KanjiSearchActivity : AppCompatActivity() {
-    private lateinit var db: KaquiDb
+    private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
+    private lateinit var mode: Mode
+
+    enum class Mode {
+        KANJI,
+        WORD,
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mode = intent.getSerializableExtra("mode") as Mode
 
         setContentView(R.layout.item_selection_activity)
 
@@ -29,9 +38,12 @@ class KanjiSearchActivity : AppCompatActivity() {
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
 
-        db = KaquiDb.getInstance(this)
+        dbView = when (mode) {
+            Mode.KANJI -> KaquiDb.getInstance(this).kanjiView
+            Mode.WORD -> KaquiDb.getInstance(this).wordView
+        }
 
-        listAdapter = ItemSelectionAdapter(db.kanjiView, this, statsFragment)
+        listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter
         item_list.layoutManager = LinearLayoutManager(this)
 
@@ -59,7 +71,7 @@ class KanjiSearchActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        statsFragment.updateStats(db.kanjiView)
+        statsFragment.updateStats(dbView)
     }
 
     private fun searchKanjiList(str: String) {

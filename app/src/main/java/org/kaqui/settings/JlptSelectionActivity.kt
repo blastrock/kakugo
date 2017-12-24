@@ -20,6 +20,7 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.model.Kanji
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 import java.io.Serializable
@@ -76,7 +77,11 @@ class JlptSelectionActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search -> {
-                startActivity(Intent(this, KanjiSearchActivity::class.java))
+                startActivity(Intent(this, KanjiSearchActivity::class.java)
+                        .putExtra("mode", when (mode) {
+                            Mode.KANJI -> KanjiSearchActivity.Mode.KANJI
+                            Mode.WORD -> KanjiSearchActivity.Mode.WORD
+                        }))
                 true
             }
             R.id.import_kanji_selection -> {
