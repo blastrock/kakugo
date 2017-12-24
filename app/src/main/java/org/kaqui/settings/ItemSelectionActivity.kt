@@ -70,7 +70,7 @@ class ItemSelectionActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.kanji_selection_menu, menu)
+        menuInflater.inflate(R.menu.item_selection_menu, menu)
         if (mode == Mode.WORD) {
             val autoselect = menu.findItem(R.id.autoselect)
             autoselect.isVisible = true
