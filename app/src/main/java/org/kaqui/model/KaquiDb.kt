@@ -329,8 +329,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
-    data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>)
-    data class DumpRow(val char: Char, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
+    data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>, val words: List<DumpRow>)
+    data class DumpRow(val item: String, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
     private fun dumpUserData(): Dump = dumpUserData(readableDatabase)
     private fun restoreUserData(data: Dump) = restoreUserData(writableDatabase, data)
@@ -369,38 +369,43 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             val hiraganas = mutableListOf<DumpRow>()
             database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
             val katakanas = mutableListOf<DumpRow>()
             database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    katakanas.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
             val kanjis = mutableListOf<DumpRow>()
             database.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    kanjis.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    kanjis.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
-            return Dump(hiraganas, katakanas, kanjis)
+            return Dump(hiraganas, katakanas, kanjis, listOf())
         }
 
         private fun dumpUserData(database: SQLiteDatabase): Dump {
             val hiraganas = mutableListOf<DumpRow>()
             database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
             val katakanas = mutableListOf<DumpRow>()
             database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    katakanas.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
             val kanjis = mutableListOf<DumpRow>()
             database.query(KANJIS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    kanjis.add(DumpRow(cursor.getString(0)[0], cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    kanjis.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
-            return Dump(hiraganas, katakanas, kanjis)
+            val words = mutableListOf<DumpRow>()
+            database.query(WORDS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+                while (cursor.moveToNext())
+                    words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+            }
+            return Dump(hiraganas, katakanas, kanjis, words)
         }
 
         private fun restoreUserData(database: SQLiteDatabase, data: Dump) {
@@ -413,7 +418,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        database.update(HIRAGANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.char.toString()))
+                        database.update(HIRAGANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.item))
                     }
                 }
                 run {
@@ -423,7 +428,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        database.update(KATAKANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.char.toString()))
+                        database.update(KATAKANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.item))
                     }
                 }
                 run {
@@ -433,9 +438,22 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        if (database.update(KANJIS_TABLE_NAME, cv, "item = ?", arrayOf(row.char.toString())) == 0) {
-                            cv.put("item", row.char.toString())
+                        if (database.update(KANJIS_TABLE_NAME, cv, "item = ?", arrayOf(row.item)) == 0) {
+                            cv.put("item", row.item)
                             database.insert(KANJIS_TABLE_NAME, null, cv)
+                        }
+                    }
+                }
+                run {
+                    for (row in data.words) {
+                        val cv = ContentValues()
+                        cv.put("short_score", row.shortScore)
+                        cv.put("long_score", row.longScore)
+                        cv.put("last_correct", row.lastCorrect)
+                        cv.put("enabled", if (row.enabled) 1 else 0)
+                        if (database.update(WORDS_TABLE_NAME, cv, "item = ?", arrayOf(row.item)) == 0) {
+                            cv.put("item", row.item)
+                            database.insert(WORDS_TABLE_NAME, null, cv)
                         }
                     }
                 }
