@@ -17,14 +17,23 @@ import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
+import org.kaqui.model.LearningDbView
 import java.io.Serializable
 
 class JlptSelectionActivity : AppCompatActivity() {
-    private lateinit var db: KaquiDb
+    private lateinit var dbView: LearningDbView
     private lateinit var statsFragment: StatsFragment
+    private lateinit var mode: Mode
+
+    enum class Mode {
+        KANJI,
+        WORD,
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mode = intent.getSerializableExtra("mode") as Mode
 
         setContentView(R.layout.jlpt_selection_activity)
 
@@ -36,21 +45,25 @@ class JlptSelectionActivity : AppCompatActivity() {
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
 
-        db = KaquiDb.getInstance(this)
+        dbView = when (mode) {
+            Mode.KANJI -> KaquiDb.getInstance(this).kanjiView
+            Mode.WORD -> KaquiDb.getInstance(this).wordView
+        }
 
-        jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this)
+        jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this, dbView)
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
     }
 
     override fun onStart() {
         super.onStart()
 
-        statsFragment.updateStats(db.kanjiView)
+        statsFragment.updateStats(dbView)
         (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.jlpt_selection_menu, menu)
+        if (mode == Mode.KANJI)
+            menuInflater.inflate(R.menu.jlpt_selection_menu, menu)
         return true
     }
 
@@ -74,7 +87,10 @@ class JlptSelectionActivity : AppCompatActivity() {
         val level = item["level"] as Int
 
         startActivity(Intent(this, ItemSelectionActivity::class.java)
-                .putExtra("mode", ItemSelectionActivity.Mode.KANJI as Serializable)
+                .putExtra("mode", when (mode) {
+                    Mode.KANJI -> ItemSelectionActivity.Mode.KANJI
+                    Mode.WORD -> ItemSelectionActivity.Mode.WORD
+                } as Serializable)
                 .putExtra("level", level))
     }
 
@@ -105,7 +121,7 @@ class JlptSelectionActivity : AppCompatActivity() {
 
         try {
             val kanjis = contentResolver.openInputStream(data.data).bufferedReader().readText()
-            db.setSelection(kanjis)
+            KaquiDb.getInstance(this).setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
             Toast.makeText(this, "Could not import file: " + e.toString(), Toast.LENGTH_LONG).show()

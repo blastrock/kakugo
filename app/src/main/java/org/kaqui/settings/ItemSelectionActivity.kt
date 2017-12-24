@@ -34,7 +34,7 @@ class ItemSelectionActivity : AppCompatActivity() {
 
         mode = intent.getSerializableExtra("mode") as Mode
 
-        if (mode == Mode.KANJI) {
+        if (mode == Mode.KANJI || mode == Mode.WORD) {
             selectedLevel = intent.getIntExtra("level", -1)
             if (selectedLevel!! < 0)
                 throw RuntimeException("Invalid level $selectedLevel")
@@ -54,7 +54,7 @@ class ItemSelectionActivity : AppCompatActivity() {
             Mode.HIRAGANA -> KaquiDb.getInstance(this).hiraganaView
             Mode.KATAKANA -> KaquiDb.getInstance(this).katakanaView
             Mode.KANJI -> KaquiDb.getInstance(this).getKanjiView(selectedLevel!!)
-            Mode.WORD -> KaquiDb.getInstance(this).wordView
+            Mode.WORD -> KaquiDb.getInstance(this).getWordView(selectedLevel!!)
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

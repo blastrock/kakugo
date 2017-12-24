@@ -72,10 +72,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.KATAKANA as Serializable))
         }
         kanji_selection_button.setOnClickListener {
-            startActivity(Intent(this, JlptSelectionActivity::class.java))
+            startActivity(Intent(this, JlptSelectionActivity::class.java).putExtra("mode", JlptSelectionActivity.Mode.KANJI as Serializable))
         }
         word_selection_button.setOnClickListener {
-            startActivity(Intent(this, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.WORD as Serializable))
+            startActivity(Intent(this, JlptSelectionActivity::class.java).putExtra("mode", JlptSelectionActivity.Mode.WORD as Serializable))
         }
 
         setMode(Mode.MAIN)

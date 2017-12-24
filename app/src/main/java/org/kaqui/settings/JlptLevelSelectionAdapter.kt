@@ -12,8 +12,9 @@ import android.widget.TextView
 import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.model.LearningDbView
 
-class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
+class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView) : BaseAdapter() {
     private val levels = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
             mapOf("label" to "Additional kanjis", "level" to 0)
 
@@ -30,8 +31,7 @@ class JlptLevelSelectionAdapter(private val context: Context) : BaseAdapter() {
             statsLayout.elevation = 8.0f
             statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
         }
-        val db = KaquiDb.getInstance(context)
-        StatsFragment.updateStats(db.getKanjiView(levels[position]["level"] as Int).getStats(), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
+        StatsFragment.updateStats(dbView.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view
     }
