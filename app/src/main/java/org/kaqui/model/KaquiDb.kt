@@ -3,6 +3,7 @@ package org.kaqui.model
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import org.kaqui.data.*
 
@@ -34,6 +35,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "item TEXT NOT NULL,"
                         + "reading TEXT NOT NULL DEFAULT '',"
                         + "meanings TEXT NOT NULL DEFAULT '',"
+                        + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
@@ -104,8 +106,12 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        val dump =
+            if (oldVersion < 10)
+                dumpUserDataV9(database)
+            else
+                dumpUserData(database)
         if (oldVersion < 10) {
-            val dump = dumpUserDataV9(database)
             database.execSQL("DROP TABLE IF EXISTS meanings")
             database.execSQL("DROP TABLE IF EXISTS readings")
             database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
@@ -114,9 +120,12 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             database.execSQL("DROP TABLE IF EXISTS similar_hiraganas")
             database.execSQL("DROP TABLE IF EXISTS katakanas")
             database.execSQL("DROP TABLE IF EXISTS similar_katakanas")
-            onCreate(database)
-            restoreUserData(database, dump)
         }
+        if (oldVersion < 11) {
+            database.execSQL("DROP TABLE IF EXISTS $WORDS_TABLE_NAME")
+        }
+        onCreate(database)
+        restoreUserData(database, dump)
     }
 
     val needsInit: Boolean
@@ -127,6 +136,11 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                     return true
             }
             readableDatabase.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "reading <> ''", null, null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                if (cursor.getInt(0) == 0)
+                    return true
+            }
+            readableDatabase.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "jlpt_level <> 0", null, null, null, null).use { cursor ->
                 cursor.moveToFirst()
                 if (cursor.getInt(0) == 0)
                     return true
@@ -169,8 +183,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             writableDatabase.delete(WORDS_TABLE_NAME, null, null)
             writableDatabase.execSQL(
                     "INSERT INTO $WORDS_TABLE_NAME "
-                            + "(id, item, reading, meanings) "
-                            + "SELECT id, item, reading, meanings "
+                            + "(id, item, reading, meanings, jlpt_level) "
+                            + "SELECT id, item, reading, meanings, jlpt_level "
                             + "FROM dict.words"
             )
             restoreUserData(dump)
@@ -191,6 +205,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", level, this::getKanji, this::searchKanji)
     val wordView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", null, this::getWord)
+    fun getWordView(level: Int?): LearningDbView =
+            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", level, this::getWord)
 
     private fun searchKanji(text: String): List<Int> {
         readableDatabase.rawQuery(
@@ -339,7 +355,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 10
+        private const val DATABASE_VERSION = 11
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
         private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
