@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/autoselect"
+        app:showAsAction="always"
+        android:title="@string/autoselect_from_kanji"
+        android:titleCondensed="@string/autoselect_from_kanji_short"/>
+</menu>

@@ -2,6 +2,7 @@ package org.kaqui.settings
 
 import android.Manifest
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,6 +15,9 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
@@ -62,8 +66,10 @@ class JlptSelectionActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        if (mode == Mode.KANJI)
-            menuInflater.inflate(R.menu.kanji_jlpt_selection_menu, menu)
+        menuInflater.inflate(when (mode) {
+            Mode.KANJI -> R.menu.kanji_jlpt_selection_menu
+            Mode.WORD -> R.menu.word_jlpt_selection_menu
+        }, menu)
         return true
     }
 
@@ -76,6 +82,22 @@ class JlptSelectionActivity : AppCompatActivity() {
             R.id.import_kanji_selection -> {
                 importKanjis()
                 true
+            }
+            R.id.autoselect -> {
+                async(UI) {
+                    val progressDialog = ProgressDialog(this@JlptSelectionActivity)
+                    progressDialog.setMessage(getString(R.string.autoselecting_words))
+                    progressDialog.setCancelable(false)
+                    progressDialog.show()
+
+                    async(CommonPool) { KaquiDb.getInstance(this@JlptSelectionActivity).autoSelectWords() }.await()
+
+                    (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
+                    statsFragment.updateStats(dbView)
+
+                    progressDialog.dismiss()
+                }
+                return true
             }
             else ->
                 super.onOptionsItemSelected(item)

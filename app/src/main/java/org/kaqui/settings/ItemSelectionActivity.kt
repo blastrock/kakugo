@@ -71,10 +71,6 @@ class ItemSelectionActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.item_selection_menu, menu)
-        if (mode == Mode.WORD) {
-            val autoselect = menu.findItem(R.id.autoselect)
-            autoselect.isVisible = true
-        }
         return true
     }
 
@@ -90,22 +86,6 @@ class ItemSelectionActivity : AppCompatActivity() {
                 dbView.setAllEnabled(false)
                 listAdapter.notifyDataSetChanged()
                 statsFragment.updateStats(dbView)
-                return true
-            }
-            R.id.autoselect -> {
-                async(UI) {
-                    val progressDialog = ProgressDialog(this@ItemSelectionActivity)
-                    progressDialog.setMessage(getString(R.string.autoselecting_words))
-                    progressDialog.setCancelable(false)
-                    progressDialog.show()
-
-                    async(CommonPool) { KaquiDb.getInstance(this@ItemSelectionActivity).autoSelectWords() }.await()
-
-                    listAdapter.notifyDataSetChanged()
-                    statsFragment.updateStats(dbView)
-
-                    progressDialog.dismiss()
-                }
                 return true
             }
             else ->

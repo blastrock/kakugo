@@ -8,10 +8,4 @@
     <item
         android:id="@+id/select_none"
         android:title="@string/select_none" />
-    <item
-        android:id="@+id/autoselect"
-        android:visible="false"
-        app:showAsAction="always"
-        android:title="@string/autoselect_from_kanji"
-        android:titleCondensed="@string/autoselect_from_kanji_short"/>
 </menu>
