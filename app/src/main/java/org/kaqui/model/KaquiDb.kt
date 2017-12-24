@@ -204,9 +204,9 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     fun getKanjiView(level: Int?): LearningDbView =
         LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", level, this::getKanji, this::searchKanji)
     val wordView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", null, this::getWord)
+        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", null, this::getWord, this::searchWord)
     fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", level, this::getWord)
+            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", level, this::getWord, this::searchWord)
 
     private fun searchKanji(text: String): List<Int> {
         readableDatabase.rawQuery(
@@ -214,6 +214,20 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 FROM $KANJIS_TABLE_NAME
                 WHERE item = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR meanings LIKE ?""",
                 arrayOf(text, "%$text%", "%$text%", "%$text%")).use { cursor ->
+            val ret = mutableListOf<Int>()
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+            return ret
+        }
+    }
+
+    private fun searchWord(text: String): List<Int> {
+        readableDatabase.rawQuery(
+                """SELECT id
+                FROM $WORDS_TABLE_NAME
+                WHERE item LIKE ? OR reading LIKE ? OR meanings LIKE ?""",
+                arrayOf("%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
