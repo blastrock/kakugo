@@ -12,7 +12,7 @@ import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 
-class KanjiSearchActivity : AppCompatActivity() {
+class ItemSearchActivity : AppCompatActivity() {
     private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
@@ -82,6 +82,6 @@ class KanjiSearchActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "KanjiSearchActivity"
+        private const val TAG = "ItemSearchActivity"
     }
 }

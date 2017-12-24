@@ -38,7 +38,7 @@
             android:name=".settings.JlptSelectionActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".settings.KanjiSearchActivity"
+            android:name=".settings.ItemSearchActivity"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".settings.ItemSelectionActivity"
