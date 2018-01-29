@@ -15,7 +15,7 @@ Features include:
 - Unique spaced repetition formula that adapts to your learning pace
 - Unlimited quiz sessions that allow you to take a quiz at any time, for how long you want, useful to efficiently spend commuting time
 - Show similar-looking kanji in answers to teach you the difference
-- Clicking on kanji opens `aedict3 <https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (a non-free japanese dictionary)
+- Clicking on kanji opens `aedict3 <https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (a non-free japanese dictionary) or `jisho.org <https://jisho.org>`_
 - Open source
 - No ads
 - More to come
