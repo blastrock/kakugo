@@ -4,6 +4,9 @@ KaQui
 
 KaQui helps learning Japanese. It takes the form of a quiz to memorize hiraganas, katakanas, and kanji readings and meanings and adapts to the user learning pace.
 
+- `Download on F-Droid <https://f-droid.org/packages/org.kaqui/>`_
+- `Download on Google Play <https://play.google.com/store/apps/details?id=org.kaqui>`_
+
 Features
 ========
 
