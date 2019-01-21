@@ -15,19 +15,22 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 import java.io.Serializable
+import kotlin.coroutines.CoroutineContext
 
-class JlptSelectionActivity : AppCompatActivity() {
+class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
     private lateinit var dbView: LearningDbView
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
+
+    lateinit var job: Job
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
 
     enum class Mode {
         KANJI,
@@ -36,6 +39,7 @@ class JlptSelectionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        job = Job()
 
         mode = intent.getSerializableExtra("mode") as Mode
 
@@ -56,6 +60,11 @@ class JlptSelectionActivity : AppCompatActivity() {
 
         jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this, dbView)
         jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
+    }
+
+    override fun onDestroy() {
+        job.cancel()
+        super.onDestroy()
     }
 
     override fun onStart() {
@@ -88,13 +97,13 @@ class JlptSelectionActivity : AppCompatActivity() {
                 true
             }
             R.id.autoselect -> {
-                async(UI) {
+                launch {
                     val progressDialog = ProgressDialog(this@JlptSelectionActivity)
                     progressDialog.setMessage(getString(R.string.autoselecting_words))
                     progressDialog.setCancelable(false)
                     progressDialog.show()
 
-                    async(CommonPool) { KaquiDb.getInstance(this@JlptSelectionActivity).autoSelectWords() }.await()
+                    async(Dispatchers.Default) { KaquiDb.getInstance(this@JlptSelectionActivity).autoSelectWords() }.await()
 
                     (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
                     statsFragment.updateStats(dbView)

@@ -7,9 +7,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.item_selection_activity.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment

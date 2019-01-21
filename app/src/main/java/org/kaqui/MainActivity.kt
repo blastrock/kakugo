@@ -8,9 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.*
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.QuizzType
 import org.kaqui.settings.JlptSelectionActivity
@@ -18,8 +16,9 @@ import org.kaqui.settings.ItemSelectionActivity
 import java.io.File
 import java.io.Serializable
 import java.util.zip.GZIPInputStream
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         private const val TAG = "MainActivity"
     }
@@ -34,9 +33,13 @@ class MainActivity : AppCompatActivity() {
 
     private var initProgress: ProgressDialog? = null
 
+    lateinit var job: Job
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        job = Job()
         setContentView(R.layout.main_activity)
 
         hiragana_quizz.transformationMethod = null
@@ -81,6 +84,11 @@ class MainActivity : AppCompatActivity() {
         setMode(Mode.MAIN)
     }
 
+    override fun onDestroy() {
+        job.cancel()
+        super.onDestroy()
+    }
+
     private fun setMode(mode: Mode) {
         main_layout.visibility = if (mode == Mode.MAIN) View.VISIBLE else View.GONE
         hiragana_layout.visibility = if (mode == Mode.HIRAGANA) View.VISIBLE else View.GONE
@@ -92,7 +100,7 @@ class MainActivity : AppCompatActivity() {
             val db = KaquiDb.getInstance(this)
             if (db.needsInit) {
                 showDownloadProgressDialog()
-                async(CommonPool) {
+                launch(Dispatchers.Default) {
                     initDic()
                 }
             }
@@ -141,14 +149,14 @@ class MainActivity : AppCompatActivity() {
             db.replaceWords(tmpFile.absolutePath)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize database", e)
-            async(UI) {
+            launch(job) {
                 Toast.makeText(this@MainActivity, getString(R.string.failed_to_init_db, e.message), Toast.LENGTH_LONG).show()
             }
         } finally {
             tmpFile.delete()
         }
 
-        async(UI) {
+        launch(job) {
             initProgress!!.dismiss()
             initProgress = null
         }
