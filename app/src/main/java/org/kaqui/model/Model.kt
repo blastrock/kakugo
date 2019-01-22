@@ -7,6 +7,7 @@ data class Kanji(
         var on_readings: List<String>,
         var kun_readings: List<String>,
         var meanings: List<String>,
+        var strokes: List<String>,
         var similarities: List<Item>,
         var jlptLevel: Int
 ) : ItemContents()

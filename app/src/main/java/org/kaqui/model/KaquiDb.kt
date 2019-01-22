@@ -23,6 +23,14 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $STROKES_TABLE_NAME ("
+                        + "id INTEGER PRIMARY KEY,"
+                        + "id_kanji INTEGER NOT NULL,"
+                        + "ordinal INT NOT NULL,"
+                        + "path TEXT NOT NULL,"
+                        + "UNIQUE(id_kanji, ordinal)"
+                        + ")")
+        database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $SIMILARITIES_TABLE_NAME ("
                         + "id_similarity INTEGER PRIMARY KEY,"
                         + "id_kanji1 INTEGER NOT NULL REFERENCES kanjis(id),"
@@ -135,6 +143,11 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 if (cursor.getInt(0) == 0)
                     return true
             }
+            readableDatabase.query(STROKES_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
+                cursor.moveToFirst()
+                if (cursor.getInt(0) == 0)
+                    return true
+            }
             readableDatabase.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "reading <> ''", null, null, null, null).use { cursor ->
                 cursor.moveToFirst()
                 if (cursor.getInt(0) == 0)
@@ -160,6 +173,12 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                             + "(id, item, on_readings, kun_readings, meanings, jlpt_level, enabled) "
                             + "SELECT id, item, on_readings, kun_readings, meanings, jlpt_level, jlpt_level = 5 "
                             + "FROM dict.kanjis"
+            )
+            writableDatabase.execSQL(
+                    "INSERT INTO $STROKES_TABLE_NAME "
+                            + "(id, id_kanji, ordinal, path) "
+                            + "SELECT id, id_kanji, ordinal, path "
+                            + "FROM dict.strokes"
             )
             writableDatabase.execSQL(
                     "INSERT INTO $SIMILARITIES_TABLE_NAME "
@@ -262,12 +281,17 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getKanji(id: Int): Item {
+        val strokes = mutableListOf<String>()
+        readableDatabase.query(STROKES_TABLE_NAME, arrayOf("path"), "id_kanji = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
+            while (cursor.moveToNext())
+                strokes.add(cursor.getString(0))
+        }
         val similarities = mutableListOf<Item>()
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
-        val contents = Kanji("", listOf(), listOf(), listOf(), similarities, 0)
+        val contents = Kanji("", listOf(), listOf(), listOf(), strokes, similarities, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         readableDatabase.query(KANJIS_TABLE_NAME,
                 arrayOf("item", "jlpt_level", "short_score", "long_score", "last_correct", "enabled", "on_readings", "kun_readings", "meanings"),
@@ -369,7 +393,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 11
+        private const val DATABASE_VERSION = 12
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
         private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
@@ -379,6 +403,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val SIMILARITIES_TABLE_NAME = "similarities"
+
+        private const val STROKES_TABLE_NAME = "strokes"
 
         private const val WORDS_TABLE_NAME = "words"
 
