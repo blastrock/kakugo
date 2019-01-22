@@ -1,7 +1,10 @@
 package org.kaqui
 
+import android.graphics.PathMeasure
+import android.graphics.PointF
 import org.kaqui.model.*
 import java.util.Random
+import kotlin.math.pow
 
 fun getBackgroundFromScore(score: Double) =
         when (score) {
@@ -19,4 +22,12 @@ fun <T> MutableList<T>.shuffle() {
         this[i] = this[target]
         this[target] = tmp
     }
+}
+
+fun PointF.squaredDistanceTo(o: PointF): Float = (this.x - o.x).pow(2) + (this.y - o.y).pow(2)
+
+fun PathMeasure.getPoint(position: Float): PointF {
+    val out = floatArrayOf(0f, 0f)
+    getPosTan(position, out, null)
+    return PointF(out[0], out[1])
 }

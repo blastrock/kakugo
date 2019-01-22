@@ -21,7 +21,7 @@ class QuizzActivity : QuizzActivityBase() {
     override val historyActionButton get() = history_action_button
     override val historyView get() = history_view
     override val sessionScore get() = session_score
-    override val mainScrollView get() = main_scrollview
+    override val mainView get() = main_scrollview
     override val mainCoordLayout get() = main_coordlayout
 
     override val quizzType

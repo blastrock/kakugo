@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         start_reading_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_KANJI)))
         start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_MEANING)))
         start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_KANJI)))
+        start_kanji_drawing_quizz.setOnClickListener(View.OnClickListener(makeDrawQuizzLauncher()))
 
         start_word_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.WORD_TO_READING)))
         start_reading_word_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_WORD)))
@@ -122,6 +123,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             } else {
                 val intent = Intent(this, QuizzActivity::class.java)
                 intent.putExtra("quizz_type", type)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun makeDrawQuizzLauncher(): (View) -> Unit {
+        return {
+            val db = KaquiDb.getInstance(this)
+            if (db.kanjiView.getEnabledCount() < 10) {
+                Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
+            } else {
+                val intent = Intent(this, WritingQuizzActivity::class.java)
                 startActivity(intent)
             }
         }

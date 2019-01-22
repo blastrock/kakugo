@@ -21,6 +21,7 @@
     <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
     <string name="kanji_meaning_quizz">Kanji to meaning quizz (日→day)</string>
     <string name="meaning_kanji_quizz">Meaning to kanji quizz (day→日)</string>
+    <string name="kanji_drawing_quizz">Kanji drawing</string>
     <string name="word_reading_quizz">Word to reading (日の出→ひので)</string>
     <string name="reading_word_quizz">Reading to word (ひので→日の出)</string>
     <string name="word_meaning_quizz">Word to meaning quizz (日の出→sunrise)</string>
@@ -39,4 +40,6 @@
     <string name="failed_to_init_db">Failed to initialize database: %1$s</string>
     <string name="debug_info">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nNew short score: %10$.2f\nNew long score: %11$.2f</string>
     <string name="info_button">Show details</string>
+    <string name="next">Next</string>
+    <string name="hint">Hint</string>
 </resources>

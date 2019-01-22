@@ -29,7 +29,7 @@ class QuizzEngine(
                     QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
                     QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
-                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
+                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.KANJI_WRITING -> db.kanjiView
 
                     QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
                 }
@@ -184,6 +184,25 @@ class QuizzEngine(
         questionCount += 1
     }
 
+    fun markAnswer(certainty: Certainty) {
+        val minLastCorrect = itemView.getLastCorrectFirstDecile()
+
+        if (certainty == Certainty.DONTKNOW) {
+            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
+            itemView.applyScoreUpdate(scoreUpdate)
+            currentDebugData?.scoreUpdate = scoreUpdate
+            addUnknownAnswerToHistory(currentQuestion)
+        } else {
+            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
+            itemView.applyScoreUpdate(scoreUpdate)
+            currentDebugData?.scoreUpdate = scoreUpdate
+            addGoodAnswerToHistory(currentQuestion)
+            correctCount += 1
+        }
+
+        questionCount += 1
+    }
+
     private fun addGoodAnswerToHistory(correct: Item) {
         history.add(HistoryLine.Correct(correct.id))
         discardOldHistory()
@@ -260,18 +279,8 @@ class QuizzEngine(
         parcel.recycle()
     }
 
-    private fun getDbView(db: KaquiDb): LearningDbView =
-            when (quizzType) {
-                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
-                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
-
-                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
-
-                QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
-            }
-
     private fun getItem(db: KaquiDb, id: Int): Item =
-            getDbView(db).getItem(id)
+            itemView.getItem(id)
 
     private val itemView: LearningDbView
         get() = getItemView(db, quizzType)

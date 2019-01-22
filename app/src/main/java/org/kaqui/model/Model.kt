@@ -1,5 +1,8 @@
 package org.kaqui.model
 
+import android.graphics.Path
+import java.lang.RuntimeException
+
 sealed class ItemContents
 
 data class Kanji(
@@ -7,7 +10,7 @@ data class Kanji(
         var on_readings: List<String>,
         var kun_readings: List<String>,
         var meanings: List<String>,
-        var strokes: List<String>,
+        var strokes: List<Path>,
         var similarities: List<Item>,
         var jlptLevel: Int
 ) : ItemContents()
@@ -52,6 +55,7 @@ fun Item.getQuestionText(quizzType: QuizzType): String =
             QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING -> (contents as Word).word
             QuizzType.READING_TO_WORD -> (contents as Word).reading
             QuizzType.MEANING_TO_WORD -> (contents as Word).meaningsText
+            QuizzType.KANJI_WRITING -> "${(contents as Kanji).readingsText}\n${(contents as Kanji).meaningsText}"
         }
 
 fun Item.getAnswerText(quizzType: QuizzType): String =
@@ -66,16 +70,17 @@ fun Item.getAnswerText(quizzType: QuizzType): String =
             QuizzType.WORD_TO_READING -> (contents as Word).reading
             QuizzType.WORD_TO_MEANING -> (contents as Word).meaningsText
             QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> (contents as Word).word
+            QuizzType.KANJI_WRITING -> throw RuntimeException("No answer text for kanji writing")
         }
 
-private val Kanji.readingsText: String
+val Kanji.readingsText: String
     get() = on_readings.joinToString(", ") + "\n" +
             kun_readings.joinToString(", ")
 
-private val Kanji.meaningsText: String
+val Kanji.meaningsText: String
     get() = meanings.joinToString(", ")
 
-private val Word.meaningsText: String
+val Word.meaningsText: String
     get() = meanings.joinToString(", ")
 
 val Item.text: String

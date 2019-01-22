@@ -16,4 +16,6 @@ enum class QuizzType {
     READING_TO_WORD,
     WORD_TO_MEANING,
     MEANING_TO_WORD,
+
+    KANJI_WRITING,
 }

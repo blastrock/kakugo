@@ -34,7 +34,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
     protected abstract val historyActionButton: FloatingActionButton
     protected abstract val historyView: LinearLayout
     protected abstract val sessionScore: TextView
-    protected abstract val mainScrollView: ScrollView
+    protected abstract val mainView: View
     protected abstract val mainCoordLayout: CoordinatorLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -234,7 +234,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
             va.addUpdateListener { sheetBehavior.peekHeight = it.animatedValue as Int }
             va.start()
 
-            mainScrollView.layoutParams = CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, mainCoordLayout.height - v.height)
+            mainView.layoutParams = CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, mainCoordLayout.height - v.height)
         }
     }
 
@@ -248,7 +248,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
                 QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
                 QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
-                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
+                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.KANJI_WRITING -> db.kanjiView
 
                 QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
             }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Path
 import org.kaqui.data.*
 
 class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -281,10 +282,13 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getKanji(id: Int): Item {
-        val strokes = mutableListOf<String>()
+        val strokes = mutableListOf<Path>()
         readableDatabase.query(STROKES_TABLE_NAME, arrayOf("path"), "id_kanji = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
-            while (cursor.moveToNext())
-                strokes.add(cursor.getString(0))
+            val PathParser = Class.forName("android.support.v4.graphics.PathParser")
+            val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
+            while (cursor.moveToNext()) {
+                strokes.add(createPathFromPathData.invoke(null, cursor.getString(0)) as Path)
+            }
         }
         val similarities = mutableListOf<Item>()
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
