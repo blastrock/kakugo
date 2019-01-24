@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
         return {
             val db = KaquiDb.getInstance(this)
-            if (QuizzActivity.getItemView(db, type).getEnabledCount() < 10) {
+            if (QuizzEngine.getItemView(db, type).getEnabledCount() < 10) {
                 Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
             } else {
                 val intent = Intent(this, QuizzActivity::class.java)

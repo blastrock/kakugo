@@ -23,50 +23,16 @@ import org.kaqui.model.*
 import java.util.*
 
 class QuizzActivity : AppCompatActivity() {
-    private sealed class HistoryLine {
-        data class Correct(val itemId: Int) : HistoryLine()
-        data class Unknown(val itemId: Int) : HistoryLine()
-        data class Incorrect(val correctItemId: Int, val answerItemId: Int) : HistoryLine()
-    }
-
     companion object {
         private const val TAG = "QuizzActivity"
-        private const val NB_ANSWERS = 6
         private const val COLUMNS = 2
-        private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
-        private const val MAX_HISTORY_SIZE = 40
-
-        fun getItemView(db: KaquiDb, quizzType: QuizzType): LearningDbView =
-                when (quizzType) {
-                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
-                    QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
-
-                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> db.kanjiView
-
-                    QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
-                }
     }
 
-    data class DebugData(
-            var probabilityData: SrsCalculator.ProbabilityData,
-            var probaParamsStage1: SrsCalculator.ProbaParamsStage1,
-            var probaParamsStage2: SrsCalculator.ProbaParamsStage2,
-            var totalWeight: Double,
-            var scoreUpdate: SrsCalculator.ScoreUpdate?)
+    private lateinit var quizzEngine: QuizzEngine
 
     private lateinit var statsFragment: StatsFragment
     private lateinit var answerTexts: List<TextView>
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
-
-    private lateinit var currentQuestion: Item
-    private var currentDebugData: DebugData? = null
-    private lateinit var currentAnswers: List<Item>
-
-    private var correctCount = 0
-    private var questionCount = 0
-
-    private val history = ArrayList<HistoryLine>()
-    private val lastQuestionsIds = ArrayDeque<Int>()
 
     private val quizzType
         get() = intent.extras.getSerializable("quizz_type") as QuizzType
@@ -86,7 +52,7 @@ class QuizzActivity : AppCompatActivity() {
         when (quizzType) {
             QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> {
                 question_text.textSize = 50.0f
-                initButtons(listOf(answers_layout), NB_ANSWERS, R.layout.kanji_answer_line)
+                initButtons(listOf(answers_layout), QuizzEngine.NB_ANSWERS, R.layout.kanji_answer_line)
             }
 
             QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> {
@@ -104,7 +70,7 @@ class QuizzActivity : AppCompatActivity() {
                 val answersLayout = LinearLayout(this)
                 answersLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                 answersLayout.orientation = LinearLayout.VERTICAL
-                val lineLayouts = (0..NB_ANSWERS / COLUMNS).map {
+                val lineLayouts = (0..QuizzEngine.NB_ANSWERS / COLUMNS).map {
                     val line = LinearLayout(this)
                     line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                     line.orientation = LinearLayout.HORIZONTAL
@@ -124,24 +90,18 @@ class QuizzActivity : AppCompatActivity() {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        lastQuestionsIds.clear()
+        quizzEngine = QuizzEngine(KaquiDb.getInstance(this), quizzType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
 
         if (savedInstanceState == null)
-            showNewQuestion()
-        else {
-            val db = KaquiDb.getInstance(this)
-            currentQuestion = getItem(db, savedInstanceState.getInt("question"))
-            currentAnswers = savedInstanceState.getIntArray("answers").map { getItem(db, it) }
-            correctCount = savedInstanceState.getInt("correctCount")
-            questionCount = savedInstanceState.getInt("questionCount")
-            unserializeHistory(savedInstanceState.getByteArray("history"))
-            showCurrentQuestion()
-        }
+            quizzEngine.prepareNewQuestion()
+        else
+            quizzEngine.loadState(savedInstanceState)
+        showCurrentQuestion()
     }
 
     private fun initButtons(lineLayouts: List<LinearLayout>, columns: Int, layoutToInflate: Int) {
-        val answerTexts = ArrayList<TextView>(NB_ANSWERS)
-        for (i in 0 until NB_ANSWERS) {
+        val answerTexts = ArrayList<TextView>(QuizzEngine.NB_ANSWERS)
+        for (i in 0 until QuizzEngine.NB_ANSWERS) {
             val currentLine = lineLayouts[i / columns]
             val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, currentLine, false)
 
@@ -160,8 +120,8 @@ class QuizzActivity : AppCompatActivity() {
         dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
 
         question_text.setOnLongClickListener { _ ->
-            if (currentDebugData != null)
-                showItemProbabilityData(currentQuestion.text, currentDebugData!!)
+            if (quizzEngine.currentDebugData != null)
+                showItemProbabilityData(quizzEngine.currentQuestion.text, quizzEngine.currentDebugData!!)
             true
         }
     }
@@ -173,12 +133,7 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt("question", currentQuestion.id)
-        outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
-        outState.putInt("correctCount", correctCount)
-        outState.putInt("questionCount", questionCount)
-        outState.putByteArray("history", serializeHistory())
-
+        quizzEngine.saveState(outState)
         super.onSaveInstanceState(outState)
     }
 
@@ -211,153 +166,31 @@ class QuizzActivity : AppCompatActivity() {
                 .show()
     }
 
-    private fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
-        if (sample > list.size - avoid.size)
-            throw RuntimeException("can't get a sample of size $sample on list of size ${list.size - avoid.size}")
-
-        val chosen = mutableSetOf<T>()
-        while (chosen.size < sample) {
-            val r = list[(Math.random() * list.size).toInt()]
-            if (r !in avoid)
-                chosen.add(r)
-        }
-        return chosen.toList()
-    }
-
-    private fun showNewQuestion() {
-        val db = KaquiDb.getInstance(this)
-
-        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
-        if (ids.size < NB_ANSWERS) {
-            Log.wtf(TAG, "Too few items selected for a quizz: ${ids.size}")
-            return
-        }
-
-        val question = pickQuestion(db, ids)
-        Log.v(TAG, "Selected question: $question")
-        currentQuestion = question.item
-        currentDebugData = DebugData(question.probabilityData, debugParams.probaParamsStage1, debugParams.probaParamsStage2, question.totalWeight, null)
-        currentAnswers = pickAnswers(db, ids, currentQuestion)
-
-        addIdToLastQuestions(currentQuestion.id)
-
-        showCurrentQuestion()
-    }
-
-    data class PickedQuestion(val item: Item, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
-
-    private fun pickQuestion(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
-        val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
-
-        val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
-        val questionPos = Math.random() * totalWeight
-        Log.v(TAG, "Picking a question, questionPos: $questionPos, totalWeight: $totalWeight")
-        var question = idsWithoutRecent.last() // take last, it is probably safer with float arithmetic
-        run {
-            var currentWeight = 0.0
-            for (itemData in idsWithoutRecent) {
-                currentWeight += itemData.finalProbability
-                if (currentWeight >= questionPos) {
-                    question = itemData
-                    break
-                }
-            }
-            if (currentWeight < questionPos)
-                Log.v(TAG, "Couldn't pick a question")
-        }
-
-        return PickedQuestion(getItem(db, question.itemId), question, totalWeight)
-    }
-
-    private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
-        val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) }
-        val similarItems =
-                if (similarItemIds.size >= NB_ANSWERS - 1)
-                    pickRandom(similarItemIds, NB_ANSWERS - 1)
-                else
-                    similarItemIds
-
-        val additionalAnswers = pickRandom(ids.map { it.itemId }, NB_ANSWERS - 1 - similarItems.size, setOf(currentQuestion.id) + similarItems)
-
-        val currentAnswers = ((additionalAnswers + similarItems).map { getItem(db, it) } + listOf(currentQuestion)).toMutableList()
-        if (currentAnswers.size != NB_ANSWERS)
-            Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
-        shuffle(currentAnswers)
-
-        return currentAnswers
-    }
-
-    private fun addIdToLastQuestions(id: Int) {
-        while (lastQuestionsIds.size > LAST_QUESTIONS_TO_AVOID_COUNT - 1)
-            lastQuestionsIds.removeFirst()
-        lastQuestionsIds.add(id)
-    }
-
     private fun showCurrentQuestion() {
         // when showNewQuestion is called in onCreate, statsFragment is not visible yet
         if (statsFragment.isVisible)
             statsFragment.updateStats(getDbView(KaquiDb.getInstance(this)))
         updateSessionScore()
 
-        question_text.text = currentQuestion.getQuestionText(quizzType)
+        question_text.text = quizzEngine.currentQuestion.getQuestionText(quizzType)
 
-        for (i in 0 until NB_ANSWERS) {
-            answerTexts[i].text = currentAnswers[i].getAnswerText(quizzType)
+        for (i in 0 until QuizzEngine.NB_ANSWERS) {
+            answerTexts[i].text = quizzEngine.currentAnswers[i].getAnswerText(quizzType)
         }
     }
 
     private fun updateSessionScore() {
-        session_score.text = getString(R.string.score_string, correctCount, questionCount)
-    }
-
-    private fun <T> shuffle(l: MutableList<T>) {
-        val rg = Random()
-        for (i in l.size - 1 downTo 1) {
-            val target = rg.nextInt(i)
-            val tmp = l[i]
-            l[i] = l[target]
-            l[target] = tmp
-        }
+        session_score.text = getString(R.string.score_string, quizzEngine.correctCount, quizzEngine.questionCount)
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        val minLastCorrect = itemView.getLastCorrectFirstDecile()
+        quizzEngine.selectAnswer(certainty, position)
 
-        if (certainty == Certainty.DONTKNOW) {
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdate)
-            currentDebugData?.scoreUpdate = scoreUpdate
-            addUnknownAnswerToHistory(currentQuestion, currentDebugData)
-        } else if (currentAnswers[position] == currentQuestion ||
-                // also compare answer texts because different answers can have the same readings
-                // like 副 and 福 and we don't want to penalize the user for that
-                currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType) ||
-                // same for question text
-                currentAnswers[position].getQuestionText(quizzType) == currentQuestion.getQuestionText(quizzType)) {
-            // correct
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
-            itemView.applyScoreUpdate(scoreUpdate)
-            currentDebugData?.scoreUpdate = scoreUpdate
-            addGoodAnswerToHistory(currentQuestion, currentDebugData)
-            correctCount += 1
-        } else {
-            // wrong
-            val scoreUpdateGood = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdateGood)
-            val scoreUpdateBad = SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdateBad)
-            currentDebugData?.scoreUpdate = scoreUpdateGood
-            addWrongAnswerToHistory(currentQuestion, currentDebugData, currentAnswers[position])
-        }
-
-        questionCount += 1
-
-        showNewQuestion()
+        quizzEngine.prepareNewQuestion()
+        showCurrentQuestion()
     }
 
-    private fun addGoodAnswerToHistory(correct: Item, probabilityData: DebugData?) {
-        history.add(HistoryLine.Correct(correct.id))
-
+    private fun addGoodAnswerToHistory(correct: Item, probabilityData: QuizzEngine.DebugData?) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
 
         history_view.addView(layout, 0)
@@ -365,9 +198,7 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addWrongAnswerToHistory(correct: Item, probabilityData: DebugData?, wrong: Item) {
-        history.add(HistoryLine.Incorrect(correct.id, wrong.id))
-
+    private fun addWrongAnswerToHistory(correct: Item, probabilityData: QuizzEngine.DebugData?, wrong: Item) {
         val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
 
@@ -377,9 +208,7 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: DebugData?) {
-        history.add(HistoryLine.Unknown(correct.id))
-
+    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: QuizzEngine.DebugData?) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
 
         history_view.addView(layout, 0)
@@ -387,7 +216,7 @@ class QuizzActivity : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun makeHistoryLine(item: Item, probabilityData: DebugData?, style: Int?, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(item: Item, probabilityData: QuizzEngine.DebugData?, style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.selection_item, history_view, false)
 
         val checkbox = line.findViewById<View>(R.id.item_checkbox)
@@ -452,7 +281,7 @@ class QuizzActivity : AppCompatActivity() {
         }
     }
 
-    private fun showItemProbabilityData(item: String, probabilityData: DebugData) {
+    private fun showItemProbabilityData(item: String, probabilityData: QuizzEngine.DebugData) {
         AlertDialog.Builder(this)
                 .setTitle(item)
                 .setMessage(
@@ -487,63 +316,8 @@ class QuizzActivity : AppCompatActivity() {
     }
 
     private fun discardOldHistory() {
-        for (position in history_view.childCount - 1 downTo MAX_HISTORY_SIZE - 1)
+        for (position in history_view.childCount - 1 downTo QuizzEngine.MAX_HISTORY_SIZE - 1)
             history_view.removeViewAt(position)
-        while (history.size > MAX_HISTORY_SIZE)
-            history.removeAt(0)
-    }
-
-    private fun serializeHistory(): ByteArray {
-        val parcel = Parcel.obtain()
-        parcel.writeInt(history.size)
-        for (line in history)
-            when (line) {
-                is HistoryLine.Correct -> {
-                    parcel.writeByte(0)
-                    parcel.writeInt(line.itemId)
-                }
-                is HistoryLine.Unknown -> {
-                    parcel.writeByte(1)
-                    parcel.writeInt(line.itemId)
-                }
-                is HistoryLine.Incorrect -> {
-                    parcel.writeByte(2)
-                    parcel.writeInt(line.correctItemId)
-                    parcel.writeInt(line.answerItemId)
-                }
-            }
-        val data = parcel.marshall()
-        parcel.recycle()
-        return data
-    }
-
-    private fun unserializeHistory(data: ByteArray) {
-        val parcel = Parcel.obtain()
-        parcel.unmarshall(data, 0, data.size)
-        parcel.setDataPosition(0)
-
-        history.clear()
-        history_view.removeAllViews()
-
-        val db = KaquiDb.getInstance(this)
-
-        val count = parcel.readInt()
-        repeat(count, {
-            val type = parcel.readByte()
-            when (type.toInt()) {
-                0 -> {
-                    addGoodAnswerToHistory(getItem(db, parcel.readInt()), null)
-                }
-                1 -> {
-                    addUnknownAnswerToHistory(getItem(db, parcel.readInt()), null)
-                }
-                2 -> {
-                    addWrongAnswerToHistory(getItem(db, parcel.readInt()), null, getItem(db, parcel.readInt()))
-                }
-            }
-        })
-
-        parcel.recycle()
     }
 
     private fun getDbView(db: KaquiDb): LearningDbView =
@@ -558,10 +332,4 @@ class QuizzActivity : AppCompatActivity() {
 
     private fun getItem(db: KaquiDb, id: Int): Item =
             getDbView(db).getItem(id)
-
-    private val itemView: LearningDbView
-        get() {
-            val db = KaquiDb.getInstance(this)
-            return getItemView(db, quizzType)
-        }
 }
