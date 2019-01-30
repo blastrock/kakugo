@@ -25,3 +25,4 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class android.support.v7.widget.SearchView { *; }
+-keep class android.support.v4.graphics.PathParser { android.graphics.Path createPathFromPathData(java.lang.String); }
