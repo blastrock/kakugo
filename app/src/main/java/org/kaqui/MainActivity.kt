@@ -8,11 +8,14 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.kaqui.model.KaquiDb
 import org.kaqui.model.QuizzType
-import org.kaqui.settings.JlptSelectionActivity
 import org.kaqui.settings.ItemSelectionActivity
+import org.kaqui.settings.JlptSelectionActivity
 import java.io.File
 import java.io.Serializable
 import java.util.zip.GZIPInputStream
@@ -33,7 +36,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private var initProgress: ProgressDialog? = null
 
-    lateinit var job: Job
+    private lateinit var job: Job
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
 

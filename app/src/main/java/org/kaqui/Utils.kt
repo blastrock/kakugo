@@ -2,8 +2,9 @@ package org.kaqui
 
 import android.graphics.PathMeasure
 import android.graphics.PointF
-import org.kaqui.model.*
-import java.util.Random
+import org.kaqui.model.BAD_WEIGHT
+import org.kaqui.model.GOOD_WEIGHT
+import java.util.*
 import kotlin.math.pow
 
 fun getBackgroundFromScore(score: Double) =

@@ -64,11 +64,11 @@ class LearningDbView(
     fun setItemEnabled(itemId: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(tableName, cv, idColumnName + " = ?", arrayOf(itemId.toString()))
+        writableDatabase.update(tableName, cv, "$idColumnName = ?", arrayOf(itemId.toString()))
     }
 
     fun isItemEnabled(id: Int): Boolean {
-        readableDatabase.query(tableName, arrayOf("enabled"), idColumnName + " = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(tableName, arrayOf("enabled"), "$idColumnName = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0) != 0
         }

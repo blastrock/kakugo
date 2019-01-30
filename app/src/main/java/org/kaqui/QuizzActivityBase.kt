@@ -15,7 +15,10 @@ import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.TextView
 import org.kaqui.model.*
 
 abstract class QuizzActivityBase : AppCompatActivity() {
@@ -97,7 +100,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
         AlertDialog.Builder(this)
                 .setTitle(R.string.confirm_quizz_stop_title)
                 .setMessage(R.string.confirm_quizz_stop_message)
-                .setPositiveButton(android.R.string.yes, { _, _ -> finish() })
+                .setPositiveButton(android.R.string.yes) { _, _ -> finish() }
                 .setNegativeButton(android.R.string.no, null)
                 .show()
     }

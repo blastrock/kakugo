@@ -2,9 +2,16 @@ package org.kaqui
 
 import android.graphics.*
 import android.os.Bundle
+import android.support.design.widget.CoordinatorLayout
+import android.support.design.widget.FloatingActionButton
+import android.support.v4.widget.NestedScrollView
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import kotlinx.android.synthetic.main.writing_quizz_activity.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
@@ -34,12 +41,12 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
 
     override val quizzType = QuizzType.KANJI_WRITING
 
-    override val historyScrollView get() = history_scroll_view
-    override val historyActionButton get() = history_action_button
-    override val historyView get() = history_view
-    override val sessionScore get() = session_score
-    override val mainView get() = main_layout
-    override val mainCoordLayout get() = main_coordlayout
+    override val historyScrollView: NestedScrollView get() = history_scroll_view
+    override val historyActionButton: FloatingActionButton get() = history_action_button
+    override val historyView: LinearLayout get() = history_view
+    override val sessionScore: TextView get() = session_score
+    override val mainView: View get() = main_layout
+    override val mainCoordLayout: CoordinatorLayout get() = main_coordlayout
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
@@ -54,12 +61,12 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
         draw_canevas.strokeCallback = this::onStrokeFinished
         draw_canevas.sizeChangedCallback = this::onDrawViewSizeChanged
 
-        hint_button.setOnClickListener { _ -> this.showHint() }
-        dontknow_button.setOnClickListener { _ -> this.onAnswerDone(Certainty.DONTKNOW) }
-        next_button.setOnClickListener { _ -> this.showNextQuestion() }
+        hint_button.setOnClickListener { this.showHint() }
+        dontknow_button.setOnClickListener { this.onAnswerDone(Certainty.DONTKNOW) }
+        next_button.setOnClickListener { this.showNextQuestion() }
         next_button.visibility = View.GONE
 
-        question_text.setOnLongClickListener { _ ->
+        question_text.setOnLongClickListener {
             if (quizzEngine.currentDebugData != null)
                 showItemProbabilityData(quizzEngine.currentQuestion.text, quizzEngine.currentDebugData!!)
             true

@@ -28,7 +28,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
 
-    lateinit var job: Job
+    private lateinit var job: Job
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
 
@@ -103,7 +103,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
                     progressDialog.setCancelable(false)
                     progressDialog.show()
 
-                    async(Dispatchers.Default) { KaquiDb.getInstance(this@JlptSelectionActivity).autoSelectWords() }.await()
+                    withContext(Dispatchers.Default) { KaquiDb.getInstance(this@JlptSelectionActivity).autoSelectWords() }
 
                     (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
                     statsFragment.updateStats(dbView)
@@ -143,7 +143,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (grantResults.all({ it == PackageManager.PERMISSION_GRANTED }))
+        if (grantResults.all { it == PackageManager.PERMISSION_GRANTED })
             importKanjis()
     }
 
@@ -159,7 +159,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
             KaquiDb.getInstance(this).setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
-            Toast.makeText(this, "Could not import file: " + e.toString(), Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Could not import file: $e", Toast.LENGTH_LONG).show()
         }
     }
 

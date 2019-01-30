@@ -3,7 +3,6 @@ package org.kaqui.model
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Path
 import org.kaqui.data.*
@@ -302,7 +301,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
             if (cursor.count == 0)
-                throw RuntimeException("Can't find kanji with id " + id)
+                throw RuntimeException("Can't find kanji with id $id")
             cursor.moveToFirst()
             contents.kanji = cursor.getString(0)
             contents.on_readings = cursor.getString(6).split('_')

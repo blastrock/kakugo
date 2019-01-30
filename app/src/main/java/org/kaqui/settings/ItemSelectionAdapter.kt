@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import org.kaqui.*
+import org.kaqui.R
+import org.kaqui.StatsFragment
+import org.kaqui.getBackgroundFromScore
 import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
 import org.kaqui.model.text

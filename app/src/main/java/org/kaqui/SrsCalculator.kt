@@ -30,7 +30,7 @@ class SrsCalculator {
 
             val probaParams = getProbaParamsStage1(now, minLastCorrect)
             Log.v(TAG, "probaParamsStage1: $probaParams, minLastCorrect: $minLastCorrect")
-            val ret = items.map({ getProbabilityDataStage1(now, probaParams, it) })
+            val ret = items.map { getProbabilityDataStage1(now, probaParams, it) }
             val stage1Stats = getStage1Stats(ret)
             val probaParams2 = getProbaParamsStage2(stage1Stats)
             Log.v(TAG, "probaParamsStage2: $probaParams2, stage1Stats: $stage1Stats")

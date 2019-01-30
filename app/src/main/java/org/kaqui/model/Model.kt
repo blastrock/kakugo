@@ -1,7 +1,6 @@
 package org.kaqui.model
 
 import android.graphics.Path
-import java.lang.RuntimeException
 
 sealed class ItemContents
 

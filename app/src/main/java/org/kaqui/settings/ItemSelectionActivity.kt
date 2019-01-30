@@ -1,15 +1,14 @@
 package org.kaqui.settings
 
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.item_selection_activity.*
-import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.model.KaquiDb
 import org.kaqui.model.LearningDbView
 
 class ItemSelectionActivity : AppCompatActivity() {

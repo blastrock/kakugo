@@ -3,8 +3,6 @@ package org.kaqui
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
-import android.os.Parcel
-import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -15,6 +13,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var mPaint = Paint()
     private var mBoundingBoxPaint = Paint()
+    private var mDebugPaint = Paint()
     private var mPath = Path()
     private var mHintPath = Path()
     private var mHintAnimator: ValueAnimator? = null
@@ -47,6 +46,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             style = Paint.Style.STROKE
             strokeWidth = 1f
             color = Color.argb(150, 0, 0, 0)
+        }
+        mDebugPaint.apply {
+            strokeWidth = debugStrokeWidth
+            color = Color.argb(255, 255, 0, 0)
         }
         mHintPaint.set(mPaint)
     }
@@ -94,11 +97,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
 
         for (path in debugPaths) {
-            val paint = Paint()
-            paint.set(mPaint)
-            paint.strokeWidth = debugStrokeWidth
-            paint.setARGB(255, 255, 0, 0)
-            canvas.drawPath(path, paint)
+            canvas.drawPath(path, mDebugPaint)
         }
 
         canvas.drawPath(boundingPath, mBoundingBoxPaint)

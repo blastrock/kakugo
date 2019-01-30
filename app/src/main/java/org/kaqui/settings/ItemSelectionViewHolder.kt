@@ -4,9 +4,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.CheckBox
 import android.widget.TextView
+import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.LearningDbView
-import org.kaqui.R
 
 class ItemSelectionViewHolder(private val dbView: LearningDbView, v: View, private val statsFragment: StatsFragment) : RecyclerView.ViewHolder(v) {
     val enabled: CheckBox = v.findViewById(R.id.item_checkbox)

@@ -1,10 +1,14 @@
 package org.kaqui
 
 import android.os.Bundle
+import android.support.design.widget.CoordinatorLayout
+import android.support.design.widget.FloatingActionButton
+import android.support.v4.widget.NestedScrollView
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.LinearLayout
+import android.widget.TextView
 import kotlinx.android.synthetic.main.quizz_activity.*
 import org.kaqui.model.*
 import java.util.*
@@ -17,12 +21,12 @@ class QuizzActivity : QuizzActivityBase() {
 
     private lateinit var answerTexts: List<TextView>
 
-    override val historyScrollView get() = history_scroll_view
-    override val historyActionButton get() = history_action_button
-    override val historyView get() = history_view
-    override val sessionScore get() = session_score
-    override val mainView get() = main_scrollview
-    override val mainCoordLayout get() = main_coordlayout
+    override val historyScrollView: NestedScrollView get() = history_scroll_view
+    override val historyActionButton: FloatingActionButton get() = history_action_button
+    override val historyView: LinearLayout get() = history_view
+    override val sessionScore: TextView get() = session_score
+    override val mainView: View get() = main_scrollview
+    override val mainCoordLayout: CoordinatorLayout get() = main_coordlayout
 
     override val quizzType
         get() = intent.extras.getSerializable("quizz_type") as QuizzType
@@ -80,15 +84,15 @@ class QuizzActivity : QuizzActivityBase() {
                 else -> Unit
             }
             answerTexts.add(textView)
-            answerLine.findViewById<View>(R.id.maybe_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.MAYBE, i) }
-            answerLine.findViewById<View>(R.id.sure_button).setOnClickListener { _ -> this.onAnswerClicked(Certainty.SURE, i) }
+            answerLine.findViewById<View>(R.id.maybe_button).setOnClickListener { this.onAnswerClicked(Certainty.MAYBE, i) }
+            answerLine.findViewById<View>(R.id.sure_button).setOnClickListener { this.onAnswerClicked(Certainty.SURE, i) }
 
             currentLine.addView(answerLine, i % columns)
         }
         this.answerTexts = answerTexts
-        dontknow_button.setOnClickListener { _ -> this.onAnswerClicked(Certainty.DONTKNOW, 0) }
+        dontknow_button.setOnClickListener { this.onAnswerClicked(Certainty.DONTKNOW, 0) }
 
-        question_text.setOnLongClickListener { _ ->
+        question_text.setOnLongClickListener {
             if (quizzEngine.currentDebugData != null)
                 showItemProbabilityData(quizzEngine.currentQuestion.text, quizzEngine.currentDebugData!!)
             true

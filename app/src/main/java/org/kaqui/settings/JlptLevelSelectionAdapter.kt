@@ -9,13 +9,12 @@ import android.view.ViewOutlineProvider
 import android.widget.BaseAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
-import org.kaqui.model.KaquiDb
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.LearningDbView
 
 class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView) : BaseAdapter() {
-    private val levels = (5 downTo 1).map { mapOf("label" to "JLPT level " + it.toString(), "level" to it) } +
+    private val levels = (5 downTo 1).map { mapOf("label" to "JLPT level $it", "level" to it) } +
             mapOf("label" to "Additional kanjis", "level" to 0)
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
