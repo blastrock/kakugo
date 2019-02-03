@@ -7,6 +7,12 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/save_selection"
+        android:title="@string/save_current_selection" />
+    <item
+        android:id="@+id/load_selection"
+        android:title="@string/load_selection" />
+    <item
         android:id="@+id/import_kanji_selection"
         android:title="@string/import_selection" />
 

@@ -3,19 +3,26 @@ package org.kaqui.settings
 import android.Manifest
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.text.InputType
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
+import android.widget.EditText
 import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import kotlinx.coroutines.*
+import org.jetbrains.anko.*
+import org.jetbrains.anko.custom.ankoView
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
@@ -92,6 +99,22 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
                         }))
                 true
             }
+            R.id.save_selection -> {
+                alert {
+                    title = "Enter the name of this kanji set"
+                    var name: EditText? = null
+                    customView = ctx.UI {
+                        name = editText()
+                     }.view
+                    positiveButton(android.R.string.ok) { saveSelection(name!!.text.toString()) }
+                    negativeButton(android.R.string.cancel) {}
+                }.show()
+                true
+            }
+            R.id.load_selection -> {
+                startActivity(Intent(this, SavedSelectionsActivity::class.java))
+                true
+            }
             R.id.import_kanji_selection -> {
                 importKanjis()
                 true
@@ -127,6 +150,11 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
                     Mode.WORD -> ItemSelectionActivity.Mode.WORD
                 } as Serializable)
                 .putExtra("level", level))
+    }
+
+    private fun saveSelection(name: String) {
+        KaquiDb.getInstance(this).saveKanjiSelectionTo(name)
+        toast(getString(R.string.saved_selection, name))
     }
 
     private fun importKanjis() {

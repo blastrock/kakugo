@@ -42,4 +42,10 @@
     <string name="info_button">Show details</string>
     <string name="next">Next</string>
     <string name="hint">Hint</string>
+    <string name="save_current_selection">Save current selection</string>
+    <string name="load_selection">Load selection</string>
+    <string name="delete">Delete</string>
+    <string name="loaded_selection">Loaded selection \"%1$s\"</string>
+    <string name="deleted_selection">Deleted selection \"%1$s\"</string>
+    <string name="saved_selection">Current kanji selection saved as \"%1$s\"</string>
 </resources>

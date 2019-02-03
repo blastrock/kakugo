@@ -38,6 +38,17 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "UNIQUE(id_kanji1, id_kanji2)"
                         + ")")
         database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $KANJIS_ITEM_SELECTION_TABLE_NAME ("
+                        + "id_selection INTEGER NOT NULL,"
+                        + "id_kanji INTEGER NOT NULL,"
+                        + "PRIMARY KEY(id_selection, id_kanji)"
+                        + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $KANJIS_SELECTION_TABLE_NAME ("
+                        + "id_selection INTEGER PRIMARY KEY,"
+                        + "name TEXT NOT NULL"
+                        + ")")
+        database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $WORDS_TABLE_NAME ("
                         + "id INTEGER PRIMARY KEY,"
                         + "item TEXT NOT NULL,"
@@ -119,19 +130,18 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                     dumpUserDataV9(database)
                 else
                     dumpUserData(database)
-        if (oldVersion < 10) {
-            database.execSQL("DROP TABLE IF EXISTS meanings")
-            database.execSQL("DROP TABLE IF EXISTS readings")
-            database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
-            database.execSQL("DROP TABLE IF EXISTS $KANJIS_TABLE_NAME")
-            database.execSQL("DROP TABLE IF EXISTS hiraganas")
-            database.execSQL("DROP TABLE IF EXISTS similar_hiraganas")
-            database.execSQL("DROP TABLE IF EXISTS katakanas")
-            database.execSQL("DROP TABLE IF EXISTS similar_katakanas")
-        }
-        if (oldVersion < 11) {
-            database.execSQL("DROP TABLE IF EXISTS $WORDS_TABLE_NAME")
-        }
+        database.execSQL("DROP TABLE IF EXISTS $KANJIS_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS meanings")
+        database.execSQL("DROP TABLE IF EXISTS readings")
+        database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS $STROKES_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS $KANJIS_ITEM_SELECTION_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS $KANJIS_SELECTION_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS hiraganas")
+        database.execSQL("DROP TABLE IF EXISTS similar_hiraganas")
+        database.execSQL("DROP TABLE IF EXISTS katakanas")
+        database.execSQL("DROP TABLE IF EXISTS similar_katakanas")
+        database.execSQL("DROP TABLE IF EXISTS $WORDS_TABLE_NAME")
         onCreate(database)
         restoreUserData(database, dump)
     }
@@ -389,6 +399,77 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         }
     }
 
+    data class KanjiSelection(
+            val id: Long,
+            val name: String
+    )
+
+    fun listKanjiSelections(): List<KanjiSelection> {
+        val out = mutableListOf<KanjiSelection>()
+        readableDatabase.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection", "name"), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                out.add(KanjiSelection(cursor.getLong(0), cursor.getString(1)))
+        }
+        return out
+    }
+
+    fun saveKanjiSelectionTo(name: String) {
+        writableDatabase.beginTransaction()
+        try {
+            val idSelection = readableDatabase.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
+                if (cursor.count == 0) {
+                    val cv = ContentValues()
+                    cv.put("name", name)
+                    return@use writableDatabase.insert(KANJIS_SELECTION_TABLE_NAME, null, cv)
+                } else {
+                    cursor.moveToFirst()
+                    return@use cursor.getInt(0)
+                }
+            }
+            writableDatabase.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            writableDatabase.execSQL("""
+            INSERT INTO $KANJIS_ITEM_SELECTION_TABLE_NAME (id_selection, id_kanji)
+            SELECT ?, id FROM $KANJIS_TABLE_NAME WHERE enabled = 1
+            """, arrayOf(idSelection.toString()))
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
+    fun restoreKanjiSelectionFrom(idSelection: Long) {
+        writableDatabase.beginTransaction()
+        try {
+            writableDatabase.execSQL("""
+                UPDATE $KANJIS_TABLE_NAME
+                SET enabled = 0
+                """)
+            writableDatabase.execSQL("""
+                UPDATE $KANJIS_TABLE_NAME
+                SET enabled = 1
+                WHERE id IN (
+                    SELECT id_kanji
+                    FROM $KANJIS_ITEM_SELECTION_TABLE_NAME
+                    WHERE id_selection = ?
+                )
+                """, arrayOf(idSelection.toString()))
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
+    fun deleteKanjiSelection(idSelection: Long) {
+        writableDatabase.beginTransaction()
+        try {
+            writableDatabase.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            writableDatabase.delete(KANJIS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
     data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>, val words: List<DumpRow>)
     data class DumpRow(val item: String, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
@@ -399,7 +480,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 12
+        private const val DATABASE_VERSION = 13
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
         private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
@@ -409,6 +490,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
         private const val KANJIS_TABLE_NAME = "kanjis"
         private const val SIMILARITIES_TABLE_NAME = "similarities"
+        private const val KANJIS_SELECTION_TABLE_NAME = "kanjis_selection"
+        private const val KANJIS_ITEM_SELECTION_TABLE_NAME = "kanjis_item_selection"
 
         private const val STROKES_TABLE_NAME = "strokes"
 

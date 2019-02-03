@@ -38,6 +38,9 @@
             android:name="org.kaqui.WritingQuizzActivity"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".settings.SavedSelectionsActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
             android:name=".settings.JlptSelectionActivity"
             android:parentActivityName=".MainActivity" />
         <activity
