@@ -115,10 +115,10 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         val dump =
-            if (oldVersion < 10)
-                dumpUserDataV9(database)
-            else
-                dumpUserData(database)
+                if (oldVersion < 10)
+                    dumpUserDataV9(database)
+                else
+                    dumpUserData(database)
         if (oldVersion < 10) {
             database.execSQL("DROP TABLE IF EXISTS meanings")
             database.execSQL("DROP TABLE IF EXISTS readings")
@@ -220,10 +220,13 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", null, this::getKatakana)
     val kanjiView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", null, this::getKanji, this::searchKanji)
+
     fun getKanjiView(level: Int?): LearningDbView =
-        LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", level, this::getKanji, this::searchKanji)
+            LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", level, this::getKanji, this::searchKanji)
+
     val wordView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", null, this::getWord, this::searchWord)
+
     fun getWordView(level: Int?): LearningDbView =
             LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", level, this::getWord, this::searchWord)
 
