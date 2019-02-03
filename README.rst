@@ -2,7 +2,7 @@
 KaQui
 =====
 
-KaQui helps learning Japanese. It takes the form of a quiz to memorize hiraganas, katakanas, and kanji readings and meanings and adapts to the user learning pace.
+KaQui helps learning Japanese. It takes the form of a quiz to memorize hiraganas, katakanas, and kanji and adapts to the user learning pace.
 
 - `Download on F-Droid <https://f-droid.org/packages/org.kaqui/>`_
 - `Download on Google Play <https://play.google.com/store/apps/details?id=org.kaqui>`_
@@ -14,6 +14,7 @@ Features include:
 
 - Hiragana, Katakana quizzes
 - Kanji quizzes by reading and meaning
+- Kanji writing quiz
 - Vocabulary quizzes by reading and meaning
 - Unique spaced repetition formula that adapts to your learning pace
 - Unlimited quiz sessions that allow you to take a quiz at any time, for how long you want, useful to efficiently spend commuting time
@@ -56,3 +57,5 @@ Credits
 - The kanji quizzes are based on `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
 - The vocabulary quizzes are based on `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
 - The kanji similarity database comes from https://minerva-access.unimelb.edu.au/handle/11343/35336 and http://lars.yencken.org/datasets/phd/
+- The kanji drawing database comes from `KanjiVG
+  <https://kanjivg.tagaini.net/>`_.
