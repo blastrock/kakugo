@@ -1,6 +1,6 @@
 package org.kaqui.model
 
-enum class QuizzType {
+enum class TestType {
     HIRAGANA_TO_ROMAJI,
     ROMAJI_TO_HIRAGANA,
 

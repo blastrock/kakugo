@@ -13,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.kaqui.model.KaquiDb
-import org.kaqui.model.QuizzType
+import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
 import org.kaqui.settings.JlptSelectionActivity
 import java.io.File
@@ -55,22 +55,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         kanji_quizz.setOnClickListener { setMode(Mode.KANJI) }
         word_quizz.setOnClickListener { setMode(Mode.WORD) }
 
-        start_hiragana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.HIRAGANA_TO_ROMAJI)))
-        start_romaji_to_hiragana_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.ROMAJI_TO_HIRAGANA)))
+        start_hiragana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.HIRAGANA_TO_ROMAJI)))
+        start_romaji_to_hiragana_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.ROMAJI_TO_HIRAGANA)))
 
-        start_katakana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KATAKANA_TO_ROMAJI)))
-        start_romaji_to_katakana_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.ROMAJI_TO_KATAKANA)))
+        start_katakana_to_romaji_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.KATAKANA_TO_ROMAJI)))
+        start_romaji_to_katakana_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.ROMAJI_TO_KATAKANA)))
 
-        start_kanji_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_READING)))
-        start_reading_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_KANJI)))
-        start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.KANJI_TO_MEANING)))
-        start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_KANJI)))
-        start_kanji_drawing_quizz.setOnClickListener(View.OnClickListener(makeDrawQuizzLauncher()))
+        start_kanji_reading_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.KANJI_TO_READING)))
+        start_reading_kanji_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.READING_TO_KANJI)))
+        start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.KANJI_TO_MEANING)))
+        start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.MEANING_TO_KANJI)))
+        start_kanji_drawing_quizz.setOnClickListener(View.OnClickListener(makeDrawTestLauncher()))
 
-        start_word_reading_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.WORD_TO_READING)))
-        start_reading_word_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.READING_TO_WORD)))
-        start_word_meaning_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.WORD_TO_MEANING)))
-        start_meaning_word_quizz.setOnClickListener(View.OnClickListener(makeQuizzLauncher(QuizzType.MEANING_TO_WORD)))
+        start_word_reading_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.WORD_TO_READING)))
+        start_reading_word_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.READING_TO_WORD)))
+        start_word_meaning_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.WORD_TO_MEANING)))
+        start_meaning_word_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.MEANING_TO_WORD)))
 
         hiragana_selection_button.setOnClickListener {
             startActivity(Intent(this, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.HIRAGANA as Serializable))
@@ -118,26 +118,26 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             super.onBackPressed()
     }
 
-    private fun makeQuizzLauncher(type: QuizzType): (View) -> Unit {
+    private fun makeTestLauncher(type: TestType): (View) -> Unit {
         return {
             val db = KaquiDb.getInstance(this)
-            if (QuizzEngine.getItemView(db, type).getEnabledCount() < 10) {
+            if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
                 Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
             } else {
-                val intent = Intent(this, QuizzActivity::class.java)
-                intent.putExtra("quizz_type", type)
+                val intent = Intent(this, TestActivity::class.java)
+                intent.putExtra("test_type", type)
                 startActivity(intent)
             }
         }
     }
 
-    private fun makeDrawQuizzLauncher(): (View) -> Unit {
+    private fun makeDrawTestLauncher(): (View) -> Unit {
         return {
             val db = KaquiDb.getInstance(this)
             if (db.kanjiView.getEnabledCount() < 10) {
                 Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
             } else {
-                val intent = Intent(this, WritingQuizzActivity::class.java)
+                val intent = Intent(this, WritingTestActivity::class.java)
                 startActivity(intent)
             }
         }

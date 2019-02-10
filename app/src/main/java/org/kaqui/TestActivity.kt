@@ -9,13 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import kotlinx.android.synthetic.main.quizz_activity.*
+import kotlinx.android.synthetic.main.test_activity.*
 import org.kaqui.model.*
 import java.util.*
 
-class QuizzActivity : QuizzActivityBase() {
+class TestActivity : TestActivityBase() {
     companion object {
-        private const val TAG = "QuizzActivity"
+        private const val TAG = "TestActivity"
         private const val COLUMNS = 2
     }
 
@@ -28,27 +28,27 @@ class QuizzActivity : QuizzActivityBase() {
     override val mainView: View get() = main_scrollview
     override val mainCoordLayout: CoordinatorLayout get() = main_coordlayout
 
-    override val quizzType
-        get() = intent.extras.getSerializable("quizz_type") as QuizzType
+    override val testType
+        get() = intent.extras.getSerializable("test_type") as TestType
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setContentView(R.layout.quizz_activity)
+        setContentView(R.layout.test_activity)
         super.onCreate(savedInstanceState)
 
-        when (quizzType) {
-            QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> {
+        when (testType) {
+            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
                 question_text.textSize = 50.0f
-                initButtons(listOf(answers_layout), QuizzEngine.NB_ANSWERS, R.layout.kanji_answer_line)
+                initButtons(listOf(answers_layout), TestEngine.NB_ANSWERS, R.layout.kanji_answer_line)
             }
 
-            QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> {
-                when (quizzType) {
-                    QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> {
+            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> {
+                when (testType) {
+                    TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI -> {
                         question_text.textSize = 20.0f
                         (question_text.layoutParams as LinearLayout.LayoutParams).topMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, resources.displayMetrics).toInt()
                         (question_text.layoutParams as LinearLayout.LayoutParams).bottomMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, resources.displayMetrics).toInt()
                     }
-                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA ->
+                    TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA ->
                         question_text.textSize = 50.0f
                     else -> Unit
                 }
@@ -56,7 +56,7 @@ class QuizzActivity : QuizzActivityBase() {
                 val answersLayout = LinearLayout(this)
                 answersLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                 answersLayout.orientation = LinearLayout.VERTICAL
-                val lineLayouts = (0..QuizzEngine.NB_ANSWERS / COLUMNS).map {
+                val lineLayouts = (0..TestEngine.NB_ANSWERS / COLUMNS).map {
                     val line = LinearLayout(this)
                     line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                     line.orientation = LinearLayout.HORIZONTAL
@@ -73,14 +73,14 @@ class QuizzActivity : QuizzActivityBase() {
     }
 
     private fun initButtons(lineLayouts: List<LinearLayout>, columns: Int, layoutToInflate: Int) {
-        val answerTexts = ArrayList<TextView>(QuizzEngine.NB_ANSWERS)
-        for (i in 0 until QuizzEngine.NB_ANSWERS) {
+        val answerTexts = ArrayList<TextView>(TestEngine.NB_ANSWERS)
+        for (i in 0 until TestEngine.NB_ANSWERS) {
             val currentLine = lineLayouts[i / columns]
             val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, currentLine, false)
 
             val textView: TextView = answerLine.findViewById(R.id.answer_text)
-            when (quizzType) {
-                QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> textView.textSize = 30.0f
+            when (testType) {
+                TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> textView.textSize = 30.0f
                 else -> Unit
             }
             answerTexts.add(textView)
@@ -93,8 +93,8 @@ class QuizzActivity : QuizzActivityBase() {
         dontknow_button.setOnClickListener { this.onAnswerClicked(Certainty.DONTKNOW, 0) }
 
         question_text.setOnLongClickListener {
-            if (quizzEngine.currentDebugData != null)
-                showItemProbabilityData(quizzEngine.currentQuestion.text, quizzEngine.currentDebugData!!)
+            if (testEngine.currentDebugData != null)
+                showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
     }
@@ -102,17 +102,17 @@ class QuizzActivity : QuizzActivityBase() {
     override fun showCurrentQuestion() {
         super.showCurrentQuestion()
 
-        question_text.text = quizzEngine.currentQuestion.getQuestionText(quizzType)
+        question_text.text = testEngine.currentQuestion.getQuestionText(testType)
 
-        for (i in 0 until QuizzEngine.NB_ANSWERS) {
-            answerTexts[i].text = quizzEngine.currentAnswers[i].getAnswerText(quizzType)
+        for (i in 0 until TestEngine.NB_ANSWERS) {
+            answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType)
         }
     }
 
     private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        quizzEngine.selectAnswer(certainty, position)
+        testEngine.selectAnswer(certainty, position)
 
-        quizzEngine.prepareNewQuestion()
+        testEngine.prepareNewQuestion()
         showCurrentQuestion()
     }
 }

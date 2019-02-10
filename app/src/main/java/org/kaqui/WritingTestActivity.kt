@@ -8,7 +8,7 @@ import android.support.v4.widget.NestedScrollView
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import kotlinx.android.synthetic.main.writing_quizz_activity.*
+import kotlinx.android.synthetic.main.writing_test_activity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,9 +16,9 @@ import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 
-class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
+class WritingTestActivity : TestActivityBase(), CoroutineScope {
     companion object {
-        private const val TAG = "WritingQuizzActivity"
+        private const val TAG = "WritingTestActivity"
 
         private const val KANJI_SIZE = 109
 
@@ -34,12 +34,12 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
         }
     }
 
-    private val currentKanji get() = quizzEngine.currentQuestion.contents as Kanji
+    private val currentKanji get() = testEngine.currentQuestion.contents as Kanji
     private lateinit var currentScaledStrokes: List<Path>
     private var currentStroke = 0
     private var missCount = 0
 
-    override val quizzType = QuizzType.KANJI_WRITING
+    override val testType = TestType.KANJI_WRITING
 
     override val historyScrollView: NestedScrollView get() = history_scroll_view
     override val historyActionButton: FloatingActionButton get() = history_action_button
@@ -54,7 +54,7 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         job = Job()
-        setContentView(R.layout.writing_quizz_activity)
+        setContentView(R.layout.writing_test_activity)
         super.onCreate(savedInstanceState)
 
         question_text.textSize = 20.0f
@@ -67,8 +67,8 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
         next_button.visibility = View.GONE
 
         question_text.setOnLongClickListener {
-            if (quizzEngine.currentDebugData != null)
-                showItemProbabilityData(quizzEngine.currentQuestion.text, quizzEngine.currentDebugData!!)
+            if (testEngine.currentDebugData != null)
+                showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
@@ -94,7 +94,7 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
     override fun showCurrentQuestion() {
         super.showCurrentQuestion()
 
-        question_text.text = quizzEngine.currentQuestion.getQuestionText(quizzType)
+        question_text.text = testEngine.currentQuestion.getQuestionText(testType)
 
         draw_canevas.clearCanvas()
 
@@ -173,7 +173,7 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
     }
 
     private fun onAnswerDone(certainty: Certainty) {
-        quizzEngine.markAnswer(certainty)
+        testEngine.markAnswer(certainty)
         currentStroke = currentKanji.strokes.size
 
         draw_canevas.clearCanvas()
@@ -188,7 +188,7 @@ class WritingQuizzActivity : QuizzActivityBase(), CoroutineScope {
     private fun showNextQuestion() {
         currentStroke = 0
         missCount = 0
-        quizzEngine.prepareNewQuestion()
+        testEngine.prepareNewQuestion()
 
         next_button.visibility = View.GONE
         hint_button.visibility = View.VISIBLE

@@ -5,7 +5,7 @@
     android:id="@+id/main_coordlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.kaqui.QuizzActivity">
+    tools:context="org.kaqui.TestActivity">
 
     <LinearLayout
         android:id="@+id/global_stats"

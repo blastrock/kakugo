@@ -42,34 +42,34 @@ val Item.similarities: List<Item>
         is Word -> listOf()
     }
 
-fun Item.getQuestionText(quizzType: QuizzType): String =
-        when (quizzType) {
-            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.KATAKANA_TO_ROMAJI -> (contents as Kana).kana
-            QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
+fun Item.getQuestionText(testType: TestType): String =
+        when (testType) {
+            TestType.HIRAGANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI -> (contents as Kana).kana
+            TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
 
-            QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING -> (contents as Kanji).kanji
-            QuizzType.READING_TO_KANJI -> (contents as Kanji).readingsText
-            QuizzType.MEANING_TO_KANJI -> (contents as Kanji).meaningsText
+            TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> (contents as Kanji).kanji
+            TestType.READING_TO_KANJI -> (contents as Kanji).readingsText
+            TestType.MEANING_TO_KANJI -> (contents as Kanji).meaningsText
 
-            QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING -> (contents as Word).word
-            QuizzType.READING_TO_WORD -> (contents as Word).reading
-            QuizzType.MEANING_TO_WORD -> (contents as Word).meaningsText
-            QuizzType.KANJI_WRITING -> "${(contents as Kanji).readingsText}\n${(contents as Kanji).meaningsText}"
+            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING -> (contents as Word).word
+            TestType.READING_TO_WORD -> (contents as Word).reading
+            TestType.MEANING_TO_WORD -> (contents as Word).meaningsText
+            TestType.KANJI_WRITING -> "${(contents as Kanji).readingsText}\n${(contents as Kanji).meaningsText}"
         }
 
-fun Item.getAnswerText(quizzType: QuizzType): String =
-        when (quizzType) {
-            QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.KATAKANA_TO_ROMAJI -> (contents as Kana).romaji
-            QuizzType.ROMAJI_TO_HIRAGANA, QuizzType.ROMAJI_TO_KATAKANA -> (contents as Kana).kana
+fun Item.getAnswerText(testType: TestType): String =
+        when (testType) {
+            TestType.HIRAGANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI -> (contents as Kana).romaji
+            TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).kana
 
-            QuizzType.KANJI_TO_READING -> (contents as Kanji).readingsText
-            QuizzType.KANJI_TO_MEANING -> (contents as Kanji).meaningsText
-            QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI -> (contents as Kanji).kanji
+            TestType.KANJI_TO_READING -> (contents as Kanji).readingsText
+            TestType.KANJI_TO_MEANING -> (contents as Kanji).meaningsText
+            TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI -> (contents as Kanji).kanji
 
-            QuizzType.WORD_TO_READING -> (contents as Word).reading
-            QuizzType.WORD_TO_MEANING -> (contents as Word).meaningsText
-            QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> (contents as Word).word
-            QuizzType.KANJI_WRITING -> throw RuntimeException("No answer text for kanji writing")
+            TestType.WORD_TO_READING -> (contents as Word).reading
+            TestType.WORD_TO_MEANING -> (contents as Word).meaningsText
+            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> (contents as Word).word
+            TestType.KANJI_WRITING -> throw RuntimeException("No answer text for kanji writing")
         }
 
 val Kanji.readingsText: String

@@ -21,17 +21,17 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import org.kaqui.model.*
 
-abstract class QuizzActivityBase : AppCompatActivity() {
+abstract class TestActivityBase : AppCompatActivity() {
     companion object {
-        private const val TAG = "QuizzActivityBase"
+        private const val TAG = "TestActivityBase"
     }
 
-    protected lateinit var quizzEngine: QuizzEngine
+    protected lateinit var testEngine: TestEngine
 
     private lateinit var statsFragment: StatsFragment
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
 
-    protected abstract val quizzType: QuizzType
+    protected abstract val testType: TestType
 
     protected abstract val historyScrollView: NestedScrollView
     protected abstract val historyActionButton: FloatingActionButton
@@ -57,12 +57,12 @@ abstract class QuizzActivityBase : AppCompatActivity() {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        quizzEngine = QuizzEngine(KaquiDb.getInstance(this), quizzType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
+        testEngine = TestEngine(KaquiDb.getInstance(this), testType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
 
         if (savedInstanceState == null)
-            quizzEngine.prepareNewQuestion()
+            testEngine.prepareNewQuestion()
         else
-            quizzEngine.loadState(savedInstanceState)
+            testEngine.loadState(savedInstanceState)
     }
 
     override fun onStart() {
@@ -72,7 +72,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        quizzEngine.saveState(outState)
+        testEngine.saveState(outState)
         super.onSaveInstanceState(outState)
     }
 
@@ -98,8 +98,8 @@ abstract class QuizzActivityBase : AppCompatActivity() {
 
     private fun confirmActivityClose() {
         AlertDialog.Builder(this)
-                .setTitle(R.string.confirm_quizz_stop_title)
-                .setMessage(R.string.confirm_quizz_stop_message)
+                .setTitle(R.string.confirm_test_stop_title)
+                .setMessage(R.string.confirm_test_stop_message)
                 .setPositiveButton(android.R.string.yes) { _, _ -> finish() }
                 .setNegativeButton(android.R.string.no, null)
                 .show()
@@ -113,10 +113,10 @@ abstract class QuizzActivityBase : AppCompatActivity() {
     }
 
     private fun updateSessionScore() {
-        sessionScore.text = getString(R.string.score_string, quizzEngine.correctCount, quizzEngine.questionCount)
+        sessionScore.text = getString(R.string.score_string, testEngine.correctCount, testEngine.questionCount)
     }
 
-    private fun addGoodAnswerToHistory(correct: Item, probabilityData: QuizzEngine.DebugData?) {
+    private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
 
         historyView.addView(layout, 0)
@@ -124,7 +124,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addWrongAnswerToHistory(correct: Item, probabilityData: QuizzEngine.DebugData?, wrong: Item) {
+    private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item) {
         val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
 
@@ -134,7 +134,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: QuizzEngine.DebugData?) {
+    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
 
         historyView.addView(layout, 0)
@@ -142,7 +142,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
         discardOldHistory()
     }
 
-    private fun makeHistoryLine(item: Item, probabilityData: QuizzEngine.DebugData?, style: Int?, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.selection_item, historyView, false)
 
         val checkbox = line.findViewById<View>(R.id.item_checkbox)
@@ -207,7 +207,7 @@ abstract class QuizzActivityBase : AppCompatActivity() {
         }
     }
 
-    protected fun showItemProbabilityData(item: String, probabilityData: QuizzEngine.DebugData) {
+    protected fun showItemProbabilityData(item: String, probabilityData: TestEngine.DebugData) {
         AlertDialog.Builder(this)
                 .setTitle(item)
                 .setMessage(
@@ -242,17 +242,17 @@ abstract class QuizzActivityBase : AppCompatActivity() {
     }
 
     private fun discardOldHistory() {
-        for (position in historyView.childCount - 1 downTo QuizzEngine.MAX_HISTORY_SIZE - 1)
+        for (position in historyView.childCount - 1 downTo TestEngine.MAX_HISTORY_SIZE - 1)
             historyView.removeViewAt(position)
     }
 
     private fun getDbView(db: KaquiDb): LearningDbView =
-            when (quizzType) {
-                QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
-                QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
+            when (testType) {
+                TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
+                TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
-                QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.KANJI_WRITING -> db.kanjiView
+                TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING -> db.kanjiView
 
-                QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
+                TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> db.wordView
             }
 }

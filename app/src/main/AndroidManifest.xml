@@ -32,10 +32,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.kaqui.QuizzActivity"
+            android:name="org.kaqui.TestActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name="org.kaqui.WritingQuizzActivity"
+            android:name="org.kaqui.WritingTestActivity"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".settings.SavedSelectionsActivity"

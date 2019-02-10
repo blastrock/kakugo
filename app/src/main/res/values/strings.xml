@@ -32,8 +32,8 @@
     <string name="score_string">Session score: %1$d/%2$d</string>
     <string name="jlpt_search">Search</string>
     <string name="search_kanji_hint">Search kanji&#8230;</string>
-    <string name="confirm_quizz_stop_title">Terminate quizz</string>
-    <string name="confirm_quizz_stop_message">Are you sure you want to end this quizz session?</string>
+    <string name="confirm_test_stop_title">Terminate quizz</string>
+    <string name="confirm_test_stop_message">Are you sure you want to end this quizz session?</string>
     <string name="enable_a_few_items">You must enable at least 10 items to start a quizz</string>
     <string name="initializing_kanji_db">Initializing database</string>
     <string name="autoselecting_words">Automatically selecting words from selected kanji</string>

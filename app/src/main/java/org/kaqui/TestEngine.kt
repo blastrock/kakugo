@@ -6,12 +6,12 @@ import android.util.Log
 import org.kaqui.model.*
 import java.util.*
 
-class QuizzEngine(
+class TestEngine(
         private val db: KaquiDb,
-        private val quizzType: QuizzType,
-        private val goodAnswerCallback: (correct: Item, probabilityData: QuizzEngine.DebugData?) -> Unit,
-        private val wrongAnswerCallback: (correct: Item, probabilityData: QuizzEngine.DebugData?, wrong: Item) -> Unit,
-        private val unknownAnswerCallback: (correct: Item, probabilityData: QuizzEngine.DebugData?) -> Unit) {
+        private val testType: TestType,
+        private val goodAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?) -> Unit,
+        private val wrongAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item) -> Unit,
+        private val unknownAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?) -> Unit) {
     private sealed class HistoryLine {
         data class Correct(val itemId: Int) : HistoryLine()
         data class Unknown(val itemId: Int) : HistoryLine()
@@ -19,19 +19,19 @@ class QuizzEngine(
     }
 
     companion object {
-        private const val TAG = "QuizzEngine"
+        private const val TAG = "TestEngine"
         const val NB_ANSWERS = 6
         private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         const val MAX_HISTORY_SIZE = 40
 
-        fun getItemView(db: KaquiDb, quizzType: QuizzType): LearningDbView =
-                when (quizzType) {
-                    QuizzType.HIRAGANA_TO_ROMAJI, QuizzType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
-                    QuizzType.KATAKANA_TO_ROMAJI, QuizzType.ROMAJI_TO_KATAKANA -> db.katakanaView
+        fun getItemView(db: KaquiDb, testType: TestType): LearningDbView =
+                when (testType) {
+                    TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
+                    TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
-                    QuizzType.KANJI_TO_READING, QuizzType.KANJI_TO_MEANING, QuizzType.READING_TO_KANJI, QuizzType.MEANING_TO_KANJI, QuizzType.KANJI_WRITING -> db.kanjiView
+                    TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING -> db.kanjiView
 
-                    QuizzType.WORD_TO_READING, QuizzType.WORD_TO_MEANING, QuizzType.READING_TO_WORD, QuizzType.MEANING_TO_WORD -> db.wordView
+                    TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> db.wordView
                 }
     }
 
@@ -91,7 +91,7 @@ class QuizzEngine(
     fun prepareNewQuestion() {
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
         if (ids.size < NB_ANSWERS) {
-            Log.wtf(TAG, "Too few items selected for a quizz: ${ids.size}")
+            Log.wtf(TAG, "Too few items selected for a test: ${ids.size}")
             return
         }
 
@@ -162,9 +162,9 @@ class QuizzEngine(
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
-                currentAnswers[position].getAnswerText(quizzType) == currentQuestion.getAnswerText(quizzType) ||
+                currentAnswers[position].getAnswerText(testType) == currentQuestion.getAnswerText(testType) ||
                 // same for question text
-                currentAnswers[position].getQuestionText(quizzType) == currentQuestion.getQuestionText(quizzType)) {
+                currentAnswers[position].getQuestionText(testType) == currentQuestion.getQuestionText(testType)) {
             // correct
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
             itemView.applyScoreUpdate(scoreUpdate)
@@ -283,5 +283,5 @@ class QuizzEngine(
             itemView.getItem(id)
 
     private val itemView: LearningDbView
-        get() = getItemView(db, quizzType)
+        get() = getItemView(db, testType)
 }
