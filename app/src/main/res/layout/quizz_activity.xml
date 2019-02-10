@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@android:color/holo_red_light"
+                    android:backgroundTint="@color/answerDontKnow"
                     android:text="@string/dont_know"
                     tools:targetApi="lollipop" />
 
@@ -70,7 +70,7 @@
         android:id="@+id/history_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#CCC"
+        android:background="@color/historyBackground"
         app:behavior_hideable="false"
         app:behavior_peekHeight="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior">

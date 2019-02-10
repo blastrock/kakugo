@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="#E0E0E0"
+        android:background="@color/statsUnknown"
         android:textAlignment="center" />
 
     <TextView
@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="#E57373"
+        android:background="@color/statsBad"
         android:textAlignment="center" />
 
     <TextView
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="#FFB74D"
+        android:background="@color/statsMeh"
         android:textAlignment="center" />
 
     <TextView
@@ -34,6 +34,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="#81C784"
+        android:background="@color/statsGood"
         android:textAlignment="center" />
 </LinearLayout>

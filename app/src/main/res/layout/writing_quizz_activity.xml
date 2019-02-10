@@ -52,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@android:color/holo_orange_light"
+                android:backgroundTint="@color/answerMaybe"
                 android:text="@string/hint"
                 tools:targetApi="lollipop" />
 
@@ -61,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@android:color/holo_red_light"
+                android:backgroundTint="@color/answerDontKnow"
                 android:text="@string/dont_know"
                 tools:targetApi="lollipop" />
 

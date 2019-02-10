@@ -3,4 +3,19 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#99CC00</color>
+
+    <color name="answerSure">#9ccc65</color>
+    <color name="answerMaybe">#dcedc8</color>
+    <color name="answerDontKnow">#e0e0e0</color>
+
+    <color name="statsUnknown">#E0E0E0</color>
+    <color name="statsBad">#fce4ec</color>
+    <color name="statsMeh">#c5cae9</color>
+    <color name="statsGood">#9ccc65</color>
+
+    <color name="itemGood">#dcedc8</color>
+    <color name="itemMeh">#fff9c4</color>
+    <color name="itemBad">#ffcdd2</color>
+
+    <color name="historyBackground">#ddd</color>
 </resources>
