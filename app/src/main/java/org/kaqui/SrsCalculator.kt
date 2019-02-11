@@ -146,11 +146,9 @@ class SrsCalculator {
                 return ProbaParamsStage2(1.0, 1.0)
 
             val neededShortWeight = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, Math.min(stage1Stats.countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
-            val neededLongWeight = 1 - neededShortWeight
-            val total = stage1Stats.totalShortWeight + stage1Stats.totalLongWeight
-            val shortCoefficient = neededShortWeight * total / stage1Stats.totalShortWeight
-            val longCoefficient = neededLongWeight * total / stage1Stats.totalLongWeight
-            return ProbaParamsStage2(shortCoefficient, longCoefficient)
+            val totalWeight = stage1Stats.totalShortWeight + stage1Stats.totalLongWeight
+            val shortCoefficient = neededShortWeight * totalWeight / stage1Stats.totalShortWeight
+            return ProbaParamsStage2(shortCoefficient, 1.0)
         }
     }
 }
