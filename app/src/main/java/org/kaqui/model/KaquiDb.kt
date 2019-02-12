@@ -250,26 +250,26 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     val hiraganaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_kana", null, this::getHiragana)
+        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_kana", "1", null, this::getHiragana)
     val katakanaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", null, this::getKatakana)
+        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", "1", null, this::getKatakana)
     val kanjiView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", null, this::getKanji, this::searchKanji)
+        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", null, this::getKanji, this::searchKanji)
 
     fun getKanjiView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", level, this::getKanji, this::searchKanji)
+            LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", level, this::getKanji, this::searchKanji)
 
     val wordView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", null, this::getWord, this::searchWord)
+        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", null, this::getWord, this::searchWord)
 
     fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", level, this::getWord, this::searchWord)
+            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", level, this::getWord, this::searchWord)
 
     private fun searchKanji(text: String): List<Int> {
         readableDatabase.rawQuery(
                 """SELECT id
                 FROM $KANJIS_TABLE_NAME
-                WHERE item = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR meanings LIKE ?""",
+                WHERE item = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR meanings LIKE ? AND radical = 0""",
                 arrayOf(text, "%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
