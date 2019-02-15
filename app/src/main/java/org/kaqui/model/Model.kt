@@ -11,6 +11,7 @@ data class Kanji(
         var meanings: List<String>,
         var strokes: List<Path>,
         var similarities: List<Item>,
+        var parts: List<Item>,
         var jlptLevel: Int
 ) : ItemContents()
 

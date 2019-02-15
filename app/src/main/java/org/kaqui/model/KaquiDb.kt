@@ -330,9 +330,14 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         val similarities = mutableListOf<Item>()
         readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
-        val contents = Kanji("", listOf(), listOf(), listOf(), strokes, similarities, 0)
+        val parts = mutableListOf<Item>()
+        readableDatabase.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                parts.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
+        }
+        val contents = Kanji("", listOf(), listOf(), listOf(), strokes, similarities, parts, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         readableDatabase.query(KANJIS_TABLE_NAME,
                 arrayOf("item", "jlpt_level", "short_score", "long_score", "last_correct", "enabled", "on_readings", "kun_readings", "meanings"),
