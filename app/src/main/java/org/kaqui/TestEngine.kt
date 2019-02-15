@@ -20,7 +20,6 @@ class TestEngine(
 
     companion object {
         private const val TAG = "TestEngine"
-        const val NB_ANSWERS = 6
         private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         const val MAX_HISTORY_SIZE = 40
 
@@ -59,6 +58,9 @@ class TestEngine(
     private val history = ArrayList<HistoryLine>()
     private val lastQuestionsIds = ArrayDeque<Int>()
 
+    val answerCount
+        get () = getAnswerCount(testType)
+
     fun loadState(savedInstanceState: Bundle) {
         currentQuestion = getItem(db, savedInstanceState.getInt("question"))
         currentAnswers = savedInstanceState.getIntArray("answers").map { getItem(db, it) }
@@ -90,7 +92,7 @@ class TestEngine(
 
     fun prepareNewQuestion() {
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
-        if (ids.size < NB_ANSWERS) {
+        if (ids.size < answerCount) {
             Log.wtf(TAG, "Too few items selected for a test: ${ids.size}")
             return
         }
@@ -130,16 +132,16 @@ class TestEngine(
     private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
         val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) }
         val similarItems =
-                if (similarItemIds.size >= NB_ANSWERS - 1)
-                    pickRandom(similarItemIds, NB_ANSWERS - 1)
+                if (similarItemIds.size >= answerCount - 1)
+                    pickRandom(similarItemIds, answerCount - 1)
                 else
                     similarItemIds
 
-        val additionalAnswers = pickRandom(ids.map { it.itemId }, NB_ANSWERS - 1 - similarItems.size, setOf(currentQuestion.id) + similarItems)
+        val additionalAnswers = pickRandom(ids.map { it.itemId }, answerCount - 1 - similarItems.size, setOf(currentQuestion.id) + similarItems)
 
         val currentAnswers = ((additionalAnswers + similarItems).map { getItem(db, it) } + listOf(currentQuestion)).toMutableList()
-        if (currentAnswers.size != NB_ANSWERS)
-            Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $NB_ANSWERS")
+        if (currentAnswers.size != answerCount)
+            Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $answerCount")
         currentAnswers.shuffle()
 
         return currentAnswers

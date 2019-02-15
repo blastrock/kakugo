@@ -38,7 +38,7 @@ class TestActivity : TestActivityBase() {
         when (testType) {
             TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
                 question_text.textSize = 50.0f
-                initButtons(listOf(answers_layout), TestEngine.NB_ANSWERS, R.layout.kanji_answer_line)
+                initButtons(listOf(answers_layout), testEngine.answerCount, R.layout.kanji_answer_line)
             }
 
             TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> {
@@ -56,7 +56,7 @@ class TestActivity : TestActivityBase() {
                 val answersLayout = LinearLayout(this)
                 answersLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                 answersLayout.orientation = LinearLayout.VERTICAL
-                val lineLayouts = (0..TestEngine.NB_ANSWERS / COLUMNS).map {
+                val lineLayouts = (0..testEngine.answerCount / COLUMNS).map {
                     val line = LinearLayout(this)
                     line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                     line.orientation = LinearLayout.HORIZONTAL
@@ -73,8 +73,8 @@ class TestActivity : TestActivityBase() {
     }
 
     private fun initButtons(lineLayouts: List<LinearLayout>, columns: Int, layoutToInflate: Int) {
-        val answerTexts = ArrayList<TextView>(TestEngine.NB_ANSWERS)
-        for (i in 0 until TestEngine.NB_ANSWERS) {
+        val answerTexts = ArrayList<TextView>(testEngine.answerCount)
+        for (i in 0 until testEngine.answerCount) {
             val currentLine = lineLayouts[i / columns]
             val answerLine = LayoutInflater.from(this).inflate(layoutToInflate, currentLine, false)
 
@@ -104,7 +104,7 @@ class TestActivity : TestActivityBase() {
 
         question_text.text = testEngine.currentQuestion.getQuestionText(testType)
 
-        for (i in 0 until TestEngine.NB_ANSWERS) {
+        for (i in 0 until testEngine.answerCount) {
             answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType)
         }
     }

@@ -117,3 +117,9 @@ val Item.description: String
                     word.meanings.joinToString(", ")
         }
     }
+
+fun getAnswerCount(testType: TestType) =
+        when (testType) {
+            else -> 6
+        }
+
