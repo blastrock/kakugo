@@ -2,6 +2,7 @@ package org.kaqui
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
@@ -96,6 +97,15 @@ class CompositionTestActivity : TestActivityBase() {
         this.answerButtons = answerButtons
     }
 
+    private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+            button.backgroundTintList = ColorStateList.valueOf(resources.getColor(color))
+        } else {
+            button.isChecked = checked
+        }
+    }
+
     private fun sampleAnswers(possibleAnswers: List<List<Int>>, currentAnswers: List<Int>): List<Int> {
         if (possibleAnswers.isEmpty() || currentAnswers.size == testEngine.answerCount)
             return currentAnswers
@@ -145,8 +155,8 @@ class CompositionTestActivity : TestActivityBase() {
 
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
             button.isClickable = true
-            button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
-            button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+            button.isChecked = false
+            setButtonTint(button, R.color.answerDontKnow, false)
             button.text = answer.getAnswerText(testType)
             button.textOn = answer.getAnswerText(testType)
             button.textOff = answer.getAnswerText(testType)
@@ -164,16 +174,13 @@ class CompositionTestActivity : TestActivityBase() {
                     else
                         answer.id == testEngine.currentQuestion.id
             if (buttonChecked && answerValid) {
-                button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.compositionGood))
+                setButtonTint(button, R.color.compositionGood, true)
             } else if (buttonChecked && !answerValid) {
                 ok = false
-                button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.compositionBadSelected))
+                setButtonTint(button, R.color.compositionBadSelected, false)
             } else if (!buttonChecked && answerValid) {
                 ok = false
-                button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.compositionBadNotSelected))
+                setButtonTint(button, R.color.compositionBadNotSelected, true)
             }
         }
 
@@ -200,8 +207,6 @@ class CompositionTestActivity : TestActivityBase() {
         done_button.visibility = View.VISIBLE
         dontknow_button.visibility = View.VISIBLE
         next_button.visibility = View.GONE
-        for (answerButton in answerButtons)
-            answerButton.isChecked = false
 
         showCurrentQuestion()
     }
