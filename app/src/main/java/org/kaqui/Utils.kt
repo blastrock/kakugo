@@ -25,6 +25,19 @@ fun <T> MutableList<T>.shuffle() {
     }
 }
 
+fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
+    if (sample > list.size - avoid.size)
+        throw RuntimeException("can't get a sample of size $sample on list of size ${list.size - avoid.size}")
+
+    val chosen = mutableSetOf<T>()
+    while (chosen.size < sample) {
+        val r = list[(Math.random() * list.size).toInt()]
+        if (r !in avoid)
+            chosen.add(r)
+    }
+    return chosen.toList()
+}
+
 fun PointF.squaredDistanceTo(o: PointF): Float = (this.x - o.x).pow(2) + (this.y - o.y).pow(2)
 
 fun PathMeasure.getPoint(position: Float): PointF {
