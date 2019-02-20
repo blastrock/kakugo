@@ -101,13 +101,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         kanji_layout.visibility = if (mode == Mode.KANJI) View.VISIBLE else View.GONE
         word_layout.visibility = if (mode == Mode.WORD) View.VISIBLE else View.GONE
 
-        if (mode == Mode.KANJI || mode == Mode.WORD) {
-            val db = KaquiDb.getInstance(this)
-            if (db.needsInit) {
-                showDownloadProgressDialog()
-                launch(Dispatchers.Default) {
-                    initDic()
-                }
+        if (KaquiDb.databaseNeedsUpdate(this)) {
+            showDownloadProgressDialog()
+            launch(Dispatchers.Default) {
+                initDic()
             }
         }
     }
@@ -183,11 +180,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         } finally {
             tmpFile.delete()
-        }
 
-        launch(job) {
-            initProgress!!.dismiss()
-            initProgress = null
+            launch(job) {
+                initProgress!!.dismiss()
+                initProgress = null
+            }
         }
     }
 }

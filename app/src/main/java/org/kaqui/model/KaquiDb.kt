@@ -3,8 +3,10 @@ package org.kaqui.model
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Path
+import android.util.Log
 import org.kaqui.data.*
 
 class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -157,36 +159,6 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         onCreate(database)
         restoreUserData(database, dump)
     }
-
-    val needsInit: Boolean
-        get() {
-            readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "on_readings <> ''", null, null, null, null).use { cursor ->
-                cursor.moveToFirst()
-                if (cursor.getInt(0) == 0)
-                    return true
-            }
-            readableDatabase.query(STROKES_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
-                cursor.moveToFirst()
-                if (cursor.getInt(0) == 0)
-                    return true
-            }
-            readableDatabase.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
-                cursor.moveToFirst()
-                if (cursor.getInt(0) == 0)
-                    return true
-            }
-            readableDatabase.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "reading <> ''", null, null, null, null).use { cursor ->
-                cursor.moveToFirst()
-                if (cursor.getInt(0) == 0)
-                    return true
-            }
-            readableDatabase.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "jlpt_level <> 0", null, null, null, null).use { cursor ->
-                cursor.moveToFirst()
-                if (cursor.getInt(0) == 0)
-                    return true
-            }
-            return false
-        }
 
     fun replaceKanjis(dictDb: String) {
         writableDatabase.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
@@ -562,6 +534,45 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             if (singleton == null)
                 singleton = KaquiDb(context)
             return singleton!!
+        }
+
+        fun databaseNeedsUpdate(context: Context): Boolean {
+            try {
+                SQLiteDatabase.openDatabase(context.getDatabasePath(KaquiDb.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+                    if (db.version != DATABASE_VERSION)
+                        return true
+
+                    db.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "on_readings <> ''", null, null, null, null).use { cursor ->
+                        cursor.moveToFirst()
+                        if (cursor.getInt(0) == 0)
+                            return true
+                    }
+                    db.query(STROKES_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
+                        cursor.moveToFirst()
+                        if (cursor.getInt(0) == 0)
+                            return true
+                    }
+                    db.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
+                        cursor.moveToFirst()
+                        if (cursor.getInt(0) == 0)
+                            return true
+                    }
+                    db.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "reading <> ''", null, null, null, null).use { cursor ->
+                        cursor.moveToFirst()
+                        if (cursor.getInt(0) == 0)
+                            return true
+                    }
+                    db.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "jlpt_level <> 0", null, null, null, null).use { cursor ->
+                        cursor.moveToFirst()
+                        if (cursor.getInt(0) == 0)
+                            return true
+                    }
+                    return false
+                }
+            } catch (e: SQLiteException) {
+                Log.i(TAG, "Failed to open database", e)
+                return true
+            }
         }
 
         private fun dumpUserDataV9(database: SQLiteDatabase): Dump {
