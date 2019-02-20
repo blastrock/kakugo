@@ -10,7 +10,7 @@ class LearningDbView(
         private val tableName: String,
         private val idColumnName: String,
         private val filter: String = "1",
-        private val level: Int?,
+        private val level: Int? = null,
         private val itemGetter: (id: Int) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
 

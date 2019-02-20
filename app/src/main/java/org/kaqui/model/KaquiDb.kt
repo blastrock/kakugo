@@ -250,20 +250,20 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     val hiraganaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_kana", "1", null, this::getHiragana)
+        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_kana", itemGetter = this::getHiragana)
     val katakanaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", "1", null, this::getKatakana)
+        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", itemGetter = this::getKatakana)
     val kanjiView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", null, this::getKanji, this::searchKanji)
+        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     fun getKanjiView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", level, this::getKanji, this::searchKanji)
+            LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     val wordView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", null, this::getWord, this::searchWord)
+        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", level, this::getWord, this::searchWord)
+            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     private fun searchKanji(text: String): List<Int> {
         readableDatabase.rawQuery(
