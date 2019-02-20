@@ -38,6 +38,9 @@
             android:name="org.kaqui.WritingTestActivity"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name="org.kaqui.CompositionTestActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
             android:name=".settings.SavedSelectionsActivity"
             android:parentActivityName=".MainActivity" />
         <activity

@@ -255,6 +255,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", itemGetter = this::getKatakana)
     val kanjiView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+    val composedKanjiView: LearningDbView
+        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     fun getKanjiView(level: Int?): LearningDbView =
             LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
@@ -264,6 +266,28 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     fun getWordView(level: Int?): LearningDbView =
             LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
+
+    fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
+        readableDatabase.rawQuery("""
+            SELECT c3.id_kanji2
+            FROM $KANJIS_COMPOSITION_TABLE_NAME c1
+            JOIN $KANJIS_COMPOSITION_TABLE_NAME c2 ON c1.id_kanji2 = c2.id_kanji2
+            JOIN $KANJIS_TABLE_NAME k2 ON c2.id_kanji1 = k2.id AND k2.enabled = 1
+            JOIN $KANJIS_COMPOSITION_TABLE_NAME c3 ON c2.id_kanji1 = c3.id_kanji1
+            WHERE c1.id_kanji1 = ?
+                UNION
+            SELECT c.id_kanji1
+            FROM $KANJIS_COMPOSITION_TABLE_NAME c
+            JOIN $KANJIS_TABLE_NAME k ON c.id_kanji1 = k.id AND k.enabled = 1
+            WHERE c.id_kanji2 = ?
+            """, arrayOf(kanjiId.toString(), kanjiId.toString())).use { cursor ->
+            val ret = mutableListOf<Int>()
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+            return ret
+        }
+    }
 
     private fun searchKanji(text: String): List<Int> {
         readableDatabase.rawQuery(

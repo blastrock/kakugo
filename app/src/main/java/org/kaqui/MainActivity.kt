@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         start_kanji_meaning_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.KANJI_TO_MEANING)))
         start_meaning_kanji_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.MEANING_TO_KANJI)))
         start_kanji_drawing_quizz.setOnClickListener(View.OnClickListener(makeDrawTestLauncher()))
+        start_kanji_composition_test.setOnClickListener(View.OnClickListener(makeCompositionTestLauncher()))
 
         start_word_reading_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.WORD_TO_READING)))
         start_reading_word_quizz.setOnClickListener(View.OnClickListener(makeTestLauncher(TestType.READING_TO_WORD)))
@@ -138,6 +139,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
             } else {
                 val intent = Intent(this, WritingTestActivity::class.java)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun makeCompositionTestLauncher(): (View) -> Unit {
+        return {
+            val db = KaquiDb.getInstance(this)
+            if (db.kanjiView.getEnabledCount() < 10) {
+                Toast.makeText(this, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
+            } else {
+                val intent = Intent(this, CompositionTestActivity::class.java)
                 startActivity(intent)
             }
         }

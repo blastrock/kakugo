@@ -18,4 +18,6 @@ enum class TestType {
     MEANING_TO_WORD,
 
     KANJI_WRITING,
+
+    KANJI_COMPOSITION,
 }

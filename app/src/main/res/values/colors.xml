@@ -17,5 +17,9 @@
     <color name="itemMeh">#fff9c4</color>
     <color name="itemBad">#ffcdd2</color>
 
+    <color name="compositionGood">#9ccc65</color>
+    <color name="compositionBadSelected">#ef9a9a</color>
+    <color name="compositionBadNotSelected">#ffcdd2</color>
+
     <color name="historyBackground">#ddd</color>
 </resources>

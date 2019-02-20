@@ -21,6 +21,7 @@
     <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
     <string name="kanji_meaning_quizz">Kanji to meaning quizz (日→day)</string>
     <string name="meaning_kanji_quizz">Meaning to kanji quizz (day→日)</string>
+    <string name="kanji_composition_test">Kanji composition (休→亻+木)</string>
     <string name="kanji_drawing_quizz">Kanji drawing</string>
     <string name="word_reading_quizz">Word to reading (日の出→ひので)</string>
     <string name="reading_word_quizz">Reading to word (ひので→日の出)</string>
@@ -48,4 +49,5 @@
     <string name="loaded_selection">Loaded selection \"%1$s\"</string>
     <string name="deleted_selection">Deleted selection \"%1$s\"</string>
     <string name="saved_selection">Current kanji selection saved as \"%1$s\"</string>
+    <string name="answerDone">Done</string>
 </resources>

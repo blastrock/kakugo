@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Parcel
 import android.util.Log
 import org.kaqui.model.*
+import java.lang.RuntimeException
 import java.util.*
 
 class TestEngine(
@@ -29,6 +30,7 @@ class TestEngine(
                     TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
                     TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING -> db.kanjiView
+                    TestType.KANJI_COMPOSITION -> db.composedKanjiView
 
                     TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> db.wordView
                 }
@@ -48,7 +50,6 @@ class TestEngine(
     var currentDebugData: DebugData? = null
         private set
     lateinit var currentAnswers: List<Item>
-        private set
 
     var correctCount = 0
         private set
@@ -77,11 +78,11 @@ class TestEngine(
         outState.putByteArray("history", serializeHistory())
     }
 
-    fun prepareNewQuestion() {
+    fun prepareNewQuestion(): List<SrsCalculator.ProbabilityData> {
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
         if (ids.size < answerCount) {
-            Log.wtf(TAG, "Too few items selected for a test: ${ids.size}")
-            return
+            Log.wtf(TAG, "Enabled items ${ids.size} must at least be $answerCount")
+            throw RuntimeException("Too few items selected")
         }
 
         val question = pickQuestion(db, ids)
@@ -91,6 +92,8 @@ class TestEngine(
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
         addIdToLastQuestions(currentQuestion.id)
+
+        return ids
     }
 
     private fun pickQuestion(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
@@ -271,6 +274,6 @@ class TestEngine(
     private fun getItem(db: KaquiDb, id: Int): Item =
             itemView.getItem(id)
 
-    private val itemView: LearningDbView
+    val itemView: LearningDbView
         get() = getItemView(db, testType)
 }

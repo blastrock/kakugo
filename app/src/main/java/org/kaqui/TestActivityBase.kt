@@ -60,7 +60,7 @@ abstract class TestActivityBase : AppCompatActivity() {
         testEngine = TestEngine(KaquiDb.getInstance(this), testType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
 
         if (savedInstanceState == null)
-            testEngine.prepareNewQuestion()
+            prepareNewQuestion()
         else
             testEngine.loadState(savedInstanceState)
     }
@@ -103,6 +103,10 @@ abstract class TestActivityBase : AppCompatActivity() {
                 .setPositiveButton(android.R.string.yes) { _, _ -> finish() }
                 .setNegativeButton(android.R.string.no, null)
                 .show()
+    }
+
+    protected open fun prepareNewQuestion() {
+        testEngine.prepareNewQuestion()
     }
 
     protected open fun showCurrentQuestion() {
@@ -251,7 +255,7 @@ abstract class TestActivityBase : AppCompatActivity() {
                 TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
                 TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
 
-                TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING -> db.kanjiView
+                TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING, TestType.KANJI_COMPOSITION -> db.kanjiView
 
                 TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> db.wordView
             }
