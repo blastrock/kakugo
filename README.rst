@@ -2,7 +2,7 @@
 KaQui
 =====
 
-KaQui helps learning Japanese. It includes multiple tests to memorize hiraganas, katakanas, and kanji and adapts to the user's learning pace.
+KaQui helps learning Japanese. It includes multiple tests to memorize hiragana, katakana, and kanji and adapts to the user's learning pace.
 
 - `Download on F-Droid <https://f-droid.org/packages/org.kaqui/>`_
 - `Download on Google Play <https://play.google.com/store/apps/details?id=org.kaqui>`_
@@ -20,7 +20,7 @@ Features include:
 - Unique spaced repetition formula that adapts to your own learning pace
 - Unlimited quiz sessions that allow you to take a quiz at any time, for however long you want, useful to efficiently spend commuting time
 - Show similar-looking kanji in answers to teach you the differences
-- Clicking on kanji opens `aedict3 <https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (a non-free japanese dictionary) or `jisho.org <https://jisho.org>`_
+- Clicking on kanji opens `aedict3 <https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (a non-free Japanese dictionary) or `jisho.org <https://jisho.org>`_
 - Open source
 - No ads
 - More to come
