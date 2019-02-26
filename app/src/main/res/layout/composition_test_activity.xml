@@ -16,9 +16,10 @@
 
     <ScrollView
         android:id="@+id/main_scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0">
+        android:layout_width="@dimen/main_layout_size"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:layout_gravity="center">
 
         <LinearLayout
             android:id="@+id/main_layout"
