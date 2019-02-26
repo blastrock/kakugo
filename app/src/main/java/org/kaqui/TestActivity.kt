@@ -67,6 +67,7 @@ class TestActivity : TestActivityBase() {
                 initButtons(lineLayouts, COLUMNS, R.layout.kanji_answer_block)
                 answers_layout.addView(answersLayout, 0)
             }
+            else -> throw RuntimeException("unsupported test type for TestActivity")
         }
 
         showCurrentQuestion()
