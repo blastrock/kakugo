@@ -33,7 +33,7 @@ class CompositionTestActivity : TestActivityBase() {
     override val historyActionButton: FloatingActionButton get() = history_action_button
     override val historyView: LinearLayout get() = history_view
     override val sessionScore: TextView get() = session_score
-    override val mainView: View get() = main_scrollview
+    override val mainView: View get() = wrapper_layout
     override val mainCoordLayout: CoordinatorLayout get() = main_coordlayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
