@@ -15,9 +15,7 @@ import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import org.jetbrains.anko.button
-import org.jetbrains.anko.matchParent
-import org.jetbrains.anko.wrapContent
+import org.jetbrains.anko.*
 import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow

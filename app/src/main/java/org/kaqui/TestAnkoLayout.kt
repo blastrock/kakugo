@@ -1,9 +1,7 @@
 package org.kaqui
 
 import android.app.Activity
-import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Build
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
@@ -12,7 +10,6 @@ import android.support.v4.widget.NestedScrollView
 import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.jetbrains.anko.*
@@ -62,14 +59,14 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                     }
                 }
             }
-
-            mainView.padding = dip(16)
         }
     }
 
     fun<T: ViewManager> makeMainBlock(subLayout: T, questionBlock: _LinearLayout.() -> Unit, answerBlock: _LinearLayout.() -> Unit): LinearLayout {
         with(subLayout) {
             return verticalLayout {
+                padding = dip(16)
+
                 sessionScore = textView {
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                 }
@@ -84,6 +81,18 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                     this.answerBlock()
                 }.lparams(width = matchParent, height = wrapContent)
             }
+        }
+    }
+
+    fun wrapInScrollView(subLayout: _CoordinatorLayout, block: _ScrollView.() -> Unit): LinearLayout {
+        with (subLayout) {
+            return verticalLayout {
+                gravity = Gravity.CENTER
+
+                scrollView {
+                    block()
+                }.lparams(width = matchParent, height = wrapContent, weight = 0f)
+            }.lparams(width = matchParent, height = matchParent)
         }
     }
 }

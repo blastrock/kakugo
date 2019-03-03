@@ -9,10 +9,12 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.NestedScrollView
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ToggleButton
-import kotlinx.android.synthetic.main.composition_test_activity.*
+import kotlinx.android.synthetic.main.test_activity.view.*
+import org.jetbrains.anko.*
 import org.kaqui.model.*
 
 class CompositionTestActivity : TestActivityBase() {
@@ -29,41 +31,69 @@ class CompositionTestActivity : TestActivityBase() {
 
     override val testType = TestType.KANJI_COMPOSITION
 
-    override val historyScrollView: NestedScrollView get() = history_scroll_view
-    override val historyActionButton: FloatingActionButton get() = history_action_button
-    override val historyView: LinearLayout get() = history_view
-    override val sessionScore: TextView get() = session_score
-    override val mainView: View get() = wrapper_layout
-    override val mainCoordLayout: CoordinatorLayout get() = main_coordlayout
+    private lateinit var testLayout: TestLayout
+
+    override val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
+    override val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
+    override val historyView: LinearLayout get() = testLayout.historyView
+    override val sessionScore: TextView get() = testLayout.sessionScore
+    override val mainView: View get() = testLayout.mainView
+    override val mainCoordLayout: CoordinatorLayout get() = testLayout.mainCoordinatorLayout
+    private lateinit var doneButton: Button
+    private lateinit var dontKnowButton: Button
+    private lateinit var nextButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setContentView(R.layout.composition_test_activity)
+        val answerCount = getAnswerCount(testType)
+        val answerButtons = mutableListOf<ToggleButton>()
+
+        testLayout = TestLayout(this) { testLayout ->
+            testLayout.wrapInScrollView(this) {
+                testLayout.makeMainBlock(this, {
+                    verticalLayout {
+                        repeat(answerCount / COLUMNS) {
+                            linearLayout {
+                                repeat(COLUMNS) {
+                                    val button = toggleButton {
+                                        textSize = 30.0f
+                                    }.lparams(width = wrapContent, height = wrapContent, weight = 1f)
+                                    answerButtons.add(button)
+                                }
+                            }.lparams(width = matchParent, height = wrapContent)
+                        }
+                    }.lparams(width = matchParent, height = wrapContent)
+                }, {
+                    doneButton = button(R.string.answerDone) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerSure))
+                        }
+                    }.lparams(width = 0, weight = 1.0f)
+                    dontKnowButton = button(R.string.dont_know) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
+                        }
+                    }.lparams(width = 0, weight = 1.0f)
+                    nextButton = button(R.string.next).lparams(weight = 1.0f)
+                })
+            }
+        }
+
+        this.answerButtons = answerButtons
+
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null)
             partMode = savedInstanceState.getBoolean("partMode")
 
-        question_text.textSize = 20.0f
+        testLayout.questionText.textSize = 20.0f
 
-        val answersLayout = LinearLayout(this)
-        answersLayout.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        answersLayout.orientation = LinearLayout.VERTICAL
-        val lineLayouts = (0..testEngine.answerCount / COLUMNS).map {
-            val line = LinearLayout(this)
-            line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            line.orientation = LinearLayout.HORIZONTAL
-            line
-        }
-        for (line in lineLayouts)
-            answersLayout.addView(line)
-        initButtons(lineLayouts, COLUMNS)
-        answers_layout.addView(answersLayout, 0)
+        doneButton.setOnClickListener { this.onAnswerDone() }
+        dontKnowButton.setOnClickListener { this.onDontKnow() }
+        nextButton.setOnClickListener { this.showNextQuestion() }
+        nextButton.visibility = View.GONE
 
-        done_button.setOnClickListener { this.onAnswerDone() }
-        dontknow_button.setOnClickListener { this.onDontKnow() }
-        next_button.setOnClickListener { this.showNextQuestion() }
-        next_button.visibility = View.GONE
-
-        question_text.setOnLongClickListener {
+        testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
                 showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
@@ -80,21 +110,6 @@ class CompositionTestActivity : TestActivityBase() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         partMode = savedInstanceState.getBoolean("partMode")
-    }
-
-    private fun initButtons(lineLayouts: List<LinearLayout>, columns: Int) {
-        val answerButtons = ArrayList<ToggleButton>(testEngine.answerCount)
-        for (i in 0 until testEngine.answerCount) {
-            val currentLine = lineLayouts[i / columns]
-            val button = ToggleButton(this)
-
-            button.textSize = 30.0f
-            button.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-            answerButtons.add(button)
-
-            currentLine.addView(button, i % columns)
-        }
-        this.answerButtons = answerButtons
     }
 
     private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
@@ -151,7 +166,7 @@ class CompositionTestActivity : TestActivityBase() {
     override fun showCurrentQuestion() {
         super.showCurrentQuestion()
 
-        question_text.text = testEngine.currentQuestion.getQuestionText(testType)
+        testLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
             button.isClickable = true
@@ -189,9 +204,9 @@ class CompositionTestActivity : TestActivityBase() {
         else
             testEngine.markAnswer(Certainty.DONTKNOW)
 
-        done_button.visibility = View.GONE
-        dontknow_button.visibility = View.GONE
-        next_button.visibility = View.VISIBLE
+        doneButton.visibility = View.GONE
+        dontKnowButton.visibility = View.GONE
+        nextButton.visibility = View.VISIBLE
     }
 
     private fun onDontKnow() {
@@ -204,9 +219,9 @@ class CompositionTestActivity : TestActivityBase() {
     private fun showNextQuestion() {
         prepareNewQuestion()
 
-        done_button.visibility = View.VISIBLE
-        dontknow_button.visibility = View.VISIBLE
-        next_button.visibility = View.GONE
+        doneButton.visibility = View.VISIBLE
+        dontKnowButton.visibility = View.VISIBLE
+        nextButton.visibility = View.GONE
 
         showCurrentQuestion()
     }
