@@ -13,7 +13,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ToggleButton
-import kotlinx.android.synthetic.main.test_activity.view.*
 import org.jetbrains.anko.*
 import org.kaqui.model.*
 
