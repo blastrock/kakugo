@@ -6,9 +6,11 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewManager
+import org.jetbrains.anko.custom.ankoView
 import kotlin.math.min
 
-class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+class DrawView(context: Context) : View(context) {
     private var mPaths = mutableListOf<Path>()
 
     private var mPaint = Paint()
@@ -159,4 +161,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
         return true
     }
+}
+
+inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
+    return ankoView({ DrawView(it) }, theme = 0, init = init)
 }

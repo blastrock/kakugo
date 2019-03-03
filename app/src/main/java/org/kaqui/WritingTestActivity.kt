@@ -1,17 +1,25 @@
 package org.kaqui
 
+import android.content.res.ColorStateList
 import android.graphics.*
+import android.os.Build
 import android.os.Bundle
+import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.NestedScrollView
+import android.view.Gravity
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import kotlinx.android.synthetic.main.writing_test_activity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import org.jetbrains.anko.*
+import org.jetbrains.anko.design.coordinatorLayout
+import org.jetbrains.anko.design.floatingActionButton
+import org.jetbrains.anko.support.v4.nestedScrollView
 import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
@@ -41,12 +49,17 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
     override val testType = TestType.KANJI_WRITING
 
-    override val historyScrollView: NestedScrollView get() = history_scroll_view
-    override val historyActionButton: FloatingActionButton get() = history_action_button
-    override val historyView: LinearLayout get() = history_view
-    override val sessionScore: TextView get() = session_score
-    override val mainView: View get() = main_layout
-    override val mainCoordLayout: CoordinatorLayout get() = main_coordlayout
+    override lateinit var historyScrollView: NestedScrollView private set
+    override lateinit var historyActionButton: FloatingActionButton private set
+    override lateinit var historyView: LinearLayout private set
+    override lateinit var sessionScore: TextView private set
+    override lateinit var mainView: View private set
+    override lateinit var mainCoordLayout: CoordinatorLayout private set
+    private lateinit var questionText: TextView
+    private lateinit var drawCanvas: DrawView
+    private lateinit var hintButton: Button
+    private lateinit var dontKnowButton: Button
+    private lateinit var nextButton: Button
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
@@ -54,19 +67,80 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         job = Job()
-        setContentView(R.layout.writing_test_activity)
+
+        mainCoordLayout = coordinatorLayout {
+            verticalLayout {
+                id = R.id.global_stats
+            }.lparams(width = matchParent, height = wrapContent)
+            mainView = verticalLayout {
+                sessionScore = textView {
+                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                }
+                questionText = textView {
+                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                }.lparams(width = wrapContent, height = wrapContent) {
+                    bottomMargin = dip(8)
+                    gravity = Gravity.CENTER_HORIZONTAL
+                }
+                drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
+                    gravity = Gravity.CENTER
+                }
+                linearLayout {
+                    hintButton = button(R.string.hint) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerMaybe))
+                        }
+                    }.lparams(weight = 1.0f)
+                    dontKnowButton = button(R.string.dont_know) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
+                        }
+                    }.lparams(weight = 1.0f)
+                    nextButton = button(R.string.next).lparams(weight = 1.0f)
+                }.lparams(width = matchParent, height = wrapContent)
+            }.lparams(width = matchParent, height = wrapContent)
+            historyScrollView = nestedScrollView {
+                id = R.id.history_scroll_view
+                backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
+                historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
+            }.lparams(width = matchParent, height = matchParent) {
+                val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
+                bottomSheetBehavior.peekHeight = 0
+                bottomSheetBehavior.isHideable = false
+                behavior = bottomSheetBehavior
+            }
+            historyActionButton = floatingActionButton {
+                size = FloatingActionButton.SIZE_MINI
+                scaleX = 0f
+                scaleY = 0f
+                setImageDrawable(resources.getDrawable(R.drawable.ic_arrow_upward))
+            }.lparams(width = matchParent, height = wrapContent) {
+                anchorId = R.id.history_scroll_view
+                anchorGravity = Gravity.TOP or Gravity.RIGHT
+
+                marginEnd = dip(20)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    elevation = 12.0f
+                }
+            }
+        }
+
+        mainView.padding = dip(16)
+
         super.onCreate(savedInstanceState)
 
-        question_text.textSize = 20.0f
-        draw_canevas.strokeCallback = this::onStrokeFinished
-        draw_canevas.sizeChangedCallback = this::onDrawViewSizeChanged
+        questionText.textSize = 20.0f
+        drawCanvas.strokeCallback = this::onStrokeFinished
+        drawCanvas.sizeChangedCallback = this::onDrawViewSizeChanged
 
-        hint_button.setOnClickListener { this.showHint() }
-        dontknow_button.setOnClickListener { this.onAnswerDone(Certainty.DONTKNOW) }
-        next_button.setOnClickListener { this.showNextQuestion() }
-        next_button.visibility = View.GONE
+        hintButton.setOnClickListener { this.showHint() }
+        dontKnowButton.setOnClickListener { this.onAnswerDone(Certainty.DONTKNOW) }
+        nextButton.setOnClickListener { this.showNextQuestion() }
+        nextButton.visibility = View.GONE
 
-        question_text.setOnLongClickListener {
+        questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
                 showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
@@ -77,7 +151,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
             missCount = savedInstanceState.getInt("missCount")
         }
 
-        draw_canevas.post { showCurrentQuestion() }
+        drawCanvas.post { showCurrentQuestion() }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -94,11 +168,11 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     override fun showCurrentQuestion() {
         super.showCurrentQuestion()
 
-        question_text.text = testEngine.currentQuestion.getQuestionText(testType)
+        questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
-        draw_canevas.clearCanvas()
+        drawCanvas.clearCanvas()
 
-        val targetSize = draw_canevas.width
+        val targetSize = drawCanvas.width
         val scale = targetSize.toFloat() / KANJI_SIZE
 
         val matrix = Matrix()
@@ -106,10 +180,10 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
         currentScaledStrokes = currentKanji.strokes.map { val path = Path(it); path.transform(matrix); path }
 
-        draw_canevas.setBoundingBox(RectF(1f, 1f, draw_canevas.width.toFloat() - 1f, draw_canevas.width.toFloat() - 1f))
+        drawCanvas.setBoundingBox(RectF(1f, 1f, drawCanvas.width.toFloat() - 1f, drawCanvas.width.toFloat() - 1f))
 
         for (stroke in currentScaledStrokes.subList(0, currentStroke))
-            draw_canevas.addPath(stroke)
+            drawCanvas.addPath(stroke)
 
         //setupDebug()
     }
@@ -124,7 +198,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         if (currentStroke >= currentKanji.strokes.size)
             return
 
-        draw_canevas.setHint(currentScaledStrokes[currentStroke])
+        drawCanvas.setHint(currentScaledStrokes[currentStroke])
         ++missCount
     }
 
@@ -132,7 +206,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         if (currentStroke >= currentKanji.strokes.size)
             return
 
-        val targetSize = draw_canevas.width
+        val targetSize = drawCanvas.width
         val scale = KANJI_SIZE / targetSize.toFloat()
         val matrix = Matrix()
         matrix.postScale(scale, scale)
@@ -153,7 +227,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
             if (squaredDistance > squaredTolerance)
                 return
 
-            if (currentPointIndex < currentPoints.size - 1 && currentPoints[currentPointIndex+1].squaredDistanceTo(drawnPoint) < squaredDistance) {
+            if (currentPointIndex < currentPoints.size - 1 && currentPoints[currentPointIndex + 1].squaredDistanceTo(drawnPoint) < squaredDistance) {
                 currentPointIndexReachedAt = drawnPointIndex
                 ++currentPointIndex
             }
@@ -164,7 +238,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
                 return // strokes finishes too early
         }
 
-        draw_canevas.addPath(currentScaledStrokes[currentStroke])
+        drawCanvas.addPath(currentScaledStrokes[currentStroke])
 
         ++currentStroke
 
@@ -176,13 +250,13 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         testEngine.markAnswer(certainty)
         currentStroke = currentKanji.strokes.size
 
-        draw_canevas.clearCanvas()
+        drawCanvas.clearCanvas()
         for (stroke in currentScaledStrokes)
-            draw_canevas.addPath(stroke)
+            drawCanvas.addPath(stroke)
 
-        hint_button.visibility = View.GONE
-        dontknow_button.visibility = View.GONE
-        next_button.visibility = View.VISIBLE
+        hintButton.visibility = View.GONE
+        dontKnowButton.visibility = View.GONE
+        nextButton.visibility = View.VISIBLE
     }
 
     private fun showNextQuestion() {
@@ -190,16 +264,16 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         missCount = 0
         testEngine.prepareNewQuestion()
 
-        next_button.visibility = View.GONE
-        hint_button.visibility = View.VISIBLE
-        dontknow_button.visibility = View.VISIBLE
+        nextButton.visibility = View.GONE
+        hintButton.visibility = View.VISIBLE
+        dontKnowButton.visibility = View.VISIBLE
 
         showCurrentQuestion()
     }
 
     private fun setupDebug() {
-        val targetSize = draw_canevas.width
-        draw_canevas.debugPaths = currentScaledStrokes.slice(listOf(3)).map {
+        val targetSize = drawCanvas.width
+        drawCanvas.debugPaths = currentScaledStrokes.slice(listOf(3)).map {
             toPoints(it, targetSize.toFloat() / resolution)
                     .map {
                         val path = Path()
@@ -208,6 +282,6 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
                         path
                     }
         }.flatten()
-        draw_canevas.debugStrokeWidth = targetSize.toFloat() / resolution * 2
+        drawCanvas.debugStrokeWidth = targetSize.toFloat() / resolution * 2
     }
 }
