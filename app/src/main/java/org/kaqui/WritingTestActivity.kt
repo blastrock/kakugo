@@ -4,7 +4,6 @@ import android.content.res.ColorStateList
 import android.graphics.*
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.NestedScrollView
@@ -16,10 +15,9 @@ import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import org.jetbrains.anko.*
-import org.jetbrains.anko.design.coordinatorLayout
-import org.jetbrains.anko.design.floatingActionButton
-import org.jetbrains.anko.support.v4.nestedScrollView
+import org.jetbrains.anko.button
+import org.jetbrains.anko.matchParent
+import org.jetbrains.anko.wrapContent
 import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
@@ -49,13 +47,14 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
     override val testType = TestType.KANJI_WRITING
 
-    override lateinit var historyScrollView: NestedScrollView private set
-    override lateinit var historyActionButton: FloatingActionButton private set
-    override lateinit var historyView: LinearLayout private set
-    override lateinit var sessionScore: TextView private set
-    override lateinit var mainView: View private set
-    override lateinit var mainCoordLayout: CoordinatorLayout private set
-    private lateinit var questionText: TextView
+    private lateinit var testLayout: TestLayout
+
+    override val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
+    override val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
+    override val historyView: LinearLayout get() = testLayout.historyView
+    override val sessionScore: TextView get() = testLayout.sessionScore
+    override val mainView: View get() = testLayout.mainView
+    override val mainCoordLayout: CoordinatorLayout get() = testLayout.mainCoordinatorLayout
     private lateinit var drawCanvas: DrawView
     private lateinit var hintButton: Button
     private lateinit var dontKnowButton: Button
@@ -68,70 +67,31 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         job = Job()
 
-        mainCoordLayout = coordinatorLayout {
-            verticalLayout {
-                id = R.id.global_stats
-            }.lparams(width = matchParent, height = wrapContent)
-            mainView = verticalLayout {
-                sessionScore = textView {
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                }
-                questionText = textView {
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                }.lparams(width = wrapContent, height = wrapContent) {
-                    bottomMargin = dip(8)
-                    gravity = Gravity.CENTER_HORIZONTAL
-                }
+        testLayout = TestLayout(this) { testLayout ->
+            testLayout.makeMainBlock(this, {
                 drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
                     gravity = Gravity.CENTER
                 }
-                linearLayout {
-                    hintButton = button(R.string.hint) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerMaybe))
-                        }
-                    }.lparams(weight = 1.0f)
-                    dontKnowButton = button(R.string.dont_know) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
-                        }
-                    }.lparams(weight = 1.0f)
-                    nextButton = button(R.string.next).lparams(weight = 1.0f)
-                }.lparams(width = matchParent, height = wrapContent)
-            }.lparams(width = matchParent, height = wrapContent)
-            historyScrollView = nestedScrollView {
-                id = R.id.history_scroll_view
-                backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
-            }.lparams(width = matchParent, height = matchParent) {
-                val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
-                bottomSheetBehavior.peekHeight = 0
-                bottomSheetBehavior.isHideable = false
-                behavior = bottomSheetBehavior
-            }
-            historyActionButton = floatingActionButton {
-                size = FloatingActionButton.SIZE_MINI
-                scaleX = 0f
-                scaleY = 0f
-                setImageDrawable(resources.getDrawable(R.drawable.ic_arrow_upward))
-            }.lparams(width = matchParent, height = wrapContent) {
-                anchorId = R.id.history_scroll_view
-                anchorGravity = Gravity.TOP or Gravity.RIGHT
-
-                marginEnd = dip(20)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    elevation = 12.0f
-                }
-            }
+            }, {
+                hintButton = button(R.string.hint) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerMaybe))
+                    }
+                }.lparams(weight = 1.0f)
+                dontKnowButton = button(R.string.dont_know) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
+                    }
+                }.lparams(weight = 1.0f)
+                nextButton = button(R.string.next).lparams(weight = 1.0f)
+            }).lparams(width = matchParent, height = wrapContent)
         }
-
-        mainView.padding = dip(16)
 
         super.onCreate(savedInstanceState)
 
-        questionText.textSize = 20.0f
+        testLayout.questionText.textSize = 20.0f
         drawCanvas.strokeCallback = this::onStrokeFinished
         drawCanvas.sizeChangedCallback = this::onDrawViewSizeChanged
 
@@ -140,7 +100,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         nextButton.setOnClickListener { this.showNextQuestion() }
         nextButton.visibility = View.GONE
 
-        questionText.setOnLongClickListener {
+        testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
                 showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
@@ -168,7 +128,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     override fun showCurrentQuestion() {
         super.showCurrentQuestion()
 
-        questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+        testLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         drawCanvas.clearCanvas()
 
