@@ -1,7 +1,12 @@
 package org.kaqui
 
+import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
+import android.graphics.PorterDuff
+import android.os.Build
+import android.support.annotation.ColorRes
+import android.widget.Button
 import org.kaqui.model.BAD_WEIGHT
 import org.kaqui.model.GOOD_WEIGHT
 import java.util.*
@@ -44,4 +49,11 @@ fun PathMeasure.getPoint(position: Float): PointF {
     val out = floatArrayOf(0f, 0f)
     getPosTan(position, out, null)
     return PointF(out[0], out[1])
+}
+
+fun Button.setExtTint(@ColorRes color: Int) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        backgroundTintMode = PorterDuff.Mode.MULTIPLY
+        backgroundTintList = ColorStateList.valueOf(resources.getColor(color))
+    }
 }

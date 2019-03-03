@@ -63,16 +63,10 @@ class CompositionTestActivity : TestActivityBase() {
                     }.lparams(width = matchParent, height = wrapContent)
                 }, {
                     doneButton = button(R.string.answerDone) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerSure))
-                        }
+                        setExtTint(R.color.answerSure)
                     }.lparams(width = 0, weight = 1.0f)
                     dontKnowButton = button(R.string.dont_know) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
-                        }
+                        setExtTint(R.color.answerDontKnow)
                     }.lparams(width = 0, weight = 1.0f)
                     nextButton = button(R.string.next).lparams(weight = 1.0f)
                 })

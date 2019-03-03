@@ -72,16 +72,10 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
                 }
             }, {
                 hintButton = button(R.string.hint) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerMaybe))
-                    }
+                    setExtTint(R.color.answerMaybe)
                 }.lparams(weight = 1.0f)
                 dontKnowButton = button(R.string.dont_know) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
-                    }
+                    setExtTint(R.color.answerDontKnow)
                 }.lparams(weight = 1.0f)
                 nextButton = button(R.string.next).lparams(weight = 1.0f)
             }).lparams(width = matchParent, height = wrapContent)

@@ -61,17 +61,11 @@ class TestActivity : TestActivityBase() {
                                             answerTexts.add(answerText)
 
                                             button(R.string.maybe) {
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                    backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                                                    backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerMaybe))
-                                                }
+                                                setExtTint(R.color.answerMaybe)
                                                 setOnClickListener { onAnswerClicked(Certainty.MAYBE, position) }
                                             }
                                             button(R.string.sure) {
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                    backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                                                    backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerSure))
-                                                }
+                                                setExtTint(R.color.answerSure)
                                                 setOnClickListener { onAnswerClicked(Certainty.SURE, position) }
                                             }
                                         }
@@ -103,10 +97,7 @@ class TestActivity : TestActivityBase() {
                                                             minimumWidth = 0
                                                             minHeight = 0
                                                             minWidth = 0
-                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                                backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                                                                backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerSure))
-                                                            }
+                                                            setExtTint(R.color.answerSure)
                                                             setOnClickListener { onAnswerClicked(Certainty.SURE, position) }
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                         button(R.string.maybe) {
@@ -114,10 +105,7 @@ class TestActivity : TestActivityBase() {
                                                             minimumWidth = 0
                                                             minHeight = 0
                                                             minWidth = 0
-                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                                backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                                                                backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerMaybe))
-                                                            }
+                                                            setExtTint(R.color.answerMaybe)
                                                             setOnClickListener { onAnswerClicked(Certainty.MAYBE, position) }
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                     }.lparams(weight = 0f)
@@ -135,10 +123,7 @@ class TestActivity : TestActivityBase() {
                     }.lparams(width = matchParent, height = wrapContent)
                 }, {
                     dontKnowButton = button(R.string.dont_know) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                            backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.answerDontKnow))
-                        }
+                        setExtTint(R.color.answerDontKnow)
                     }.lparams(width = 0, weight = 1.0f)
                 })
             }
