@@ -43,8 +43,8 @@ class TestActivity : TestActivityBase() {
         val answerTexts = mutableListOf<TextView>()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.wrapInScrollView(this) {
-                testLayout.makeMainBlock(this) {
+            testLayout.makeMainBlock(this) {
+                testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         view {
                             backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
@@ -120,10 +120,10 @@ class TestActivity : TestActivityBase() {
                             }
                             else -> throw RuntimeException("unsupported test type for TestActivity")
                         }
+                        dontKnowButton = button(R.string.dont_know) {
+                            setExtTint(R.color.answerDontKnow)
+                        }.lparams(width = matchParent)
                     }.lparams(width = matchParent, height = wrapContent)
-                    dontKnowButton = button(R.string.dont_know) {
-                        setExtTint(R.color.answerDontKnow)
-                    }.lparams(width = matchParent)
                 }
             }
         }

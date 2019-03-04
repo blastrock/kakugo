@@ -81,7 +81,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
         }
     }
 
-    fun wrapInScrollView(subLayout: _CoordinatorLayout, block: _ScrollView.() -> Unit): LinearLayout {
+    fun wrapInScrollView(subLayout: _LinearLayout, block: _ScrollView.() -> Unit): LinearLayout {
         with (subLayout) {
             return verticalLayout {
                 gravity = Gravity.CENTER

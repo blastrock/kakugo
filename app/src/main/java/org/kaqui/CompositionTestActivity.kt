@@ -47,8 +47,8 @@ class CompositionTestActivity : TestActivityBase() {
         val answerButtons = mutableListOf<ToggleButton>()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.wrapInScrollView(this) {
-                testLayout.makeMainBlock(this) {
+            testLayout.makeMainBlock(this) {
+                testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         repeat(answerCount / COLUMNS) {
                             linearLayout {
@@ -60,15 +60,15 @@ class CompositionTestActivity : TestActivityBase() {
                                 }
                             }.lparams(width = matchParent, height = wrapContent)
                         }
-                    }.lparams(width = matchParent, height = wrapContent)
-                    linearLayout {
-                        doneButton = button(R.string.answerDone) {
-                            setExtTint(R.color.answerSure)
-                        }.lparams(width = 0, weight = 1.0f)
-                        dontKnowButton = button(R.string.dont_know) {
-                            setExtTint(R.color.answerDontKnow)
-                        }.lparams(width = 0, weight = 1.0f)
-                        nextButton = button(R.string.next).lparams(weight = 1.0f)
+                        linearLayout {
+                            doneButton = button(R.string.answerDone) {
+                                setExtTint(R.color.answerSure)
+                            }.lparams(width = 0, weight = 1.0f)
+                            dontKnowButton = button(R.string.dont_know) {
+                                setExtTint(R.color.answerDontKnow)
+                            }.lparams(width = 0, weight = 1.0f)
+                            nextButton = button(R.string.next).lparams(weight = 1.0f)
+                        }.lparams(width = matchParent, height = wrapContent)
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
