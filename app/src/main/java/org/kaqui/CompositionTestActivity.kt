@@ -47,7 +47,7 @@ class CompositionTestActivity : TestActivityBase() {
         val answerButtons = mutableListOf<ToggleButton>()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@CompositionTestActivity, this) {
+            testLayout.makeMainBlock(this@CompositionTestActivity, this, 20) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         repeat(answerCount / COLUMNS) {
@@ -79,8 +79,6 @@ class CompositionTestActivity : TestActivityBase() {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null)
             partMode = savedInstanceState.getBoolean("partMode")
-
-        testLayout.questionText.textSize = 20.0f
 
         doneButton.setOnClickListener { this.onAnswerDone() }
         dontKnowButton.setOnClickListener { this.onDontKnow() }

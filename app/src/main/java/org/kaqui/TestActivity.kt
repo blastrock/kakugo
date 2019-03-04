@@ -42,8 +42,16 @@ class TestActivity : TestActivityBase() {
         val answerCount = getAnswerCount(testType)
         val answerTexts = mutableListOf<TextView>()
 
+        val questionMinSize =
+                when (testType) {
+                    TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> 50
+                    TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI -> 10
+                    TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> 50
+                    else -> throw RuntimeException("unsupported test type for TestActivity")
+                }
+
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@TestActivity, this) {
+            testLayout.makeMainBlock(this@TestActivity, this, questionMinSize) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         view {
@@ -126,16 +134,6 @@ class TestActivity : TestActivityBase() {
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
-        }
-
-        when (testType) {
-            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING ->
-                testLayout.questionText.textSize = 50.0f
-            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI ->
-                testLayout.questionText.textSize = 20.0f
-            TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA ->
-                testLayout.questionText.textSize = 50.0f
-            else -> throw RuntimeException("unsupported test type for TestActivity")
         }
 
         dontKnowButton.setOnClickListener { this.onAnswerClicked(Certainty.DONTKNOW, 0) }

@@ -6,7 +6,10 @@ import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.os.Build
 import android.support.annotation.ColorRes
+import android.support.v7.widget.AppCompatTextView
+import android.view.ViewManager
 import android.widget.Button
+import org.jetbrains.anko.custom.ankoView
 import org.kaqui.model.BAD_WEIGHT
 import org.kaqui.model.GOOD_WEIGHT
 import java.util.*
@@ -56,4 +59,8 @@ fun Button.setExtTint(@ColorRes color: Int) {
         backgroundTintMode = PorterDuff.Mode.MULTIPLY
         backgroundTintList = ColorStateList.valueOf(resources.getColor(color))
     }
+}
+
+inline fun ViewManager.appCompatTextView(init: AppCompatTextView.() -> Unit = {}): AppCompatTextView {
+    return ankoView({ AppCompatTextView(it) }, theme = 0, init = init)
 }
