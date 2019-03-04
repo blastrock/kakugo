@@ -44,7 +44,7 @@ class TestActivity : TestActivityBase() {
 
         testLayout = TestLayout(this) { testLayout ->
             testLayout.wrapInScrollView(this) {
-                testLayout.makeMainBlock(this, {
+                testLayout.makeMainBlock(this) {
                     verticalLayout {
                         view {
                             backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
@@ -121,11 +121,10 @@ class TestActivity : TestActivityBase() {
                             else -> throw RuntimeException("unsupported test type for TestActivity")
                         }
                     }.lparams(width = matchParent, height = wrapContent)
-                }, {
                     dontKnowButton = button(R.string.dont_know) {
                         setExtTint(R.color.answerDontKnow)
-                    }.lparams(width = 0, weight = 1.0f)
-                })
+                    }.lparams(width = matchParent)
+                }
             }
         }
 

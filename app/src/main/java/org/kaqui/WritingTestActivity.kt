@@ -66,19 +66,20 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         job = Job()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this, {
+            testLayout.makeMainBlock(this) {
                 drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
                     gravity = Gravity.CENTER
                 }
-            }, {
-                hintButton = button(R.string.hint) {
-                    setExtTint(R.color.answerMaybe)
-                }.lparams(weight = 1.0f)
-                dontKnowButton = button(R.string.dont_know) {
-                    setExtTint(R.color.answerDontKnow)
-                }.lparams(weight = 1.0f)
-                nextButton = button(R.string.next).lparams(weight = 1.0f)
-            }).lparams(width = matchParent, height = wrapContent)
+                linearLayout {
+                    hintButton = button(R.string.hint) {
+                        setExtTint(R.color.answerMaybe)
+                    }.lparams(weight = 1.0f)
+                    dontKnowButton = button(R.string.dont_know) {
+                        setExtTint(R.color.answerDontKnow)
+                    }.lparams(weight = 1.0f)
+                    nextButton = button(R.string.next).lparams(weight = 1.0f)
+                }.lparams(width = matchParent, height = wrapContent)
+            }
         }
 
         super.onCreate(savedInstanceState)

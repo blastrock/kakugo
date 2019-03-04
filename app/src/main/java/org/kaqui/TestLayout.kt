@@ -7,8 +7,6 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.NestedScrollView
-import android.util.Log
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
@@ -35,7 +33,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                 verticalLayout {
                     id = R.id.global_stats
                 }.lparams(width = matchParent, height = wrapContent)
-                mainView = mainBlock(this@TestLayout)
+                mainView = mainBlock(this@TestLayout).lparams(width = matchParent, height = matchParent)
                 historyScrollView = nestedScrollView {
                     id = R.id.history_scroll_view
                     backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
@@ -64,7 +62,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
         }
     }
 
-    fun<T: ViewManager> makeMainBlock(subLayout: T, questionBlock: _LinearLayout.() -> Unit, answerBlock: _LinearLayout.() -> Unit): LinearLayout {
+    fun<T: ViewManager> makeMainBlock(subLayout: T, answersBlock: _LinearLayout.() -> Unit): LinearLayout {
         with(subLayout) {
             return verticalLayout {
                 padding = dip(16)
@@ -78,10 +76,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                     bottomMargin = dip(8)
                     gravity = Gravity.CENTER_HORIZONTAL
                 }
-                this.questionBlock()
-                linearLayout {
-                    this.answerBlock()
-                }.lparams(width = matchParent, height = wrapContent)
+                this.answersBlock()
             }
         }
     }
