@@ -43,7 +43,7 @@ class TestActivity : TestActivityBase() {
         val answerTexts = mutableListOf<TextView>()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this) {
+            testLayout.makeMainBlock(this@TestActivity, this) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         view {

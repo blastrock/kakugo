@@ -7,6 +7,8 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.NestedScrollView
+import android.support.v4.widget.TextViewCompat
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
@@ -62,7 +64,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
         }
     }
 
-    fun<T: ViewManager> makeMainBlock(subLayout: T, answersBlock: _LinearLayout.() -> Unit): LinearLayout {
+    fun <T : ViewManager> makeMainBlock(activity: Activity, subLayout: T, answersBlock: _LinearLayout.() -> View): LinearLayout {
         with(subLayout) {
             return verticalLayout {
                 padding = dip(16)
@@ -70,19 +72,34 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                 sessionScore = textView {
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                 }
-                questionText = textView {
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                }.lparams(width = wrapContent, height = wrapContent) {
-                    bottomMargin = dip(8)
-                    gravity = Gravity.CENTER_HORIZONTAL
+                activity.configuration(orientation = Orientation.LANDSCAPE) {
+                    linearLayout {
+                        gravity = Gravity.CENTER
+                        questionText = textView {
+                            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, 10, 200, 10, TypedValue.COMPLEX_UNIT_SP)
+                            textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                            gravity = Gravity.CENTER
+                        }.lparams(width = 0, height = matchParent, weight = 1f) {
+                            bottomMargin = dip(8)
+                        }
+                        this.answersBlock().lparams(width = 0, height = matchParent, weight = 1f)
+                    }.lparams(width = matchParent, height = matchParent)
                 }
-                this.answersBlock()
+                activity.configuration(orientation = Orientation.PORTRAIT) {
+                    questionText = textView {
+                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                    }.lparams(width = wrapContent, height = wrapContent) {
+                        bottomMargin = dip(8)
+                        gravity = Gravity.CENTER_HORIZONTAL
+                    }
+                    this.answersBlock()
+                }
             }
         }
     }
 
     fun wrapInScrollView(subLayout: _LinearLayout, block: _ScrollView.() -> Unit): LinearLayout {
-        with (subLayout) {
+        with(subLayout) {
             return verticalLayout {
                 gravity = Gravity.CENTER
 

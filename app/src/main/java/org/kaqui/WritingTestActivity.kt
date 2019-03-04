@@ -66,7 +66,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         job = Job()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this) {
+            testLayout.makeMainBlock(this@WritingTestActivity, this) {
                 drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
                     gravity = Gravity.CENTER
                 }
