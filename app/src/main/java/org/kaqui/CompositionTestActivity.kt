@@ -47,7 +47,7 @@ class CompositionTestActivity : TestActivityBase() {
         val answerButtons = mutableListOf<ToggleButton>()
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@CompositionTestActivity, this, 20) {
+            testLayout.makeMainBlock(this@CompositionTestActivity, this, 10) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         repeat(answerCount / COLUMNS) {
