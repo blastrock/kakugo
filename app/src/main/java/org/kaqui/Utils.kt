@@ -23,6 +23,8 @@ fun getBackgroundFromScore(score: Double) =
             else -> R.drawable.round_red
         }
 
+fun lerp(a: Float, b: Float, r: Float): Float = a + (r * (b - a))
+
 fun <T> MutableList<T>.shuffle() {
     val rg = Random()
     for (i in this.size - 1 downTo 1) {

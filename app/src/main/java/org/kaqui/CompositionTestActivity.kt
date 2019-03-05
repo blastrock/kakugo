@@ -137,7 +137,9 @@ class CompositionTestActivity : TestActivityBase() {
 
         Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it).contents as Kanji).kanji }}")
 
-        partMode = Math.random() > 0.5
+        val wholeKanjisRatio = db.getEnabledWholeKanjiRatio()
+        val threshold = lerp(0.1f, 0.5f, wholeKanjisRatio)
+        partMode = Math.random() > threshold
         val currentAnswers =
                 if (partMode) {
                     Log.d(TAG, "Composition mode: part")

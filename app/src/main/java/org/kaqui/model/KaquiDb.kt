@@ -355,6 +355,19 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         return item
     }
 
+    fun getEnabledWholeKanjiRatio(): Float {
+        val wholeKanjis = readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1 AND part_count = 1", null, null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            cursor.getInt(0)
+        }
+        val enabledKanjis = readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1", null, null, null, null).use { cursor ->
+            cursor.moveToFirst()
+            cursor.getInt(0)
+        }
+
+        return wholeKanjis.toFloat() / enabledKanjis.toFloat()
+    }
+
     fun getWord(id: Int): Item {
         val contents = Word("", "", listOf())
         val item = Item(id, contents, 0.0, 0.0, 0, false)
