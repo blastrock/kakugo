@@ -93,7 +93,11 @@ class TestActivity : TestActivityBase() {
                                                     gravity = Gravity.CENTER_VERTICAL
 
                                                     val answerText = textView {
-                                                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
+                                                        setTextSize(TypedValue.COMPLEX_UNIT_SP,
+                                                                when (testType) {
+                                                                    TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30f
+                                                                    else -> 50f
+                                                                })
                                                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                                     }.lparams(weight = 1f)
                                                     val position = answerTexts.size
