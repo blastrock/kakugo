@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.util.Log
 import android.view.View
@@ -14,7 +15,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ToggleButton
-import kotlinx.android.synthetic.main.selection_item.view.*
 import org.jetbrains.anko.*
 import org.kaqui.model.*
 
@@ -134,7 +134,7 @@ class CompositionTestActivity : TestActivityBase() {
     private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(resources.getColor(color))
+            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, color))
         } else {
             button.isChecked = checked
         }
@@ -236,7 +236,7 @@ class CompositionTestActivity : TestActivityBase() {
         val offsetViewBounds = Rect()
         doneButton.getDrawingRect(offsetViewBounds)
         testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(doneButton, offsetViewBounds)
-        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), resources.getColor(result.toColorRes()))
+        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, result.toColorRes()))
 
         doneButton.visibility = View.GONE
         dontKnowButton.visibility = View.GONE

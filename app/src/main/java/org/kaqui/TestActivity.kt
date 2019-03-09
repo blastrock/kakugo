@@ -1,9 +1,11 @@
 package org.kaqui
 
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.util.TypedValue
 import android.view.Gravity
@@ -13,7 +15,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import org.jetbrains.anko.*
 import org.kaqui.model.*
-import android.graphics.Rect
 
 class TestActivity : TestActivityBase() {
     companion object {
@@ -34,7 +35,7 @@ class TestActivity : TestActivityBase() {
     private lateinit var dontKnowButton: Button
 
     override val testType
-        get() = intent.extras.getSerializable("test_type") as TestType
+        get() = intent.extras!!.getSerializable("test_type") as TestType
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val answerCount = getAnswerCount(testType)
@@ -168,7 +169,7 @@ class TestActivity : TestActivityBase() {
         val offsetViewBounds = Rect()
         button.getDrawingRect(offsetViewBounds)
         testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(button, offsetViewBounds)
-        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), resources.getColor(result.toColorRes()))
+        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, result.toColorRes()))
 
         testEngine.prepareNewQuestion()
         showCurrentQuestion()

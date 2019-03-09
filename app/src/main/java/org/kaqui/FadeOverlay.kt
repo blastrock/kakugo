@@ -3,10 +3,7 @@ package org.kaqui
 import android.animation.TimeAnimator
 import android.content.Context
 import android.graphics.*
-import android.util.Log
 import android.view.View
-import android.view.ViewManager
-import org.jetbrains.anko.custom.ankoView
 import kotlin.math.max
 import kotlin.math.pow
 

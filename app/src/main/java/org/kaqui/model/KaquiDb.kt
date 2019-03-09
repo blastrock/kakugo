@@ -137,12 +137,11 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         val dump =
-                if (oldVersion < 10)
-                    dumpUserDataV9(database)
-                else if (oldVersion < 13)
-                    dumpUserDataV12(database)
-                else
-                    dumpUserData(database)
+                when {
+                    oldVersion < 10 -> dumpUserDataV9(database)
+                    oldVersion < 13 -> dumpUserDataV12(database)
+                    else -> dumpUserData(database)
+                }
         database.execSQL("DROP TABLE IF EXISTS meanings")
         database.execSQL("DROP TABLE IF EXISTS readings")
         database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
@@ -376,7 +375,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
             if (cursor.count == 0)
-                throw RuntimeException("Can't find kanji with id " + id)
+                throw RuntimeException("Can't find kanji with id $id")
             cursor.moveToFirst()
             contents.word = cursor.getString(0)
             contents.reading = cursor.getString(1)

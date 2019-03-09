@@ -1,13 +1,12 @@
 package org.kaqui
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.util.AttributeSet
+import android.support.v4.content.ContextCompat
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewManager
-import org.jetbrains.anko.custom.ankoView
 import kotlin.math.min
 
 class DrawView(context: Context) : View(context) {
@@ -76,7 +75,7 @@ class DrawView(context: Context) : View(context) {
         animator.setIntValues(0, 255, 0)
         animator.duration = 1000
         animator.addUpdateListener {
-            val color = resources.getColor(android.R.color.holo_green_light)
+            val color = ContextCompat.getColor(context, android.R.color.holo_green_light)
             mHintPaint.color = (it.animatedValue as Int shl 24) or (color and 0xffffff)
             invalidate()
         }
@@ -140,6 +139,7 @@ class DrawView(context: Context) : View(context) {
         mPath.reset()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         parent.requestDisallowInterceptTouchEvent(true)
 

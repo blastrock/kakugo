@@ -25,5 +25,5 @@
     <color name="compositionBadSelected">#ef9a9a</color>
     <color name="compositionBadNotSelected">#ffcdd2</color>
 
-    <color name="historyBackground">#ddd</color>
+    <color name="historyBackground">#dddddd</color>
 </resources>

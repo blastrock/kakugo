@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Parcel
 import android.util.Log
 import org.kaqui.model.*
-import java.lang.RuntimeException
 import java.util.*
 
 class TestEngine(
@@ -64,10 +63,10 @@ class TestEngine(
 
     fun loadState(savedInstanceState: Bundle) {
         currentQuestion = getItem(db, savedInstanceState.getInt("question"))
-        currentAnswers = savedInstanceState.getIntArray("answers").map { getItem(db, it) }
+        currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(db, it) }
         correctCount = savedInstanceState.getInt("correctCount")
         questionCount = savedInstanceState.getInt("questionCount")
-        unserializeHistory(savedInstanceState.getByteArray("history"))
+        unserializeHistory(savedInstanceState.getByteArray("history")!!)
     }
 
     fun saveState(outState: Bundle) {

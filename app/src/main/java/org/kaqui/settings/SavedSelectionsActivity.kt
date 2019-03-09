@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
-import org.jetbrains.anko.ctx
 import org.jetbrains.anko.listView
 import org.jetbrains.anko.toast
 import org.kaqui.R
@@ -22,7 +21,7 @@ class SavedSelectionsActivity: AppCompatActivity() {
 
         val db = KaquiDb.getInstance(this)
         listView = listView {
-            adapter = SavedSelectionsAdapter(ctx, db.listKanjiSelections())
+            adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, db.listKanjiSelections())
             onItemClickListener = AdapterView.OnItemClickListener(this@SavedSelectionsActivity::onListItemClick)
         }
         registerForContextMenu(listView)

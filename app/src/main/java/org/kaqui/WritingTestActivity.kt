@@ -1,11 +1,10 @@
 package org.kaqui
 
-import android.content.res.ColorStateList
 import android.graphics.*
-import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.view.Gravity
 import android.view.View
@@ -209,7 +208,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     private fun onAnswerDone(certainty: Certainty) {
         testEngine.markAnswer(certainty)
 
-        testLayout.overlay.trigger(testLayout.overlay.width / 2, testLayout.overlay.height / 2, resources.getColor(certainty.toColorRes()))
+        testLayout.overlay.trigger(testLayout.overlay.width / 2, testLayout.overlay.height / 2, ContextCompat.getColor(this, certainty.toColorRes()))
 
         currentStroke = currentKanji.strokes.size
 

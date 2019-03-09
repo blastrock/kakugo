@@ -1,12 +1,12 @@
 package org.kaqui
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.os.Build
 import android.support.annotation.ColorRes
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.AppCompatTextView
 import android.view.ViewManager
 import android.widget.Button
@@ -61,7 +61,7 @@ fun PathMeasure.getPoint(position: Float): PointF {
 fun Button.setExtTint(@ColorRes color: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         backgroundTintMode = PorterDuff.Mode.MULTIPLY
-        backgroundTintList = ColorStateList.valueOf(resources.getColor(color))
+        backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, color))
     }
 }
 

@@ -1,15 +1,14 @@
 package org.kaqui
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.res.Resources
-import android.graphics.Color
 import android.os.Build
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.support.v4.widget.TextViewCompat
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -42,7 +41,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                     mainView = mainBlock(this@TestLayout).lparams(width = matchParent, height = matchParent)
                     historyScrollView = nestedScrollView {
                         id = R.id.history_scroll_view
-                        backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
+                        backgroundColor = ContextCompat.getColor(this@with, R.color.historyBackground)
                         historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
                     }.lparams(width = matchParent, height = matchParent) {
                         val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
@@ -57,6 +56,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                         setImageResource(R.drawable.ic_arrow_upward)
                     }.lparams(width = matchParent, height = wrapContent) {
                         anchorId = R.id.history_scroll_view
+                        @SuppressLint("RtlHardcoded")
                         anchorGravity = Gravity.TOP or Gravity.RIGHT
 
                         marginEnd = dip(20)

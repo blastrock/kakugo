@@ -3,15 +3,11 @@ package org.kaqui.settings
 import android.Manifest
 import android.app.Activity
 import android.app.ProgressDialog
-import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.text.InputType
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -21,8 +17,10 @@ import android.widget.EditText
 import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import kotlinx.coroutines.*
-import org.jetbrains.anko.*
-import org.jetbrains.anko.custom.ankoView
+import org.jetbrains.anko.UI
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.editText
+import org.jetbrains.anko.toast
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.KaquiDb
@@ -183,7 +181,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
             return
 
         try {
-            val kanjis = contentResolver.openInputStream(data.data).bufferedReader().readText()
+            val kanjis = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
             KaquiDb.getInstance(this).setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)

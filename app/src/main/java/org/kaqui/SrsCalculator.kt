@@ -83,7 +83,7 @@ class SrsCalculator {
             val previousShortScore = item.shortScore
             // short score reduces the distance by half to target score
             var newShortScore = previousShortScore + (targetScore - previousShortScore) / 2
-            if (newShortScore !in 0..1) {
+            if (newShortScore !in 0f..1f) {
                 Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
             }
             if (newShortScore >= 0.92) {
@@ -112,7 +112,7 @@ class SrsCalculator {
                         else ->
                             previousLongScore
                     }
-            if (newLongScore !in 0..1) {
+            if (newLongScore !in 0f..1f) {
                 Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceCorrect = $daysSinceCorrect, targetScore = $targetScore, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
             }
 
