@@ -21,6 +21,7 @@ Features include:
 - Unlimited quiz sessions that allow you to take a quiz at any time, for however long you want, useful to efficiently spend commuting time
 - Show similar-looking kanji in answers to teach you the differences
 - Clicking on kanji opens `aedict3 <https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (a non-free Japanese dictionary) or `jisho.org <https://jisho.org>`_
+- Optimized tablet support
 - Open source
 - No ads
 - More to come
