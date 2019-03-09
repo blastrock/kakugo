@@ -162,7 +162,3 @@ class DrawView(context: Context) : View(context) {
         return true
     }
 }
-
-inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
-    return ankoView({ DrawView(it) }, theme = 0, init = init)
-}

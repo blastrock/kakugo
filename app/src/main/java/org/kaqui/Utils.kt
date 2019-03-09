@@ -69,6 +69,14 @@ inline fun ViewManager.appCompatTextView(init: AppCompatTextView.() -> Unit = {}
     return ankoView({ AppCompatTextView(it) }, theme = 0, init = init)
 }
 
+inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
+    return ankoView({ DrawView(it) }, theme = 0, init = init)
+}
+
+inline fun ViewManager.fadeOverlay(init: FadeOverlay.() -> Unit = {}): FadeOverlay {
+    return ankoView({ FadeOverlay(it) }, theme = 0, init = init)
+}
+
 fun Certainty.toColorRes() =
         when (this) {
             Certainty.DONTKNOW -> R.color.feedbackDontKnow

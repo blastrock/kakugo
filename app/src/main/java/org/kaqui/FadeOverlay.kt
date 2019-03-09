@@ -74,7 +74,3 @@ class FadeOverlay(context: Context) : View(context) {
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), fillPaint)
     }
 }
-
-inline fun ViewManager.fadeOverlay(init: FadeOverlay.() -> Unit = {}): FadeOverlay {
-    return ankoView({ FadeOverlay(it) }, theme = 0, init = init)
-}
