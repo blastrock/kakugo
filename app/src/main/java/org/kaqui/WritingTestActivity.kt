@@ -92,7 +92,6 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         hintButton.setOnClickListener { this.showHint() }
         dontKnowButton.setOnClickListener { this.onAnswerDone(Certainty.DONTKNOW) }
         nextButton.setOnClickListener { this.showNextQuestion() }
-        nextButton.visibility = View.GONE
 
         testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
@@ -103,6 +102,13 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         if (savedInstanceState != null) {
             currentStroke = savedInstanceState.getInt("currentStroke")
             missCount = savedInstanceState.getInt("missCount")
+        }
+
+        if (currentStroke == currentKanji.strokes.size) {
+            dontKnowButton.visibility = View.GONE
+            hintButton.visibility = View.GONE
+        } else {
+            nextButton.visibility = View.GONE
         }
 
         drawCanvas.post { showCurrentQuestion() }
