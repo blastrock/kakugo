@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ToggleButton
+import kotlinx.android.synthetic.main.selection_item.view.*
 import org.jetbrains.anko.*
 import org.kaqui.model.*
 
@@ -78,13 +79,17 @@ class CompositionTestActivity : TestActivityBase() {
         this.answerButtons = answerButtons
 
         super.onCreate(savedInstanceState)
-        if (savedInstanceState != null)
+        var finished = false
+        var checkedAnswers: ArrayList<Int>? = null
+        if (savedInstanceState != null) {
             partMode = savedInstanceState.getBoolean("partMode")
+            finished = savedInstanceState.getBoolean("finished")
+            checkedAnswers = savedInstanceState.getIntegerArrayList("checkedAnswers")!!
+        }
 
         doneButton.setOnClickListener { this.onAnswerDone() }
         dontKnowButton.setOnClickListener { this.onDontKnow() }
         nextButton.setOnClickListener { this.showNextQuestion() }
-        nextButton.visibility = View.GONE
 
         testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
@@ -93,11 +98,32 @@ class CompositionTestActivity : TestActivityBase() {
         }
 
         showCurrentQuestion()
+
+        if (checkedAnswers != null)
+            for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
+                if (answer.id in checkedAnswers)
+                    button.isChecked = true
+            }
+
+        if (finished) {
+            doneButton.visibility = View.GONE
+            dontKnowButton.visibility = View.GONE
+            validateAnswer()
+        } else {
+            nextButton.visibility = View.GONE
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("partMode", partMode)
+        outState.putBoolean("finished", nextButton.visibility == View.VISIBLE)
+        outState.putIntegerArrayList("checkedAnswers", ArrayList(answerButtons.zip(testEngine.currentAnswers).mapNotNull { (button, answer) ->
+            if (button.isChecked)
+                answer.id
+            else
+                null
+        }))
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -173,7 +199,7 @@ class CompositionTestActivity : TestActivityBase() {
         }
     }
 
-    private fun onAnswerDone() {
+    private fun validateAnswer(): Boolean {
         var ok = true
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
             button.isClickable = false
@@ -193,6 +219,11 @@ class CompositionTestActivity : TestActivityBase() {
                 setButtonTint(button, R.color.compositionBadNotSelected, true)
             }
         }
+        return ok
+    }
+
+    private fun onAnswerDone() {
+        val ok = validateAnswer()
 
         val result =
                 if (ok)
