@@ -1,5 +1,6 @@
 package org.kaqui
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
@@ -11,6 +12,7 @@ import android.view.ViewManager
 import android.widget.Button
 import org.jetbrains.anko.custom.ankoView
 import org.kaqui.model.BAD_WEIGHT
+import org.kaqui.model.Certainty
 import org.kaqui.model.GOOD_WEIGHT
 import java.util.*
 import kotlin.math.pow
@@ -66,3 +68,10 @@ fun Button.setExtTint(@ColorRes color: Int) {
 inline fun ViewManager.appCompatTextView(init: AppCompatTextView.() -> Unit = {}): AppCompatTextView {
     return ankoView({ AppCompatTextView(it) }, theme = 0, init = init)
 }
+
+fun Certainty.toColorRes() =
+        when (this) {
+            Certainty.DONTKNOW -> R.color.feedbackDontKnow
+            Certainty.MAYBE -> R.color.feedbackMaybe
+            Certainty.SURE -> R.color.feedbackSure
+        }

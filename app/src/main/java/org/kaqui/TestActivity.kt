@@ -1,9 +1,6 @@
 package org.kaqui
 
-import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
@@ -16,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import org.jetbrains.anko.*
 import org.kaqui.model.*
+import android.graphics.Rect
 
 class TestActivity : TestActivityBase() {
     companion object {
@@ -70,11 +68,11 @@ class TestActivity : TestActivityBase() {
 
                                             button(R.string.maybe) {
                                                 setExtTint(R.color.answerMaybe)
-                                                setOnClickListener { onAnswerClicked(Certainty.MAYBE, position) }
+                                                setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
                                             }
                                             button(R.string.sure) {
                                                 setExtTint(R.color.answerSure)
-                                                setOnClickListener { onAnswerClicked(Certainty.SURE, position) }
+                                                setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                             }
                                         }
                                         view {
@@ -110,7 +108,7 @@ class TestActivity : TestActivityBase() {
                                                             minHeight = 0
                                                             minWidth = 0
                                                             setExtTint(R.color.answerSure)
-                                                            setOnClickListener { onAnswerClicked(Certainty.SURE, position) }
+                                                            setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                         button(R.string.maybe) {
                                                             minimumHeight = 0
@@ -118,7 +116,7 @@ class TestActivity : TestActivityBase() {
                                                             minHeight = 0
                                                             minWidth = 0
                                                             setExtTint(R.color.answerMaybe)
-                                                            setOnClickListener { onAnswerClicked(Certainty.MAYBE, position) }
+                                                            setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                     }.lparams(weight = 0f)
                                                 }.lparams(width = matchParent, height = wrapContent)
@@ -134,13 +132,13 @@ class TestActivity : TestActivityBase() {
                         }
                         dontKnowButton = button(R.string.dont_know) {
                             setExtTint(R.color.answerDontKnow)
+                            setOnClickListener { this@TestActivity.onAnswerClicked(this, Certainty.DONTKNOW, 0) }
                         }.lparams(width = matchParent)
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
         }
 
-        dontKnowButton.setOnClickListener { this.onAnswerClicked(Certainty.DONTKNOW, 0) }
         testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
                 showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
@@ -164,8 +162,13 @@ class TestActivity : TestActivityBase() {
         }
     }
 
-    private fun onAnswerClicked(certainty: Certainty, position: Int) {
-        testEngine.selectAnswer(certainty, position)
+    private fun onAnswerClicked(button: View, certainty: Certainty, position: Int) {
+        val result = testEngine.selectAnswer(certainty, position)
+
+        val offsetViewBounds = Rect()
+        button.getDrawingRect(offsetViewBounds)
+        testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(button, offsetViewBounds)
+        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), resources.getColor(result.toColorRes()))
 
         testEngine.prepareNewQuestion()
         showCurrentQuestion()

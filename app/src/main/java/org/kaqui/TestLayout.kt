@@ -23,7 +23,8 @@ import org.jetbrains.anko.design.floatingActionButton
 import org.jetbrains.anko.support.v4.nestedScrollView
 
 class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: TestLayout) -> View) {
-    val mainCoordinatorLayout: CoordinatorLayout
+    lateinit var mainCoordinatorLayout: CoordinatorLayout
+    lateinit var overlay: FadeOverlay
     lateinit var mainView: View
     lateinit var sessionScore: TextView
     lateinit var questionText: TextView
@@ -33,33 +34,40 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
 
     init {
         with(activity) {
-            mainCoordinatorLayout = coordinatorLayout {
-                verticalLayout {
-                    id = R.id.global_stats
-                }.lparams(width = matchParent, height = wrapContent)
-                mainView = mainBlock(this@TestLayout).lparams(width = matchParent, height = matchParent)
-                historyScrollView = nestedScrollView {
-                    id = R.id.history_scroll_view
-                    backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                    historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
-                }.lparams(width = matchParent, height = matchParent) {
-                    val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
-                    bottomSheetBehavior.peekHeight = 0
-                    bottomSheetBehavior.isHideable = false
-                    behavior = bottomSheetBehavior
-                }
-                historyActionButton = floatingActionButton {
-                    size = FloatingActionButton.SIZE_MINI
-                    scaleX = 0f
-                    scaleY = 0f
-                    setImageResource(R.drawable.ic_arrow_upward)
-                }.lparams(width = matchParent, height = wrapContent) {
-                    anchorId = R.id.history_scroll_view
-                    anchorGravity = Gravity.TOP or Gravity.RIGHT
+            frameLayout {
+                mainCoordinatorLayout = coordinatorLayout {
+                    verticalLayout {
+                        id = R.id.global_stats
+                    }.lparams(width = matchParent, height = wrapContent)
+                    mainView = mainBlock(this@TestLayout).lparams(width = matchParent, height = matchParent)
+                    historyScrollView = nestedScrollView {
+                        id = R.id.history_scroll_view
+                        backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
+                        historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
+                    }.lparams(width = matchParent, height = matchParent) {
+                        val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
+                        bottomSheetBehavior.peekHeight = 0
+                        bottomSheetBehavior.isHideable = false
+                        behavior = bottomSheetBehavior
+                    }
+                    historyActionButton = floatingActionButton {
+                        size = FloatingActionButton.SIZE_MINI
+                        scaleX = 0f
+                        scaleY = 0f
+                        setImageResource(R.drawable.ic_arrow_upward)
+                    }.lparams(width = matchParent, height = wrapContent) {
+                        anchorId = R.id.history_scroll_view
+                        anchorGravity = Gravity.TOP or Gravity.RIGHT
 
-                    marginEnd = dip(20)
+                        marginEnd = dip(20)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            elevation = 12.0f
+                        }
+                    }
+                }
+                this@TestLayout.overlay = fadeOverlay {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        elevation = 12.0f
+                        elevation = 100f
                     }
                 }
             }

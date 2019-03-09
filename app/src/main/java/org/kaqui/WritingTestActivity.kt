@@ -202,6 +202,9 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
     private fun onAnswerDone(certainty: Certainty) {
         testEngine.markAnswer(certainty)
+
+        testLayout.overlay.trigger(testLayout.overlay.width / 2, testLayout.overlay.height / 2, resources.getColor(certainty.toColorRes()))
+
         currentStroke = currentKanji.strokes.size
 
         drawCanvas.clearCanvas()

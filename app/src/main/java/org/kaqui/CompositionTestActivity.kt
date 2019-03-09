@@ -2,6 +2,7 @@ package org.kaqui
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
@@ -193,10 +194,18 @@ class CompositionTestActivity : TestActivityBase() {
             }
         }
 
-        if (ok)
-            testEngine.markAnswer(Certainty.SURE)
-        else
-            testEngine.markAnswer(Certainty.DONTKNOW)
+        val result =
+                if (ok)
+                    Certainty.SURE
+                else
+                    Certainty.DONTKNOW
+
+        testEngine.markAnswer(result)
+
+        val offsetViewBounds = Rect()
+        doneButton.getDrawingRect(offsetViewBounds)
+        testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(doneButton, offsetViewBounds)
+        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), resources.getColor(result.toColorRes()))
 
         doneButton.visibility = View.GONE
         dontKnowButton.visibility = View.GONE

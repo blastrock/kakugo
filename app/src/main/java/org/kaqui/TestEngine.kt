@@ -143,14 +143,17 @@ class TestEngine(
         lastQuestionsIds.add(id)
     }
 
-    fun selectAnswer(certainty: Certainty, position: Int) {
+    fun selectAnswer(certainty: Certainty, position: Int): Certainty {
         val minLastCorrect = itemView.getLastCorrectFirstDecile()
+        val ret: Certainty
 
         if (certainty == Certainty.DONTKNOW) {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
             itemView.applyScoreUpdate(scoreUpdate)
             currentDebugData?.scoreUpdate = scoreUpdate
             addUnknownAnswerToHistory(currentQuestion)
+
+            ret = Certainty.DONTKNOW
         } else if (currentAnswers[position] == currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
@@ -163,6 +166,8 @@ class TestEngine(
             currentDebugData?.scoreUpdate = scoreUpdate
             addGoodAnswerToHistory(currentQuestion)
             correctCount += 1
+
+            ret = certainty
         } else {
             // wrong
             val scoreUpdateGood = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
@@ -171,9 +176,12 @@ class TestEngine(
             itemView.applyScoreUpdate(scoreUpdateBad)
             currentDebugData?.scoreUpdate = scoreUpdateGood
             addWrongAnswerToHistory(currentQuestion, currentAnswers[position])
+
+            ret = Certainty.DONTKNOW
         }
 
         questionCount += 1
+        return ret
     }
 
     fun markAnswer(certainty: Certainty) {
