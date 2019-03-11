@@ -14,7 +14,6 @@ class FadeOverlay(context: Context) : View(context) {
     }
 
     private val radialPaint = Paint()
-    private val fillPaint = Paint()
     private val animator = TimeAnimator()
 
     private var positionX: Int = 0
@@ -22,11 +21,7 @@ class FadeOverlay(context: Context) : View(context) {
     private var radius: Float = 0f
 
     init {
-        radialPaint.strokeWidth = 1f
-        radialPaint.style = Paint.Style.FILL_AND_STROKE
-
-        fillPaint.style = Paint.Style.FILL
-        fillPaint.color = Color.TRANSPARENT
+        radialPaint.style = Paint.Style.FILL
 
         animator.setTimeListener(this::updateRadius)
     }
@@ -36,7 +31,7 @@ class FadeOverlay(context: Context) : View(context) {
         positionY = y
 
         radialPaint.shader = RadialGradient(0f, 0f, 1f, color, Color.TRANSPARENT, Shader.TileMode.CLAMP)
-        fillPaint.color = color and 0xffffff
+        radialPaint.alpha = Color.WHITE
 
         animator.start()
     }
@@ -44,14 +39,13 @@ class FadeOverlay(context: Context) : View(context) {
     private fun updateRadius(animation: TimeAnimator, totalTime: Long, deltaTime: Long) {
         when (totalTime) {
             in 0..radiusGradientTime -> {
-                radius = 2 * max(width, height) * (totalTime / radiusGradientTime.toFloat()).pow(2)
+                radius = max(width, height) * (totalTime / radiusGradientTime.toFloat())
             }
             in radiusGradientTime..(radiusGradientTime + fadeTime) -> {
-                radius = 0f
-                fillPaint.alpha = (0xff * (1 - (totalTime - radiusGradientTime) / fadeTime.toFloat())).toInt()
+                radialPaint.alpha = (0xff * (1 - (totalTime - radiusGradientTime) / fadeTime.toFloat())).toInt()
             }
             else -> {
-                fillPaint.alpha = Color.TRANSPARENT
+                radius = 0f
                 animation.end()
             }
         }
@@ -60,7 +54,7 @@ class FadeOverlay(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (radius == 0f && fillPaint.alpha == 0)
+        if (radius == 0f)
             return
 
         canvas.save()
@@ -68,6 +62,5 @@ class FadeOverlay(context: Context) : View(context) {
         canvas.scale(radius, radius)
         canvas.drawCircle(0f, 0f, 1f, radialPaint)
         canvas.restore()
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), fillPaint)
     }
 }
