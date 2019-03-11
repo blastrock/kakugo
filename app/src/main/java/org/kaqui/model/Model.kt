@@ -24,7 +24,8 @@ data class Kana(
 data class Word(
         var word: String,
         var reading: String,
-        var meanings: List<String>
+        var meanings: List<String>,
+        var similarities: List<Item>
 ) : ItemContents()
 
 data class Item(
@@ -40,7 +41,7 @@ val Item.similarities: List<Item>
     get() = when (contents) {
         is Kana -> (contents as Kana).similarities
         is Kanji -> (contents as Kanji).similarities
-        is Word -> listOf()
+        is Word -> (contents as Word).similarities
     }
 
 fun Item.getQuestionText(testType: TestType): String =

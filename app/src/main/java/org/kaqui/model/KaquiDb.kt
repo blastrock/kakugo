@@ -66,6 +66,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
                         + "reading TEXT NOT NULL DEFAULT '',"
                         + "meanings TEXT NOT NULL DEFAULT '',"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
+                        + "similarity_class INTEGER NOT NULL DEFAULT 0,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
@@ -208,8 +209,8 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             writableDatabase.delete(WORDS_TABLE_NAME, null, null)
             writableDatabase.execSQL(
                     "INSERT INTO $WORDS_TABLE_NAME "
-                            + "(id, item, reading, meanings, jlpt_level) "
-                            + "SELECT id, item, reading, meanings, jlpt_level "
+                            + "(id, item, reading, meanings, jlpt_level, similarity_class) "
+                            + "SELECT id, item, reading, meanings, jlpt_level, similarity_class "
                             + "FROM dict.words"
             )
             restoreUserData(dump)
@@ -368,10 +369,11 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     }
 
     fun getWord(id: Int): Item {
-        val contents = Word("", "", listOf())
+        val contents = Word("", "", listOf(), listOf())
         val item = Item(id, contents, 0.0, 0.0, 0, false)
+        var similarityClass = 0
         readableDatabase.query(WORDS_TABLE_NAME,
-                arrayOf("item", "reading", "meanings", "short_score", "long_score", "last_correct", "enabled"),
+                arrayOf("item", "reading", "meanings", "short_score", "long_score", "last_correct", "enabled", "similarity_class"),
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
             if (cursor.count == 0)
@@ -384,7 +386,16 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
             item.longScore = cursor.getDouble(4)
             item.lastCorrect = cursor.getLong(5)
             item.enabled = cursor.getInt(6) != 0
+            similarityClass = cursor.getInt(7)
         }
+        val similarWords = mutableListOf<Item>()
+        readableDatabase.query(WORDS_TABLE_NAME, arrayOf("id"),
+                "similarity_class = ? AND id <> ?", arrayOf(similarityClass.toString(), id.toString()),
+                null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf()), 0.0, 0.0, 0, false))
+        }
+        contents.similarities = similarWords
         return item
     }
 
@@ -518,7 +529,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         private const val TAG = "KaquiDb"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 14
+        private const val DATABASE_VERSION = 15
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
         private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
