@@ -127,30 +127,36 @@ abstract class TestActivityBase : AppCompatActivity() {
         sessionScore.text = getString(R.string.score_string, testEngine.correctCount, testEngine.questionCount)
     }
 
-    private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?) {
+    private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
 
         historyView.addView(layout, 0)
-        updateSheetPeekHeight(layout)
-        discardOldHistory()
+        if (refresh) {
+            updateSheetPeekHeight(layout)
+            discardOldHistory()
+        }
     }
 
-    private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item) {
+    private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) {
         val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
 
         historyView.addView(layoutBad, 0)
         historyView.addView(layoutGood, 0)
-        updateSheetPeekHeight(layoutGood)
-        discardOldHistory()
+        if (refresh) {
+            updateSheetPeekHeight(layoutGood)
+            discardOldHistory()
+        }
     }
 
-    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?) {
+    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
 
         historyView.addView(layout, 0)
-        updateSheetPeekHeight(layout)
-        discardOldHistory()
+        if (refresh) {
+            updateSheetPeekHeight(layout)
+            discardOldHistory()
+        }
     }
 
     private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, style: Int?, withSeparator: Boolean = true): View {

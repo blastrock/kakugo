@@ -9,9 +9,9 @@ import java.util.*
 class TestEngine(
         private val db: KaquiDb,
         private val testType: TestType,
-        private val goodAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?) -> Unit,
-        private val wrongAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item) -> Unit,
-        private val unknownAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?) -> Unit) {
+        private val goodAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) -> Unit,
+        private val wrongAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) -> Unit,
+        private val unknownAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) -> Unit) {
     private sealed class HistoryLine {
         data class Correct(val itemId: Int) : HistoryLine()
         data class Unknown(val itemId: Int) : HistoryLine()
@@ -202,25 +202,25 @@ class TestEngine(
         questionCount += 1
     }
 
-    private fun addGoodAnswerToHistory(correct: Item) {
+    private fun addGoodAnswerToHistory(correct: Item, refresh: Boolean = true) {
         history.add(HistoryLine.Correct(correct.id))
         discardOldHistory()
 
-        goodAnswerCallback(correct, currentDebugData)
+        goodAnswerCallback(correct, currentDebugData, refresh)
     }
 
-    private fun addWrongAnswerToHistory(correct: Item, wrong: Item) {
+    private fun addWrongAnswerToHistory(correct: Item, wrong: Item, refresh: Boolean = true) {
         history.add(HistoryLine.Incorrect(correct.id, wrong.id))
         discardOldHistory()
 
-        wrongAnswerCallback(correct, currentDebugData, wrong)
+        wrongAnswerCallback(correct, currentDebugData, wrong, refresh)
     }
 
-    private fun addUnknownAnswerToHistory(correct: Item) {
+    private fun addUnknownAnswerToHistory(correct: Item, refresh: Boolean = true) {
         history.add(HistoryLine.Unknown(correct.id))
         discardOldHistory()
 
-        unknownAnswerCallback(correct, currentDebugData)
+        unknownAnswerCallback(correct, currentDebugData, refresh)
     }
 
     private fun discardOldHistory() {
@@ -260,17 +260,17 @@ class TestEngine(
         history.clear()
 
         val count = parcel.readInt()
-        repeat(count) {
+        repeat(count) { iteration ->
             val type = parcel.readByte()
             when (type.toInt()) {
                 0 -> {
-                    addGoodAnswerToHistory(getItem(db, parcel.readInt()))
+                    addGoodAnswerToHistory(getItem(db, parcel.readInt()), iteration == count - 1)
                 }
                 1 -> {
-                    addUnknownAnswerToHistory(getItem(db, parcel.readInt()))
+                    addUnknownAnswerToHistory(getItem(db, parcel.readInt()), iteration == count - 1)
                 }
                 2 -> {
-                    addWrongAnswerToHistory(getItem(db, parcel.readInt()), getItem(db, parcel.readInt()))
+                    addWrongAnswerToHistory(getItem(db, parcel.readInt()), getItem(db, parcel.readInt()), iteration == count - 1)
                 }
             }
         }
