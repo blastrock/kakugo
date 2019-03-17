@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.NavUtils
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.support.v7.app.AlertDialog
@@ -82,13 +83,13 @@ abstract class TestActivityBase : AppCompatActivity() {
             historyScrollView.scrollTo(0, 0)
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         } else
-            confirmActivityClose()
+            confirmActivityClose(false)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                confirmActivityClose()
+                confirmActivityClose(true)
                 true
             }
             else ->
@@ -96,11 +97,16 @@ abstract class TestActivityBase : AppCompatActivity() {
         }
     }
 
-    private fun confirmActivityClose() {
+    private fun confirmActivityClose(upNavigation: Boolean) {
         AlertDialog.Builder(this)
                 .setTitle(R.string.confirm_test_stop_title)
                 .setMessage(R.string.confirm_test_stop_message)
-                .setPositiveButton(android.R.string.yes) { _, _ -> finish() }
+                .setPositiveButton(android.R.string.yes) { _, _ ->
+                    if (upNavigation)
+                        NavUtils.navigateUpFromSameTask(this)
+                    else
+                        finish()
+                }
                 .setNegativeButton(android.R.string.no, null)
                 .show()
     }
