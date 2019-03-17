@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:fullBackupContent="@xml/backup_descriptor">
-        <activity android:name="org.kaqui.MainActivity">
+        <activity android:name="org.kaqui.mainmenu.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,27 +31,41 @@
                     android:pathPrefix="/kaquiAppLink" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="org.kaqui.mainmenu.HiraganaMenuActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name="org.kaqui.mainmenu.KatakanaMenuActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name="org.kaqui.mainmenu.KanjiMenuActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name="org.kaqui.mainmenu.VocabularyMenuActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+
         <activity
             android:name="org.kaqui.TestActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name="org.kaqui.WritingTestActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name="org.kaqui.CompositionTestActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.SavedSelectionsActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.JlptSelectionActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.ItemSearchActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.ItemSelectionActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity" />
     </application>
 
 </manifest>

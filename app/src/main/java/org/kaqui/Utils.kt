@@ -1,5 +1,7 @@
 package org.kaqui
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
@@ -10,10 +12,12 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.AppCompatTextView
 import android.view.ViewManager
 import android.widget.Button
+import android.widget.Toast
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.custom.ankoView
-import org.kaqui.model.BAD_WEIGHT
-import org.kaqui.model.Certainty
-import org.kaqui.model.GOOD_WEIGHT
+import org.jetbrains.anko.longToast
+import org.jetbrains.anko.toast
+import org.kaqui.model.*
 import java.util.*
 import kotlin.math.pow
 
@@ -83,3 +87,14 @@ fun Certainty.toColorRes() =
             Certainty.MAYBE -> R.color.feedbackMaybe
             Certainty.SURE -> R.color.feedbackSure
         }
+
+fun startTest(activity: Activity, type: TestType) {
+    val db = KaquiDb.getInstance(activity)
+    if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
+        activity.longToast(R.string.enable_a_few_items)
+    } else when (type) {
+        TestType.KANJI_WRITING -> activity.startActivity<WritingTestActivity>()
+        TestType.KANJI_COMPOSITION -> activity.startActivity<CompositionTestActivity>()
+        else -> activity.startActivity<TestActivity>("test_type" to type)
+    }
+}
