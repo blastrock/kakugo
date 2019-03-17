@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.View.MeasureSpec
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -238,16 +239,29 @@ abstract class TestActivityBase : AppCompatActivity() {
     }
 
     private fun updateSheetPeekHeight(v: View) {
-        historyView.post {
-            if (sheetBehavior.peekHeight == 0)
-                historyActionButton.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400).start()
+        v.measure(MeasureSpec.makeMeasureSpec(resources.displayMetrics.widthPixels, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
 
-            val va = ValueAnimator.ofInt(sheetBehavior.peekHeight, v.height)
+        if (sheetBehavior.peekHeight == 0)
+            historyActionButton.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400).start()
+
+        run {
+            val va = ValueAnimator.ofInt(sheetBehavior.peekHeight, v.measuredHeight)
             va.duration = 200 // ms
-            va.addUpdateListener { sheetBehavior.peekHeight = it.animatedValue as Int }
+            va.addUpdateListener {
+                sheetBehavior.peekHeight = it.animatedValue as Int
+                mainView.layoutParams.height = mainCoordLayout.height - it.animatedValue as Int
+            }
             va.start()
+        }
 
-            mainView.layoutParams.height = mainCoordLayout.height - v.height
+        run {
+            val va = ValueAnimator.ofInt(-v.measuredHeight, 0)
+            va.duration = 200 // ms
+            va.addUpdateListener {
+                (v.layoutParams as LinearLayout.LayoutParams).topMargin = it.animatedValue as Int
+                historyView.requestLayout()
+            }
+            va.start()
         }
     }
 
