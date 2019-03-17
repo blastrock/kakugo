@@ -13,10 +13,8 @@ import android.support.v7.widget.AppCompatTextView
 import android.view.ViewManager
 import android.widget.Button
 import android.widget.Toast
-import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.toast
 import org.kaqui.model.*
 import java.util.*
 import kotlin.math.pow
@@ -98,3 +96,10 @@ fun startTest(activity: Activity, type: TestType) {
         else -> activity.startActivity<TestActivity>("test_type" to type)
     }
 }
+
+val Activity.menuWidth
+        get() =
+            if (resources.configuration.screenWidthDp >= 500)
+                dip(500)
+            else
+                matchParent

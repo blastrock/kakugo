@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         }
                     }
                 }
-            }
+            }.lparams(width = menuWidth)
         }
 
         if (KaquiDb.databaseNeedsUpdate(this)) {

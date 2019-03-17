@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.widget.TextView
 import org.jetbrains.anko.*
 import org.kaqui.R
+import org.kaqui.menuWidth
 import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
 import org.kaqui.startTest
@@ -48,7 +49,7 @@ class HiraganaMenuActivity : AppCompatActivity() {
                         }
                     }
                 }
-            }
+            }.lparams(width = menuWidth)
         }
     }
 }

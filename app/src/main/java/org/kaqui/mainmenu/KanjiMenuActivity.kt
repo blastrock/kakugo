@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.widget.TextView
 import org.jetbrains.anko.*
 import org.kaqui.R
+import org.kaqui.menuWidth
 import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
 import org.kaqui.settings.JlptSelectionActivity
@@ -69,7 +70,7 @@ class KanjiMenuActivity : AppCompatActivity() {
                         }
                     }.lparams(width = matchParent, height = matchParent)
                 }
-            }
+            }.lparams(width = menuWidth)
         }
     }
 }
