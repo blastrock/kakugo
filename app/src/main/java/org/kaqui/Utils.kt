@@ -1,7 +1,6 @@
 package org.kaqui
 
 import android.app.Activity
-import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
@@ -12,9 +11,11 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.AppCompatTextView
 import android.view.ViewManager
 import android.widget.Button
-import android.widget.Toast
-import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
+import org.jetbrains.anko.dip
+import org.jetbrains.anko.longToast
+import org.jetbrains.anko.matchParent
+import org.jetbrains.anko.startActivity
 import org.kaqui.model.*
 import java.util.*
 import kotlin.math.pow

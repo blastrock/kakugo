@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.*
 import android.view.View
 import kotlin.math.max
-import kotlin.math.pow
 
 class FadeOverlay(context: Context) : View(context) {
     companion object {

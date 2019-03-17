@@ -1,6 +1,5 @@
 package org.kaqui.mainmenu
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Gravity
@@ -9,7 +8,6 @@ import org.jetbrains.anko.*
 import org.kaqui.R
 import org.kaqui.menuWidth
 import org.kaqui.model.TestType
-import org.kaqui.settings.ItemSelectionActivity
 import org.kaqui.settings.JlptSelectionActivity
 import org.kaqui.startTest
 import java.io.Serializable
