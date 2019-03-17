@@ -39,6 +39,7 @@ Features include:
 - Optimized tablet support
 - Open source
 - No ads
+- No internet access required
 - More to come
 
 What makes it different from other apps:
