@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">KaQui</string>
+    <string name="app_name">Kakugo</string>
     <string name="hiragana"><font size="30">ひらがな</font>\nHIRAGANA</string>
     <string name="katakana"><font size="30">カタカナ</font>\nKATAKANA</string>
     <string name="kanji"><font size="30">漢字</font>\nKANJI</string>

@@ -1,8 +1,8 @@
-=====
-KaQui
-=====
+======
+Kakugo
+======
 
-KaQui helps learning Japanese. It includes multiple tests to memorize hiragana, katakana, and kanji and adapts to the user's learning pace.
+Kakugo helps learning Japanese. It includes multiple tests to memorize hiragana, katakana, and kanji and adapts to the user's learning pace.
 
 - `Download on F-Droid <https://f-droid.org/packages/org.kaqui/>`_
 - `Download on Google Play <https://play.google.com/store/apps/details?id=org.kaqui>`_
@@ -13,13 +13,16 @@ work, the more kanji you know, the harder it gets and the more time it takes to
 revise them all. Proper tools can help you memorize these huge amounts of
 knowledge to more quickly become a fluent Japanese speaker.
 
-KaQui is one of these tools. It helps learning and revising kanji and vocabulary
+Kakugo is one of these tools. It helps learning and revising kanji and vocabulary
 in an efficient manner. It uses Spaced Repetition in a unique way that adapts to
 the user's pace. If you only have time to revise 30 kanji every day, or if you
 can revise as much as 100 kanji every day, the app will adapt and test you
 on the right kanji at the right time for you to memorize them. There is no
 "kanji of the day" list to revise, you can start and finish a session whenever
 you feel like it.
+
+Kakugo also features a wide variety of tests to help you find the best ways that
+will help you learn Japanese.
 
 Features
 ========
@@ -46,7 +49,7 @@ What makes it different from other apps:
 
 - a custom SRS formula that adapts to each person's level and learning pace
 - unlimited quiz sessions that can be stopped at any time
-- "don't know", "maybe" and "sure" buttons that helps KaQui determine how well you know a character
+- "don't know", "maybe" and "sure" buttons that helps Kakugo determine how well you know a character
 - a harsher penalty when the answer is wrong to help you learn the character well
 - kanji similar to the one in the question are shown as answers to help you learn the subtle differences between them
 - it's free and without ads
