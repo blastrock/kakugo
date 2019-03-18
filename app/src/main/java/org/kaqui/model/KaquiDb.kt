@@ -391,7 +391,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
         val similarWords = mutableListOf<Item>()
         readableDatabase.query(WORDS_TABLE_NAME, arrayOf("id"),
                 "similarity_class = ? AND id <> ?", arrayOf(similarityClass.toString(), id.toString()),
-                null, null, null).use { cursor ->
+                null, null, "RANDOM()", "20").use { cursor ->
             while (cursor.moveToNext())
                 similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf()), 0.0, 0.0, 0, false))
         }
