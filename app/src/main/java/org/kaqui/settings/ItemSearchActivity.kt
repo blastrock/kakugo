@@ -9,7 +9,7 @@ import android.view.ContextThemeWrapper
 import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
-import org.kaqui.model.KaquiDb
+import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 
 class ItemSearchActivity : AppCompatActivity() {
@@ -39,8 +39,8 @@ class ItemSearchActivity : AppCompatActivity() {
                 .commit()
 
         dbView = when (mode) {
-            Mode.KANJI -> KaquiDb.getInstance(this).kanjiView
-            Mode.WORD -> KaquiDb.getInstance(this).wordView
+            Mode.KANJI -> Database.getInstance(this).kanjiView
+            Mode.WORD -> Database.getInstance(this).wordView
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

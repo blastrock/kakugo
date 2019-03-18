@@ -9,7 +9,7 @@ import android.graphics.Path
 import android.util.Log
 import org.kaqui.data.*
 
-class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class Database private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $KANJIS_TABLE_NAME ("
@@ -526,7 +526,7 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
     private fun restoreUserData(data: Dump) = restoreUserData(writableDatabase, data)
 
     companion object {
-        private const val TAG = "KaquiDb"
+        private const val TAG = "Database"
 
         private const val DATABASE_NAME = "kanjis"
         private const val DATABASE_VERSION = 15
@@ -546,22 +546,22 @@ class KaquiDb private constructor(context: Context) : SQLiteOpenHelper(context, 
 
         private const val WORDS_TABLE_NAME = "words"
 
-        private var singleton: KaquiDb? = null
+        private var singleton: Database? = null
 
         private fun isKanji(c: Char): Boolean {
             // This is the hiragana/katakana range
             return c.toInt() !in 0x3040..0x3100
         }
 
-        fun getInstance(context: Context): KaquiDb {
+        fun getInstance(context: Context): Database {
             if (singleton == null)
-                singleton = KaquiDb(context)
+                singleton = Database(context)
             return singleton!!
         }
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
-                SQLiteDatabase.openDatabase(context.getDatabasePath(KaquiDb.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+                SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READONLY).use { db ->
                     if (db.version != DATABASE_VERSION)
                         return true
 

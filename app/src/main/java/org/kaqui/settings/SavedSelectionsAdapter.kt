@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import org.jetbrains.anko.*
-import org.kaqui.model.KaquiDb
+import org.kaqui.model.Database
 
-class SavedSelectionsAdapter(context: Context, var savedSelections: List<KaquiDb.KanjiSelection>) : BaseAdapter() {
+class SavedSelectionsAdapter(context: Context, var savedSelections: List<Database.KanjiSelection>) : BaseAdapter() {
     private val ankoContext = AnkoContext.createReusable(context, this)
 
     private fun createView() = ankoContext.apply {
@@ -24,7 +24,7 @@ class SavedSelectionsAdapter(context: Context, var savedSelections: List<KaquiDb
         return view
     }
 
-    override fun getItem(position: Int): KaquiDb.KanjiSelection {
+    override fun getItem(position: Int): Database.KanjiSelection {
         return savedSelections[position]
     }
 

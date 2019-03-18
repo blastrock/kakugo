@@ -154,7 +154,7 @@ class CompositionTestActivity : TestActivityBase() {
     }
 
     override fun prepareNewQuestion() {
-        val db = KaquiDb.getInstance(this)
+        val db = Database.getInstance(this)
         val ids = testEngine.prepareNewQuestion().map { it.itemId }
 
         val questionPartsIds = currentKanji.parts.map { it.id }

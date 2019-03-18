@@ -88,7 +88,7 @@ fun Certainty.toColorRes() =
         }
 
 fun startTest(activity: Activity, type: TestType) {
-    val db = KaquiDb.getInstance(activity)
+    val db = Database.getInstance(activity)
     if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
     } else when (type) {

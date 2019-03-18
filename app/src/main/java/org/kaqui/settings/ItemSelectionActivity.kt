@@ -8,7 +8,7 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
-import org.kaqui.model.KaquiDb
+import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 
 class ItemSelectionActivity : AppCompatActivity() {
@@ -47,10 +47,10 @@ class ItemSelectionActivity : AppCompatActivity() {
                 .commit()
 
         dbView = when (mode) {
-            Mode.HIRAGANA -> KaquiDb.getInstance(this).hiraganaView
-            Mode.KATAKANA -> KaquiDb.getInstance(this).katakanaView
-            Mode.KANJI -> KaquiDb.getInstance(this).getKanjiView(selectedLevel!!)
-            Mode.WORD -> KaquiDb.getInstance(this).getWordView(selectedLevel!!)
+            Mode.HIRAGANA -> Database.getInstance(this).hiraganaView
+            Mode.KATAKANA -> Database.getInstance(this).katakanaView
+            Mode.KANJI -> Database.getInstance(this).getKanjiView(selectedLevel!!)
+            Mode.WORD -> Database.getInstance(this).getWordView(selectedLevel!!)
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

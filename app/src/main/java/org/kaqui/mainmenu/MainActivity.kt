@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.kaqui.R
 import org.kaqui.menuWidth
-import org.kaqui.model.KaquiDb
+import org.kaqui.model.Database
 import java.io.File
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.CoroutineContext
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }.lparams(width = menuWidth)
         }
 
-        if (KaquiDb.databaseNeedsUpdate(this)) {
+        if (Database.databaseNeedsUpdate(this)) {
             showDownloadProgressDialog()
             launch(Dispatchers.Default) {
                 initDic()
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun initDic() {
         val tmpFile = File.createTempFile("dict", "", cacheDir)
         try {
-            val db = KaquiDb.getInstance(this)
+            val db = Database.getInstance(this)
             resources.openRawResource(R.raw.dict).use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
                     tmpFile.outputStream().use { outputStream ->

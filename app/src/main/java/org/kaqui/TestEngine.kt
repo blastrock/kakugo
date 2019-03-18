@@ -7,7 +7,7 @@ import org.kaqui.model.*
 import java.util.*
 
 class TestEngine(
-        private val db: KaquiDb,
+        private val db: Database,
         private val testType: TestType,
         private val goodAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) -> Unit,
         private val wrongAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) -> Unit,
@@ -23,7 +23,7 @@ class TestEngine(
         private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         const val MAX_HISTORY_SIZE = 40
 
-        fun getItemView(db: KaquiDb, testType: TestType): LearningDbView =
+        fun getItemView(db: Database, testType: TestType): LearningDbView =
                 when (testType) {
                     TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
                     TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
@@ -95,7 +95,7 @@ class TestEngine(
         return ids
     }
 
-    private fun pickQuestion(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
+    private fun pickQuestion(db: Database, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
 
         val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
@@ -118,7 +118,7 @@ class TestEngine(
         return PickedQuestion(getItem(db, question.itemId), question, totalWeight)
     }
 
-    private fun pickAnswers(db: KaquiDb, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
+    private fun pickAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
         val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) }
         val similarItems =
                 if (similarItemIds.size >= answerCount - 1)
@@ -278,7 +278,7 @@ class TestEngine(
         parcel.recycle()
     }
 
-    private fun getItem(db: KaquiDb, id: Int): Item =
+    private fun getItem(db: Database, id: Int): Item =
             itemView.getItem(id)
 
     val itemView: LearningDbView

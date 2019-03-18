@@ -23,7 +23,7 @@ import org.jetbrains.anko.editText
 import org.jetbrains.anko.toast
 import org.kaqui.R
 import org.kaqui.StatsFragment
-import org.kaqui.model.KaquiDb
+import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 import java.io.Serializable
 import kotlin.coroutines.CoroutineContext
@@ -59,8 +59,8 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
                 .commit()
 
         dbView = when (mode) {
-            Mode.KANJI -> KaquiDb.getInstance(this).kanjiView
-            Mode.WORD -> KaquiDb.getInstance(this).wordView
+            Mode.KANJI -> Database.getInstance(this).kanjiView
+            Mode.WORD -> Database.getInstance(this).wordView
         }
 
         jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this, dbView)
@@ -124,7 +124,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
                     progressDialog.setCancelable(false)
                     progressDialog.show()
 
-                    withContext(Dispatchers.Default) { KaquiDb.getInstance(this@JlptSelectionActivity).autoSelectWords() }
+                    withContext(Dispatchers.Default) { Database.getInstance(this@JlptSelectionActivity).autoSelectWords() }
 
                     (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
                     statsFragment.updateStats(dbView)
@@ -151,7 +151,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun saveSelection(name: String) {
-        KaquiDb.getInstance(this).saveKanjiSelectionTo(name)
+        Database.getInstance(this).saveKanjiSelectionTo(name)
         toast(getString(R.string.saved_selection, name))
     }
 
@@ -182,7 +182,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
 
         try {
             val kanjis = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
-            KaquiDb.getInstance(this).setSelection(kanjis)
+            Database.getInstance(this).setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
             Toast.makeText(this, "Could not import file: $e", Toast.LENGTH_LONG).show()

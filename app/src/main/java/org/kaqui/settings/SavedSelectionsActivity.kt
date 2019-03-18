@@ -10,16 +10,16 @@ import android.widget.ListView
 import org.jetbrains.anko.listView
 import org.jetbrains.anko.toast
 import org.kaqui.R
-import org.kaqui.model.KaquiDb
+import org.kaqui.model.Database
 
 class SavedSelectionsActivity: AppCompatActivity() {
     private lateinit var listView: ListView
-    private var selectedItem: KaquiDb.KanjiSelection? = null
+    private var selectedItem: Database.KanjiSelection? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val db = KaquiDb.getInstance(this)
+        val db = Database.getInstance(this)
         listView = listView {
             adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, db.listKanjiSelections())
             onItemClickListener = AdapterView.OnItemClickListener(this@SavedSelectionsActivity::onListItemClick)
@@ -28,9 +28,9 @@ class SavedSelectionsActivity: AppCompatActivity() {
     }
 
     private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
-        val item = l.adapter.getItem(position) as KaquiDb.KanjiSelection
+        val item = l.adapter.getItem(position) as Database.KanjiSelection
 
-        val db = KaquiDb.getInstance(this)
+        val db = Database.getInstance(this)
         db.restoreKanjiSelectionFrom(id)
 
         toast(getString(R.string.loaded_selection, item.name))
@@ -42,14 +42,14 @@ class SavedSelectionsActivity: AppCompatActivity() {
         super.onCreateContextMenu(menu, v, menuInfo)
 
         val acmi = menuInfo as AdapterView.AdapterContextMenuInfo
-        selectedItem = listView.adapter.getItem(acmi.position) as KaquiDb.KanjiSelection
+        selectedItem = listView.adapter.getItem(acmi.position) as Database.KanjiSelection
 
         val inflater = menuInflater
         inflater.inflate(R.menu.selection_menu, menu)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val db = KaquiDb.getInstance(this)
+        val db = Database.getInstance(this)
         return when (item.itemId) {
             R.id.delete -> {
                 db.deleteKanjiSelection(selectedItem!!.id)

@@ -59,7 +59,7 @@ abstract class TestActivityBase : AppCompatActivity() {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        testEngine = TestEngine(KaquiDb.getInstance(this), testType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
+        testEngine = TestEngine(Database.getInstance(this), testType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
 
         if (savedInstanceState == null)
             prepareNewQuestion()
@@ -70,7 +70,7 @@ abstract class TestActivityBase : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        statsFragment.updateStats(getDbView(KaquiDb.getInstance(this)))
+        statsFragment.updateStats(getDbView(Database.getInstance(this)))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -119,7 +119,7 @@ abstract class TestActivityBase : AppCompatActivity() {
     protected open fun showCurrentQuestion() {
         // when showNewQuestion is called in onCreate, statsFragment is not visible yet
         if (statsFragment.isVisible)
-            statsFragment.updateStats(getDbView(KaquiDb.getInstance(this)))
+            statsFragment.updateStats(getDbView(Database.getInstance(this)))
         updateSessionScore()
     }
 
@@ -276,7 +276,7 @@ abstract class TestActivityBase : AppCompatActivity() {
             historyView.removeViewAt(position)
     }
 
-    private fun getDbView(db: KaquiDb): LearningDbView =
+    private fun getDbView(db: Database): LearningDbView =
             when (testType) {
                 TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
                 TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
