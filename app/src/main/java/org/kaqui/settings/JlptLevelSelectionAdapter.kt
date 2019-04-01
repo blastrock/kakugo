@@ -14,8 +14,8 @@ import org.kaqui.StatsFragment
 import org.kaqui.model.LearningDbView
 
 class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView) : BaseAdapter() {
-    private val levels = (5 downTo 1).map { mapOf("label" to "JLPT level $it", "level" to it) } +
-            mapOf("label" to "Additional kanjis", "level" to 0)
+    private val levels = (5 downTo 1).map { mapOf("label" to context.getString(R.string.jlpt_level_n, it.toString()), "level" to it) } +
+            mapOf("label" to context.getString(R.string.additional_kanji), "level" to 0)
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.jlpt_level_item, parent, false)

@@ -62,7 +62,10 @@ class ItemSearchActivity : AppCompatActivity() {
         // never collapse the searchView
         searchView.setOnCloseListener { true }
         searchView.isIconified = false
-        searchView.queryHint = resources.getString(R.string.search_kanji_hint)
+        if (mode == Mode.KANJI)
+            searchView.queryHint = resources.getString(R.string.search_kanji_hint)
+        else
+            searchView.queryHint = resources.getString(R.string.search_word_hint)
         supportActionBar!!.customView = searchView
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM or ActionBar.DISPLAY_HOME_AS_UP
         searchView.requestFocusFromTouch()

@@ -99,7 +99,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
             }
             R.id.save_selection -> {
                 alert {
-                    title = "Enter the name of this kanji set"
+                    title = getString(R.string.enter_name_of_selection)
                     var name: EditText? = null
                     customView = ctx.UI {
                         name = editText()
@@ -185,7 +185,7 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
             Database.getInstance(this).setSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
-            Toast.makeText(this, "Could not import file: $e", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.could_not_import_file, e.toString()), Toast.LENGTH_LONG).show()
         }
     }
 
