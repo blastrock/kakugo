@@ -6,10 +6,23 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Path
+import android.os.Build
 import android.util.Log
 import org.kaqui.data.*
 
 class Database private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+    private val locale: String by lazy {
+        val locale =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                context.resources.configuration.locales.getFirstMatch(arrayOf("fr-FR"))?.language
+            else
+                context.resources.configuration.locale.language
+        if (locale == "fr")
+            "fr"
+        else
+            "en"
+    }
+
     override fun onCreate(database: SQLiteDatabase) {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $KANJIS_TABLE_NAME ("
@@ -17,7 +30,8 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         + "item TEXT NOT NULL UNIQUE,"
                         + "on_readings TEXT NOT NULL DEFAULT '',"
                         + "kun_readings TEXT NOT NULL DEFAULT '',"
-                        + "meanings TEXT NOT NULL DEFAULT '',"
+                        + "meanings_en TEXT NOT NULL DEFAULT '',"
+                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "kaqui_level INTEGER NOT NULL DEFAULT 0,"
                         + "part_count INTEGER NOT NULL DEFAULT 0,"
@@ -64,7 +78,8 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         + "id INTEGER PRIMARY KEY,"
                         + "item TEXT NOT NULL,"
                         + "reading TEXT NOT NULL DEFAULT '',"
-                        + "meanings TEXT NOT NULL DEFAULT '',"
+                        + "meanings_en TEXT NOT NULL DEFAULT '',"
+                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "similarity_class INTEGER NOT NULL DEFAULT 0,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
@@ -171,8 +186,8 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             writableDatabase.delete(KANJIS_TABLE_NAME, null, null)
             writableDatabase.execSQL(
                     "INSERT INTO $KANJIS_TABLE_NAME "
-                            + "(id, item, on_readings, kun_readings, meanings, jlpt_level, kaqui_level, part_count, radical, enabled) "
-                            + "SELECT id, item, on_readings, kun_readings, meanings, jlpt_level, kaqui_level, part_count, radical, jlpt_level = 5 "
+                            + "(id, item, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, kaqui_level, part_count, radical, enabled) "
+                            + "SELECT id, item, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, kaqui_level, part_count, radical, jlpt_level = 5 "
                             + "FROM dict.kanjis"
             )
             writableDatabase.execSQL(
@@ -209,8 +224,8 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             writableDatabase.delete(WORDS_TABLE_NAME, null, null)
             writableDatabase.execSQL(
                     "INSERT INTO $WORDS_TABLE_NAME "
-                            + "(id, item, reading, meanings, jlpt_level, similarity_class) "
-                            + "SELECT id, item, reading, meanings, jlpt_level, similarity_class "
+                            + "(id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class) "
+                            + "SELECT id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class "
                             + "FROM dict.words"
             )
             restoreUserData(dump)
@@ -265,8 +280,8 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         readableDatabase.rawQuery(
                 """SELECT id
                 FROM $KANJIS_TABLE_NAME
-                WHERE item = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR meanings LIKE ? AND radical = 0""",
-                arrayOf(text, "%$text%", "%$text%", "%$text%")).use { cursor ->
+                WHERE item = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR  (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?) AND radical = 0""",
+                arrayOf(text, "%$text%", "%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
@@ -279,8 +294,8 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         readableDatabase.rawQuery(
                 """SELECT id
                 FROM $WORDS_TABLE_NAME
-                WHERE item LIKE ? OR reading LIKE ? OR meanings LIKE ?""",
-                arrayOf("%$text%", "%$text%", "%$text%")).use { cursor ->
+                WHERE item LIKE ? OR reading LIKE ? OR (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?)""",
+                arrayOf("%$text%", "%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
@@ -336,7 +351,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         val contents = Kanji("", listOf(), listOf(), listOf(), strokes, similarities, parts, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         readableDatabase.query(KANJIS_TABLE_NAME,
-                arrayOf("item", "jlpt_level", "short_score", "long_score", "last_correct", "enabled", "on_readings", "kun_readings", "meanings"),
+                arrayOf("item", "jlpt_level", "short_score", "long_score", "last_correct", "enabled", "on_readings", "kun_readings", "meanings_$locale", "meanings_en"),
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
             if (cursor.count == 0)
@@ -345,7 +360,11 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             contents.kanji = cursor.getString(0)
             contents.on_readings = cursor.getString(6).split('_')
             contents.kun_readings = cursor.getString(7).split('_')
-            contents.meanings = cursor.getString(8).split('_')
+            val localMeaning = cursor.getString(8)
+            if (localMeaning != "")
+                contents.meanings = localMeaning.split('_')
+            else
+                contents.meanings = cursor.getString(9).split('_')
             contents.jlptLevel = cursor.getInt(1)
             item.shortScore = cursor.getDouble(2)
             item.longScore = cursor.getDouble(3)
@@ -373,7 +392,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         readableDatabase.query(WORDS_TABLE_NAME,
-                arrayOf("item", "reading", "meanings", "short_score", "long_score", "last_correct", "enabled", "similarity_class"),
+                arrayOf("item", "reading", "meanings_$locale", "short_score", "long_score", "last_correct", "enabled", "similarity_class", "meanings_en"),
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
             if (cursor.count == 0)
@@ -381,7 +400,11 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             cursor.moveToFirst()
             contents.word = cursor.getString(0)
             contents.reading = cursor.getString(1)
-            contents.meanings = cursor.getString(2).split('_')
+            val localMeaning = cursor.getString(2)
+            if (localMeaning != "")
+                contents.meanings = localMeaning.split('_')
+            else
+                contents.meanings = cursor.getString(8).split('_')
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
             item.lastCorrect = cursor.getLong(5)
@@ -529,7 +552,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         private const val TAG = "Database"
 
         private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 15
+        private const val DATABASE_VERSION = 16
 
         private const val HIRAGANAS_TABLE_NAME = "hiraganas"
         private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
