@@ -23,10 +23,7 @@ class VocabularyMenuActivity : AppCompatActivity() {
                 verticalLayout {
                     padding = dip(8)
 
-                    textView(R.string.app_name) {
-                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                        textSize = 50f
-                    }.lparams(width = matchParent, height = wrapContent) {
+                    imageView(R.drawable.kakugo).lparams(width = matchParent, height = dip(80)) {
                         margin = dip(8)
                     }
 
