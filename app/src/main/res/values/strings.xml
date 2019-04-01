@@ -55,4 +55,8 @@
     <string name="could_not_import_file">Could not import file: %1$s</string>
     <string name="additional_kanji">Additional kanji</string>
     <string name="jlpt_level_n">JLPT level %1$s</string>
+    <string name="hiragana_title">Hiragana</string>
+    <string name="katakana_title">Katakana</string>
+    <string name="kanji_title">Kanji</string>
+    <string name="word_title">Vocabulary</string>
 </resources>

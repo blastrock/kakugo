@@ -34,16 +34,20 @@
 
         <activity
             android:name="org.kaqui.mainmenu.HiraganaMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity"
+            android:label="@string/hiragana_title" />
         <activity
             android:name="org.kaqui.mainmenu.KatakanaMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity"
+            android:label="@string/katakana_title" />
         <activity
             android:name="org.kaqui.mainmenu.KanjiMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity"
+            android:label="@string/kanji_title" />
         <activity
             android:name="org.kaqui.mainmenu.VocabularyMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity"
+            android:label="@string/word_title" />
 
         <activity
             android:name="org.kaqui.TestActivity"
