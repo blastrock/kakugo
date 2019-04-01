@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Kakugo</string>
-    <string name="hiragana"><font size="30">ひらがな</font>\nHIRAGANA</string>
-    <string name="katakana"><font size="30">カタカナ</font>\nKATAKANA</string>
-    <string name="kanji"><font size="30">漢字</font>\nKANJI</string>
+    <string name="app_name" translatable="false">Kakugo</string>
+    <string name="hiragana" translatable="false"><font size="30">ひらがな</font>\nHIRAGANA</string>
+    <string name="katakana" translatable="false"><font size="30">カタカナ</font>\nKATAKANA</string>
+    <string name="kanji" translatable="false"><font size="30">漢字</font>\nKANJI</string>
     <string name="word"><font size="30">語彙</font>\nVOCABULARY</string>
     <string name="hiragana_selection">Hiragana selection</string>
     <string name="katakana_selection">Katakana selection</string>
@@ -34,13 +34,13 @@
     <string name="jlpt_search">Search</string>
     <string name="search_kanji_hint">Search kanji&#8230;</string>
     <string name="search_word_hint">Search word&#8230;</string>
-    <string name="confirm_test_stop_title">Terminate quiz</string>
+    <string name="confirm_test_stop_title">Terminate session</string>
     <string name="confirm_test_stop_message">Are you sure you want to end this quiz session?</string>
     <string name="enable_a_few_items">You must enable at least 10 items to start a session</string>
     <string name="initializing_kanji_db">Initializing database</string>
     <string name="autoselecting_words">Automatically selecting words from selected kanji</string>
     <string name="failed_to_init_db">Failed to initialize database: %1$s</string>
-    <string name="debug_info">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nNew short score: %10$.2f\nNew long score: %11$.2f</string>
+    <string name="debug_info" translatable="false">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nNew short score: %10$.2f\nNew long score: %11$.2f</string>
     <string name="info_button">Show details</string>
     <string name="next">Next</string>
     <string name="hint">Hint</string>
@@ -55,8 +55,8 @@
     <string name="could_not_import_file">Could not import file: %1$s</string>
     <string name="additional_kanji">Additional kanji</string>
     <string name="jlpt_level_n">JLPT level %1$s</string>
-    <string name="hiragana_title">Hiragana</string>
-    <string name="katakana_title">Katakana</string>
-    <string name="kanji_title">Kanji</string>
+    <string name="hiragana_title" translatable="false">Hiragana</string>
+    <string name="katakana_title" translatable="false">Katakana</string>
+    <string name="kanji_title" translatable="false">Kanji</string>
     <string name="word_title">Vocabulary</string>
 </resources>
