@@ -42,7 +42,8 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     private var currentStroke = 0
     private var missCount = 0
 
-    override val testType = TestType.KANJI_WRITING
+    override val testType
+        get() = intent.extras!!.getSerializable("test_type") as TestType
 
     private lateinit var testLayout: TestLayout
 

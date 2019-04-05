@@ -47,7 +47,7 @@ val Item.similarities: List<Item>
 fun Item.getQuestionText(testType: TestType): String =
         when (testType) {
             TestType.HIRAGANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI -> (contents as Kana).kana
-            TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
+            TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA, TestType.HIRAGANA_WRITING, TestType.KATAKANA_WRITING -> (contents as Kana).romaji
 
             TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> (contents as Kanji).kanji
             TestType.READING_TO_KANJI -> (contents as Kanji).readingsText
@@ -72,7 +72,8 @@ fun Item.getAnswerText(testType: TestType): String =
             TestType.WORD_TO_READING -> (contents as Word).reading
             TestType.WORD_TO_MEANING -> (contents as Word).meaningsText
             TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> (contents as Word).word
-            TestType.KANJI_WRITING -> throw RuntimeException("No answer text for kanji writing")
+
+            TestType.KANJI_WRITING, TestType.HIRAGANA_WRITING, TestType.KATAKANA_WRITING -> throw RuntimeException("No answer text for writing test")
         }
 
 val Kanji.readingsText: String

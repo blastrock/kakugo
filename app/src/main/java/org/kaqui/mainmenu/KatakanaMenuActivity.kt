@@ -38,6 +38,11 @@ class KatakanaMenuActivity : AppCompatActivity() {
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
+                        button(R.string.katakana_drawing_quizz) {
+                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_WRITING) }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(8)
+                        }
                         button(R.string.katakana_selection) {
                             setOnClickListener { startActivity<ItemSelectionActivity>("mode" to ItemSelectionActivity.Mode.KATAKANA as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
