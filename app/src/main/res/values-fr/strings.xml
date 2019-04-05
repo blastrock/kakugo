@@ -52,4 +52,6 @@
     <string name="jlpt_level_n">JLPT niveau %1$s</string>
     <string name="search_word_hint">Rechercher un mot&#8230;</string>
     <string name="word_title">Vocabulaire</string>
+    <string name="hiragana_drawing_quizz">Dessin d\'hiragana</string>
+    <string name="katakana_drawing_quizz">Dessin de katakana</string>
 </resources>
