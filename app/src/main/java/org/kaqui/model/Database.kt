@@ -174,7 +174,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         restoreUserData(database, dump)
     }
 
-    fun replaceKanjis(dictDb: String) {
+    fun replaceDict(dictDb: String) {
         writableDatabase.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
         writableDatabase.beginTransaction()
         try {
@@ -207,19 +207,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                             + "SELECT id_kanji1, id_kanji2 "
                             + "FROM dict.kanjis_composition "
             )
-            restoreUserData(dump)
-            writableDatabase.setTransactionSuccessful()
-        } finally {
-            writableDatabase.endTransaction()
-            writableDatabase.execSQL("DETACH DATABASE dict")
-        }
-    }
 
-    fun replaceWords(dictDb: String) {
-        writableDatabase.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
-        writableDatabase.beginTransaction()
-        try {
-            val dump = dumpUserData()
             writableDatabase.delete(WORDS_TABLE_NAME, null, null)
             writableDatabase.execSQL(
                     "INSERT INTO $WORDS_TABLE_NAME "
@@ -227,6 +215,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                             + "SELECT id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class "
                             + "FROM dict.words"
             )
+
             restoreUserData(dump)
             writableDatabase.setTransactionSuccessful()
         } finally {

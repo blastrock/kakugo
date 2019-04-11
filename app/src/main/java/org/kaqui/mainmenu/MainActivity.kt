@@ -112,8 +112,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
                 }
             }
-            db.replaceKanjis(tmpFile.absolutePath)
-            db.replaceWords(tmpFile.absolutePath)
+            db.replaceDict(tmpFile.absolutePath)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize database", e)
             launch(job) {
