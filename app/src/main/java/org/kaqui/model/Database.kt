@@ -94,8 +94,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
     private fun initKanas(database: SQLiteDatabase, tableName: String, similarKanaTableName: String, kanas: Array<RawKana>, similarKanas: Array<SimilarKana>) {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $tableName ("
-                        + "id_kana INTEGER PRIMARY KEY,"
-                        + "kana TEXT NOT NULL UNIQUE,"
+                        + "id INTEGER PRIMARY KEY NOT NULL,"
                         + "romaji TEXT NOT NULL,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
@@ -104,10 +103,9 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $similarKanaTableName ("
-                        + "id_similar_kana INTEGER PRIMARY KEY,"
-                        + "id_kana INTEGER NOT NULL REFERENCES $tableName(id_kana),"
-                        + "similar_kana INTEGER NOT NULL REFERENCES $tableName(id_kana),"
-                        + "UNIQUE (id_kana, similar_kana)"
+                        + "id_kana1 INTEGER NOT NULL REFERENCES $tableName(id),"
+                        + "id_kana2 INTEGER NOT NULL REFERENCES $tableName(id),"
+                        + "PRIMARY KEY (id_kana1, id_kana2)"
                         + ")")
 
         val kanaCount = database.query(tableName, arrayOf("COUNT(*)"), null, null, null, null, null).use {
@@ -117,7 +115,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         if (kanaCount == 0) {
             for (kana in kanas) {
                 val cv = ContentValues()
-                cv.put("kana", kana.kana)
+                cv.put("id", kana.kana.codePointAt(0))
                 cv.put("romaji", kana.romaji)
                 database.insertOrThrow(tableName, null, cv)
             }
@@ -128,21 +126,15 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         }
         if (similarKanaCount == 0) {
             for (similarKana in similarKanas) {
-                val id1 = database.query(tableName, arrayOf("id_kana"), "kana = ?", arrayOf(similarKana.kana), null, null, null).use {
-                    it.moveToFirst()
-                    it.getInt(0)
-                }
-                val id2 = database.query(tableName, arrayOf("id_kana"), "kana = ?", arrayOf(similarKana.similar), null, null, null).use {
-                    it.moveToFirst()
-                    it.getInt(0)
-                }
+                val id1 = similarKana.kana.codePointAt(0)
+                val id2 = similarKana.similar.codePointAt(0)
 
                 val cv = ContentValues()
-                cv.put("id_kana", id1)
-                cv.put("similar_kana", id2)
+                cv.put("id_kana1", id1)
+                cv.put("id_kana2", id2)
                 database.insertOrThrow(similarKanaTableName, null, cv)
-                cv.put("id_kana", id2)
-                cv.put("similar_kana", id1)
+                cv.put("id_kana1", id2)
+                cv.put("id_kana2", id1)
                 database.insertOrThrow(similarKanaTableName, null, cv)
             }
         }
@@ -225,9 +217,9 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     val hiraganaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id_kana", itemGetter = this::getHiragana)
+        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id", itemGetter = this::getHiragana)
     val katakanaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id_kana", itemGetter = this::getKatakana)
+        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id", itemGetter = this::getKatakana)
     val kanjiView: LearningDbView
         get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
     val composedKanjiView: LearningDbView
@@ -302,22 +294,22 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
 
     private fun getKana(tableName: String, similarKanaTableName: String, id: Int): Item {
         val similarities = mutableListOf<Item>()
-        readableDatabase.query(similarKanaTableName, arrayOf("similar_kana"), "id_kana = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(similarKanaTableName, arrayOf("id_kana2"), "id_kana1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kana("", "", listOf()), 0.0, 0.0, 0, false))
         }
         val contents = Kana("", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
-        readableDatabase.query(tableName, arrayOf("kana", "romaji", "short_score", "long_score", "last_correct", "enabled"), "id_kana = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kana with id $id in $tableName")
             cursor.moveToFirst()
-            contents.kana = cursor.getString(0)
-            contents.romaji = cursor.getString(1)
-            item.shortScore = cursor.getDouble(2)
-            item.longScore = cursor.getDouble(3)
-            item.lastCorrect = cursor.getLong(4)
-            item.enabled = cursor.getInt(5) != 0
+            contents.kana = Character.toChars(id).joinToString()
+            contents.romaji = cursor.getString(0)
+            item.shortScore = cursor.getDouble(1)
+            item.longScore = cursor.getDouble(2)
+            item.lastCorrect = cursor.getLong(3)
+            item.enabled = cursor.getInt(4) != 0
         }
         return item
     }
@@ -693,14 +685,14 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
 
         private fun dumpUserData(database: SQLiteDatabase): Dump {
             val hiraganas = mutableListOf<DumpRow>()
-            database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+            database.query(HIRAGANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    hiraganas.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
             val katakanas = mutableListOf<DumpRow>()
-            database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+            database.query(KATAKANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                    katakanas.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
             }
             val kanjis = mutableListOf<DumpRow>()
             database.query(KANJIS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
@@ -734,7 +726,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        database.update(HIRAGANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.item))
+                        database.update(HIRAGANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
                     }
                 }
                 run {
@@ -744,7 +736,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        database.update(KATAKANAS_TABLE_NAME, cv, "kana = ?", arrayOf(row.item))
+                        database.update(KATAKANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
                     }
                 }
                 run {
