@@ -87,15 +87,15 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         + "UNIQUE(item, reading)"
                         + ")")
 
-        initKanas(database, HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, getHiraganas(), getSimilarHiraganas())
-        initKanas(database, KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, getKatakanas(), getSimilarKatakanas())
+        createKanaTable(database, HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME)
+        createKanaTable(database, KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME)
     }
 
-    private fun initKanas(database: SQLiteDatabase, tableName: String, similarKanaTableName: String, kanas: Array<RawKana>, similarKanas: Array<SimilarKana>) {
+    private fun createKanaTable(database: SQLiteDatabase, tableName: String, similarKanaTableName: String) {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $tableName ("
                         + "id INTEGER PRIMARY KEY NOT NULL,"
-                        + "romaji TEXT NOT NULL,"
+                        + "romaji TEXT NOT NULL DEFAULT '',"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
@@ -107,38 +107,6 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         + "id_kana2 INTEGER NOT NULL REFERENCES $tableName(id),"
                         + "PRIMARY KEY (id_kana1, id_kana2)"
                         + ")")
-
-        val kanaCount = database.query(tableName, arrayOf("COUNT(*)"), null, null, null, null, null).use {
-            it.moveToFirst()
-            it.getInt(0)
-        }
-        if (kanaCount == 0) {
-            for (kana in kanas) {
-                val cv = ContentValues()
-                cv.put("id", kana.kana.codePointAt(0))
-                cv.put("romaji", kana.romaji)
-                database.insertOrThrow(tableName, null, cv)
-            }
-        }
-        val similarKanaCount = database.query(similarKanaTableName, arrayOf("COUNT(*)"), null, null, null, null, null).use {
-            it.moveToFirst()
-            it.getInt(0)
-        }
-        if (similarKanaCount == 0) {
-            for (similarKana in similarKanas) {
-                val id1 = similarKana.kana.codePointAt(0)
-                val id2 = similarKana.similar.codePointAt(0)
-
-                val cv = ContentValues()
-                cv.put("id_kana1", id1)
-                cv.put("id_kana2", id2)
-                database.insertOrThrow(similarKanaTableName, null, cv)
-                cv.put("id_kana1", id2)
-                cv.put("id_kana2", id1)
-                database.insertOrThrow(similarKanaTableName, null, cv)
-            }
-        }
-
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -157,10 +125,10 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         database.execSQL("DROP TABLE IF EXISTS $KANJIS_SELECTION_TABLE_NAME")
         database.execSQL("DROP TABLE IF EXISTS $KANJIS_COMPOSITION_TABLE_NAME")
         database.execSQL("DROP TABLE IF EXISTS $KANJIS_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS hiraganas")
-        database.execSQL("DROP TABLE IF EXISTS similar_hiraganas")
-        database.execSQL("DROP TABLE IF EXISTS katakanas")
-        database.execSQL("DROP TABLE IF EXISTS similar_katakanas")
+        database.execSQL("DROP TABLE IF EXISTS $HIRAGANAS_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS $SIMILAR_HIRAGANAS_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS $KATAKANAS_TABLE_NAME")
+        database.execSQL("DROP TABLE IF EXISTS $SIMILAR_KATAKANAS_TABLE_NAME")
         database.execSQL("DROP TABLE IF EXISTS $WORDS_TABLE_NAME")
         onCreate(database)
         restoreUserData(database, dump)
@@ -171,6 +139,10 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         writableDatabase.beginTransaction()
         try {
             val dump = dumpUserData()
+
+            replaceKanas(HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME)
+            replaceKanas(KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME)
+
             writableDatabase.delete(SIMILARITIES_TABLE_NAME, null, null)
             writableDatabase.delete(STROKES_TABLE_NAME, null, null)
             writableDatabase.delete(KANJIS_COMPOSITION_TABLE_NAME, null, null)
@@ -214,6 +186,24 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             writableDatabase.endTransaction()
             writableDatabase.execSQL("DETACH DATABASE dict")
         }
+    }
+
+    private fun replaceKanas(tableName: String, similarKanaTableName: String) {
+        writableDatabase.delete(tableName, null, null)
+        writableDatabase.delete(similarKanaTableName, null, null)
+
+        writableDatabase.execSQL(
+                "INSERT INTO $tableName "
+                        + "(id, romaji) "
+                        + "SELECT id, romaji "
+                        + "FROM dict.$tableName"
+        )
+        writableDatabase.execSQL(
+                "INSERT INTO $similarKanaTableName "
+                        + "(id_kana1, id_kana2) "
+                        + "SELECT id_kana1, id_kana2 "
+                        + "FROM dict.$similarKanaTableName"
+        )
     }
 
     val hiraganaView: LearningDbView
@@ -726,7 +716,10 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        database.update(HIRAGANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
+                        if (database.update(HIRAGANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString())) == 0) {
+                            cv.put("id", row.item.codePointAt(0))
+                            database.insertOrThrow(HIRAGANAS_TABLE_NAME, null, cv)
+                        }
                     }
                 }
                 run {
@@ -736,7 +729,10 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         cv.put("long_score", row.longScore)
                         cv.put("last_correct", row.lastCorrect)
                         cv.put("enabled", if (row.enabled) 1 else 0)
-                        database.update(KATAKANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
+                        if (database.update(KATAKANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString())) == 0) {
+                            cv.put("id", row.item.codePointAt(0))
+                            database.insertOrThrow(KATAKANAS_TABLE_NAME, null, cv)
+                        }
                     }
                 }
                 run {
@@ -748,7 +744,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         cv.put("enabled", if (row.enabled) 1 else 0)
                         if (database.update(KANJIS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString())) == 0) {
                             cv.put("id", row.item.codePointAt(0))
-                            database.insert(KANJIS_TABLE_NAME, null, cv)
+                            database.insertOrThrow(KANJIS_TABLE_NAME, null, cv)
                         }
 
                     }
@@ -764,7 +760,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                             val cv = ContentValues()
                             cv.put("id_selection", selectionId)
                             cv.put("id_kanji", item.codePointAt(0))
-                            database.insert(KANJIS_ITEM_SELECTION_TABLE_NAME, null, cv)
+                            database.insertOrThrow(KANJIS_ITEM_SELECTION_TABLE_NAME, null, cv)
                         }
                     }
                 }
@@ -777,7 +773,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                         cv.put("enabled", if (row.enabled) 1 else 0)
                         if (database.update(WORDS_TABLE_NAME, cv, "item = ?", arrayOf(row.item)) == 0) {
                             cv.put("item", row.item)
-                            database.insert(WORDS_TABLE_NAME, null, cv)
+                            database.insertOrThrow(WORDS_TABLE_NAME, null, cv)
                         }
                     }
                 }
