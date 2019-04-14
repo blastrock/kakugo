@@ -10,7 +10,7 @@ import android.os.Build
 import android.util.Log
 import org.kaqui.data.*
 
-class Database private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DatabaseUpdater.DATABASE_VERSION) {
+class Database private constructor(context: Context, private val database: SQLiteDatabase) {
     private val locale: String by lazy {
         val locale =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -23,32 +23,26 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             "en"
     }
 
-    override fun onCreate(db: SQLiteDatabase?) {
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-    }
-
     val hiraganaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, HIRAGANAS_TABLE_NAME, "id", itemGetter = this::getHiragana)
+        get() = LearningDbView(database, database, HIRAGANAS_TABLE_NAME, "id", itemGetter = this::getHiragana)
     val katakanaView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KATAKANAS_TABLE_NAME, "id", itemGetter = this::getKatakana)
+        get() = LearningDbView(database, database, KATAKANAS_TABLE_NAME, "id", itemGetter = this::getKatakana)
     val kanjiView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+        get() = LearningDbView(database, database, KANJIS_TABLE_NAME, "id", "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
     val composedKanjiView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+        get() = LearningDbView(database, database, KANJIS_TABLE_NAME, "id", filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     fun getKanjiView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, KANJIS_TABLE_NAME, "id", "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+            LearningDbView(database, database, KANJIS_TABLE_NAME, "id", "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     val wordView: LearningDbView
-        get() = LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", itemGetter = this::getWord, itemSearcher = this::searchWord)
+        get() = LearningDbView(database, database, WORDS_TABLE_NAME, "id", itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(readableDatabase, writableDatabase, WORDS_TABLE_NAME, "id", "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
+            LearningDbView(database, database, WORDS_TABLE_NAME, "id", "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
-        readableDatabase.rawQuery("""
+        database.rawQuery("""
             SELECT c3.id_kanji2
             FROM $KANJIS_COMPOSITION_TABLE_NAME c1
             JOIN $KANJIS_COMPOSITION_TABLE_NAME c2 ON c1.id_kanji2 = c2.id_kanji2
@@ -75,7 +69,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                     text.codePointAt(0).toString()
                 else
                     ""
-        readableDatabase.rawQuery(
+        database.rawQuery(
                 """SELECT id
                 FROM $KANJIS_TABLE_NAME
                 WHERE id_kanji = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR  (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?) AND radical = 0""",
@@ -89,7 +83,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     private fun searchWord(text: String): List<Int> {
-        readableDatabase.rawQuery(
+        database.rawQuery(
                 """SELECT id
                 FROM $WORDS_TABLE_NAME
                 WHERE item LIKE ? OR reading LIKE ? OR (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?)""",
@@ -107,13 +101,13 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
 
     private fun getKana(tableName: String, similarKanaTableName: String, id: Int): Item {
         val similarities = mutableListOf<Item>()
-        readableDatabase.query(similarKanaTableName, arrayOf("id_kana2"), "id_kana1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(similarKanaTableName, arrayOf("id_kana2"), "id_kana1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf()), 0.0, 0.0, 0, false))
         }
         val contents = Kana("", "", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
-        readableDatabase.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kana with id $id in $tableName")
             cursor.moveToFirst()
@@ -130,7 +124,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
 
     fun getKanji(id: Int): Item {
         val strokes = mutableListOf<Path>()
-        readableDatabase.query(STROKES_TABLE_NAME, arrayOf("path"), "id_kanji = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
+        database.query(STROKES_TABLE_NAME, arrayOf("path"), "id_kanji = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
             val PathParser = Class.forName("android.support.v4.graphics.PathParser")
             val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
             while (cursor.moveToNext()) {
@@ -138,18 +132,18 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             }
         }
         val similarities = mutableListOf<Item>()
-        readableDatabase.query(SIMILARITIES_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(SIMILARITIES_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
         val parts = mutableListOf<Item>()
-        readableDatabase.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 parts.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
         val contents = Kanji("", listOf(), listOf(), listOf(), strokes, similarities, parts, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
-        readableDatabase.query(KANJIS_TABLE_NAME,
+        database.query(KANJIS_TABLE_NAME,
                 arrayOf("jlpt_level", "short_score", "long_score", "last_correct", "enabled", "on_readings", "kun_readings", "meanings_$locale", "meanings_en"),
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
@@ -174,11 +168,11 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     fun getEnabledWholeKanjiRatio(): Float {
-        val wholeKanjis = readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1 AND part_count = 1", null, null, null, null).use { cursor ->
+        val wholeKanjis = database.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1 AND part_count = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             cursor.getInt(0)
         }
-        val enabledKanjis = readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1", null, null, null, null).use { cursor ->
+        val enabledKanjis = database.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             cursor.getInt(0)
         }
@@ -190,7 +184,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         val contents = Word("", "", listOf(), listOf())
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
-        readableDatabase.query(WORDS_TABLE_NAME,
+        database.query(WORDS_TABLE_NAME,
                 arrayOf("item", "reading", "meanings_$locale", "short_score", "long_score", "last_correct", "enabled", "similarity_class", "meanings_en"),
                 "id = ?", arrayOf(id.toString()),
                 null, null, null).use { cursor ->
@@ -211,7 +205,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             similarityClass = cursor.getInt(7)
         }
         val similarWords = mutableListOf<Item>()
-        readableDatabase.query(WORDS_TABLE_NAME, arrayOf("id"),
+        database.query(WORDS_TABLE_NAME, arrayOf("id"),
                 "similarity_class = ? AND id <> ?", arrayOf(similarityClass.toString(), id.toString()),
                 null, null, "RANDOM()", "20").use { cursor ->
             while (cursor.moveToNext())
@@ -222,30 +216,30 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     fun setSelection(kanjis: String) {
-        writableDatabase.beginTransaction()
+        database.beginTransaction()
         try {
             val cv = ContentValues()
             cv.put("enabled", false)
-            writableDatabase.update(KANJIS_TABLE_NAME, cv, null, null)
+            database.update(KANJIS_TABLE_NAME, cv, null, null)
             cv.put("enabled", true)
             for (i in 0..kanjis.codePointCount(0, kanjis.length)) {
-                writableDatabase.update(KANJIS_TABLE_NAME, cv, "item = ?", arrayOf(kanjis.codePointAt(i).toString()))
+                database.update(KANJIS_TABLE_NAME, cv, "item = ?", arrayOf(kanjis.codePointAt(i).toString()))
             }
-            writableDatabase.setTransactionSuccessful()
+            database.setTransactionSuccessful()
         } finally {
-            writableDatabase.endTransaction()
+            database.endTransaction()
         }
     }
 
     fun autoSelectWords() {
         val enabledKanjis = HashSet<Char>()
-        readableDatabase.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->
+        database.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
                 enabledKanjis.add(Character.toChars(cursor.getInt(0))[0])
             }
         }
         var allWords =
-                readableDatabase.query(WORDS_TABLE_NAME, arrayOf("id, item"), null, null, null, null, null).use { cursor ->
+                database.query(WORDS_TABLE_NAME, arrayOf("id, item"), null, null, null, null, null).use { cursor ->
                     val ret = mutableListOf<Pair<Long, String>>()
                     while (cursor.moveToNext()) {
                         ret.add(Pair(cursor.getLong(0), cursor.getString(1)))
@@ -255,18 +249,18 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         allWords = allWords.map { Pair(it.first, it.second.filter { isKanji(it) }) }
         allWords = allWords.filter { it.second.all { it in enabledKanjis } }
 
-        writableDatabase.beginTransaction()
+        database.beginTransaction()
         try {
             val cv = ContentValues()
             cv.put("enabled", false)
-            writableDatabase.update(WORDS_TABLE_NAME, cv, null, null)
+            database.update(WORDS_TABLE_NAME, cv, null, null)
             cv.put("enabled", true)
             for (word in allWords) {
-                writableDatabase.update(WORDS_TABLE_NAME, cv, "id = ?", arrayOf(word.first.toString()))
+                database.update(WORDS_TABLE_NAME, cv, "id = ?", arrayOf(word.first.toString()))
             }
-            writableDatabase.setTransactionSuccessful()
+            database.setTransactionSuccessful()
         } finally {
-            writableDatabase.endTransaction()
+            database.endTransaction()
         }
     }
 
@@ -277,7 +271,7 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
 
     fun listKanjiSelections(): List<KanjiSelection> {
         val out = mutableListOf<KanjiSelection>()
-        readableDatabase.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection", "name"), null, null, null, null, null).use { cursor ->
+        database.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection", "name"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 out.add(KanjiSelection(cursor.getLong(0), cursor.getString(1)))
         }
@@ -285,37 +279,37 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     fun saveKanjiSelectionTo(name: String) {
-        writableDatabase.beginTransaction()
+        database.beginTransaction()
         try {
-            val idSelection = readableDatabase.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
+            val idSelection = database.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
                 if (cursor.count == 0) {
                     val cv = ContentValues()
                     cv.put("name", name)
-                    return@use writableDatabase.insert(KANJIS_SELECTION_TABLE_NAME, null, cv)
+                    return@use database.insert(KANJIS_SELECTION_TABLE_NAME, null, cv)
                 } else {
                     cursor.moveToFirst()
                     return@use cursor.getInt(0)
                 }
             }
-            writableDatabase.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
-            writableDatabase.execSQL("""
+            database.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.execSQL("""
             INSERT INTO $KANJIS_ITEM_SELECTION_TABLE_NAME (id_selection, id_kanji)
             SELECT ?, id FROM $KANJIS_TABLE_NAME WHERE enabled = 1
             """, arrayOf(idSelection.toString()))
-            writableDatabase.setTransactionSuccessful()
+            database.setTransactionSuccessful()
         } finally {
-            writableDatabase.endTransaction()
+            database.endTransaction()
         }
     }
 
     fun restoreKanjiSelectionFrom(idSelection: Long) {
-        writableDatabase.beginTransaction()
+        database.beginTransaction()
         try {
-            writableDatabase.execSQL("""
+            database.execSQL("""
                 UPDATE $KANJIS_TABLE_NAME
                 SET enabled = 0
                 """)
-            writableDatabase.execSQL("""
+            database.execSQL("""
                 UPDATE $KANJIS_TABLE_NAME
                 SET enabled = 1
                 WHERE id IN (
@@ -324,20 +318,20 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
                     WHERE id_selection = ?
                 )
                 """, arrayOf(idSelection.toString()))
-            writableDatabase.setTransactionSuccessful()
+            database.setTransactionSuccessful()
         } finally {
-            writableDatabase.endTransaction()
+            database.endTransaction()
         }
     }
 
     fun deleteKanjiSelection(idSelection: Long) {
-        writableDatabase.beginTransaction()
+        database.beginTransaction()
         try {
-            writableDatabase.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
-            writableDatabase.delete(KANJIS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
-            writableDatabase.setTransactionSuccessful()
+            database.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.delete(KANJIS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.setTransactionSuccessful()
         } finally {
-            writableDatabase.endTransaction()
+            database.endTransaction()
         }
     }
 
@@ -369,8 +363,10 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         }
 
         fun getInstance(context: Context): Database {
-            if (singleton == null)
-                singleton = Database(context)
+            if (singleton == null) {
+                val db = SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE)
+                singleton = Database(context, db)
+            }
             return singleton!!
         }
     }
