@@ -5,8 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import org.kaqui.SrsCalculator
 
 class LearningDbView(
-        private val readableDatabase: SQLiteDatabase,
-        private val writableDatabase: SQLiteDatabase,
+        private val database: SQLiteDatabase,
         private val tableName: String,
         private val idColumnName: String,
         private val filter: String = "1",
@@ -26,7 +25,7 @@ class LearningDbView(
 
     private fun getAllItemsForAnyLevel(): List<Int> {
         val ret = mutableListOf<Int>()
-        readableDatabase.query(tableName, arrayOf(idColumnName), filter, null, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf(idColumnName), filter, null, null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
@@ -36,7 +35,7 @@ class LearningDbView(
 
     private fun getItemsForLevel(level: Int): List<Int> {
         val ret = mutableListOf<Int>()
-        readableDatabase.query(tableName, arrayOf(idColumnName), "$filter AND jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf(idColumnName), "$filter AND jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
@@ -53,30 +52,30 @@ class LearningDbView(
     private fun setAllAnyLevelEnabled(enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(tableName, cv, filter, null)
+        database.update(tableName, cv, filter, null)
     }
 
     private fun setLevelEnabled(level: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(tableName, cv, "$filter AND jlpt_level = ?", arrayOf(level.toString()))
+        database.update(tableName, cv, "$filter AND jlpt_level = ?", arrayOf(level.toString()))
     }
 
     fun setItemEnabled(itemId: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        writableDatabase.update(tableName, cv, "$idColumnName = ?", arrayOf(itemId.toString()))
+        database.update(tableName, cv, "$idColumnName = ?", arrayOf(itemId.toString()))
     }
 
     fun isItemEnabled(id: Int): Boolean {
-        readableDatabase.query(tableName, arrayOf("enabled"), "$idColumnName = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("enabled"), "$idColumnName = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0) != 0
         }
     }
 
     fun getEnabledItemsAndScores(): List<SrsCalculator.ProbabilityData> {
-        readableDatabase.query(tableName, arrayOf(idColumnName, "short_score", "long_score", "last_correct"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf(idColumnName, "short_score", "long_score", "last_correct"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
             val ret = mutableListOf<SrsCalculator.ProbabilityData>()
             while (cursor.moveToNext()) {
                 ret.add(SrsCalculator.ProbabilityData(cursor.getInt(0), cursor.getDouble(1), 0.0, cursor.getDouble(2), 0.0, cursor.getLong(3), 0.0, 0.0))
@@ -86,19 +85,19 @@ class LearningDbView(
     }
 
     fun getLastCorrectFirstDecile(): Int {
-        val count = readableDatabase.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
+        val count = database.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             cursor.getInt(0)
         }
         val decile1 = count / 10
-        readableDatabase.query(tableName, arrayOf("last_correct"), "$filter AND enabled = 1", null, null, null, "last_correct ASC", "$decile1, 1").use { cursor ->
+        database.query(tableName, arrayOf("last_correct"), "$filter AND enabled = 1", null, null, null, "last_correct ASC", "$decile1, 1").use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)
         }
     }
 
     fun getEnabledCount(): Int {
-        readableDatabase.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)
         }
@@ -110,7 +109,7 @@ class LearningDbView(
         cv.put("long_score", scoreUpdate.longScore)
         if (scoreUpdate.lastCorrect != null)
             cv.put("last_correct", scoreUpdate.lastCorrect)
-        writableDatabase.update(tableName, cv, "$idColumnName = ?", arrayOf(scoreUpdate.itemId.toString()))
+        database.update(tableName, cv, "$idColumnName = ?", arrayOf(scoreUpdate.itemId.toString()))
     }
 
 
@@ -132,7 +131,7 @@ class LearningDbView(
                     selectionArgsBase + level.toString()
                 else
                     selectionArgsBase
-        readableDatabase.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->
             cursor.moveToNext()
             return cursor.getInt(0)
         }
@@ -150,7 +149,7 @@ class LearningDbView(
                     selectionArgsBase + level.toString()
                 else
                     selectionArgsBase
-        readableDatabase.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->
             cursor.moveToNext()
             return cursor.getInt(0)
         }
