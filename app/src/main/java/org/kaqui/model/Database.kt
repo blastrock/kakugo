@@ -10,7 +10,7 @@ import android.os.Build
 import android.util.Log
 import org.kaqui.data.*
 
-class Database private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class Database private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DatabaseUpdater.DATABASE_VERSION) {
     private val locale: String by lazy {
         val locale =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -23,187 +23,10 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             "en"
     }
 
-    override fun onCreate(database: SQLiteDatabase) {
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $KANJIS_TABLE_NAME ("
-                        + "id INTEGER PRIMARY KEY NOT NULL,"
-                        + "on_readings TEXT NOT NULL DEFAULT '',"
-                        + "kun_readings TEXT NOT NULL DEFAULT '',"
-                        + "meanings_en TEXT NOT NULL DEFAULT '',"
-                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
-                        + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
-                        + "kaqui_level INTEGER NOT NULL DEFAULT 0,"
-                        + "part_count INTEGER NOT NULL DEFAULT 0,"
-                        + "radical INTEGER NOT NULL DEFAULT 0,"
-                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
-                        + "enabled INTEGER NOT NULL DEFAULT 1"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $STROKES_TABLE_NAME ("
-                        + "id INTEGER PRIMARY KEY,"
-                        + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "ordinal INT NOT NULL,"
-                        + "path TEXT NOT NULL,"
-                        + "UNIQUE(id_kanji, ordinal)"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $KANJIS_COMPOSITION_TABLE_NAME ("
-                        + "id_composition INTEGER PRIMARY KEY,"
-                        + "id_kanji1 INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "id_kanji2 INTEGER NOT NULL REFERENCES kanjis(id)"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $SIMILARITIES_TABLE_NAME ("
-                        + "id_kanji1 INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "id_kanji2 INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "PRIMARY KEY (id_kanji1, id_kanji2)"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $KANJIS_ITEM_SELECTION_TABLE_NAME ("
-                        + "id_selection INTEGER NOT NULL,"
-                        + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "PRIMARY KEY(id_selection, id_kanji)"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $KANJIS_SELECTION_TABLE_NAME ("
-                        + "id_selection INTEGER PRIMARY KEY,"
-                        + "name TEXT NOT NULL"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $WORDS_TABLE_NAME ("
-                        + "id INTEGER PRIMARY KEY,"
-                        + "item TEXT NOT NULL,"
-                        + "reading TEXT NOT NULL DEFAULT '',"
-                        + "meanings_en TEXT NOT NULL DEFAULT '',"
-                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
-                        + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
-                        + "similarity_class INTEGER NOT NULL DEFAULT 0,"
-                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
-                        + "enabled INTEGER NOT NULL DEFAULT 1,"
-                        + "UNIQUE(item, reading)"
-                        + ")")
-
-        createKanaTable(database, HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME)
-        createKanaTable(database, KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME)
+    override fun onCreate(db: SQLiteDatabase?) {
     }
 
-    private fun createKanaTable(database: SQLiteDatabase, tableName: String, similarKanaTableName: String) {
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $tableName ("
-                        + "id INTEGER PRIMARY KEY NOT NULL,"
-                        + "romaji TEXT NOT NULL DEFAULT '',"
-                        + "short_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "long_score FLOAT NOT NULL DEFAULT 0.0,"
-                        + "last_correct INTEGER NOT NULL DEFAULT 0,"
-                        + "enabled INTEGER NOT NULL DEFAULT 1"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $similarKanaTableName ("
-                        + "id_kana1 INTEGER NOT NULL REFERENCES $tableName(id),"
-                        + "id_kana2 INTEGER NOT NULL REFERENCES $tableName(id),"
-                        + "PRIMARY KEY (id_kana1, id_kana2)"
-                        + ")")
-    }
-
-    override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        val dump =
-                when {
-                    oldVersion < 10 -> dumpUserDataV9(database)
-                    oldVersion < 13 -> dumpUserDataV12(database)
-                    oldVersion < 17 -> dumpUserDataV16(database)
-                    else -> dumpUserData(database)
-                }
-        database.execSQL("DROP TABLE IF EXISTS meanings")
-        database.execSQL("DROP TABLE IF EXISTS readings")
-        database.execSQL("DROP TABLE IF EXISTS $SIMILARITIES_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $STROKES_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $KANJIS_ITEM_SELECTION_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $KANJIS_SELECTION_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $KANJIS_COMPOSITION_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $KANJIS_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $HIRAGANAS_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $SIMILAR_HIRAGANAS_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $KATAKANAS_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $SIMILAR_KATAKANAS_TABLE_NAME")
-        database.execSQL("DROP TABLE IF EXISTS $WORDS_TABLE_NAME")
-        onCreate(database)
-        restoreUserData(database, dump)
-    }
-
-    fun replaceDict(dictDb: String) {
-        writableDatabase.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
-        writableDatabase.beginTransaction()
-        try {
-            val dump = dumpUserData()
-
-            replaceKanas(HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME)
-            replaceKanas(KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME)
-
-            writableDatabase.delete(SIMILARITIES_TABLE_NAME, null, null)
-            writableDatabase.delete(STROKES_TABLE_NAME, null, null)
-            writableDatabase.delete(KANJIS_COMPOSITION_TABLE_NAME, null, null)
-            writableDatabase.delete(KANJIS_TABLE_NAME, null, null)
-            writableDatabase.execSQL(
-                    "INSERT INTO $KANJIS_TABLE_NAME "
-                            + "(id, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, kaqui_level, part_count, radical, enabled) "
-                            + "SELECT id, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, kaqui_level, part_count, radical, jlpt_level = 5 "
-                            + "FROM dict.kanjis"
-            )
-            writableDatabase.execSQL(
-                    "INSERT INTO $STROKES_TABLE_NAME "
-                            + "(id, id_kanji, ordinal, path) "
-                            + "SELECT id, id_kanji, ordinal, path "
-                            + "FROM dict.strokes"
-            )
-            writableDatabase.execSQL(
-                    "INSERT INTO $SIMILARITIES_TABLE_NAME "
-                            + "(id_kanji1, id_kanji2) "
-                            + "SELECT id_kanji1, id_kanji2 "
-                            + "FROM dict.kanjis_similars "
-            )
-            writableDatabase.execSQL(
-                    "INSERT INTO $KANJIS_COMPOSITION_TABLE_NAME "
-                            + "(id_kanji1, id_kanji2) "
-                            + "SELECT id_kanji1, id_kanji2 "
-                            + "FROM dict.kanjis_composition "
-            )
-
-            writableDatabase.delete(WORDS_TABLE_NAME, null, null)
-            writableDatabase.execSQL(
-                    "INSERT INTO $WORDS_TABLE_NAME "
-                            + "(id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class) "
-                            + "SELECT id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class "
-                            + "FROM dict.words"
-            )
-
-            restoreUserData(dump)
-            writableDatabase.setTransactionSuccessful()
-        } finally {
-            writableDatabase.endTransaction()
-            writableDatabase.execSQL("DETACH DATABASE dict")
-        }
-    }
-
-    private fun replaceKanas(tableName: String, similarKanaTableName: String) {
-        writableDatabase.delete(tableName, null, null)
-        writableDatabase.delete(similarKanaTableName, null, null)
-
-        writableDatabase.execSQL(
-                "INSERT INTO $tableName "
-                        + "(id, romaji) "
-                        + "SELECT id, romaji "
-                        + "FROM dict.$tableName"
-        )
-        writableDatabase.execSQL(
-                "INSERT INTO $similarKanaTableName "
-                        + "(id_kana1, id_kana2) "
-                        + "SELECT id_kana1, id_kana2 "
-                        + "FROM dict.$similarKanaTableName"
-        )
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
     }
 
     val hiraganaView: LearningDbView
@@ -517,32 +340,25 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         }
     }
 
-    data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>, val words: List<DumpRow>, val kanjiSelections: Map<String, List<String>>)
-    data class DumpRow(val item: String, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
-
-    private fun dumpUserData(): Dump = dumpUserData(readableDatabase)
-    private fun restoreUserData(data: Dump) = restoreUserData(writableDatabase, data)
-
     companion object {
         private const val TAG = "Database"
 
-        private const val DATABASE_NAME = "kanjis"
-        private const val DATABASE_VERSION = 17
+        const val DATABASE_NAME = "kanjis"
 
-        private const val HIRAGANAS_TABLE_NAME = "hiraganas"
-        private const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
+        const val HIRAGANAS_TABLE_NAME = "hiraganas"
+        const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
 
-        private const val KATAKANAS_TABLE_NAME = "katakanas"
-        private const val SIMILAR_KATAKANAS_TABLE_NAME = "similar_katakanas"
+        const val KATAKANAS_TABLE_NAME = "katakanas"
+        const val SIMILAR_KATAKANAS_TABLE_NAME = "similar_katakanas"
 
-        private const val KANJIS_TABLE_NAME = "kanjis"
-        private const val SIMILARITIES_TABLE_NAME = "similarities"
-        private const val KANJIS_SELECTION_TABLE_NAME = "kanjis_selection"
-        private const val KANJIS_ITEM_SELECTION_TABLE_NAME = "kanjis_item_selection"
-        private const val STROKES_TABLE_NAME = "strokes"
-        private const val KANJIS_COMPOSITION_TABLE_NAME = "kanjis_composition"
+        const val KANJIS_TABLE_NAME = "kanjis"
+        const val SIMILARITIES_TABLE_NAME = "similarities"
+        const val KANJIS_SELECTION_TABLE_NAME = "kanjis_selection"
+        const val KANJIS_ITEM_SELECTION_TABLE_NAME = "kanjis_item_selection"
+        const val STROKES_TABLE_NAME = "strokes"
+        const val KANJIS_COMPOSITION_TABLE_NAME = "kanjis_composition"
 
-        private const val WORDS_TABLE_NAME = "words"
+        const val WORDS_TABLE_NAME = "words"
 
         private var singleton: Database? = null
 
@@ -555,232 +371,6 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
             if (singleton == null)
                 singleton = Database(context)
             return singleton!!
-        }
-
-        fun databaseNeedsUpdate(context: Context): Boolean {
-            try {
-                SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READONLY).use { db ->
-                    if (db.version != DATABASE_VERSION)
-                        return true
-
-                    db.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "on_readings <> ''", null, null, null, null).use { cursor ->
-                        cursor.moveToFirst()
-                        if (cursor.getInt(0) == 0)
-                            return true
-                    }
-                    db.query(STROKES_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
-                        cursor.moveToFirst()
-                        if (cursor.getInt(0) == 0)
-                            return true
-                    }
-                    db.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
-                        cursor.moveToFirst()
-                        if (cursor.getInt(0) == 0)
-                            return true
-                    }
-                    db.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "reading <> ''", null, null, null, null).use { cursor ->
-                        cursor.moveToFirst()
-                        if (cursor.getInt(0) == 0)
-                            return true
-                    }
-                    db.query(WORDS_TABLE_NAME, arrayOf("COUNT(*)"), "jlpt_level <> 0", null, null, null, null).use { cursor ->
-                        cursor.moveToFirst()
-                        if (cursor.getInt(0) == 0)
-                            return true
-                    }
-                    return false
-                }
-            } catch (e: SQLiteException) {
-                Log.i(TAG, "Failed to open database", e)
-                return true
-            }
-        }
-
-        private fun dumpUserDataV9(database: SQLiteDatabase): Dump {
-            val hiraganas = mutableListOf<DumpRow>()
-            database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val katakanas = mutableListOf<DumpRow>()
-            database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val kanjis = mutableListOf<DumpRow>()
-            database.query(KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    kanjis.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            return Dump(hiraganas, katakanas, kanjis, listOf(), mapOf())
-        }
-
-        private fun dumpUserDataV12(database: SQLiteDatabase): Dump {
-            val hiraganas = mutableListOf<DumpRow>()
-            database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val katakanas = mutableListOf<DumpRow>()
-            database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val kanjis = mutableListOf<DumpRow>()
-            database.query(KANJIS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    kanjis.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val words = mutableListOf<DumpRow>()
-            database.query(WORDS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            return Dump(hiraganas, katakanas, kanjis, words, mapOf())
-        }
-
-        private fun dumpUserDataV16(database: SQLiteDatabase): Dump {
-            val hiraganas = mutableListOf<DumpRow>()
-            database.query(HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val katakanas = mutableListOf<DumpRow>()
-            database.query(KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val kanjis = mutableListOf<DumpRow>()
-            database.query(KANJIS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    kanjis.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val kanjiSelections = mutableMapOf<String, MutableList<String>>()
-            database.rawQuery("""
-                SELECT ks.name, k.item
-                FROM $KANJIS_SELECTION_TABLE_NAME ks
-                LEFT JOIN $KANJIS_ITEM_SELECTION_TABLE_NAME kis USING(id_selection)
-                LEFT JOIN $KANJIS_TABLE_NAME k ON kis.id_kanji = k.id
-            """, null).use { cursor ->
-                while (cursor.moveToNext())
-                    kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getString(1))
-            }
-            val words = mutableListOf<DumpRow>()
-            database.query(WORDS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            return Dump(hiraganas, katakanas, kanjis, words, kanjiSelections)
-        }
-
-        private fun dumpUserData(database: SQLiteDatabase): Dump {
-            val hiraganas = mutableListOf<DumpRow>()
-            database.query(HIRAGANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    hiraganas.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val katakanas = mutableListOf<DumpRow>()
-            database.query(KATAKANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    katakanas.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val kanjis = mutableListOf<DumpRow>()
-            database.query(KANJIS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    kanjis.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            val kanjiSelections = mutableMapOf<String, MutableList<String>>()
-            database.rawQuery("""
-                SELECT ks.name, kis.id_kanji
-                FROM $KANJIS_SELECTION_TABLE_NAME ks
-                LEFT JOIN $KANJIS_ITEM_SELECTION_TABLE_NAME kis USING(id_selection)
-            """, null).use { cursor ->
-                while (cursor.moveToNext())
-                    kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(Character.toChars(cursor.getInt(1)).joinToString())
-            }
-            val words = mutableListOf<DumpRow>()
-            database.query(WORDS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
-                while (cursor.moveToNext())
-                    words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
-            }
-            return Dump(hiraganas, katakanas, kanjis, words, kanjiSelections)
-        }
-
-        private fun restoreUserData(database: SQLiteDatabase, data: Dump) {
-            database.beginTransaction()
-            try {
-                run {
-                    val cv = ContentValues()
-                    for (row in data.hiraganas) {
-                        cv.put("short_score", row.shortScore)
-                        cv.put("long_score", row.longScore)
-                        cv.put("last_correct", row.lastCorrect)
-                        cv.put("enabled", if (row.enabled) 1 else 0)
-                        if (database.update(HIRAGANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString())) == 0) {
-                            cv.put("id", row.item.codePointAt(0))
-                            database.insertOrThrow(HIRAGANAS_TABLE_NAME, null, cv)
-                        }
-                    }
-                }
-                run {
-                    val cv = ContentValues()
-                    for (row in data.katakanas) {
-                        cv.put("short_score", row.shortScore)
-                        cv.put("long_score", row.longScore)
-                        cv.put("last_correct", row.lastCorrect)
-                        cv.put("enabled", if (row.enabled) 1 else 0)
-                        if (database.update(KATAKANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString())) == 0) {
-                            cv.put("id", row.item.codePointAt(0))
-                            database.insertOrThrow(KATAKANAS_TABLE_NAME, null, cv)
-                        }
-                    }
-                }
-                run {
-                    for (row in data.kanjis) {
-                        val cv = ContentValues()
-                        cv.put("short_score", row.shortScore)
-                        cv.put("long_score", row.longScore)
-                        cv.put("last_correct", row.lastCorrect)
-                        cv.put("enabled", if (row.enabled) 1 else 0)
-                        if (database.update(KANJIS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString())) == 0) {
-                            cv.put("id", row.item.codePointAt(0))
-                            database.insertOrThrow(KANJIS_TABLE_NAME, null, cv)
-                        }
-
-                    }
-                }
-                run {
-                    database.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, null, null)
-                    database.delete(KANJIS_SELECTION_TABLE_NAME, null, null)
-                    for ((selectionName, selectionItems) in data.kanjiSelections) {
-                        val cv = ContentValues()
-                        cv.put("name", selectionName)
-                        val selectionId = database.insert(KANJIS_SELECTION_TABLE_NAME, null, cv)
-                        for (item in selectionItems) {
-                            val cv = ContentValues()
-                            cv.put("id_selection", selectionId)
-                            cv.put("id_kanji", item.codePointAt(0))
-                            database.insertOrThrow(KANJIS_ITEM_SELECTION_TABLE_NAME, null, cv)
-                        }
-                    }
-                }
-                run {
-                    for (row in data.words) {
-                        val cv = ContentValues()
-                        cv.put("short_score", row.shortScore)
-                        cv.put("long_score", row.longScore)
-                        cv.put("last_correct", row.lastCorrect)
-                        cv.put("enabled", if (row.enabled) 1 else 0)
-                        if (database.update(WORDS_TABLE_NAME, cv, "item = ?", arrayOf(row.item)) == 0) {
-                            cv.put("item", row.item)
-                            database.insertOrThrow(WORDS_TABLE_NAME, null, cv)
-                        }
-                    }
-                }
-                database.setTransactionSuccessful()
-            } finally {
-                database.endTransaction()
-            }
         }
     }
 }
