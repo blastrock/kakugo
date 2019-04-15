@@ -100,12 +100,20 @@ class Database private constructor(context: Context, private val database: SQLit
     fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, id)
 
     private fun getKana(tableName: String, similarKanaTableName: String, id: Int): Item {
+        val strokes = mutableListOf<Path>()
+        database.query(HIRAGANA_STROKES_TABLE_NAME, arrayOf("path"), "id_kana = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
+            val PathParser = Class.forName("android.support.v4.graphics.PathParser")
+            val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
+            while (cursor.moveToNext()) {
+                strokes.add(createPathFromPathData.invoke(null, cursor.getString(0)) as Path)
+            }
+        }
         val similarities = mutableListOf<Item>()
         database.query(similarKanaTableName, arrayOf("id_kana2"), "id_kana1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf()), 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf(), listOf()), 0.0, 0.0, 0, false))
         }
-        val contents = Kana("", "", "", similarities)
+        val contents = Kana("", "", "", strokes, similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         database.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
