@@ -341,9 +341,11 @@ class Database private constructor(context: Context, private val database: SQLit
         const val DATABASE_NAME = "kanjis"
 
         const val HIRAGANAS_TABLE_NAME = "hiraganas"
+        const val HIRAGANA_STROKES_TABLE_NAME = "hiragana_strokes"
         const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
 
         const val KATAKANAS_TABLE_NAME = "katakanas"
+        const val KATAKANA_STROKES_TABLE_NAME = "katakana_strokes"
         const val SIMILAR_KATAKANAS_TABLE_NAME = "similar_katakanas"
 
         const val KANJIS_TABLE_NAME = "kanjis"

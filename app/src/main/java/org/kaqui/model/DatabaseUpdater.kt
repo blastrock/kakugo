@@ -74,11 +74,11 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "UNIQUE(item, reading)"
                         + ")")
 
-        createKanaTable(Database.HIRAGANAS_TABLE_NAME, Database.SIMILAR_HIRAGANAS_TABLE_NAME)
-        createKanaTable(Database.KATAKANAS_TABLE_NAME, Database.SIMILAR_KATAKANAS_TABLE_NAME)
+        createKanaTable(Database.HIRAGANAS_TABLE_NAME, Database.HIRAGANA_STROKES_TABLE_NAME, Database.SIMILAR_HIRAGANAS_TABLE_NAME)
+        createKanaTable(Database.KATAKANAS_TABLE_NAME, Database.KATAKANA_STROKES_TABLE_NAME, Database.SIMILAR_KATAKANAS_TABLE_NAME)
     }
 
-    private fun createKanaTable(tableName: String, similarKanaTableName: String) {
+    private fun createKanaTable(tableName: String, strokesTableName: String, similarKanaTableName: String) {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $tableName ("
                         + "id INTEGER PRIMARY KEY NOT NULL,"
@@ -88,6 +88,14 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
+                        + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $strokesTableName ("
+                        + "id INTEGER PRIMARY KEY NOT NULL,"
+                        + "id_kana INTEGER NOT NULL,"
+                        + "ordinal INTEGER NOT NULL,"
+                        + "path TEXT NOT NULL,"
+                        + "UNIQUE (id_kana, ordinal)"
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $similarKanaTableName ("
@@ -138,8 +146,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
     }
 
     private fun replaceDict() {
-        replaceKanas(Database.HIRAGANAS_TABLE_NAME, Database.SIMILAR_HIRAGANAS_TABLE_NAME)
-        replaceKanas(Database.KATAKANAS_TABLE_NAME, Database.SIMILAR_KATAKANAS_TABLE_NAME)
+        replaceKanas(Database.HIRAGANAS_TABLE_NAME, Database.HIRAGANA_STROKES_TABLE_NAME, Database.SIMILAR_HIRAGANAS_TABLE_NAME)
+        replaceKanas(Database.KATAKANAS_TABLE_NAME, Database.KATAKANA_STROKES_TABLE_NAME, Database.SIMILAR_KATAKANAS_TABLE_NAME)
 
         database.delete(Database.SIMILARITIES_TABLE_NAME, null, null)
         database.delete(Database.STROKES_TABLE_NAME, null, null)
@@ -179,7 +187,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         )
     }
 
-    private fun replaceKanas(tableName: String, similarKanaTableName: String) {
+    private fun replaceKanas(tableName: String, strokesTableName: String, similarKanaTableName: String) {
         database.delete(tableName, null, null)
         database.delete(similarKanaTableName, null, null)
 
@@ -188,6 +196,12 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "(id, romaji, unique_romaji) "
                         + "SELECT id, romaji, unique_romaji "
                         + "FROM dict.$tableName"
+        )
+        database.execSQL(
+                "INSERT INTO $strokesTableName "
+                        + "(id, id_kana, ordinal, path) "
+                        + "SELECT id, id_kana, ordinal, path "
+                        + "FROM dict.$strokesTableName"
         )
         database.execSQL(
                 "INSERT INTO $similarKanaTableName "
