@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.text.InputType
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -102,7 +103,9 @@ class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
                     title = getString(R.string.enter_name_of_selection)
                     var name: EditText? = null
                     customView = ctx.UI {
-                        name = editText()
+                        name = editText {
+                            inputType = InputType.TYPE_CLASS_TEXT
+                        }
                      }.view
                     positiveButton(android.R.string.ok) { saveSelection(name!!.text.toString()) }
                     negativeButton(android.R.string.cancel) {}
