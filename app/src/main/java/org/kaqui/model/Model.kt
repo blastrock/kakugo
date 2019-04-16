@@ -18,6 +18,7 @@ data class Kanji(
 data class Kana(
         var kana: String,
         var romaji: String,
+        var uniqueRomaji: String,
         var similarities: List<Item>
 ) : ItemContents()
 

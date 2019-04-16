@@ -109,16 +109,17 @@ class Database private constructor(context: Context) : SQLiteOpenHelper(context,
         val similarities = mutableListOf<Item>()
         readableDatabase.query(similarKanaTableName, arrayOf("id_kana2"), "id_kana1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Item(cursor.getInt(0), Kana("", "", listOf()), 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf()), 0.0, 0.0, 0, false))
         }
-        val contents = Kana("", "", similarities)
+        val contents = Kana("", "", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
-        readableDatabase.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        readableDatabase.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kana with id $id in $tableName")
             cursor.moveToFirst()
             contents.kana = Character.toChars(id).joinToString()
             contents.romaji = cursor.getString(0)
+            contents.uniqueRomaji = cursor.getString(5)
             item.shortScore = cursor.getDouble(1)
             item.longScore = cursor.getDouble(2)
             item.lastCorrect = cursor.getLong(3)
