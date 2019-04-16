@@ -83,6 +83,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                 "CREATE TABLE IF NOT EXISTS $tableName ("
                         + "id INTEGER PRIMARY KEY NOT NULL,"
                         + "romaji TEXT NOT NULL DEFAULT '',"
+                        + "unique_romaji TEXT NOT NULL DEFAULT '',"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
@@ -184,8 +185,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
         database.execSQL(
                 "INSERT INTO $tableName "
-                        + "(id, romaji) "
-                        + "SELECT id, romaji "
+                        + "(id, romaji, unique_romaji) "
+                        + "SELECT id, romaji, unique_romaji "
                         + "FROM dict.$tableName"
         )
         database.execSQL(
