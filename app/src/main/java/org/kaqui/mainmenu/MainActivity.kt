@@ -3,6 +3,7 @@ package org.kaqui.mainmenu
 import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import android.view.Gravity
 import android.widget.TextView
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         job = Job()
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
         verticalLayout {
             gravity = Gravity.CENTER
