@@ -33,6 +33,11 @@ class KatakanaMenuActivity : AppCompatActivity() {
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
+                        button(R.string.katakana_romaji_writing_quizz) {
+                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI_TEXT) }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(8)
+                        }
                         button(R.string.romaji_katakana_quizz) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.ROMAJI_TO_KATAKANA) }
                         }.lparams(width = matchParent, height = wrapContent) {

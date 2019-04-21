@@ -33,6 +33,11 @@ class HiraganaMenuActivity : AppCompatActivity() {
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
+                        button(R.string.hiragana_romaji_writing_quizz) {
+                            setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(8)
+                        }
                         button(R.string.romaji_hiragana_quizz) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.ROMAJI_TO_HIRAGANA) }
                         }.lparams(width = matchParent, height = wrapContent) {

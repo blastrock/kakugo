@@ -53,6 +53,9 @@
             android:name="org.kaqui.TestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
+            android:name="org.kaqui.TestTextActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
             android:name="org.kaqui.WritingTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity

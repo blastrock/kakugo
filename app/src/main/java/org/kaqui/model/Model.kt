@@ -46,7 +46,7 @@ val Item.similarities: List<Item>
 
 fun Item.getQuestionText(testType: TestType): String =
         when (testType) {
-            TestType.HIRAGANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI -> (contents as Kana).kana
+            TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT -> (contents as Kana).kana
             TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
 
             TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> (contents as Kanji).kanji
@@ -62,7 +62,7 @@ fun Item.getQuestionText(testType: TestType): String =
 
 fun Item.getAnswerText(testType: TestType): String =
         when (testType) {
-            TestType.HIRAGANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI -> (contents as Kana).romaji
+            TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT -> (contents as Kana).romaji
             TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).kana
 
             TestType.KANJI_TO_READING -> (contents as Kanji).readingsText
