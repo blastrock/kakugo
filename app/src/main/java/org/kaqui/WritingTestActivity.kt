@@ -37,12 +37,13 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         }
     }
 
-    private val currentKanji get() = testEngine.currentQuestion.contents as Kanji
+    private val currentStrokes get() = testEngine.currentQuestion.strokes
     private lateinit var currentScaledStrokes: List<Path>
     private var currentStroke = 0
     private var missCount = 0
 
-    override val testType = TestType.KANJI_WRITING
+    override val testType
+        get() = intent.extras!!.getSerializable("test_type") as TestType
 
     private lateinit var testLayout: TestLayout
 
@@ -103,7 +104,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
             missCount = savedInstanceState.getInt("missCount")
         }
 
-        if (currentStroke == currentKanji.strokes.size) {
+        if (currentStroke == currentStrokes.size) {
             dontKnowButton.visibility = View.GONE
             hintButton.visibility = View.GONE
         } else {
@@ -137,7 +138,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         val matrix = Matrix()
         matrix.postScale(scale, scale)
 
-        currentScaledStrokes = currentKanji.strokes.map { val path = Path(it); path.transform(matrix); path }
+        currentScaledStrokes = currentStrokes.map { val path = Path(it); path.transform(matrix); path }
 
         drawCanvas.setBoundingBox(RectF(1f, 1f, drawCanvas.width.toFloat() - 1f, drawCanvas.width.toFloat() - 1f))
 
@@ -154,7 +155,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     private val resolution = 4
 
     private fun showHint() {
-        if (currentStroke >= currentKanji.strokes.size)
+        if (currentStroke >= currentStrokes.size)
             return
 
         drawCanvas.setHint(currentScaledStrokes[currentStroke])
@@ -162,7 +163,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     }
 
     private fun onStrokeFinished(drawnPath: Path) {
-        if (currentStroke >= currentKanji.strokes.size)
+        if (currentStroke >= currentStrokes.size)
             return
 
         val targetSize = drawCanvas.width
@@ -173,7 +174,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
         val squaredTolerance = (KANJI_SIZE.toFloat() / resolution).pow(2)
 
-        val currentPath = currentKanji.strokes[currentStroke]
+        val currentPath = currentStrokes[currentStroke]
         val currentPoints = toPoints(currentPath, KANJI_SIZE.toFloat() / resolution)
 
         val drawnPoints = toPoints(drawnPath, KANJI_SIZE.toFloat() / resolution / 4)
@@ -201,7 +202,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
         ++currentStroke
 
-        if (currentStroke == currentKanji.strokes.size)
+        if (currentStroke == currentStrokes.size)
             onAnswerDone(if (missCount == 0) Certainty.SURE else Certainty.DONTKNOW)
     }
 
@@ -210,7 +211,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
         testLayout.overlay.trigger(testLayout.overlay.width / 2, testLayout.overlay.height / 2, ContextCompat.getColor(this, certainty.toColorRes()))
 
-        currentStroke = currentKanji.strokes.size
+        currentStroke = currentStrokes.size
 
         drawCanvas.clearCanvas()
         for (stroke in currentScaledStrokes)

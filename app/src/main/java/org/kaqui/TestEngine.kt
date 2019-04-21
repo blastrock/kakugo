@@ -25,8 +25,8 @@ class TestEngine(
 
         fun getItemView(db: Database, testType: TestType): LearningDbView =
                 when (testType) {
-                    TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_HIRAGANA -> db.hiraganaView
-                    TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_KATAKANA -> db.katakanaView
+                    TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_HIRAGANA, TestType.HIRAGANA_WRITING -> db.hiraganaView
+                    TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_KATAKANA, TestType.KATAKANA_WRITING -> db.katakanaView
 
                     TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING -> db.kanjiView
                     TestType.KANJI_COMPOSITION -> db.composedKanjiView

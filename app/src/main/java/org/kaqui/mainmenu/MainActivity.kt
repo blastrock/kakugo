@@ -3,6 +3,7 @@ package org.kaqui.mainmenu
 import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import android.view.Gravity
 import android.widget.TextView
@@ -15,6 +16,7 @@ import org.jetbrains.anko.*
 import org.kaqui.R
 import org.kaqui.menuWidth
 import org.kaqui.model.Database
+import org.kaqui.model.DatabaseUpdater
 import java.io.File
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.CoroutineContext
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         job = Job()
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
         verticalLayout {
             gravity = Gravity.CENTER
@@ -79,7 +82,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }.lparams(width = menuWidth)
         }
 
-        if (Database.databaseNeedsUpdate(this)) {
+        if (DatabaseUpdater.databaseNeedsUpdate(this)) {
             showDownloadProgressDialog()
             launch(Dispatchers.Default) {
                 initDic()
@@ -102,7 +105,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun initDic() {
         val tmpFile = File.createTempFile("dict", "", cacheDir)
         try {
-            val db = Database.getInstance(this)
             resources.openRawResource(R.raw.dict).use { gzipStream ->
                 GZIPInputStream(gzipStream, 1024).use { textStream ->
                     tmpFile.outputStream().use { outputStream ->
@@ -110,8 +112,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
                 }
             }
-            db.replaceKanjis(tmpFile.absolutePath)
-            db.replaceWords(tmpFile.absolutePath)
+            DatabaseUpdater.upgradeDatabase(this, tmpFile.absolutePath)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize database", e)
             launch(job) {

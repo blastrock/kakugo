@@ -16,9 +16,11 @@
     <string name="hiragana_romaji_quizz">Hiragana to romaji (ひ→hi)</string>
     <string name="hiragana_romaji_writing_quizz">Hiragana to romaji writing (ひ→hi)</string>
     <string name="romaji_hiragana_quizz">Romaji to hiragana (hi→ひ)</string>
+    <string name="hiragana_drawing_quizz">Hiragana drawing</string>
     <string name="katakana_romaji_quizz">Katakana to romaji (ヒ→hi)</string>
     <string name="katakana_romaji_writing_quizz">Katakana to romaji writing (ヒ→hi)</string>
     <string name="romaji_katakana_quizz">Romaji to katakana (hi→ヒ)</string>
+    <string name="katakana_drawing_quizz">Katakana drawing</string>
     <string name="kanji_reading_quizz">Kanji to reading (日→ひ)</string>
     <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
     <string name="kanji_meaning_quizz">Kanji to meaning (日→day)</string>

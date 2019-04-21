@@ -43,6 +43,11 @@ class HiraganaMenuActivity : AppCompatActivity() {
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
+                        button(R.string.hiragana_drawing_quizz) {
+                            setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_WRITING) }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(8)
+                        }
                         button(R.string.hiragana_selection) {
                             setOnClickListener { startActivity<ItemSelectionActivity>("mode" to ItemSelectionActivity.Mode.HIRAGANA as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
