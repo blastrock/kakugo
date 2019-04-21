@@ -25,8 +25,8 @@ class TestEngine(
 
         fun getItemView(db: Database, testType: TestType): LearningDbView =
                 when (testType) {
-                    TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.HIRAGANA_WRITING -> db.hiraganaView
-                    TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA, TestType.KATAKANA_WRITING -> db.katakanaView
+                    TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_HIRAGANA, TestType.HIRAGANA_WRITING -> db.hiraganaView
+                    TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_KATAKANA, TestType.KATAKANA_WRITING -> db.katakanaView
 
                     TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING -> db.kanjiView
                     TestType.KANJI_COMPOSITION -> db.composedKanjiView
@@ -177,6 +177,43 @@ class TestEngine(
             addWrongAnswerToHistory(currentQuestion, currentAnswers[position])
 
             ret = Certainty.DONTKNOW
+        }
+
+        questionCount += 1
+        return ret
+    }
+
+    fun selectAnswer(certainty: Certainty, answerText: String): Certainty {
+        val minLastCorrect = itemView.getLastCorrectFirstDecile()
+        val ret: Certainty
+
+        if (certainty == Certainty.DONTKNOW) {
+            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
+            itemView.applyScoreUpdate(scoreUpdate)
+            currentDebugData?.scoreUpdate = scoreUpdate
+            addUnknownAnswerToHistory(currentQuestion)
+
+            ret = Certainty.DONTKNOW
+        }
+        else {
+            val kana = currentQuestion.contents as? Kana
+            if (kana != null && kana.romaji == answerText.trim().toLowerCase()) {
+                val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
+                itemView.applyScoreUpdate(scoreUpdate)
+                currentDebugData?.scoreUpdate = scoreUpdate
+                addGoodAnswerToHistory(currentQuestion)
+                correctCount += 1
+
+                ret = certainty
+            }
+            else {
+                val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
+                itemView.applyScoreUpdate(scoreUpdate)
+                currentDebugData?.scoreUpdate = scoreUpdate
+                addUnknownAnswerToHistory(currentQuestion)
+
+                ret = Certainty.DONTKNOW
+            }
         }
 
         questionCount += 1

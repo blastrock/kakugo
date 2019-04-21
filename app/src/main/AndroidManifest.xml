@@ -51,6 +51,9 @@
             android:name=".TestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
+            android:name=".TextTestActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
             android:name=".WritingTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
