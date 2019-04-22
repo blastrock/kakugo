@@ -3,12 +3,8 @@ package org.kaqui.model
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteException
-import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Path
 import android.os.Build
-import android.util.Log
-import org.kaqui.data.*
 
 class Database private constructor(context: Context, private val database: SQLiteDatabase) {
     private val locale: String by lazy {
