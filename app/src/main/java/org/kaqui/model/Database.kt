@@ -96,12 +96,12 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
-    fun getHiragana(id: Int): Item = getKana(HIRAGANAS_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, id)
-    fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, id)
+    fun getHiragana(id: Int): Item = getKana(HIRAGANAS_TABLE_NAME, HIRAGANA_STROKES_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, id)
+    fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, KATAKANA_STROKES_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, id)
 
-    private fun getKana(tableName: String, similarKanaTableName: String, id: Int): Item {
+    private fun getKana(tableName: String, strokesTableName: String, similarKanaTableName: String, id: Int): Item {
         val strokes = mutableListOf<Path>()
-        database.query(HIRAGANA_STROKES_TABLE_NAME, arrayOf("path"), "id_kana = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
+        database.query(strokesTableName, arrayOf("path"), "id_kana = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
             val PathParser = Class.forName("android.support.v4.graphics.PathParser")
             val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
             while (cursor.moveToNext()) {
