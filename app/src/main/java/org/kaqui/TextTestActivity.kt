@@ -53,28 +53,28 @@ class TextTestActivity : TestActivityBase() {
                         verticalLayout {
                             linearLayout {
                                 gravity = Gravity.CENTER_VERTICAL
-                                val field = editText().lparams(weight = 1f)
-                                field.gravity = Gravity.CENTER
-                                field.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                                field.setOnEditorActionListener { v, actionId, event ->
-                                    val answer = v.getText().toString()
-                                    if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL) {
-                                        if (answer.isBlank()) {
-                                            false
+                                
+                                val field = editText {
+                                    gravity = Gravity.CENTER
+                                    inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                                    setOnEditorActionListener { v, actionId, event ->
+                                        val answer = v.getText().toString()
+                                        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL) {
+                                            if (answer.isBlank()) {
+                                                false
+                                            }
+                                            else {
+                                                this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
+                                                true
+                                            }
                                         }
                                         else {
-                                            this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
-                                            true
+                                            false
                                         }
                                     }
-                                    else {
-                                        false
-                                    }
-                                }
+                                }.lparams(weight = 1f)
                                 answerField = field
-                            }
 
-                            linearLayout {
                                 button(R.string.maybe) {
                                     setExtTint(R.color.answerMaybe)
                                     setOnClickListener {
@@ -82,7 +82,8 @@ class TextTestActivity : TestActivityBase() {
                                             this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
                                         }
                                     }
-                                }.lparams(weight = 0.5f)
+                                }
+
                                 button(R.string.sure) {
                                     setExtTint(R.color.answerSure)
                                     setOnClickListener {
@@ -90,7 +91,7 @@ class TextTestActivity : TestActivityBase() {
                                             this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
                                         }
                                     }
-                                }.lparams(weight = 0.5f)
+                                }
                             }.lparams(width = matchParent, height = wrapContent)
 
                             linearLayout {
