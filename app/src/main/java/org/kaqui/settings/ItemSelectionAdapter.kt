@@ -1,12 +1,11 @@
 package org.kaqui.settings
 
 import android.content.Context
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.core.content.ContextCompat
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.getBackgroundFromScore
@@ -14,7 +13,7 @@ import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
 import org.kaqui.model.text
 
-class ItemSelectionAdapter(private val view: LearningDbView, private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
+class ItemSelectionAdapter(private val view: LearningDbView, private val context: Context, private val statsFragment: StatsFragment) : androidx.recyclerview.widget.RecyclerView.Adapter<ItemSelectionViewHolder>() {
     private var ids: List<Int> = listOf()
 
     fun setup() {

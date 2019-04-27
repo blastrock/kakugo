@@ -3,16 +3,15 @@ package org.kaqui
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.NestedScrollView
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.kaqui.model.*
 
@@ -31,7 +30,7 @@ class TestActivity : TestActivityBase() {
     override val historyView: LinearLayout get() = testLayout.historyView
     override val sessionScore: TextView get() = testLayout.sessionScore
     override val mainView: View get() = testLayout.mainView
-    override val mainCoordLayout: CoordinatorLayout get() = testLayout.mainCoordinatorLayout
+    override val mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout get() = testLayout.mainCoordinatorLayout
     private lateinit var dontKnowButton: Button
 
     override val testType

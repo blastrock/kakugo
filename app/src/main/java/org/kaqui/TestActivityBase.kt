@@ -5,14 +5,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.NavUtils
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.NestedScrollView
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -21,6 +13,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NavUtils
+import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.kaqui.model.*
 
 abstract class TestActivityBase : AppCompatActivity() {
@@ -40,7 +39,7 @@ abstract class TestActivityBase : AppCompatActivity() {
     protected abstract val historyView: LinearLayout
     protected abstract val sessionScore: TextView
     protected abstract val mainView: View
-    protected abstract val mainCoordLayout: CoordinatorLayout
+    protected abstract val mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

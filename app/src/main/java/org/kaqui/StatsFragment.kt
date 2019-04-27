@@ -1,7 +1,6 @@
 package org.kaqui
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.stats_fragment.*
 import org.kaqui.model.LearningDbView
 
-class StatsFragment : Fragment() {
+class StatsFragment : androidx.fragment.app.Fragment() {
     private var showDisabled: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

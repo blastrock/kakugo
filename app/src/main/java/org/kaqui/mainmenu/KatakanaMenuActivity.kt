@@ -1,9 +1,8 @@
 package org.kaqui.mainmenu
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.Gravity
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.*
 import org.kaqui.R
 import org.kaqui.appTitleImage

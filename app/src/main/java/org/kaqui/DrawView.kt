@@ -4,9 +4,9 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.support.v4.content.ContextCompat
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import kotlin.math.min
 
 class DrawView(context: Context) : View(context) {

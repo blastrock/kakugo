@@ -24,5 +24,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class android.support.v7.widget.SearchView { *; }
--keep class android.support.v4.graphics.PathParser { android.graphics.Path createPathFromPathData(java.lang.String); }
+-keep class androidx.appcompat.widget.SearchView { *; }
+-keep class androidx.core.graphics.PathParser { android.graphics.Path createPathFromPathData(java.lang.String); }

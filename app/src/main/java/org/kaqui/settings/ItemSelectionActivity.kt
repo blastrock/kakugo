@@ -1,10 +1,9 @@
 package org.kaqui.settings
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
@@ -55,7 +54,7 @@ class ItemSelectionActivity : AppCompatActivity() {
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter
-        item_list.layoutManager = LinearLayoutManager(this)
+        item_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         listAdapter.setup()
     }
 

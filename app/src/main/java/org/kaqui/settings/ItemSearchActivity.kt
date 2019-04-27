@@ -1,11 +1,10 @@
 package org.kaqui.settings
 
 import android.os.Bundle
-import android.support.v7.app.ActionBar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.SearchView
 import android.view.ContextThemeWrapper
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.R
 import org.kaqui.StatsFragment
@@ -45,7 +44,7 @@ class ItemSearchActivity : AppCompatActivity() {
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter
-        item_list.layoutManager = LinearLayoutManager(this)
+        item_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
 
         val searchView = SearchView(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Dark))
         searchView.isSubmitButtonEnabled = false

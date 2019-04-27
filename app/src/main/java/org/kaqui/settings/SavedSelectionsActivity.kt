@@ -1,12 +1,12 @@
 package org.kaqui.settings
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.ContextMenu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
+import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.listView
 import org.jetbrains.anko.toast
 import org.kaqui.R

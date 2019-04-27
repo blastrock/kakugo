@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.text.InputType
 import android.util.Log
 import android.view.Menu
@@ -16,6 +15,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.UI

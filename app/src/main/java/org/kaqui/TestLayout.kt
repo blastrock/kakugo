@@ -3,18 +3,16 @@ package org.kaqui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
-import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.NestedScrollView
-import android.support.v4.widget.TextViewCompat
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.widget.NestedScrollView
+import androidx.core.widget.TextViewCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design._CoordinatorLayout
 import org.jetbrains.anko.design.coordinatorLayout
@@ -22,7 +20,7 @@ import org.jetbrains.anko.design.floatingActionButton
 import org.jetbrains.anko.support.v4.nestedScrollView
 
 class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: TestLayout) -> View) {
-    lateinit var mainCoordinatorLayout: CoordinatorLayout
+    lateinit var mainCoordinatorLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
     lateinit var overlay: FadeOverlay
     lateinit var mainView: View
     lateinit var sessionScore: TextView
