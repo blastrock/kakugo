@@ -2,4 +2,5 @@
 <resources>
     <item name="main_activity_fragment" type="id" />
     <item name="history_scroll_view" type="id" />
+    <item name="settings_main_view" type="id" />
 </resources>

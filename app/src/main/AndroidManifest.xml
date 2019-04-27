@@ -7,13 +7,13 @@
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppThemeLight"
-        android:fullBackupContent="@xml/backup_descriptor">
-        <activity android:name="org.kaqui.mainmenu.MainActivity">
+        android:theme="@style/AppThemeLight">
+        <activity android:name=".mainmenu.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,37 +26,35 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="https"
                     android:host="kaqui.org"
-                    android:pathPrefix="/kaquiAppLink" />
+                    android:pathPrefix="/kaquiAppLink"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="org.kaqui.mainmenu.HiraganaMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity"
-            android:label="@string/hiragana_title" />
-        <activity
-            android:name="org.kaqui.mainmenu.KatakanaMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity"
-            android:label="@string/katakana_title" />
-        <activity
-            android:name="org.kaqui.mainmenu.KanjiMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity"
-            android:label="@string/kanji_title" />
-        <activity
-            android:name="org.kaqui.mainmenu.VocabularyMenuActivity"
-            android:parentActivityName=".mainmenu.MainActivity"
-            android:label="@string/word_title" />
-
-        <activity
-            android:name="org.kaqui.TestActivity"
+            android:name=".mainmenu.HiraganaMenuActivity"
+            android:label="@string/hiragana_title"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name="org.kaqui.WritingTestActivity"
+            android:name=".mainmenu.KatakanaMenuActivity"
+            android:label="@string/katakana_title"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name="org.kaqui.CompositionTestActivity"
+            android:name=".mainmenu.KanjiMenuActivity"
+            android:label="@string/kanji_title"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name=".mainmenu.VocabularyMenuActivity"
+            android:label="@string/word_title"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name=".TestActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name=".WritingTestActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name=".CompositionTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.SavedSelectionsActivity"
@@ -69,6 +67,10 @@
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.ItemSelectionActivity"
+            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name=".settings.MainSettingsActivity"
+            android:label="@string/title_activity_main_settings"
             android:parentActivityName=".mainmenu.MainActivity" />
     </application>
 

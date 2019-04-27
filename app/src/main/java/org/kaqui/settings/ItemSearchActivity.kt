@@ -6,12 +6,13 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import kotlinx.android.synthetic.main.item_selection_activity.*
+import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 
-class ItemSearchActivity : AppCompatActivity() {
+class ItemSearchActivity : BaseActivity() {
     private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment

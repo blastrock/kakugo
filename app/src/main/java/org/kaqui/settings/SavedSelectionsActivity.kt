@@ -9,10 +9,11 @@ import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.listView
 import org.jetbrains.anko.toast
+import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.model.Database
 
-class SavedSelectionsActivity: AppCompatActivity() {
+class SavedSelectionsActivity: BaseActivity() {
     private lateinit var listView: ListView
     private var selectedItem: Database.KanjiSelection? = null
 

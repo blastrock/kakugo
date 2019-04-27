@@ -4,15 +4,12 @@ import android.os.Bundle
 import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.*
-import org.kaqui.R
-import org.kaqui.appTitleImage
-import org.kaqui.menuWidth
+import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.JlptSelectionActivity
-import org.kaqui.startTest
 import java.io.Serializable
 
-class KanjiMenuActivity : AppCompatActivity() {
+class KanjiMenuActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

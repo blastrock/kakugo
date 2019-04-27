@@ -5,12 +5,13 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.item_selection_activity.*
+import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 
-class ItemSelectionActivity : AppCompatActivity() {
+class ItemSelectionActivity : BaseActivity() {
     private lateinit var dbView: LearningDbView
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment

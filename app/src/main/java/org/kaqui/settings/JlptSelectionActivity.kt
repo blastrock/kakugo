@@ -22,6 +22,7 @@ import org.jetbrains.anko.UI
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.editText
 import org.jetbrains.anko.toast
+import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Database
@@ -29,7 +30,7 @@ import org.kaqui.model.LearningDbView
 import java.io.Serializable
 import kotlin.coroutines.CoroutineContext
 
-class JlptSelectionActivity : AppCompatActivity(), CoroutineScope {
+class JlptSelectionActivity : BaseActivity(), CoroutineScope {
     private lateinit var dbView: LearningDbView
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode

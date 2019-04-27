@@ -12,15 +12,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
+import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.appTitleImage
 import org.kaqui.menuWidth
 import org.kaqui.model.DatabaseUpdater
+import org.kaqui.settings.MainSettingsActivity
 import java.io.File
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity(), CoroutineScope {
+class MainActivity : BaseActivity(), CoroutineScope {
     companion object {
         private const val TAG = "MainActivity"
     }
@@ -73,6 +75,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         }
                         button(R.string.word) {
                             setOnClickListener { startActivity<VocabularyMenuActivity>() }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(8)
+                        }
+                        button(R.string.settings) {
+                            setOnClickListener { startActivity<MainSettingsActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }

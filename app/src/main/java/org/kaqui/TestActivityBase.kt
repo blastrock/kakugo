@@ -22,7 +22,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.kaqui.model.*
 
-abstract class TestActivityBase : AppCompatActivity() {
+abstract class TestActivityBase : BaseActivity() {
     companion object {
         private const val TAG = "TestActivityBase"
     }

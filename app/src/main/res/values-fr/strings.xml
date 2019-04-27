@@ -54,4 +54,8 @@
     <string name="word_title">Vocabulaire</string>
     <string name="hiragana_drawing_quizz">Dessin d\'hiragana</string>
     <string name="katakana_drawing_quizz">Dessin de katakana</string>
+    <string name="enable_dark_theme">Activer le thème sombre</string>
+    <string name="settings"><font size="30">設定</font>\nPARAMÈTRES</string>
+    <string name="title_activity_main_settings">Paramètres</string>
+    <string name="will_update_later">Pris en compte lorsque vous quittez les paramètres</string>
 </resources>
