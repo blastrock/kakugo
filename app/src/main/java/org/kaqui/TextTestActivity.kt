@@ -20,9 +20,9 @@ import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
 
-class TestTextActivity : TestActivityBase() {
+class TextTestActivity : TestActivityBase() {
     companion object {
-        private const val TAG = "TestTextActivity"
+        private const val TAG = "TextTestActivity"
     }
 
     private lateinit var answerField: EditText
@@ -43,7 +43,7 @@ class TestTextActivity : TestActivityBase() {
         val questionMinSize = 30
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@TestTextActivity, this, questionMinSize) {
+            testLayout.makeMainBlock(this@TextTestActivity, this, questionMinSize) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         view {
@@ -63,7 +63,7 @@ class TestTextActivity : TestActivityBase() {
                                             false
                                         }
                                         else {
-                                            this@TestTextActivity.onTextAnswerClicked(v, Certainty.SURE)
+                                            this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
                                             true
                                         }
                                     }
@@ -79,7 +79,7 @@ class TestTextActivity : TestActivityBase() {
                                     setExtTint(R.color.answerMaybe)
                                     setOnClickListener {
                                         if (!answerField.text.toString().isBlank()) {
-                                            this@TestTextActivity.onTextAnswerClicked(this, Certainty.MAYBE)
+                                            this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
                                         }
                                     }
                                 }.lparams(weight = 0.5f)
@@ -87,7 +87,7 @@ class TestTextActivity : TestActivityBase() {
                                     setExtTint(R.color.answerSure)
                                     setOnClickListener {
                                         if (!answerField.text.toString().isBlank()) {
-                                            this@TestTextActivity.onTextAnswerClicked(this, Certainty.SURE)
+                                            this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
                                         }
                                     }
                                 }.lparams(weight = 0.5f)
@@ -96,7 +96,7 @@ class TestTextActivity : TestActivityBase() {
                             linearLayout {
                                 button(R.string.dont_know) {
                                     setExtTint(R.color.answerDontKnow)
-                                    setOnClickListener { this@TestTextActivity.onTextAnswerClicked(this, Certainty.DONTKNOW) }
+                                    setOnClickListener { this@TextTestActivity.onTextAnswerClicked(this, Certainty.DONTKNOW) }
                                 }.lparams(width = matchParent)
                             }.lparams(width = matchParent, height = wrapContent)
 
