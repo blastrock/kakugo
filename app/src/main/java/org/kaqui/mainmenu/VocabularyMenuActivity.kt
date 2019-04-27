@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.widget.TextView
 import org.jetbrains.anko.*
 import org.kaqui.R
+import org.kaqui.appTitleImage
 import org.kaqui.menuWidth
 import org.kaqui.model.TestType
 import org.kaqui.settings.JlptSelectionActivity
@@ -23,7 +24,7 @@ class VocabularyMenuActivity : AppCompatActivity() {
                 verticalLayout {
                     padding = dip(8)
 
-                    imageView(R.drawable.kakugo).lparams(width = matchParent, height = dip(80)) {
+                    appTitleImage(this@VocabularyMenuActivity).lparams(width = matchParent, height = dip(80)) {
                         margin = dip(8)
                     }
 

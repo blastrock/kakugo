@@ -36,7 +36,7 @@ class DrawView(context: Context) : View(context) {
 
     init {
         mPaint.apply {
-            color = Color.BLACK
+            color = context.getColorFromAttr(android.R.attr.colorForeground)
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
@@ -75,7 +75,7 @@ class DrawView(context: Context) : View(context) {
         animator.setIntValues(0, 255, 0)
         animator.duration = 1000
         animator.addUpdateListener {
-            val color = ContextCompat.getColor(context, android.R.color.holo_green_light)
+            val color = ContextCompat.getColor(context, R.color.drawingHintColor)
             mHintPaint.color = (it.animatedValue as Int shl 24) or (color and 0xffffff)
             invalidate()
         }

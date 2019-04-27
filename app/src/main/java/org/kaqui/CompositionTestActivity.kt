@@ -133,6 +133,7 @@ class CompositionTestActivity : TestActivityBase() {
 
     private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            button.textColor = ContextCompat.getColor(this, R.color.answerTextColor)
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
             button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, color))
         } else {

@@ -41,7 +41,7 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
                     mainView = mainBlock(this@TestLayout).lparams(width = matchParent, height = matchParent)
                     historyScrollView = nestedScrollView {
                         id = R.id.history_scroll_view
-                        backgroundColor = ContextCompat.getColor(this@with, R.color.historyBackground)
+                        backgroundColor = this@with.getColorFromAttr(R.attr.historyBackground)
                         historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
                     }.lparams(width = matchParent, height = matchParent) {
                         val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()

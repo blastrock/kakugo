@@ -1,21 +1,23 @@
 package org.kaqui
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.os.Build
+import android.support.annotation.AttrRes
 import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
+import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.AppCompatTextView
+import android.util.TypedValue
 import android.view.ViewManager
 import android.widget.Button
+import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.dip
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.matchParent
-import org.jetbrains.anko.startActivity
 import org.kaqui.model.*
 import java.util.*
 import kotlin.math.pow
@@ -63,6 +65,7 @@ fun PathMeasure.getPoint(position: Float): PointF {
 
 fun Button.setExtTint(@ColorRes color: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        textColor = ContextCompat.getColor(context, R.color.answerTextColor)
         backgroundTintMode = PorterDuff.Mode.MULTIPLY
         backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, color))
     }
@@ -79,6 +82,15 @@ inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
 inline fun ViewManager.fadeOverlay(init: FadeOverlay.() -> Unit = {}): FadeOverlay {
     return ankoView({ FadeOverlay(it) }, theme = 0, init = init)
 }
+
+inline fun ViewManager.appTitleImage(context: Context) =
+        imageView {
+            val drawable = AppCompatResources.getDrawable(context, R.drawable.kakugo)!!
+            val mWrappedDrawable = DrawableCompat.wrap(drawable)
+            DrawableCompat.setTint(mWrappedDrawable, context.getColorFromAttr(android.R.attr.colorForeground))
+            DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+            setImageDrawable(drawable)
+        }
 
 fun Certainty.toColorRes() =
         when (this) {
@@ -99,8 +111,16 @@ fun startTest(activity: Activity, type: TestType) {
 }
 
 val Activity.menuWidth
-        get() =
-            if (resources.configuration.screenWidthDp >= 500)
-                dip(500)
-            else
-                matchParent
+    get() =
+        if (resources.configuration.screenWidthDp >= 500)
+            dip(500)
+        else
+            matchParent
+
+fun Context.getColorFromAttr(
+        @AttrRes attrColor: Int
+): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(attrColor, typedValue, true)
+    return typedValue.data
+}
