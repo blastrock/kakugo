@@ -18,7 +18,7 @@
     <string name="reading_kanji_quizz">Lecture à kanji (ひ→日)</string>
     <string name="kanji_meaning_quizz">Kanji à sens (日→jour)</string>
     <string name="meaning_kanji_quizz">Sens à kanji (jour→日)</string>
-    <string name="kanji_composition_test">Kanji composition (休→亻+木)</string>
+    <string name="kanji_composition_test">Composition de kanji (休→亻+木)</string>
     <string name="kanji_drawing_quizz">Dessin de kanji</string>
     <string name="word_reading_quizz">Mot à lecture (日の出→ひので)</string>
     <string name="reading_word_quizz">Lecture à mot (ひので→日の出)</string>
