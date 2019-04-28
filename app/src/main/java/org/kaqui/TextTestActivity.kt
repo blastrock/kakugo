@@ -56,9 +56,9 @@ class TextTestActivity : TestActivityBase() {
                                 
                                 val field = editText {
                                     gravity = Gravity.CENTER
-                                    inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                                     setOnEditorActionListener { v, actionId, event ->
-                                        val answer = v.getText().toString()
+                                        val answer = v.text.toString()
                                         if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL) {
                                             if (answer.isBlank()) {
                                                 false
