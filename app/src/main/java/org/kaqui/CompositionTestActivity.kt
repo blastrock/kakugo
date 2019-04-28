@@ -44,6 +44,8 @@ class CompositionTestActivity : TestActivityBase() {
     private lateinit var nextButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val answerCount = getAnswerCount(testType)
         val answerButtons = mutableListOf<ToggleButton>()
 
@@ -77,7 +79,8 @@ class CompositionTestActivity : TestActivityBase() {
 
         this.answerButtons = answerButtons
 
-        super.onCreate(savedInstanceState)
+        setUpGui(savedInstanceState)
+
         var finished = false
         var checkedAnswers: ArrayList<Int>? = null
         if (savedInstanceState != null) {

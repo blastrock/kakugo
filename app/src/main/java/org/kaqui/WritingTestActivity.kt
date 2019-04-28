@@ -62,6 +62,8 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         get() = job + Dispatchers.Main
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         job = Job()
 
         testLayout = TestLayout(this) { testLayout ->
@@ -83,8 +85,6 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
             }
         }
 
-        super.onCreate(savedInstanceState)
-
         drawCanvas.strokeCallback = this::onStrokeFinished
         drawCanvas.sizeChangedCallback = this::onDrawViewSizeChanged
 
@@ -97,6 +97,8 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
                 showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
+
+        setUpGui(savedInstanceState)
 
         if (savedInstanceState != null) {
             currentStroke = savedInstanceState.getInt("currentStroke")

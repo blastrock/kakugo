@@ -41,9 +41,7 @@ abstract class TestActivityBase : BaseActivity() {
     protected abstract val mainView: View
     protected abstract val mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+    protected fun setUpGui(savedInstanceState: Bundle?) {
         statsFragment = StatsFragment.newInstance()
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)

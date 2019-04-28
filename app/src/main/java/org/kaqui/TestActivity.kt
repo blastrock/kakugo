@@ -37,6 +37,8 @@ class TestActivity : TestActivityBase() {
         get() = intent.extras!!.getSerializable("test_type") as TestType
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val answerCount = getAnswerCount(testType)
         val answerTexts = mutableListOf<TextView>()
 
@@ -147,7 +149,7 @@ class TestActivity : TestActivityBase() {
 
         this.answerTexts = answerTexts
 
-        super.onCreate(savedInstanceState)
+        setUpGui(savedInstanceState)
 
         showCurrentQuestion()
     }
