@@ -2,6 +2,7 @@ package org.kaqui
 
 import android.util.Log
 import org.kaqui.model.Certainty
+import org.kaqui.model.GOOD_WEIGHT
 import org.kaqui.model.Item
 import java.util.*
 
@@ -86,7 +87,7 @@ class SrsCalculator {
             if (newShortScore !in 0f..1f) {
                 Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
             }
-            if (newShortScore >= 0.92) {
+            if (newShortScore >= GOOD_WEIGHT) {
                 newShortScore = 1.0
             }
 
