@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
+import org.kaqui.asUnicodeCodePoint
 
 class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: String) {
     data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>, val words: List<DumpRow>, val kanjiSelections: Map<String, List<String>>)
@@ -292,17 +293,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         val hiraganas = mutableListOf<DumpRow>()
         database.query(Database.HIRAGANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                hiraganas.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                hiraganas.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val katakanas = mutableListOf<DumpRow>()
         database.query(Database.KATAKANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                katakanas.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                katakanas.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val kanjis = mutableListOf<DumpRow>()
         database.query(Database.KANJIS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                kanjis.add(DumpRow(Character.toChars(cursor.getInt(0)).joinToString(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+                kanjis.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val kanjiSelections = mutableMapOf<String, MutableList<String>>()
         database.rawQuery("""
@@ -311,7 +312,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                 LEFT JOIN ${Database.KANJIS_ITEM_SELECTION_TABLE_NAME} kis USING(id_selection)
             """, null).use { cursor ->
             while (cursor.moveToNext())
-                kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(Character.toChars(cursor.getInt(1)).joinToString())
+                kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getInt(1).asUnicodeCodePoint())
         }
         val words = mutableListOf<DumpRow>()
         database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->

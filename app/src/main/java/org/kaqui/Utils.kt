@@ -124,3 +124,5 @@ fun Context.getColorFromAttr(
     theme.resolveAttribute(attrColor, typedValue, true)
     return typedValue.data
 }
+
+fun Int.asUnicodeCodePoint() = Character.toChars(this).joinToString("")

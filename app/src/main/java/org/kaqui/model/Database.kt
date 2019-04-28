@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Path
 import android.os.Build
+import org.kaqui.asUnicodeCodePoint
 
 class Database private constructor(context: Context, private val database: SQLiteDatabase) {
     private val locale: String by lazy {
@@ -115,7 +116,7 @@ class Database private constructor(context: Context, private val database: SQLit
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kana with id $id in $tableName")
             cursor.moveToFirst()
-            contents.kana = Character.toChars(id).joinToString()
+            contents.kana = id.asUnicodeCodePoint()
             contents.romaji = cursor.getString(0)
             contents.uniqueRomaji = cursor.getString(5)
             item.shortScore = cursor.getDouble(1)
@@ -154,7 +155,7 @@ class Database private constructor(context: Context, private val database: SQLit
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id $id")
             cursor.moveToFirst()
-            contents.kanji = Character.toChars(id).joinToString()
+            contents.kanji = id.asUnicodeCodePoint()
             contents.on_readings = cursor.getString(5).split('_')
             contents.kun_readings = cursor.getString(6).split('_')
             val localMeaning = cursor.getString(7)
