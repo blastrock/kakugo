@@ -15,9 +15,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.kaqui.model.*
 
-class TestActivity : TestActivityBase() {
+class QuizTestActivity : TestActivityBase() {
     companion object {
-        private const val TAG = "TestActivity"
+        private const val TAG = "QuizTestActivity"
         private const val COLUMNS = 2
     }
 
@@ -47,11 +47,11 @@ class TestActivity : TestActivityBase() {
                     TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> 50
                     TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI -> 10
                     TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> 50
-                    else -> throw RuntimeException("unsupported test type for TestActivity")
+                    else -> throw RuntimeException("unsupported test type for QuizTestActivity")
                 }
 
         testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@TestActivity, this, questionMinSize) {
+            testLayout.makeMainBlock(this@QuizTestActivity, this, questionMinSize) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
                         view {
@@ -130,11 +130,11 @@ class TestActivity : TestActivityBase() {
                                     }.lparams(width = matchParent, height = wrapContent)
                                 }
                             }
-                            else -> throw RuntimeException("unsupported test type for TestActivity")
+                            else -> throw RuntimeException("unsupported test type for QuizTestActivity")
                         }
                         dontKnowButton = button(R.string.dont_know) {
                             setExtTint(R.color.answerDontKnow)
-                            setOnClickListener { this@TestActivity.onAnswerClicked(this, Certainty.DONTKNOW, 0) }
+                            setOnClickListener { this@QuizTestActivity.onAnswerClicked(this, Certainty.DONTKNOW, 0) }
                         }.lparams(width = matchParent)
                     }.lparams(width = matchParent, height = wrapContent)
                 }
