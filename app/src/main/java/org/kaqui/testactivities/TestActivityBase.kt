@@ -19,10 +19,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.kaqui.BaseActivity
-import org.kaqui.R
-import org.kaqui.StatsFragment
-import org.kaqui.TestEngine
+import org.jetbrains.anko.textColor
+import org.kaqui.*
 import org.kaqui.model.*
 
 abstract class TestActivityBase : BaseActivity() {
@@ -183,6 +181,8 @@ abstract class TestActivityBase : BaseActivity() {
             (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         if (style != null)
             itemView.background = ContextCompat.getDrawable(this, style)
+        else
+            itemView.textColor = getColorFromAttr(android.R.attr.colorForeground)
         if (item.contents is Kanji) {
             line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
             itemView.setOnClickListener {
