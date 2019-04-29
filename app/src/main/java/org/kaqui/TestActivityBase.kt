@@ -62,6 +62,10 @@ abstract class TestActivityBase : BaseActivity() {
             prepareNewQuestion()
         else
             testEngine.loadState(savedInstanceState)
+
+        // handle view resize due to keyboard opening and closing
+        val rootView = findViewById<View>(android.R.id.content)
+        rootView.addOnLayoutChangeListener(this::onLayoutChange)
     }
 
     override fun onStart() {
@@ -73,6 +77,14 @@ abstract class TestActivityBase : BaseActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         testEngine.saveState(outState)
         super.onSaveInstanceState(outState)
+    }
+
+    private fun onLayoutChange(v: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
+        if (left == oldLeft && top == oldTop && right == oldRight && bottom == oldBottom)
+            return
+
+        val shownLine = historyView.getChildAt(0) ?: return
+        updateSheetPeekHeight(shownLine)
     }
 
     override fun onBackPressed() {
