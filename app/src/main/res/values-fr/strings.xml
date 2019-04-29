@@ -10,20 +10,29 @@
     <string name="autoselect_from_kanji">Sélectionner automatiquement les mots à partir des kanji sélectionnés</string>
     <string name="autoselect_from_kanji_short">Auto</string>
     <string name="import_selection">Importer une sélection de kanji</string>
-    <string name="hiragana_romaji_quizz">Hiragana à romaji (ひ→hi)</string>
-    <string name="romaji_hiragana_quizz">Romaji à hiragana (hi→ひ)</string>
-    <string name="katakana_romaji_quizz">Katakana à romaji (ヒ→hi)</string>
-    <string name="romaji_katakana_quizz">Romaji à katakana (hi→ヒ)</string>
-    <string name="kanji_reading_quizz">Kanji à lecture (日→ひ)</string>
-    <string name="reading_kanji_quizz">Lecture à kanji (ひ→日)</string>
-    <string name="kanji_meaning_quizz">Kanji à sens (日→jour)</string>
-    <string name="meaning_kanji_quizz">Sens à kanji (jour→日)</string>
+
+    <string name="hiragana_romaji_quiz">Quizz hiragana à romaji (ひ→hi)</string>
+    <string name="romaji_hiragana_quiz">Quizz romaji à hiragana (hi→ひ)</string>
+    <string name="hiragana_romaji_writing">Écriture d\'hiragana en romaji (ひ→hi)</string>
+    <string name="hiragana_drawing">Dessin d\'hiragana</string>
+
+    <string name="katakana_romaji_quiz">Quizz katakana à romaji (ヒ→hi)</string>
+    <string name="romaji_katakana_quiz">Quizz romaji à katakana (hi→ヒ)</string>
+    <string name="katakana_romaji_writing">Écriture de katakana en romaji (ヒ→hi)</string>
+    <string name="katakana_drawing">Dessin de katakana</string>
+
+    <string name="kanji_reading_quiz">Quizz kanji à lecture (日→ひ)</string>
+    <string name="reading_kanji_quiz">Quizz lecture à kanji (ひ→日)</string>
+    <string name="kanji_meaning_quiz">Quizz kanji à sens (日→jour)</string>
+    <string name="meaning_kanji_quiz">Quizz sens à kanji (jour→日)</string>
     <string name="kanji_composition_test">Composition de kanji (休→亻+木)</string>
-    <string name="kanji_drawing_quizz">Dessin de kanji</string>
-    <string name="word_reading_quizz">Mot à lecture (日の出→ひので)</string>
-    <string name="reading_word_quizz">Lecture à mot (ひので→日の出)</string>
-    <string name="word_meaning_quizz">Mot à sens (日の出→lever de soleil)</string>
-    <string name="meaning_word_quizz">Sens à mot (lever de soleil→日の出)</string>
+    <string name="kanji_drawing_quiz">Dessin de kanji</string>
+
+    <string name="word_reading_quiz">Quizz mot à lecture (日の出→ひので)</string>
+    <string name="reading_word_quiz">Quizz lecture à mot (ひので→日の出)</string>
+    <string name="word_meaning_quiz">Quizz mot à sens (日の出→lever de soleil)</string>
+    <string name="meaning_word_quiz">Quizz sens à mot (lever de soleil→日の出)</string>
+
     <string name="sure">Sûr</string>
     <string name="maybe">Pas sûr</string>
     <string name="dont_know">Ne sait pas</string>
@@ -52,8 +61,6 @@
     <string name="jlpt_level_n">JLPT niveau %1$s</string>
     <string name="search_word_hint">Rechercher un mot&#8230;</string>
     <string name="word_title">Vocabulaire</string>
-    <string name="hiragana_drawing_quizz">Dessin d\'hiragana</string>
-    <string name="katakana_drawing_quizz">Dessin de katakana</string>
     <string name="enable_dark_theme">Activer le thème sombre</string>
     <string name="settings"><font size="30">設定</font>\nPARAMÈTRES</string>
     <string name="title_activity_main_settings">Paramètres</string>

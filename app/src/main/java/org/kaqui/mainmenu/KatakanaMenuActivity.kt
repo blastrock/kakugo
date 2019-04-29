@@ -2,7 +2,6 @@ package org.kaqui.mainmenu
 
 import android.os.Bundle
 import android.view.Gravity
-import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
@@ -25,22 +24,22 @@ class KatakanaMenuActivity : BaseActivity() {
                     }
 
                     verticalLayout {
-                        button(R.string.katakana_romaji_quizz) {
+                        button(R.string.katakana_romaji_quiz) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.katakana_romaji_writing_quizz) {
+                        button(R.string.katakana_romaji_writing) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI_TEXT) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.romaji_katakana_quizz) {
+                        button(R.string.romaji_katakana_quiz) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.ROMAJI_TO_KATAKANA) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.katakana_drawing_quizz) {
+                        button(R.string.katakana_drawing) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_WRITING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)

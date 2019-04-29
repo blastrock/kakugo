@@ -14,24 +14,29 @@
     <string name="autoselect_from_kanji">Automatically select words from selected kanji</string>
     <string name="autoselect_from_kanji_short">Auto</string>
     <string name="import_selection">Import kanji selection</string>
-    <string name="hiragana_romaji_quizz">Hiragana to romaji (ひ→hi)</string>
-    <string name="hiragana_romaji_writing_quizz">Hiragana to romaji writing (ひ→hi)</string>
-    <string name="romaji_hiragana_quizz">Romaji to hiragana (hi→ひ)</string>
-    <string name="hiragana_drawing_quizz">Hiragana drawing</string>
-    <string name="katakana_romaji_quizz">Katakana to romaji (ヒ→hi)</string>
-    <string name="katakana_romaji_writing_quizz">Katakana to romaji writing (ヒ→hi)</string>
-    <string name="romaji_katakana_quizz">Romaji to katakana (hi→ヒ)</string>
-    <string name="katakana_drawing_quizz">Katakana drawing</string>
-    <string name="kanji_reading_quizz">Kanji to reading (日→ひ)</string>
-    <string name="reading_kanji_quizz">Reading to kanji (ひ→日)</string>
-    <string name="kanji_meaning_quizz">Kanji to meaning (日→day)</string>
-    <string name="meaning_kanji_quizz">Meaning to kanji (day→日)</string>
+
+    <string name="hiragana_romaji_quiz">Hiragana to romaji quiz (ひ→hi)</string>
+    <string name="romaji_hiragana_quiz">Romaji to hiragana (hi→ひ)</string>
+    <string name="hiragana_romaji_writing">Hiragana to romaji writing (ひ→hi)</string>
+    <string name="hiragana_drawing">Hiragana drawing</string>
+
+    <string name="katakana_romaji_quiz">Katakana to romaji (ヒ→hi)</string>
+    <string name="romaji_katakana_quiz">Romaji to katakana (hi→ヒ)</string>
+    <string name="katakana_romaji_writing">Katakana to romaji writing (ヒ→hi)</string>
+    <string name="katakana_drawing">Katakana drawing</string>
+
+    <string name="kanji_reading_quiz">Kanji to reading (日→ひ)</string>
+    <string name="reading_kanji_quiz">Reading to kanji (ひ→日)</string>
+    <string name="kanji_meaning_quiz">Kanji to meaning (日→day)</string>
+    <string name="meaning_kanji_quiz">Meaning to kanji (day→日)</string>
     <string name="kanji_composition_test">Kanji composition (休→亻+木)</string>
-    <string name="kanji_drawing_quizz">Kanji drawing</string>
-    <string name="word_reading_quizz">Word to reading (日の出→ひので)</string>
-    <string name="reading_word_quizz">Reading to word (ひので→日の出)</string>
-    <string name="word_meaning_quizz">Word to meaning (日の出→sunrise)</string>
-    <string name="meaning_word_quizz">Meaning to word (sunrise→日の出)</string>
+    <string name="kanji_drawing_quiz">Kanji drawing</string>
+
+    <string name="word_reading_quiz">Word to reading (日の出→ひので)</string>
+    <string name="reading_word_quiz">Reading to word (ひので→日の出)</string>
+    <string name="word_meaning_quiz">Word to meaning (日の出→sunrise)</string>
+    <string name="meaning_word_quiz">Meaning to word (sunrise→日の出)</string>
+
     <string name="sure">Sure</string>
     <string name="maybe">Maybe</string>
     <string name="dont_know">Don\'t know</string>

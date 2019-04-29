@@ -2,7 +2,6 @@ package org.kaqui.mainmenu
 
 import android.os.Bundle
 import android.view.Gravity
-import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
@@ -25,22 +24,22 @@ class HiraganaMenuActivity : BaseActivity() {
                     }
 
                     verticalLayout {
-                        button(R.string.hiragana_romaji_quizz) {
+                        button(R.string.hiragana_romaji_quiz) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.hiragana_romaji_writing_quizz) {
+                        button(R.string.hiragana_romaji_writing) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.romaji_hiragana_quizz) {
+                        button(R.string.romaji_hiragana_quiz) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.ROMAJI_TO_HIRAGANA) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.hiragana_drawing_quizz) {
+                        button(R.string.hiragana_drawing) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_WRITING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)

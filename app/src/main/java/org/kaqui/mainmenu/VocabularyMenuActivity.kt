@@ -2,7 +2,6 @@ package org.kaqui.mainmenu
 
 import android.os.Bundle
 import android.view.Gravity
-import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
@@ -25,22 +24,22 @@ class VocabularyMenuActivity : BaseActivity() {
                     }
 
                     verticalLayout {
-                        button(R.string.word_reading_quizz) {
+                        button(R.string.word_reading_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.WORD_TO_READING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.reading_word_quizz) {
+                        button(R.string.reading_word_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.READING_TO_WORD) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.word_meaning_quizz) {
+                        button(R.string.word_meaning_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.WORD_TO_MEANING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.meaning_word_quizz) {
+                        button(R.string.meaning_word_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.MEANING_TO_WORD) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
