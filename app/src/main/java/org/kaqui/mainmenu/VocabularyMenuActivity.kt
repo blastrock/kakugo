@@ -27,27 +27,28 @@ class VocabularyMenuActivity : BaseActivity() {
                         button(R.string.word_reading_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.WORD_TO_READING) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.reading_word_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.READING_TO_WORD) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.word_meaning_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.WORD_TO_MEANING) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.meaning_word_quiz) {
                             setOnClickListener { startTest(this@VocabularyMenuActivity, TestType.MEANING_TO_WORD) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
+                        separator(this@VocabularyMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.word_selection) {
                             setOnClickListener { startActivity<JlptSelectionActivity>("mode" to JlptSelectionActivity.Mode.WORD as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                     }
                 }

@@ -27,27 +27,28 @@ class HiraganaMenuActivity : BaseActivity() {
                         button(R.string.hiragana_romaji_quiz) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.romaji_hiragana_quiz) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.ROMAJI_TO_HIRAGANA) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.hiragana_romaji_writing) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.hiragana_drawing) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_WRITING) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
+                        separator(this@HiraganaMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.hiragana_selection) {
                             setOnClickListener { startActivity<ItemSelectionActivity>("mode" to ItemSelectionActivity.Mode.HIRAGANA as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                     }
                 }

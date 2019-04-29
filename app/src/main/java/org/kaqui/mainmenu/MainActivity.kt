@@ -61,27 +61,27 @@ class MainActivity : BaseActivity(), CoroutineScope {
                         button(R.string.hiragana) {
                             setOnClickListener { startActivity<HiraganaMenuActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.katakana) {
                             setOnClickListener { startActivity<KatakanaMenuActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.kanji) {
                             setOnClickListener { startActivity<KanjiMenuActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.word) {
                             setOnClickListener { startActivity<VocabularyMenuActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                         button(R.string.settings) {
                             setOnClickListener { startActivity<MainSettingsActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(8)
+                            margin = dip(4)
                         }
                     }
                 }
