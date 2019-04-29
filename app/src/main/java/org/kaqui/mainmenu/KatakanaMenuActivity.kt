@@ -29,13 +29,13 @@ class KatakanaMenuActivity : BaseActivity() {
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.katakana_romaji_writing) {
-                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI_TEXT) }
+                        button(R.string.romaji_katakana_quiz) {
+                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.ROMAJI_TO_KATAKANA) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
-                        button(R.string.romaji_katakana_quiz) {
-                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.ROMAJI_TO_KATAKANA) }
+                        button(R.string.katakana_romaji_writing) {
+                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI_TEXT) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(8)
                         }
