@@ -183,43 +183,6 @@ class TestEngine(
         return ret
     }
 
-    fun selectAnswer(certainty: Certainty, answerText: String): Certainty {
-        val minLastCorrect = itemView.getLastCorrectFirstDecile()
-        val ret: Certainty
-
-        if (certainty == Certainty.DONTKNOW) {
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdate)
-            currentDebugData?.scoreUpdate = scoreUpdate
-            addUnknownAnswerToHistory(currentQuestion)
-
-            ret = Certainty.DONTKNOW
-        }
-        else {
-            val kana = currentQuestion.contents as? Kana
-            if (kana != null && kana.romaji == answerText.trim().toLowerCase()) {
-                val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
-                itemView.applyScoreUpdate(scoreUpdate)
-                currentDebugData?.scoreUpdate = scoreUpdate
-                addGoodAnswerToHistory(currentQuestion)
-                correctCount += 1
-
-                ret = certainty
-            }
-            else {
-                val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
-                itemView.applyScoreUpdate(scoreUpdate)
-                currentDebugData?.scoreUpdate = scoreUpdate
-                addUnknownAnswerToHistory(currentQuestion)
-
-                ret = Certainty.DONTKNOW
-            }
-        }
-
-        questionCount += 1
-        return ret
-    }
-
     fun markAnswer(certainty: Certainty) {
         val minLastCorrect = itemView.getLastCorrectFirstDecile()
 

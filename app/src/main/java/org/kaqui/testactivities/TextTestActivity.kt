@@ -16,10 +16,7 @@ import androidx.core.widget.NestedScrollView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.kaqui.R
-import org.kaqui.model.Certainty
-import org.kaqui.model.TestType
-import org.kaqui.model.getQuestionText
-import org.kaqui.model.text
+import org.kaqui.model.*
 import org.kaqui.separator
 import org.kaqui.setExtTint
 import org.kaqui.toColorRes
@@ -43,6 +40,8 @@ class TextTestActivity : TestActivityBase() {
     override val testType
         get() = intent.extras!!.getSerializable("test_type") as TestType
 
+    private val currentKana get() = testEngine.currentQuestion.contents as Kana
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -62,17 +61,10 @@ class TextTestActivity : TestActivityBase() {
                                     gravity = Gravity.CENTER
                                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                                     setOnEditorActionListener { v, actionId, event ->
-                                        val answer = v.text.toString()
-                                        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL) {
-                                            if (answer.isBlank()) {
-                                                false
-                                            } else {
-                                                this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
-                                                true
-                                            }
-                                        } else {
+                                        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
+                                            this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
+                                        else
                                             false
-                                        }
                                     }
                                 }.lparams(weight = 1f)
                                 answerField = field
@@ -80,18 +72,14 @@ class TextTestActivity : TestActivityBase() {
                                 button(R.string.maybe) {
                                     setExtTint(R.color.answerMaybe)
                                     setOnClickListener {
-                                        if (!answerField.text.toString().isBlank()) {
-                                            this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
-                                        }
+                                        this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
                                     }
                                 }
 
                                 button(R.string.sure) {
                                     setExtTint(R.color.answerSure)
                                     setOnClickListener {
-                                        if (!answerField.text.toString().isBlank()) {
-                                            this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
-                                        }
+                                        this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
                                     }
                                 }
                             }.lparams(width = matchParent, height = wrapContent)
@@ -130,9 +118,25 @@ class TextTestActivity : TestActivityBase() {
         answerField.requestFocus()
     }
 
-    private fun onTextAnswerClicked(view: View, certainty: Certainty) {
-        val answer = answerField.text.toString()
-        val result = testEngine.selectAnswer(certainty, answer)
+    private fun onTextAnswerClicked(view: View, certainty: Certainty): Boolean {
+        val result =
+                if (certainty == Certainty.DONTKNOW) {
+                    testEngine.markAnswer(Certainty.DONTKNOW)
+                    Certainty.DONTKNOW
+                } else {
+                    val answer = answerField.text.trim().toString().toLowerCase()
+
+                    if (answer.isBlank())
+                        return false
+
+                    if (answer == currentKana.romaji) {
+                        testEngine.markAnswer(certainty)
+                        certainty
+                    } else {
+                        testEngine.markAnswer(Certainty.DONTKNOW)
+                        Certainty.DONTKNOW
+                    }
+                }
 
         val offsetViewBounds = Rect()
         view.getDrawingRect(offsetViewBounds)
@@ -141,5 +145,7 @@ class TextTestActivity : TestActivityBase() {
 
         testEngine.prepareNewQuestion()
         showCurrentQuestion()
+
+        return true
     }
 }
