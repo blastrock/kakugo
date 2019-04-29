@@ -9,9 +9,9 @@ import java.util.*
 class TestEngine(
         private val db: Database,
         private val testType: TestType,
-        private val goodAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) -> Unit,
-        private val wrongAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) -> Unit,
-        private val unknownAnswerCallback: (correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) -> Unit) {
+        private val goodAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit,
+        private val wrongAnswerCallback: (correct: Item, probabilityData: DebugData?, wrong: Item, refresh: Boolean) -> Unit,
+        private val unknownAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit) {
     private sealed class HistoryLine {
         data class Correct(val itemId: Int) : HistoryLine()
         data class Unknown(val itemId: Int) : HistoryLine()

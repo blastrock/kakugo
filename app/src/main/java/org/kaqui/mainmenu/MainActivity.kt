@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,14 +24,6 @@ import kotlin.coroutines.CoroutineContext
 class MainActivity : BaseActivity(), CoroutineScope {
     companion object {
         private const val TAG = "MainActivity"
-    }
-
-    private enum class Mode {
-        MAIN,
-        HIRAGANA,
-        KATAKANA,
-        KANJI,
-        WORD,
     }
 
     private var initProgress: ProgressDialog? = null

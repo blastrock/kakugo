@@ -62,7 +62,7 @@ class Database private constructor(context: Context, private val database: SQLit
 
     private fun searchKanji(text: String): List<Int> {
         val firstCodePoint =
-                if (!text.isEmpty())
+                if (text.isNotEmpty())
                     text.codePointAt(0).toString()
                 else
                     ""
@@ -371,7 +371,7 @@ class Database private constructor(context: Context, private val database: SQLit
 
         fun getInstance(context: Context): Database {
             if (singleton == null) {
-                val db = SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE)
+                val db = SQLiteDatabase.openDatabase(context.getDatabasePath(DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE)
                 singleton = Database(context, db)
             }
             return singleton!!

@@ -1,7 +1,6 @@
 package org.kaqui.settings
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import org.jetbrains.anko.frameLayout
 import org.jetbrains.anko.linearLayout

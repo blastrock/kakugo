@@ -3,7 +3,6 @@ package org.kaqui.settings
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.BaseActivity

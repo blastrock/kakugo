@@ -15,7 +15,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.UI
@@ -161,7 +160,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
 
     private fun importKanjis() {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
                 return
             }

@@ -1,6 +1,5 @@
 package org.kaqui.testactivities
 
-import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
 import android.text.InputType

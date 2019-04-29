@@ -8,7 +8,6 @@ import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.os.Build
 import android.util.TypedValue
-import android.view.ViewGroup
 import android.view.ViewManager
 import android.widget.Button
 import androidx.annotation.AttrRes

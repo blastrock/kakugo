@@ -6,7 +6,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
-import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.listView
 import org.jetbrains.anko.toast
 import org.kaqui.BaseActivity
