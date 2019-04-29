@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.animation.ValueAnimator
 import android.content.ActivityNotFoundException
@@ -14,12 +14,15 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import org.kaqui.BaseActivity
+import org.kaqui.R
+import org.kaqui.StatsFragment
+import org.kaqui.TestEngine
 import org.kaqui.model.*
 
 abstract class TestActivityBase : BaseActivity() {

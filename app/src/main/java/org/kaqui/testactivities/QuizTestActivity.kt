@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.graphics.Color
 import android.graphics.Rect
@@ -13,7 +13,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
+import org.kaqui.R
 import org.kaqui.model.*
+import org.kaqui.setExtTint
+import org.kaqui.toColorRes
 
 class QuizTestActivity : TestActivityBase() {
     companion object {

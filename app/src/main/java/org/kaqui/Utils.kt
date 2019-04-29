@@ -19,6 +19,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
 import org.kaqui.model.*
+import org.kaqui.testactivities.*
 import java.util.*
 import kotlin.math.pow
 

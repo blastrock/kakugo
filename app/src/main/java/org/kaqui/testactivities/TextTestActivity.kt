@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.graphics.Color
 import android.graphics.Rect
@@ -15,10 +15,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
+import org.kaqui.R
 import org.kaqui.model.Certainty
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
+import org.kaqui.setExtTint
+import org.kaqui.toColorRes
 
 class TextTestActivity : TestActivityBase() {
     companion object {
@@ -55,7 +58,7 @@ class TextTestActivity : TestActivityBase() {
                         verticalLayout {
                             linearLayout {
                                 gravity = Gravity.CENTER_VERTICAL
-                                
+
                                 val field = editText {
                                     gravity = Gravity.CENTER
                                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
@@ -64,13 +67,11 @@ class TextTestActivity : TestActivityBase() {
                                         if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL) {
                                             if (answer.isBlank()) {
                                                 false
-                                            }
-                                            else {
+                                            } else {
                                                 this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
                                                 true
                                             }
-                                        }
-                                        else {
+                                        } else {
                                             false
                                         }
                                     }

@@ -48,16 +48,16 @@
             android:label="@string/word_title"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".QuizTestActivity"
+            android:name=".testactivities.QuizTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".TextTestActivity"
+            android:name=".testactivities.TextTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".WritingTestActivity"
+            android:name=".testactivities.WritingTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".CompositionTestActivity"
+            android:name=".testactivities.CompositionTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.SavedSelectionsActivity"

@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -18,6 +18,7 @@ import org.jetbrains.anko.design._CoordinatorLayout
 import org.jetbrains.anko.design.coordinatorLayout
 import org.jetbrains.anko.design.floatingActionButton
 import org.jetbrains.anko.support.v4.nestedScrollView
+import org.kaqui.*
 
 class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: TestLayout) -> View) {
     lateinit var mainCoordinatorLayout: androidx.coordinatorlayout.widget.CoordinatorLayout

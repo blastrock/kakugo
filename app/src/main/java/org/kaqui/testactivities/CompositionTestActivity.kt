@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
@@ -15,7 +15,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
+import org.kaqui.*
 import org.kaqui.model.*
+import kotlin.collections.shuffle
 
 class CompositionTestActivity : TestActivityBase() {
     companion object {

@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.graphics.*
 import android.os.Bundle
@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.jetbrains.anko.*
+import org.kaqui.*
 import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow

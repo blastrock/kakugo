@@ -1,4 +1,4 @@
-package org.kaqui
+package org.kaqui.testactivities
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -7,6 +7,8 @@ import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
+import org.kaqui.R
+import org.kaqui.getColorFromAttr
 import kotlin.math.min
 
 class DrawView(context: Context) : View(context) {
