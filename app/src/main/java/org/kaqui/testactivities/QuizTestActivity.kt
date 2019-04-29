@@ -15,6 +15,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.kaqui.R
 import org.kaqui.model.*
+import org.kaqui.separator
 import org.kaqui.setExtTint
 import org.kaqui.toColorRes
 
@@ -57,9 +58,7 @@ class QuizTestActivity : TestActivityBase() {
             testLayout.makeMainBlock(this@QuizTestActivity, this, questionMinSize) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
-                        view {
-                            backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                        }.lparams(width = matchParent, height = dip(1))
+                        separator(this@QuizTestActivity)
                         when (testType) {
                             TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
                                 repeat(answerCount) {
@@ -80,9 +79,7 @@ class QuizTestActivity : TestActivityBase() {
                                                 setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                             }
                                         }
-                                        view {
-                                            backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                                        }.lparams(width = matchParent, height = dip(1))
+                                        separator(this@QuizTestActivity)
                                     }
                                 }
                             }
@@ -125,9 +122,7 @@ class QuizTestActivity : TestActivityBase() {
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                     }.lparams(weight = 0f)
                                                 }.lparams(width = matchParent, height = wrapContent)
-                                                view {
-                                                    backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                                                }.lparams(width = matchParent, height = dip(1))
+                                                separator(this@QuizTestActivity)
                                             }.lparams(weight = 1f)
                                         }
                                     }.lparams(width = matchParent, height = wrapContent)

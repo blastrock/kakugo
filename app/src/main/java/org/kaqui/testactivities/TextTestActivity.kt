@@ -20,6 +20,7 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
+import org.kaqui.separator
 import org.kaqui.setExtTint
 import org.kaqui.toColorRes
 
@@ -51,9 +52,7 @@ class TextTestActivity : TestActivityBase() {
             testLayout.makeMainBlock(this@TextTestActivity, this, questionMinSize) {
                 testLayout.wrapInScrollView(this) {
                     verticalLayout {
-                        view {
-                            backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                        }.lparams(width = matchParent, height = dip(1))
+                        separator(this@TextTestActivity)
 
                         verticalLayout {
                             linearLayout {
@@ -104,9 +103,7 @@ class TextTestActivity : TestActivityBase() {
                                 }.lparams(width = matchParent)
                             }.lparams(width = matchParent, height = wrapContent)
 
-                            view {
-                                backgroundColor = Color.rgb(0xcc, 0xcc, 0xcc)
-                            }.lparams(width = matchParent, height = dip(1))
+                            separator(this@TextTestActivity)
                         }
 
                     }.lparams(width = matchParent, height = wrapContent)

@@ -8,6 +8,7 @@ import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.os.Build
 import android.util.TypedValue
+import android.view.ViewGroup
 import android.view.ViewManager
 import android.widget.Button
 import androidx.annotation.AttrRes
@@ -83,6 +84,11 @@ inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
 inline fun ViewManager.fadeOverlay(init: FadeOverlay.() -> Unit = {}): FadeOverlay {
     return ankoView({ FadeOverlay(it) }, theme = 0, init = init)
 }
+
+fun _LinearLayout.separator(context: Context) =
+    view {
+        backgroundColor = ContextCompat.getColor(context, R.color.separator)
+    }.lparams(width = matchParent, height = dip(1))
 
 inline fun ViewManager.appTitleImage(context: Context) =
         imageView {
