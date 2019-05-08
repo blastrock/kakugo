@@ -95,7 +95,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
 
         testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(this, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 

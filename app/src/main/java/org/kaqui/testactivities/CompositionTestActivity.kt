@@ -97,7 +97,7 @@ class CompositionTestActivity : TestActivityBase() {
 
         testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(this, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 

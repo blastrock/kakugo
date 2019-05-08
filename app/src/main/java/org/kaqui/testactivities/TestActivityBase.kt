@@ -196,7 +196,7 @@ abstract class TestActivityBase : BaseActivity() {
         }
         itemView.setOnLongClickListener {
             if (probabilityData != null)
-                showItemProbabilityData(item.text, probabilityData)
+                showItemProbabilityData(this, item.text, probabilityData)
             true
         }
 
@@ -234,26 +234,6 @@ abstract class TestActivityBase : BaseActivity() {
         } catch (e: ActivityNotFoundException) {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${word.word}")))
         }
-    }
-
-    protected fun showItemProbabilityData(item: String, probabilityData: TestEngine.DebugData) {
-        AlertDialog.Builder(this)
-                .setTitle(item)
-                .setMessage(
-                        getString(R.string.debug_info,
-                                probabilityData.probabilityData.daysSinceCorrect,
-                                probabilityData.probabilityData.longScore,
-                                probabilityData.probabilityData.longWeight,
-                                probabilityData.probabilityData.shortScore,
-                                probabilityData.probabilityData.shortWeight,
-                                probabilityData.probaParamsStage2.shortCoefficient,
-                                probabilityData.probaParamsStage2.longCoefficient,
-                                probabilityData.probabilityData.finalProbability,
-                                probabilityData.totalWeight,
-                                probabilityData.scoreUpdate?.shortScore,
-                                probabilityData.scoreUpdate?.longScore))
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
     }
 
     private fun updateSheetPeekHeight(v: View) {

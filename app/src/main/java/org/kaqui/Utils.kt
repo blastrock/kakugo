@@ -12,6 +12,7 @@ import android.view.ViewManager
 import android.widget.Button
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
@@ -133,3 +134,23 @@ fun Context.getColorFromAttr(
 }
 
 fun Int.asUnicodeCodePoint() = Character.toChars(this).joinToString("")
+
+fun showItemProbabilityData(context: Context, item: String, probabilityData: TestEngine.DebugData) {
+    AlertDialog.Builder(context)
+            .setTitle(item)
+            .setMessage(
+                    context.getString(R.string.debug_info,
+                            probabilityData.probabilityData.daysSinceCorrect,
+                            probabilityData.probabilityData.longScore,
+                            probabilityData.probabilityData.longWeight,
+                            probabilityData.probabilityData.shortScore,
+                            probabilityData.probabilityData.shortWeight,
+                            probabilityData.probaParamsStage2.shortCoefficient,
+                            probabilityData.probaParamsStage2.longCoefficient,
+                            probabilityData.probabilityData.finalProbability,
+                            probabilityData.totalWeight,
+                            probabilityData.scoreUpdate?.shortScore,
+                            probabilityData.scoreUpdate?.longScore))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+}

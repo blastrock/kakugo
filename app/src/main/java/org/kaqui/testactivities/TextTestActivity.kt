@@ -14,11 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
-import org.kaqui.R
+import org.kaqui.*
 import org.kaqui.model.*
-import org.kaqui.separator
-import org.kaqui.setExtTint
-import org.kaqui.toColorRes
 
 class TextTestActivity : TestActivityBase() {
     companion object {
@@ -100,7 +97,7 @@ class TextTestActivity : TestActivityBase() {
 
         testLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(this, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
