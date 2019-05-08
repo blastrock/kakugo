@@ -8,8 +8,10 @@ import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.os.Build
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.ViewManager
 import android.widget.Button
+import android.widget.LinearLayout
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
@@ -153,4 +155,16 @@ fun showItemProbabilityData(context: Context, item: String, probabilityData: Tes
                             probabilityData.scoreUpdate?.longScore))
             .setPositiveButton(android.R.string.ok, null)
             .show()
+}
+
+fun wrapInScrollView(subLayout: _LinearLayout, block: _ScrollView.() -> Unit): LinearLayout {
+    with(subLayout) {
+        return verticalLayout {
+            gravity = Gravity.CENTER
+
+            scrollView {
+                block()
+            }.lparams(width = matchParent, height = wrapContent, weight = 0f)
+        }.lparams(width = matchParent, height = matchParent)
+    }
 }

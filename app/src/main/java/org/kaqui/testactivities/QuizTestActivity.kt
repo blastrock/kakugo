@@ -52,7 +52,7 @@ class QuizTestActivity : TestActivityBase() {
 
         testLayout = TestLayout(this) { testLayout ->
             testLayout.makeMainBlock(this@QuizTestActivity, this, questionMinSize) {
-                testLayout.wrapInScrollView(this) {
+                wrapInScrollView(this) {
                     verticalLayout {
                         separator(this@QuizTestActivity)
                         when (testType) {

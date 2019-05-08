@@ -53,7 +53,7 @@ class CompositionTestActivity : TestActivityBase() {
 
         testLayout = TestLayout(this) { testLayout ->
             testLayout.makeMainBlock(this@CompositionTestActivity, this, 10) {
-                testLayout.wrapInScrollView(this) {
+                wrapInScrollView(this) {
                     verticalLayout {
                         repeat(answerCount / COLUMNS) {
                             linearLayout {

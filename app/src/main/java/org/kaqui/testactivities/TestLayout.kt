@@ -126,16 +126,4 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
             }
         }
     }
-
-    fun wrapInScrollView(subLayout: _LinearLayout, block: _ScrollView.() -> Unit): LinearLayout {
-        with(subLayout) {
-            return verticalLayout {
-                gravity = Gravity.CENTER
-
-                scrollView {
-                    block()
-                }.lparams(width = matchParent, height = wrapContent, weight = 0f)
-            }.lparams(width = matchParent, height = matchParent)
-        }
-    }
 }

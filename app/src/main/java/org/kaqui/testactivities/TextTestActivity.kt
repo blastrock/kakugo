@@ -45,7 +45,7 @@ class TextTestActivity : TestActivityBase() {
 
         testLayout = TestLayout(this) { testLayout ->
             testLayout.makeMainBlock(this@TextTestActivity, this, questionMinSize) {
-                testLayout.wrapInScrollView(this) {
+                wrapInScrollView(this) {
                     verticalLayout {
                         separator(this@TextTestActivity)
 
