@@ -35,7 +35,12 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
             frameLayout {
                 mainCoordinatorLayout = coordinatorLayout {
                     verticalLayout {
-                        id = R.id.global_stats
+                        frameLayout {
+                            id = R.id.global_stats
+                        }.lparams(width = matchParent, height = wrapContent)
+                        sessionScore = textView {
+                            textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                        }
                     }.lparams(width = matchParent, height = wrapContent)
                     mainView = mainBlock(this@TestLayout).lparams(width = matchParent, height = matchParent)
                     historyScrollView = nestedScrollView {
@@ -74,56 +79,9 @@ class TestLayout(activity: Activity, mainBlock: _CoordinatorLayout.(testLayout: 
     }
 
     fun <T : ViewManager> makeMainBlock(activity: Activity, subLayout: T, questionMinSize: Int, answersBlock: _LinearLayout.() -> View): LinearLayout {
-        with(subLayout) {
-            return verticalLayout {
-                padding = dip(16)
-
-                sessionScore = textView {
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                }
-                activity.configuration(orientation = Orientation.LANDSCAPE) {
-                    linearLayout {
-                        gravity = Gravity.CENTER
-                        questionText = appCompatTextView {
-                            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, questionMinSize, 200, 10, TypedValue.COMPLEX_UNIT_SP)
-                            textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                            gravity = Gravity.CENTER
-                        }.lparams(width = 0, height = matchParent, weight = 1f) {
-                            bottomMargin = dip(8)
-                        }
-                        if (resources.configuration.screenWidthDp >= 1000) {
-                            linearLayout {
-                                gravity = Gravity.CENTER
-                                this.answersBlock().lparams(width = dip(500 - 16), height = matchParent)
-                            }.lparams(width = 0, height = matchParent, weight = 1f)
-                        } else {
-                            this.answersBlock().lparams(width = 0, height = matchParent, weight = 1f)
-                        }
-                    }.lparams(width = matchParent, height = matchParent)
-                }
-                activity.configuration(orientation = Orientation.PORTRAIT) {
-                    val (weightQuestion, weightAnswers) =
-                            when {
-                                resources.configuration.screenHeightDp < 800 -> Pair(.25f, .75f)
-                                resources.configuration.screenHeightDp < 1000 -> Pair(.4f, .6f)
-                                else -> Pair(.5f, .5f)
-                            }
-                    gravity = Gravity.CENTER
-                    questionText = appCompatTextView {
-                        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, questionMinSize, 200, 2, TypedValue.COMPLEX_UNIT_SP)
-                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                        gravity = Gravity.CENTER
-                    }.lparams(width = matchParent, height = 0, weight = weightQuestion) {
-                        bottomMargin = dip(8)
-                    }
-                    val answerWidth =
-                            if (resources.configuration.screenWidthDp >= 500)
-                                dip(500 - 32)
-                            else
-                                matchParent
-                    this.answersBlock().lparams(width = answerWidth, height = 0, weight = weightAnswers)
-                }
-            }
-        }
+        val tql = TestQuestionLayout()
+        val view = tql.makeMainBlock(activity, subLayout, questionMinSize, answersBlock)
+        questionText = tql.questionText
+        return view
     }
 }

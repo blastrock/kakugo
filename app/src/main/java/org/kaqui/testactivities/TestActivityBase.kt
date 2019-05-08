@@ -67,6 +67,8 @@ abstract class TestActivityBase : BaseActivity() {
         // handle view resize due to keyboard opening and closing
         val rootView = findViewById<View>(android.R.id.content)
         rootView.addOnLayoutChangeListener(this::onLayoutChange)
+
+        updateSessionScore()
     }
 
     override fun onStart() {

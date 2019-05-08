@@ -142,61 +142,28 @@ class TestEngine(
         lastQuestionsIds.add(id)
     }
 
-    fun selectAnswer(certainty: Certainty, position: Int): Certainty {
+    fun markAnswer(certainty: Certainty, wrong: Item? = null) {
         val minLastCorrect = itemView.getLastCorrectFirstDecile()
-        val ret: Certainty
 
         if (certainty == Certainty.DONTKNOW) {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
             itemView.applyScoreUpdate(scoreUpdate)
             currentDebugData?.scoreUpdate = scoreUpdate
-            addUnknownAnswerToHistory(currentQuestion)
-
-            ret = Certainty.DONTKNOW
-        } else if (currentAnswers[position] == currentQuestion ||
-                // also compare answer texts because different answers can have the same readings
-                // like 副 and 福 and we don't want to penalize the user for that
-                currentAnswers[position].getAnswerText(testType) == currentQuestion.getAnswerText(testType) ||
-                // same for question text
-                currentAnswers[position].getQuestionText(testType) == currentQuestion.getQuestionText(testType)) {
-            // correct
+            if (wrong != null)
+                addWrongAnswerToHistory(currentQuestion, wrong)
+            else
+                addUnknownAnswerToHistory(currentQuestion)
+        } else {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
             itemView.applyScoreUpdate(scoreUpdate)
             currentDebugData?.scoreUpdate = scoreUpdate
             addGoodAnswerToHistory(currentQuestion)
             correctCount += 1
-
-            ret = certainty
-        } else {
-            // wrong
-            val scoreUpdateGood = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdateGood)
-            val scoreUpdateBad = SrsCalculator.getScoreUpdate(minLastCorrect, currentAnswers[position], Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdateBad)
-            currentDebugData?.scoreUpdate = scoreUpdateGood
-            addWrongAnswerToHistory(currentQuestion, currentAnswers[position])
-
-            ret = Certainty.DONTKNOW
         }
 
-        questionCount += 1
-        return ret
-    }
-
-    fun markAnswer(certainty: Certainty) {
-        val minLastCorrect = itemView.getLastCorrectFirstDecile()
-
-        if (certainty == Certainty.DONTKNOW) {
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
-            itemView.applyScoreUpdate(scoreUpdate)
-            currentDebugData?.scoreUpdate = scoreUpdate
-            addUnknownAnswerToHistory(currentQuestion)
-        } else {
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
-            itemView.applyScoreUpdate(scoreUpdate)
-            currentDebugData?.scoreUpdate = scoreUpdate
-            addGoodAnswerToHistory(currentQuestion)
-            correctCount += 1
+        if (wrong != null) {
+            val scoreUpdateBad = SrsCalculator.getScoreUpdate(minLastCorrect, wrong, Certainty.DONTKNOW)
+            itemView.applyScoreUpdate(scoreUpdateBad)
         }
 
         questionCount += 1
