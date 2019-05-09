@@ -21,4 +21,10 @@
         app:title="@string/enable_dark_theme"
         app:summary="@string/will_update_later" />
 
+    <SwitchPreferenceCompat
+        app:key="fast_text_input"
+        app:defaultValue="false"
+        app:title="@string/fast_text_input_title"
+        app:summary="@string/fast_text_input_summary" />
+
 </androidx.preference.PreferenceScreen>

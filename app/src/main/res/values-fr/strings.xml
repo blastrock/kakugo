@@ -65,4 +65,7 @@
     <string name="settings"><font size="30">設定</font>\nPARAMÈTRES</string>
     <string name="title_activity_main_settings">Paramètres</string>
     <string name="will_update_later">Pris en compte lorsque vous quittez les paramètres</string>
+
+    <string name="fast_text_input_title">Saisie de texte rapide</string>
+    <string name="fast_text_input_summary">Le texte sera vérifié lors de la saisie. Rapide, mais méfiez-vous des fautes de frappe!</string>
 </resources>

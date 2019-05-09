@@ -2,7 +2,9 @@ package org.kaqui.testactivities
 
 import android.graphics.Rect
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -12,6 +14,7 @@ import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
+import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.kaqui.R
@@ -45,6 +48,7 @@ class TextTestActivity : TestActivityBase() {
         super.onCreate(savedInstanceState)
 
         val questionMinSize = 30
+        val fastTextInput = PreferenceManager.getDefaultSharedPreferences(this@TextTestActivity).getBoolean("fast_text_input", false)
 
         testLayout = TestLayout(this) { testLayout ->
             testLayout.makeMainBlock(this@TextTestActivity, this, questionMinSize) {
@@ -65,20 +69,32 @@ class TextTestActivity : TestActivityBase() {
                                         else
                                             false
                                     }
+
+                                    if (fastTextInput) {
+                                        addTextChangedListener(object : TextWatcher {
+                                            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                                            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                                            override fun afterTextChanged(s: Editable?) {
+                                                answerTextDidChange(s)
+                                            }
+                                        })
+                                    }
                                 }.lparams(weight = 1f)
                                 answerField = field
 
-                                button(R.string.maybe) {
-                                    setExtTint(R.color.answerMaybe)
-                                    setOnClickListener {
-                                        this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
+                                if (!fastTextInput) {
+                                    button(R.string.maybe) {
+                                        setExtTint(R.color.answerMaybe)
+                                        setOnClickListener {
+                                            this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
+                                        }
                                     }
-                                }
 
-                                button(R.string.sure) {
-                                    setExtTint(R.color.answerSure)
-                                    setOnClickListener {
-                                        this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
+                                    button(R.string.sure) {
+                                        setExtTint(R.color.answerSure)
+                                        setOnClickListener {
+                                            this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
+                                        }
                                     }
                                 }
                             }.lparams(width = matchParent, height = wrapContent)
@@ -92,7 +108,6 @@ class TextTestActivity : TestActivityBase() {
 
                             separator(this@TextTestActivity)
                         }
-
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
@@ -136,7 +151,31 @@ class TextTestActivity : TestActivityBase() {
                         Certainty.DONTKNOW
                     }
                 }
+        didAnswer(view, result)
+        return true
+    }
 
+    private fun answerTextDidChange(s: Editable?) {
+        val input = s.toString().toLowerCase()
+        if (input.isEmpty()) {
+            return
+        }
+
+        val romaji = currentKana.romaji.toLowerCase()
+        val result =
+                if (input == romaji) {
+                    testEngine.markAnswer(Certainty.SURE)
+                    Certainty.SURE
+                } else if (romaji.startsWith(input)) {
+                    return
+                } else {
+                    testEngine.markAnswer(Certainty.DONTKNOW)
+                    Certainty.DONTKNOW
+                }
+        didAnswer(answerField, result)
+    }
+
+    private fun didAnswer(view: View, result: Certainty) {
         val offsetViewBounds = Rect()
         view.getDrawingRect(offsetViewBounds)
         testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(view, offsetViewBounds)
@@ -144,7 +183,5 @@ class TextTestActivity : TestActivityBase() {
 
         testEngine.prepareNewQuestion()
         showCurrentQuestion()
-
-        return true
     }
 }

@@ -73,4 +73,7 @@
     <string name="title_activity_main_settings">Settings</string>
     <string name="enable_dark_theme">Enable dark theme</string>
     <string name="will_update_later">Will update when leaving the settings screen</string>
+
+    <string name="fast_text_input_title">Fast text input</string>
+    <string name="fast_text_input_summary">Text will be checked during input. Fast, but beware of typos!</string>
 </resources>
