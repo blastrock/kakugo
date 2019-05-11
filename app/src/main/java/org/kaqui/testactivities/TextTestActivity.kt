@@ -3,6 +3,7 @@ package org.kaqui.testactivities
 import android.graphics.Rect
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.view.Gravity
@@ -22,6 +23,11 @@ import org.kaqui.model.*
 import org.kaqui.separator
 import org.kaqui.setExtTint
 import org.kaqui.toColorRes
+import kotlin.concurrent.schedule
+import java.util.*
+
+const val INPUT_DELAY_ON_RIGHT_ANSWER: Long = 100
+const val INPUT_DELAY_ON_WRONG_ANSWER: Long = 500
 
 class TextTestActivity : TestActivityBase() {
     companion object {
@@ -43,6 +49,7 @@ class TextTestActivity : TestActivityBase() {
         get() = intent.extras!!.getSerializable("test_type") as TestType
 
     private val currentKana get() = testEngine.currentQuestion.contents as Kana
+    private var shouldIgnoreTextInput = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +70,7 @@ class TextTestActivity : TestActivityBase() {
                                 val field = editText {
                                     gravity = Gravity.CENTER
                                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                                    setOnEditorActionListener { v, actionId, event ->
+                                    setOnEditorActionListener { v, actionId, _ ->
                                         if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
                                             this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
                                         else
@@ -76,6 +83,15 @@ class TextTestActivity : TestActivityBase() {
                                             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                                             override fun afterTextChanged(s: Editable?) {
                                                 answerTextDidChange(s)
+                                            }
+                                        })
+
+                                        filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+                                            if (shouldIgnoreTextInput) {
+                                                ""
+                                            }
+                                            else {
+                                                source
                                             }
                                         })
                                     }
@@ -151,7 +167,8 @@ class TextTestActivity : TestActivityBase() {
                         Certainty.DONTKNOW
                     }
                 }
-        didAnswer(view, result)
+        showAnswerAnimation(view, ContextCompat.getColor(this, result.toColorRes()))
+        didAnswer()
         return true
     }
 
@@ -164,23 +181,33 @@ class TextTestActivity : TestActivityBase() {
         val romaji = currentKana.romaji.toLowerCase()
         val result =
                 if (input == romaji) {
-                    testEngine.markAnswer(Certainty.SURE)
                     Certainty.SURE
                 } else if (romaji.startsWith(input)) {
                     return
                 } else {
-                    testEngine.markAnswer(Certainty.DONTKNOW)
                     Certainty.DONTKNOW
                 }
-        didAnswer(answerField, result)
+        testEngine.markAnswer(result)
+
+        shouldIgnoreTextInput = true
+        showAnswerAnimation(answerField, ContextCompat.getColor(this, result.toColorRes()))
+        val delay = if (result == Certainty.DONTKNOW) INPUT_DELAY_ON_WRONG_ANSWER else INPUT_DELAY_ON_RIGHT_ANSWER
+        Timer("NextQuestionPause",false).schedule(delay) {
+            runOnUiThread {
+                shouldIgnoreTextInput = false
+                didAnswer()
+            }
+        }
     }
 
-    private fun didAnswer(view: View, result: Certainty) {
+    private fun showAnswerAnimation(view: View, color: Int) {
         val offsetViewBounds = Rect()
         view.getDrawingRect(offsetViewBounds)
         testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(view, offsetViewBounds)
-        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, result.toColorRes()))
+        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), color)
+    }
 
+    private fun didAnswer() {
         testEngine.prepareNewQuestion()
         showCurrentQuestion()
     }
