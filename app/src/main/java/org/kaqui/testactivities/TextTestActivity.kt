@@ -89,8 +89,7 @@ class TextTestActivity : TestActivityBase() {
                                         filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
                                             if (shouldIgnoreTextInput) {
                                                 ""
-                                            }
-                                            else {
+                                            } else {
                                                 source
                                             }
                                         })
