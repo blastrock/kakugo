@@ -22,7 +22,7 @@ class QuizTestActivity : TestActivityBase(), QuizTestFragment.TestFragmentHolder
     }
 
     private lateinit var testLayout: TestLayout
-    private lateinit var testFragment: QuizTestFragment
+    private lateinit var testFragment: TestFragment
 
     override val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
     override val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
@@ -53,7 +53,8 @@ class QuizTestActivity : TestActivityBase(), QuizTestFragment.TestFragmentHolder
         setUpGui(savedInstanceState)
 
         supportFragmentManager.transaction {
-            testFragment = QuizTestFragment.newInstance()
+            val testFragment = QuizTestFragment.newInstance()
+            this@QuizTestActivity.testFragment = testFragment
             replace(R.id.main_test_block, testFragment)
         }
     }

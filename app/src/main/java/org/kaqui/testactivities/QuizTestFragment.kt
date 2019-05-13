@@ -18,7 +18,7 @@ import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
 import org.kaqui.model.*
 
-class QuizTestFragment : Fragment() {
+class QuizTestFragment : Fragment(), TestFragment {
     private lateinit var testQuestionLayout: TestQuestionLayout
     private lateinit var dontKnowButton: Button
 
@@ -141,7 +141,7 @@ class QuizTestFragment : Fragment() {
         return mainBlock
     }
 
-    fun refreshQuestion() {
+    override fun refreshQuestion() {
         testQuestionLayout.questionText.text = testFragmentHolder.currentQuestion.getQuestionText(testType)
 
         for (i in 0 until answerTexts.size) {
