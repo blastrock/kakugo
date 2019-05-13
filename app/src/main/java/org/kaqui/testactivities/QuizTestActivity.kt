@@ -64,7 +64,9 @@ class QuizTestActivity : TestActivityBase(), TestFragmentHolder {
         button.getDrawingRect(offsetViewBounds)
         testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(button, offsetViewBounds)
         testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, certainty.toColorRes()))
+    }
 
+    override fun nextQuestion() {
         testEngine.prepareNewQuestion()
         testFragment.refreshQuestion()
 

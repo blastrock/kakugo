@@ -160,6 +160,7 @@ class QuizTestFragment : Fragment(), TestFragment {
         } else {
             testFragmentHolder.onWrongAnswer(button, testEngine.currentAnswers[position])
         }
+        testFragmentHolder.nextQuestion()
     }
 
     companion object {

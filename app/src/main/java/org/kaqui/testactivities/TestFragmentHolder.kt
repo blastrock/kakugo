@@ -12,4 +12,5 @@ interface TestFragmentHolder {
 
     fun onGoodAnswer(button: View, certainty: Certainty)
     fun onWrongAnswer(button: View, wrong: Item?)
+    fun nextQuestion()
 }
