@@ -4,50 +4,50 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.widget.NestedScrollView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.fragment.app.Fragment
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
 import org.kaqui.model.*
 
-class TextTestActivity : TestActivityBase() {
+class TextTestFragment : Fragment(), TestFragment {
     companion object {
-        private const val TAG = "TextTestActivity"
+        private const val TAG = "TextTestFragment"
+
+        @JvmStatic
+        fun newInstance() = TextTestFragment()
     }
 
     private lateinit var answerField: EditText
 
-    private lateinit var testLayout: TestLayout
+    private lateinit var testQuestionLayout: TestQuestionLayout
 
-    override val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
-    override val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
-    override val historyView: LinearLayout get() = testLayout.historyView
-    override val sessionScore: TextView get() = testLayout.sessionScore
-    override val mainView: View get() = testLayout.mainView
-    override val mainCoordLayout: CoordinatorLayout get() = testLayout.mainCoordinatorLayout
-
-    override val testType
-        get() = intent.extras!!.getSerializable("test_type") as TestType
+    private val testFragmentHolder
+        get() = (activity!! as TestFragmentHolder)
+    private val testEngine
+        get() = testFragmentHolder.testEngine
+    private val testType
+        get() = testFragmentHolder.testType
 
     private val currentKana get() = testEngine.currentQuestion.contents as Kana
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreate(savedInstanceState)
 
         val questionMinSize = 30
 
-        testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@TextTestActivity, this, questionMinSize) {
+        testQuestionLayout = TestQuestionLayout()
+        val mainBlock = UI {
+            testQuestionLayout.makeMainBlock(activity!!, this, questionMinSize) {
                 wrapInScrollView(this) {
                     verticalLayout {
-                        separator(this@TextTestActivity)
+                        separator(context!!)
 
                         verticalLayout {
                             linearLayout {
@@ -58,7 +58,7 @@ class TextTestActivity : TestActivityBase() {
                                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                                     setOnEditorActionListener { v, actionId, event ->
                                         if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
-                                            this@TextTestActivity.onTextAnswerClicked(v, Certainty.SURE)
+                                            this@TextTestFragment.onTextAnswerClicked(v, Certainty.SURE)
                                         else
                                             false
                                     }
@@ -68,14 +68,14 @@ class TextTestActivity : TestActivityBase() {
                                 button(R.string.maybe) {
                                     setExtTint(R.color.answerMaybe)
                                     setOnClickListener {
-                                        this@TextTestActivity.onTextAnswerClicked(this, Certainty.MAYBE)
+                                        this@TextTestFragment.onTextAnswerClicked(this, Certainty.MAYBE)
                                     }
                                 }
 
                                 button(R.string.sure) {
                                     setExtTint(R.color.answerSure)
                                     setOnClickListener {
-                                        this@TextTestActivity.onTextAnswerClicked(this, Certainty.SURE)
+                                        this@TextTestFragment.onTextAnswerClicked(this, Certainty.SURE)
                                     }
                                 }
                             }.lparams(width = matchParent, height = wrapContent)
@@ -83,32 +83,31 @@ class TextTestActivity : TestActivityBase() {
                             linearLayout {
                                 button(R.string.dont_know) {
                                     setExtTint(R.color.answerDontKnow)
-                                    setOnClickListener { this@TextTestActivity.onTextAnswerClicked(this, Certainty.DONTKNOW) }
+                                    setOnClickListener { this@TextTestFragment.onTextAnswerClicked(this, Certainty.DONTKNOW) }
                                 }.lparams(width = matchParent)
                             }.lparams(width = matchParent, height = wrapContent)
 
-                            separator(this@TextTestActivity)
+                            separator(context!!)
                         }
 
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
-        }
+        }.view
 
-        testLayout.questionText.setOnLongClickListener {
+        testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(this, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
-        setUpGui(savedInstanceState)
+        refreshQuestion()
 
-        showCurrentQuestion()
+        return mainBlock
     }
 
-    override fun showCurrentQuestion() {
-        super.showCurrentQuestion()
-        testLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+    override fun refreshQuestion() {
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         answerField.setText("")
         answerField.requestFocus()
@@ -117,7 +116,6 @@ class TextTestActivity : TestActivityBase() {
     private fun onTextAnswerClicked(view: View, certainty: Certainty): Boolean {
         val result =
                 if (certainty == Certainty.DONTKNOW) {
-                    testEngine.markAnswer(Certainty.DONTKNOW)
                     Certainty.DONTKNOW
                 } else {
                     val answer = answerField.text.trim().toString().toLowerCase()
@@ -126,21 +124,14 @@ class TextTestActivity : TestActivityBase() {
                         return false
 
                     if (answer == currentKana.romaji) {
-                        testEngine.markAnswer(certainty)
                         certainty
                     } else {
-                        testEngine.markAnswer(Certainty.DONTKNOW)
                         Certainty.DONTKNOW
                     }
                 }
 
-        val offsetViewBounds = Rect()
-        view.getDrawingRect(offsetViewBounds)
-        testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(view, offsetViewBounds)
-        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, result.toColorRes()))
-
-        testEngine.prepareNewQuestion()
-        showCurrentQuestion()
+        testFragmentHolder.onAnswer(view, result)
+        testFragmentHolder.nextQuestion()
 
         return true
     }

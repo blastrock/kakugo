@@ -51,9 +51,6 @@
             android:name=".testactivities.QuizTestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".testactivities.TextTestActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
-        <activity
             android:name=".settings.SavedSelectionsActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
