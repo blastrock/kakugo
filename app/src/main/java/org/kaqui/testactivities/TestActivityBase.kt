@@ -28,7 +28,7 @@ abstract class TestActivityBase : BaseActivity() {
         private const val TAG = "TestActivityBase"
     }
 
-    protected lateinit var testEngine: TestEngine
+    lateinit var testEngine: TestEngine
 
     private lateinit var statsFragment: StatsFragment
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>

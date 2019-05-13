@@ -31,13 +31,6 @@ class QuizTestActivity : TestActivityBase(), TestFragmentHolder {
     override val testType
         get() = intent.extras!!.getSerializable("test_type") as TestType
 
-    override val currentQuestion: Item
-        get() = testEngine.currentQuestion
-    override val currentAnswers: List<Item>
-        get() = testEngine.currentAnswers
-    override val currentDebugData: TestEngine.DebugData?
-        get() = testEngine.currentDebugData
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

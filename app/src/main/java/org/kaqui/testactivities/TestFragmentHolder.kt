@@ -7,9 +7,7 @@ import org.kaqui.model.Item
 import org.kaqui.model.TestType
 
 interface TestFragmentHolder {
-    val currentQuestion: Item
-    val currentAnswers: List<Item>
-    val currentDebugData: TestEngine.DebugData?
+    val testEngine: TestEngine
     val testType: TestType
 
     fun onGoodAnswer(button: View, certainty: Certainty)

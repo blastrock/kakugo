@@ -22,6 +22,8 @@ class QuizTestFragment : Fragment(), TestFragment {
 
     private val testFragmentHolder
         get() = (activity!! as TestFragmentHolder)
+    private val testEngine
+        get() = testFragmentHolder.testEngine
     private val testType
         get() = testFragmentHolder.testType
 
@@ -125,8 +127,8 @@ class QuizTestFragment : Fragment(), TestFragment {
         }.view
 
         testQuestionLayout.questionText.setOnLongClickListener {
-            if (testFragmentHolder.currentDebugData != null)
-                showItemProbabilityData(context!!, testFragmentHolder.currentQuestion.text, testFragmentHolder.currentDebugData!!)
+            if (testEngine.currentDebugData != null)
+                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
@@ -138,25 +140,25 @@ class QuizTestFragment : Fragment(), TestFragment {
     }
 
     override fun refreshQuestion() {
-        testQuestionLayout.questionText.text = testFragmentHolder.currentQuestion.getQuestionText(testType)
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         for (i in 0 until answerTexts.size) {
-            answerTexts[i].text = testFragmentHolder.currentAnswers[i].getAnswerText(testType)
+            answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType)
         }
     }
 
     private fun onAnswerClicked(button: View, certainty: Certainty, position: Int) {
         if (certainty == Certainty.DONTKNOW) {
             testFragmentHolder.onWrongAnswer(button, null)
-        } else if (testFragmentHolder.currentAnswers[position] == testFragmentHolder.currentQuestion ||
+        } else if (testEngine.currentAnswers[position] == testEngine.currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
-                testFragmentHolder.currentAnswers[position].getAnswerText(testType) == testFragmentHolder.currentQuestion.getAnswerText(testType) ||
+                testEngine.currentAnswers[position].getAnswerText(testType) == testEngine.currentQuestion.getAnswerText(testType) ||
                 // same for question text
-                testFragmentHolder.currentAnswers[position].getQuestionText(testType) == testFragmentHolder.currentQuestion.getQuestionText(testType)) {
+                testEngine.currentAnswers[position].getQuestionText(testType) == testEngine.currentQuestion.getQuestionText(testType)) {
             testFragmentHolder.onGoodAnswer(button, certainty)
         } else {
-            testFragmentHolder.onWrongAnswer(button, testFragmentHolder.currentAnswers[position])
+            testFragmentHolder.onWrongAnswer(button, testEngine.currentAnswers[position])
         }
     }
 
