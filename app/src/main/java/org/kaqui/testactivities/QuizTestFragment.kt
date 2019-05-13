@@ -37,7 +37,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                     TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> 50
                     TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI -> 10
                     TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> 50
-                    else -> throw RuntimeException("unsupported test type for QuizTestActivity")
+                    else -> throw RuntimeException("unsupported test type for TestActivity")
                 }
 
         testQuestionLayout = TestQuestionLayout()
@@ -115,7 +115,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                     }.lparams(width = matchParent, height = wrapContent)
                                 }
                             }
-                            else -> throw RuntimeException("unsupported test type for QuizTestActivity")
+                            else -> throw RuntimeException("unsupported test type for TestActivity")
                         }
                         dontKnowButton = button(R.string.dont_know) {
                             setExtTint(R.color.answerDontKnow)

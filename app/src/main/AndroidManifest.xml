@@ -48,7 +48,7 @@
             android:label="@string/word_title"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".testactivities.QuizTestActivity"
+            android:name=".testactivities.TestActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.SavedSelectionsActivity"

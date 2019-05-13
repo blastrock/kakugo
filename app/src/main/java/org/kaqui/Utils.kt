@@ -113,7 +113,7 @@ fun startTest(activity: Activity, type: TestType) {
     if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
     }
-    activity.startActivity<QuizTestActivity>("test_type" to type)
+    activity.startActivity<TestActivity>("test_type" to type)
 }
 
 val Activity.menuWidth

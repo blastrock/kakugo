@@ -27,9 +27,9 @@ import org.jetbrains.anko.textColor
 import org.kaqui.*
 import org.kaqui.model.*
 
-class QuizTestActivity : BaseActivity(), TestFragmentHolder {
+class TestActivity : BaseActivity(), TestFragmentHolder {
     companion object {
-        private const val TAG = "QuizTestActivity"
+        private const val TAG = "TestActivity"
     }
 
     override lateinit var testEngine: TestEngine
@@ -91,7 +91,7 @@ class QuizTestActivity : BaseActivity(), TestFragmentHolder {
                         TestType.KANJI_COMPOSITION -> CompositionTestFragment.newInstance()
                         TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragment.newInstance()
                     }
-            this@QuizTestActivity.testFragment = testFragment as TestFragment
+            this@TestActivity.testFragment = testFragment as TestFragment
             replace(R.id.main_test_block, testFragment)
             replace(R.id.global_stats, statsFragment)
         }
