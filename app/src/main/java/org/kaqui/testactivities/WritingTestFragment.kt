@@ -3,25 +3,29 @@ package org.kaqui.testactivities
 import android.graphics.*
 import android.os.Bundle
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
 import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 
-class WritingTestActivity : TestActivityBase(), CoroutineScope {
+class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
     companion object {
-        private const val TAG = "WritingTestActivity"
+        private const val TAG = "WritingTestFragment"
 
         private const val KANJI_SIZE = 109
 
@@ -35,24 +39,25 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
             points.add(pathMeasure.getPoint(pathMeasure.length))
             return points
         }
+
+        @JvmStatic
+        fun newInstance() = WritingTestFragment()
     }
+
+    private val testFragmentHolder
+        get() = (activity!! as TestFragmentHolder)
+    private val testEngine
+        get() = testFragmentHolder.testEngine
+    private val testType
+        get() = testFragmentHolder.testType
 
     private val currentStrokes get() = testEngine.currentQuestion.strokes
     private lateinit var currentScaledStrokes: List<Path>
     private var currentStroke = 0
     private var missCount = 0
 
-    override val testType
-        get() = intent.extras!!.getSerializable("test_type") as TestType
+    private lateinit var testQuestionLayout: TestQuestionLayout
 
-    private lateinit var testLayout: TestLayout
-
-    override val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
-    override val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
-    override val historyView: LinearLayout get() = testLayout.historyView
-    override val sessionScore: TextView get() = testLayout.sessionScore
-    override val mainView: View get() = testLayout.mainView
-    override val mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout get() = testLayout.mainCoordinatorLayout
     private lateinit var drawCanvas: DrawView
     private lateinit var hintButton: Button
     private lateinit var dontKnowButton: Button
@@ -66,9 +71,12 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         super.onCreate(savedInstanceState)
 
         job = Job()
+    }
 
-        testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@WritingTestActivity, this, 10) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        testQuestionLayout = TestQuestionLayout()
+        val mainBlock = UI {
+            testQuestionLayout.makeMainBlock(activity!!, this, 10) {
                 verticalLayout {
                     drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
                         gravity = Gravity.CENTER
@@ -84,22 +92,20 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
-        }
+        }.view
 
         drawCanvas.strokeCallback = this::onStrokeFinished
         drawCanvas.sizeChangedCallback = this::onDrawViewSizeChanged
 
         hintButton.setOnClickListener { this.showHint() }
-        dontKnowButton.setOnClickListener { this.onAnswerDone(Certainty.DONTKNOW) }
-        nextButton.setOnClickListener { this.showNextQuestion() }
+        dontKnowButton.setOnClickListener { this.onAnswerDone(false) }
+        nextButton.setOnClickListener { testFragmentHolder.nextQuestion() }
 
-        testLayout.questionText.setOnLongClickListener {
+        testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(this, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
-
-        setUpGui(savedInstanceState)
 
         if (savedInstanceState != null) {
             currentStroke = savedInstanceState.getInt("currentStroke")
@@ -113,7 +119,9 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
             nextButton.visibility = View.GONE
         }
 
-        drawCanvas.post { showCurrentQuestion() }
+        drawCanvas.post { refreshQuestion() }
+
+        return mainBlock
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -127,10 +135,27 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         super.onDestroy()
     }
 
-    override fun showCurrentQuestion() {
-        super.showCurrentQuestion()
+    private fun refreshState() {
+        if (currentStroke == currentStrokes.size) {
+            dontKnowButton.visibility = View.GONE
+            hintButton.visibility = View.GONE
+            nextButton.visibility = View.VISIBLE
+        } else {
+            nextButton.visibility = View.GONE
+            dontKnowButton.visibility = View.VISIBLE
+            hintButton.visibility = View.VISIBLE
+        }
+    }
 
-        testLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+    override fun startNewQuestion() {
+        currentStroke = 0
+        missCount = 0
+    }
+
+    override fun refreshQuestion() {
+        refreshState()
+
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         drawCanvas.clearCanvas()
 
@@ -151,7 +176,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
     }
 
     private fun onDrawViewSizeChanged(w: Int, h: Int) {
-        showCurrentQuestion()
+        refreshQuestion()
     }
 
     private val resolution = 4
@@ -205,13 +230,14 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         ++currentStroke
 
         if (currentStroke == currentStrokes.size)
-            onAnswerDone(if (missCount == 0) Certainty.SURE else Certainty.DONTKNOW)
+            onAnswerDone(missCount == 0)
     }
 
-    private fun onAnswerDone(certainty: Certainty) {
-        testEngine.markAnswer(certainty)
-
-        testLayout.overlay.trigger(testLayout.overlay.width / 2, testLayout.overlay.height / 2, ContextCompat.getColor(this, certainty.toColorRes()))
+    private fun onAnswerDone(correct: Boolean) {
+        if (correct)
+            testFragmentHolder.onGoodAnswer(null, Certainty.SURE)
+        else
+            testFragmentHolder.onWrongAnswer(null, null)
 
         currentStroke = currentStrokes.size
 
@@ -219,21 +245,7 @@ class WritingTestActivity : TestActivityBase(), CoroutineScope {
         for (stroke in currentScaledStrokes)
             drawCanvas.addPath(stroke)
 
-        hintButton.visibility = View.GONE
-        dontKnowButton.visibility = View.GONE
-        nextButton.visibility = View.VISIBLE
-    }
-
-    private fun showNextQuestion() {
-        currentStroke = 0
-        missCount = 0
-        testEngine.prepareNewQuestion()
-
-        nextButton.visibility = View.GONE
-        hintButton.visibility = View.VISIBLE
-        dontKnowButton.visibility = View.VISIBLE
-
-        showCurrentQuestion()
+        refreshState()
     }
 
     private fun setupDebug() {
