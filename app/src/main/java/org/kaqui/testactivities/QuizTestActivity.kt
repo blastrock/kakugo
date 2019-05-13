@@ -2,10 +2,7 @@ package org.kaqui.testactivities
 
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -16,7 +13,7 @@ import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.*
 
-class QuizTestActivity : TestActivityBase(), QuizTestFragment.TestFragmentHolder {
+class QuizTestActivity : TestActivityBase(), TestFragmentHolder {
     companion object {
         private const val TAG = "QuizTestActivity"
     }

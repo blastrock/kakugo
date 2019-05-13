@@ -1,8 +1,5 @@
 package org.kaqui.testactivities
 
-import android.content.Context
-import android.graphics.Rect
-import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
@@ -12,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
@@ -162,16 +158,6 @@ class QuizTestFragment : Fragment(), TestFragment {
         } else {
             testFragmentHolder.onWrongAnswer(button, testFragmentHolder.currentAnswers[position])
         }
-    }
-
-    interface TestFragmentHolder {
-        val currentQuestion: Item
-        val currentAnswers: List<Item>
-        val currentDebugData: TestEngine.DebugData?
-        val testType: TestType
-
-        fun onGoodAnswer(button: View, certainty: Certainty)
-        fun onWrongAnswer(button: View, wrong: Item?)
     }
 
     companion object {
