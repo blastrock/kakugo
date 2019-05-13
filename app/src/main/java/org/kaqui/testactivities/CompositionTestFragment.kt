@@ -6,53 +6,57 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ToggleButton
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
 import org.kaqui.model.*
 import kotlin.collections.shuffle
 
-class CompositionTestActivity : TestActivityBase() {
+class CompositionTestFragment : Fragment(), TestFragment {
     companion object {
-        private const val TAG = "CompositionTestActivity"
+        private const val TAG = "CompositionTestFragment"
 
         private const val COLUMNS = 3
+
+        @JvmStatic
+        fun newInstance() = CompositionTestFragment()
     }
+
+    private val testFragmentHolder
+        get() = (activity!! as TestFragmentHolder)
+    private val testEngine
+        get() = testFragmentHolder.testEngine
+    private val testType
+        get() = testFragmentHolder.testType
 
     private lateinit var answerButtons: List<ToggleButton>
     private var partMode = false
 
     private val currentKanji get() = testEngine.currentQuestion.contents as Kanji
 
-    override val testType = TestType.KANJI_COMPOSITION
-
-    private lateinit var testLayout: TestLayout
-
-    override val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
-    override val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
-    override val historyView: LinearLayout get() = testLayout.historyView
-    override val sessionScore: TextView get() = testLayout.sessionScore
-    override val mainView: View get() = testLayout.mainView
-    override val mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout get() = testLayout.mainCoordinatorLayout
+    private lateinit var testQuestionLayout: TestQuestionLayout
     private lateinit var doneButton: Button
     private lateinit var dontKnowButton: Button
     private lateinit var nextButton: Button
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val answerCount = getAnswerCount(testType)
         val answerButtons = mutableListOf<ToggleButton>()
 
-        testLayout = TestLayout(this) { testLayout ->
-            testLayout.makeMainBlock(this@CompositionTestActivity, this, 10) {
+        testQuestionLayout = TestQuestionLayout()
+        val mainBlock = UI {
+            testQuestionLayout.makeMainBlock(activity!!, this, 10) {
                 wrapInScrollView(this) {
                     verticalLayout {
                         repeat(answerCount / COLUMNS) {
@@ -77,11 +81,9 @@ class CompositionTestActivity : TestActivityBase() {
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }
-        }
+        }.view
 
         this.answerButtons = answerButtons
-
-        setUpGui(savedInstanceState)
 
         var finished = false
         var checkedAnswers: ArrayList<Int>? = null
@@ -93,15 +95,15 @@ class CompositionTestActivity : TestActivityBase() {
 
         doneButton.setOnClickListener { this.onAnswerDone() }
         dontKnowButton.setOnClickListener { this.onDontKnow() }
-        nextButton.setOnClickListener { this.showNextQuestion() }
+        nextButton.setOnClickListener { testFragmentHolder.nextQuestion() }
 
-        testLayout.questionText.setOnLongClickListener {
+        testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(this, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
-        showCurrentQuestion()
+        refreshQuestion()
 
         if (checkedAnswers != null)
             for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
@@ -116,6 +118,8 @@ class CompositionTestActivity : TestActivityBase() {
         } else {
             nextButton.visibility = View.GONE
         }
+
+        return mainBlock
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -130,16 +134,11 @@ class CompositionTestActivity : TestActivityBase() {
         }))
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        partMode = savedInstanceState.getBoolean("partMode")
-    }
-
     private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            button.textColor = ContextCompat.getColor(this, R.color.answerTextColor)
+            button.textColor = ContextCompat.getColor(context!!, R.color.answerTextColor)
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, color))
+            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context!!, color))
         } else {
             button.isChecked = checked
         }
@@ -158,8 +157,8 @@ class CompositionTestActivity : TestActivityBase() {
         }
     }
 
-    override fun prepareNewQuestion() {
-        val db = Database.getInstance(this)
+    override fun startNewQuestion() {
+        val db = Database.getInstance(context!!)
         val ids = testEngine.prepareNewQuestion().map { it.itemId }
 
         val questionPartsIds = currentKanji.parts.map { it.id }
@@ -187,12 +186,14 @@ class CompositionTestActivity : TestActivityBase() {
         currentAnswers.shuffle()
 
         testEngine.currentAnswers = currentAnswers
+
+        doneButton.visibility = View.VISIBLE
+        dontKnowButton.visibility = View.VISIBLE
+        nextButton.visibility = View.GONE
     }
 
-    override fun showCurrentQuestion() {
-        super.showCurrentQuestion()
-
-        testLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+    override fun refreshQuestion() {
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
             button.isClickable = true
@@ -229,19 +230,10 @@ class CompositionTestActivity : TestActivityBase() {
 
     private fun onAnswerDone() {
         val ok = validateAnswer()
-
-        val result =
-                if (ok)
-                    Certainty.SURE
-                else
-                    Certainty.DONTKNOW
-
-        testEngine.markAnswer(result)
-
-        val offsetViewBounds = Rect()
-        doneButton.getDrawingRect(offsetViewBounds)
-        testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(doneButton, offsetViewBounds)
-        testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, result.toColorRes()))
+        if (ok)
+            testFragmentHolder.onGoodAnswer(doneButton, Certainty.SURE)
+        else
+            testFragmentHolder.onWrongAnswer(doneButton, null)
 
         doneButton.visibility = View.GONE
         dontKnowButton.visibility = View.GONE
@@ -253,15 +245,5 @@ class CompositionTestActivity : TestActivityBase() {
             button.isChecked = false
 
         onAnswerDone()
-    }
-
-    private fun showNextQuestion() {
-        prepareNewQuestion()
-
-        doneButton.visibility = View.VISIBLE
-        dontKnowButton.visibility = View.VISIBLE
-        nextButton.visibility = View.GONE
-
-        showCurrentQuestion()
     }
 }

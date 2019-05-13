@@ -114,7 +114,7 @@ fun startTest(activity: Activity, type: TestType) {
         activity.longToast(R.string.enable_a_few_items)
     } else when (type) {
         TestType.KANJI_WRITING, TestType.HIRAGANA_WRITING, TestType.KATAKANA_WRITING -> activity.startActivity<QuizTestActivity>("test_type" to type)
-        TestType.KANJI_COMPOSITION -> activity.startActivity<CompositionTestActivity>()
+        TestType.KANJI_COMPOSITION -> activity.startActivity<QuizTestActivity>("test_type" to TestType.KANJI_COMPOSITION)
         TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> activity.startActivity<TextTestActivity>("test_type" to type)
         else -> activity.startActivity<QuizTestActivity>("test_type" to type)
     }

@@ -49,6 +49,7 @@ class QuizTestActivity : TestActivityBase(), TestFragmentHolder {
                     when (testType) {
                         TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragment.newInstance()
                         TestType.HIRAGANA_WRITING, TestType.KATAKANA_WRITING, TestType.KANJI_WRITING -> WritingTestFragment.newInstance()
+                        TestType.KANJI_COMPOSITION -> CompositionTestFragment.newInstance()
                         else -> throw RuntimeException("Unsupported test type $testType")
                     }
             this@QuizTestActivity.testFragment = testFragment as TestFragment
