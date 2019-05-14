@@ -69,7 +69,7 @@ class Database private constructor(context: Context, private val database: SQLit
         database.rawQuery(
                 """SELECT id
                 FROM $KANJIS_TABLE_NAME
-                WHERE id = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR  (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?) AND radical = 0""",
+                WHERE (id = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?)) AND radical = 0""",
                 arrayOf(firstCodePoint, "%$text%", "%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
