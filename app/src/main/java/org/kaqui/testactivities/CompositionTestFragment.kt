@@ -206,15 +206,18 @@ class CompositionTestFragment : Fragment(), TestFragment {
         doneButton.visibility = View.VISIBLE
         dontKnowButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
+
+        for (button in answerButtons) {
+            button.isClickable = true
+            button.isChecked = false
+            colorCheckedButton(button)
+        }
     }
 
     override fun refreshQuestion() {
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
-            button.isClickable = true
-            button.isChecked = false
-            setButtonTint(button, R.color.answerDontKnow, false)
             button.text = answer.getAnswerText(testType)
             button.textOn = answer.getAnswerText(testType)
             button.textOff = answer.getAnswerText(testType)
