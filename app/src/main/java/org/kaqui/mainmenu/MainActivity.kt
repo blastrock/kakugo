@@ -11,10 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
-import org.kaqui.BaseActivity
-import org.kaqui.R
-import org.kaqui.appTitleImage
-import org.kaqui.menuWidth
+import org.kaqui.*
 import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
 import java.io.File
@@ -33,6 +30,8 @@ class MainActivity : BaseActivity(), CoroutineScope {
         get() = job + Dispatchers.Main
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        LocaleManager.updateDictionaryLocale(this)
+
         super.onCreate(savedInstanceState)
         job = Job()
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
