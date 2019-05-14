@@ -64,6 +64,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
                                 repeat(COLUMNS) {
                                     val button = toggleButton {
                                         textSize = 30.0f
+                                        setOnClickListener { colorCheckedButton(it as ToggleButton) }
                                     }.lparams(width = wrapContent, height = wrapContent, weight = 1f)
                                     answerButtons.add(button)
                                 }
@@ -109,6 +110,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
             for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
                 if (answer.id in checkedAnswers)
                     button.isChecked = true
+                colorCheckedButton(button)
             }
 
         if (finished) {
@@ -132,6 +134,20 @@ class CompositionTestFragment : Fragment(), TestFragment {
             else
                 null
         }))
+    }
+
+    private fun colorCheckedButton(button: ToggleButton) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val color =
+                    if (button.isChecked)
+                        R.color.compositionGood
+                    else
+                        R.color.answerDontKnow
+
+            button.textColor = ContextCompat.getColor(context!!, R.color.answerTextColor)
+            button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context!!, color))
+        }
     }
 
     private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
