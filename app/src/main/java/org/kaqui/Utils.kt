@@ -36,16 +36,6 @@ fun getBackgroundFromScore(score: Double) =
 
 fun lerp(a: Float, b: Float, r: Float): Float = a + (r * (b - a))
 
-fun <T> MutableList<T>.shuffle() {
-    val rg = Random()
-    for (i in this.size - 1 downTo 1) {
-        val target = rg.nextInt(i)
-        val tmp = this[i]
-        this[i] = this[target]
-        this[target] = tmp
-    }
-}
-
 fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
     if (sample > list.size - avoid.size)
         throw RuntimeException("can't get a sample of size $sample on list of size ${list.size - avoid.size}")
