@@ -17,10 +17,7 @@ import android.widget.EditText
 import android.widget.Toast
 import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import kotlinx.coroutines.*
-import org.jetbrains.anko.UI
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.editText
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
@@ -102,11 +99,15 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
                 alert {
                     title = getString(R.string.enter_name_of_selection)
                     var name: EditText? = null
-                    customView = ctx.UI {
-                        name = editText {
-                            inputType = InputType.TYPE_CLASS_TEXT
+                    customView = UI {
+                        linearLayout {
+                            name = editText {
+                                inputType = InputType.TYPE_CLASS_TEXT
+                            }.lparams(width = matchParent, height = wrapContent) {
+                                horizontalMargin = dip(16)
+                            }
                         }
-                     }.view
+                    }.view
                     positiveButton(android.R.string.ok) { saveSelection(name!!.text.toString()) }
                     negativeButton(android.R.string.cancel) {}
                 }.show()
