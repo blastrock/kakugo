@@ -73,4 +73,8 @@
     <string name="title_activity_main_settings">Settings</string>
     <string name="enable_dark_theme">Enable dark theme</string>
     <string name="will_update_later">Will update when leaving the settings screen</string>
+    <string name="dictionary_language">Dictionary language</string>
+    <string name="lang_system_default">System default</string>
+    <string name="lang_english" translatable="false">English</string>
+    <string name="lang_french" translatable="false">Français</string>
 </resources>

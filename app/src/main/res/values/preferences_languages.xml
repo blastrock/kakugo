@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="language_strings">
+        <item>@string/lang_system_default</item>
+        <item>@string/lang_english</item>
+        <item>@string/lang_french</item>
+    </string-array>
+    <string-array name="language_ids">
+        <item></item>
+        <item>en</item>
+        <item>fr</item>
+    </string-array>
+</resources>

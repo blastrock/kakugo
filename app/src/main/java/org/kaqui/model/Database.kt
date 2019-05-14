@@ -5,16 +5,23 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Path
 import android.os.Build
+import androidx.preference.PreferenceManager
 import org.kaqui.asUnicodeCodePoint
 
 class Database private constructor(context: Context, private val database: SQLiteDatabase) {
     private val locale: String by lazy {
-        val locale =
+        val forcedLocale = PreferenceManager.getDefaultSharedPreferences(context).getString("dictionary_language", "")!!
+        val systemLocale =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     context.resources.configuration.locales.getFirstMatch(arrayOf("fr-FR"))?.language
                 else
                     context.resources.configuration.locale.language
-        if (locale == "fr")
+        val finalLocale =
+                if (forcedLocale.isNotEmpty())
+                    forcedLocale
+                else
+                    systemLocale
+        if (finalLocale == "fr")
             "fr"
         else
             "en"

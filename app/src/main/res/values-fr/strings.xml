@@ -65,4 +65,6 @@
     <string name="settings"><font size="30">設定</font>\nPARAMÈTRES</string>
     <string name="title_activity_main_settings">Paramètres</string>
     <string name="will_update_later">Pris en compte lorsque vous quittez les paramètres</string>
+    <string name="dictionary_language">Langue du dictionnaire</string>
+    <string name="lang_system_default">Langue du système</string>
 </resources>
