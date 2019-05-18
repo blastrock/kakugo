@@ -155,24 +155,12 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                 .show()
     }
 
-    override fun onGoodAnswer(button: View?, certainty: Certainty) {
-        testEngine.markAnswer(certainty)
-        finishQuestion(button, certainty)
+    override fun onAnswer(button: View?, certainty: Certainty, wrong: Item?) {
+        testEngine.markAnswer(certainty, wrong)
+        triggerFeedback(button, certainty)
     }
 
-    override fun onWrongAnswer(button: View?, wrong: Item?) {
-        testEngine.markAnswer(Certainty.DONTKNOW, wrong)
-        finishQuestion(button, Certainty.DONTKNOW)
-    }
-
-    override fun onAnswer(button: View?, certainty: Certainty) {
-        if (certainty == Certainty.DONTKNOW)
-            onWrongAnswer(button, null)
-        else
-            onGoodAnswer(button, certainty)
-    }
-
-    private fun finishQuestion(button: View?, certainty: Certainty) {
+    private fun triggerFeedback(button: View?, certainty: Certainty) {
         if (button != null) {
             val offsetViewBounds = Rect()
             button.getDrawingRect(offsetViewBounds)

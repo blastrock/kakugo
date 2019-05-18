@@ -235,9 +235,9 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
 
     private fun onAnswerDone(correct: Boolean) {
         if (correct)
-            testFragmentHolder.onGoodAnswer(null, Certainty.SURE)
+            testFragmentHolder.onAnswer(null, Certainty.SURE, null)
         else
-            testFragmentHolder.onWrongAnswer(null, null)
+            testFragmentHolder.onAnswer(null, Certainty.DONTKNOW, null)
 
         currentStroke = currentStrokes.size
 

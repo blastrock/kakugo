@@ -130,7 +130,7 @@ class TextTestFragment : Fragment(), TestFragment {
                     }
                 }
 
-        testFragmentHolder.onAnswer(view, result)
+        testFragmentHolder.onAnswer(view, result, null)
         testFragmentHolder.nextQuestion()
 
         return true

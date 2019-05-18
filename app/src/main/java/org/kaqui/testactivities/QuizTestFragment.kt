@@ -149,16 +149,16 @@ class QuizTestFragment : Fragment(), TestFragment {
 
     private fun onAnswerClicked(button: View, certainty: Certainty, position: Int) {
         if (certainty == Certainty.DONTKNOW) {
-            testFragmentHolder.onWrongAnswer(button, null)
+            testFragmentHolder.onAnswer(button, Certainty.DONTKNOW, null)
         } else if (testEngine.currentAnswers[position] == testEngine.currentQuestion ||
                 // also compare answer texts because different answers can have the same readings
                 // like 副 and 福 and we don't want to penalize the user for that
                 testEngine.currentAnswers[position].getAnswerText(testType) == testEngine.currentQuestion.getAnswerText(testType) ||
                 // same for question text
                 testEngine.currentAnswers[position].getQuestionText(testType) == testEngine.currentQuestion.getQuestionText(testType)) {
-            testFragmentHolder.onGoodAnswer(button, certainty)
+            testFragmentHolder.onAnswer(button, certainty, null)
         } else {
-            testFragmentHolder.onWrongAnswer(button, testEngine.currentAnswers[position])
+            testFragmentHolder.onAnswer(button, Certainty.DONTKNOW, testEngine.currentAnswers[position])
         }
         testFragmentHolder.nextQuestion()
     }

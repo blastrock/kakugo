@@ -10,8 +10,6 @@ interface TestFragmentHolder {
     val testEngine: TestEngine
     val testType: TestType
 
-    fun onAnswer(button: View?, certainty: Certainty)
-    fun onGoodAnswer(button: View?, certainty: Certainty)
-    fun onWrongAnswer(button: View?, wrong: Item?)
+    fun onAnswer(button: View?, certainty: Certainty, wrong: Item?)
     fun nextQuestion()
 }

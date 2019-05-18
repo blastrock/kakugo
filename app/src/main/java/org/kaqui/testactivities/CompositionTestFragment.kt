@@ -2,7 +2,6 @@ package org.kaqui.testactivities
 
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
-import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -10,13 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.ToggleButton
 import androidx.core.content.ContextCompat
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
@@ -248,11 +243,12 @@ class CompositionTestFragment : Fragment(), TestFragment {
     }
 
     private fun onAnswerDone() {
-        val ok = validateAnswer()
-        if (ok)
-            testFragmentHolder.onGoodAnswer(doneButton, Certainty.SURE)
-        else
-            testFragmentHolder.onWrongAnswer(doneButton, null)
+        val result =
+                if (validateAnswer())
+                    Certainty.SURE
+                else
+                    Certainty.DONTKNOW
+        testFragmentHolder.onAnswer(doneButton, result, null)
 
         doneButton.visibility = View.GONE
         dontKnowButton.visibility = View.GONE
