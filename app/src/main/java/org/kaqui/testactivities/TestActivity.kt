@@ -1,11 +1,14 @@
 package org.kaqui.testactivities
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -22,8 +25,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.transaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.jetbrains.anko.frameLayout
-import org.jetbrains.anko.textColor
+import org.jetbrains.anko.*
+import org.jetbrains.anko.design.coordinatorLayout
+import org.jetbrains.anko.design.floatingActionButton
+import org.jetbrains.anko.support.v4.nestedScrollView
 import org.kaqui.*
 import org.kaqui.model.*
 
@@ -37,15 +42,15 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     private lateinit var statsFragment: StatsFragment
     private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
 
-    private lateinit var testLayout: TestLayout
     private lateinit var testFragment: TestFragment
 
-    private val historyScrollView: NestedScrollView get() = testLayout.historyScrollView
-    private val historyActionButton: FloatingActionButton get() = testLayout.historyActionButton
-    private val historyView: LinearLayout get() = testLayout.historyView
-    private val sessionScore: TextView get() = testLayout.sessionScore
-    private val mainView: View get() = testLayout.mainView
-    private val mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout get() = testLayout.mainCoordinatorLayout
+    private lateinit var historyScrollView: NestedScrollView
+    private lateinit var historyActionButton: FloatingActionButton
+    private lateinit var historyView: LinearLayout
+    private lateinit var sessionScore: TextView
+    private lateinit var mainView: View
+    private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
+    private lateinit var fadeOverlay: FadeOverlay
 
     override val testType
         get() = intent.extras!!.getSerializable("test_type") as TestType
@@ -53,11 +58,52 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        testLayout = TestLayout(this) {
-            frameLayout {
-                id = R.id.main_test_block
+        frameLayout {
+            mainCoordLayout = coordinatorLayout {
+                verticalLayout {
+                    frameLayout {
+                        id = R.id.global_stats
+                    }.lparams(width = matchParent, height = wrapContent)
+                    sessionScore = textView {
+                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                    }
+                }.lparams(width = matchParent, height = wrapContent)
+                mainView = frameLayout {
+                    id = R.id.main_test_block
+                }.lparams(width = matchParent, height = matchParent)
+                historyScrollView = nestedScrollView {
+                    id = R.id.history_scroll_view
+                    backgroundColor = getColorFromAttr(R.attr.historyBackground)
+                    historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
+                }.lparams(width = matchParent, height = matchParent) {
+                    val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
+                    bottomSheetBehavior.peekHeight = 0
+                    bottomSheetBehavior.isHideable = false
+                    behavior = bottomSheetBehavior
+                }
+                historyActionButton = floatingActionButton {
+                    size = FloatingActionButton.SIZE_MINI
+                    scaleX = 0f
+                    scaleY = 0f
+                    setImageResource(R.drawable.ic_arrow_upward)
+                }.lparams(width = matchParent, height = wrapContent) {
+                    anchorId = R.id.history_scroll_view
+                    @SuppressLint("RtlHardcoded")
+                    anchorGravity = Gravity.TOP or Gravity.RIGHT
+
+                    marginEnd = dip(20)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        elevation = 12.0f
+                    }
+                }
+            }
+            fadeOverlay = fadeOverlay {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    elevation = 100f
+                }
             }
         }
+
 
         statsFragment = StatsFragment.newInstance()
 
@@ -164,10 +210,10 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         if (button != null) {
             val offsetViewBounds = Rect()
             button.getDrawingRect(offsetViewBounds)
-            testLayout.mainCoordinatorLayout.offsetDescendantRectToMyCoords(button, offsetViewBounds)
-            testLayout.overlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, certainty.toColorRes()))
+            mainCoordLayout.offsetDescendantRectToMyCoords(button, offsetViewBounds)
+            fadeOverlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, certainty.toColorRes()))
         } else {
-            testLayout.overlay.trigger(testLayout.overlay.width / 2, testLayout.overlay.height / 2, ContextCompat.getColor(this, certainty.toColorRes()))
+            fadeOverlay.trigger(fadeOverlay.width / 2, fadeOverlay.height / 2, ContextCompat.getColor(this, certainty.toColorRes()))
         }
     }
 
