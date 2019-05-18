@@ -172,7 +172,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                         + ")")
     }
 
-    private fun doUpgrade(dictDb: String) {
+    fun doUpgrade(dictDb: String) {
         database.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
         database.transaction {
             val dump = dumpUserData()
@@ -207,6 +207,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 restoreUserData(dump)
             database.version = DATABASE_VERSION
         }
+        database.execSQL("DETACH DATABASE dict")
     }
 
     private fun replaceDict() {

@@ -12,7 +12,7 @@ import org.kaqui.roundToPreviousDay
 import java.util.Calendar
 import java.util.TimeZone
 
-class Database private constructor(context: Context, val database: SQLiteDatabase) {
+class Database constructor(context: Context, val database: SQLiteDatabase) {
     private val locale: String get() = LocaleManager.getDictionaryLocale()
 
     init {
@@ -456,7 +456,7 @@ class Database private constructor(context: Context, val database: SQLiteDatabas
         return database.insertOrThrow(SESSIONS_TABLE_NAME, null, cv)
     }
 
-    private fun commitAllSessions() {
+    fun commitAllSessions() {
         // Delete empty sessions
         val emptySessions = mutableListOf<Long>()
         database.rawQuery("""

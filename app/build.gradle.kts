@@ -88,4 +88,10 @@ dependencies {
     // Third-party Libraries
     implementation(libs.accompanist.drawablepainter)
     implementation(libs.mpandroidchart)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit.ktx)
+    androidTestImplementation(libs.androidx.test.runner)
 }
