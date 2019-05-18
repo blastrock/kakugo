@@ -70,7 +70,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                 }.lparams(width = matchParent, height = wrapContent)
                 mainView = frameLayout {
                     id = R.id.main_test_block
-                }.lparams(width = matchParent, height = matchParent)
+                }.lparams(width = matchParent, height = matchParent) {
+                    topMargin = dip(16)
+                }
                 historyScrollView = nestedScrollView {
                     id = R.id.history_scroll_view
                     backgroundColor = getColorFromAttr(R.attr.historyBackground)
