@@ -8,7 +8,7 @@ class LearningDbView(
         private val database: SQLiteDatabase,
         private val tableName: String,
         private val filter: String = "1",
-        private val level: Int? = null,
+        private val classifier: Classifier? = null,
         private val itemGetter: (id: Int) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
 
@@ -17,8 +17,8 @@ class LearningDbView(
     fun search(text: String): List<Int> = itemSearcher!!(text)
 
     fun getAllItems(): List<Int> =
-            if (level != null)
-                getItemsForLevel(level)
+            if (classifier != null)
+                getItemsForLevel(classifier)
             else
                 getAllItemsForAnyLevel()
 
@@ -32,9 +32,9 @@ class LearningDbView(
         return ret
     }
 
-    private fun getItemsForLevel(level: Int): List<Int> {
+    private fun getItemsForLevel(classifier: Classifier): List<Int> {
         val ret = mutableListOf<Int>()
-        database.query(tableName, arrayOf("id"), "$filter AND jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("id"), "$filter AND " + classifier.whereClause(), classifier.whereArguments(), null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
@@ -43,8 +43,8 @@ class LearningDbView(
     }
 
     fun setAllEnabled(enabled: Boolean) =
-            if (level != null)
-                setLevelEnabled(level, enabled)
+            if (classifier != null)
+                setLevelEnabled(classifier, enabled)
             else
                 setAllAnyLevelEnabled(enabled)
 
@@ -54,10 +54,10 @@ class LearningDbView(
         database.update(tableName, cv, filter, null)
     }
 
-    private fun setLevelEnabled(level: Int, enabled: Boolean) {
+    private fun setLevelEnabled(classifier: Classifier, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        database.update(tableName, cv, "$filter AND jlpt_level = ?", arrayOf(level.toString()))
+        database.update(tableName, cv, "$filter AND " + classifier.whereClause(), classifier.whereArguments())
     }
 
     fun setItemEnabled(itemId: Int, enabled: Boolean) {
@@ -114,20 +114,20 @@ class LearningDbView(
 
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
 
-    fun getStats(): Stats = getStats(level)
-    fun getStats(level: Int?): Stats =
-            Stats(getCountForScore(0.0f, BAD_WEIGHT, level), getCountForScore(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForScore(GOOD_WEIGHT, 1.0f, level), getDisabledCount(level))
+    fun getStats(): Stats = getStats(classifier)
+    fun getStats(classifier: Classifier?): Stats =
+            Stats(getCountForScore(0.0f, BAD_WEIGHT, classifier), getCountForScore(BAD_WEIGHT, GOOD_WEIGHT, classifier), getCountForScore(GOOD_WEIGHT, 1.0f, classifier), getDisabledCount(classifier))
 
-    private fun getCountForScore(from: Float, to: Float, level: Int?): Int {
+    private fun getCountForScore(from: Float, to: Float, classifier: Classifier?): Int {
         val selection = "$filter AND enabled = 1 AND short_score BETWEEN ? AND ?" +
-                if (level != null)
-                    " AND jlpt_level = ?"
+                if (classifier != null)
+                    " AND " + classifier.whereClause()
                 else
                     ""
         val selectionArgsBase = arrayOf(from.toString(), to.toString())
         val selectionArgs =
-                if (level != null)
-                    selectionArgsBase + level.toString()
+                if (classifier != null)
+                    selectionArgsBase + classifier.whereArguments()
                 else
                     selectionArgsBase
         database.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->
@@ -136,16 +136,16 @@ class LearningDbView(
         }
     }
 
-    private fun getDisabledCount(level: Int?): Int {
-        val selection = "$filter AND enabled = 0 AND $filter" +
-                if (level != null)
-                    " AND jlpt_level = ?"
+    private fun getDisabledCount(classifier: Classifier?): Int {
+        val selection = "$filter AND enabled = 0" +
+                if (classifier != null)
+                    " AND " + classifier.whereClause()
                 else
                     ""
         val selectionArgsBase = arrayOf<String>()
         val selectionArgs =
-                if (level != null)
-                    selectionArgsBase + level.toString()
+                if (classifier != null)
+                    selectionArgsBase + classifier.whereArguments()
                 else
                     selectionArgsBase
         database.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->

@@ -8,6 +8,7 @@ import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Database
+import org.kaqui.model.JlptLevel
 import org.kaqui.model.LearningDbView
 
 class ItemSelectionActivity : BaseActivity() {
@@ -48,8 +49,8 @@ class ItemSelectionActivity : BaseActivity() {
         dbView = when (mode) {
             Mode.HIRAGANA -> Database.getInstance(this).hiraganaView
             Mode.KATAKANA -> Database.getInstance(this).katakanaView
-            Mode.KANJI -> Database.getInstance(this).getKanjiView(selectedLevel!!)
-            Mode.WORD -> Database.getInstance(this).getWordView(selectedLevel!!)
+            Mode.KANJI -> Database.getInstance(this).getKanjiView(JlptLevel(selectedLevel!!))
+            Mode.WORD -> Database.getInstance(this).getWordView(JlptLevel(selectedLevel!!))
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

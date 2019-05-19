@@ -17,14 +17,14 @@ class Database private constructor(context: Context, private val database: SQLit
     val kanjiView: LearningDbView
         get() = LearningDbView(database, KANJIS_TABLE_NAME, filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
-    fun getKanjiView(level: Int?): LearningDbView =
-            LearningDbView(database, KANJIS_TABLE_NAME, filter = "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+    fun getKanjiView(classifier: Classifier?): LearningDbView =
+            LearningDbView(database, KANJIS_TABLE_NAME, filter = "radical = 0", classifier = classifier, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     val wordView: LearningDbView
         get() = LearningDbView(database, WORDS_TABLE_NAME, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
-    fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(database, WORDS_TABLE_NAME, filter = "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
+    fun getWordView(classifier: Classifier?): LearningDbView =
+            LearningDbView(database, WORDS_TABLE_NAME, filter = "1", classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""

@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.model.JlptLevel
 import org.kaqui.model.LearningDbView
 
 class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView) : BaseAdapter() {
@@ -30,7 +31,7 @@ class JlptLevelSelectionAdapter(private val context: Context, private val dbView
             statsLayout.elevation = 8.0f
             statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
         }
-        StatsFragment.updateStats(dbView.getStats(levels[position]["level"] as Int), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
+        StatsFragment.updateStats(dbView.getStats(JlptLevel(levels[position]["level"] as Int)), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view
     }
