@@ -25,11 +25,11 @@ import org.kaqui.model.*
 import java.io.Serializable
 import kotlin.coroutines.CoroutineContext
 
-class JlptSelectionActivity : BaseActivity(), CoroutineScope {
+class ClassSelectionActivity : BaseActivity(), CoroutineScope {
     private lateinit var dbView: LearningDbView
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
-    private lateinit var adapter: JlptLevelSelectionAdapter
+    private lateinit var adapter: ClassSelectionAdapter
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
@@ -64,9 +64,9 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
                 id = R.id.global_stats
             }.lparams(width = matchParent, height = wrapContent)
             listView{
-                this@JlptSelectionActivity.adapter = JlptLevelSelectionAdapter(context, dbView, classification)
-                adapter = this@JlptSelectionActivity.adapter
-                onItemClickListener = AdapterView.OnItemClickListener(this@JlptSelectionActivity::onListItemClick)
+                this@ClassSelectionActivity.adapter = ClassSelectionAdapter(context, dbView, classification)
+                adapter = this@ClassSelectionActivity.adapter
+                onItemClickListener = AdapterView.OnItemClickListener(this@ClassSelectionActivity::onListItemClick)
             }.lparams(width = matchParent, height = matchParent)
         }
 
@@ -137,12 +137,12 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
             }
             R.id.autoselect -> {
                 launch {
-                    val progressDialog = ProgressDialog(this@JlptSelectionActivity)
+                    val progressDialog = ProgressDialog(this@ClassSelectionActivity)
                     progressDialog.setMessage(getString(R.string.autoselecting_words))
                     progressDialog.setCancelable(false)
                     progressDialog.show()
 
-                    withContext(Dispatchers.Default) { Database.getInstance(this@JlptSelectionActivity).autoSelectWords() }
+                    withContext(Dispatchers.Default) { Database.getInstance(this@ClassSelectionActivity).autoSelectWords() }
 
                     adapter.notifyDataSetChanged()
                     statsFragment.updateStats(dbView)
@@ -208,7 +208,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
     }
 
     companion object {
-        private const val TAG = "JlptSelectionActivity"
+        private const val TAG = "ClassSelectionActivity"
 
         private const val PICK_IMPORT_FILE = 1
     }

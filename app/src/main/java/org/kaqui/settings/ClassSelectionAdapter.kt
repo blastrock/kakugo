@@ -13,7 +13,7 @@ import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.*
 
-class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView, classification: Classification) : BaseAdapter() {
+class ClassSelectionAdapter(private val context: Context, private val dbView: LearningDbView, classification: Classification) : BaseAdapter() {
     private val levels = getClassifiers(classification).map { mapOf("label" to it.name(context), "classifier" to it) }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {

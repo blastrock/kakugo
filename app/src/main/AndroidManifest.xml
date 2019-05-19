@@ -54,7 +54,7 @@
             android:name=".settings.SavedSelectionsActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
-            android:name=".settings.JlptSelectionActivity"
+            android:name=".settings.ClassSelectionActivity"
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".settings.ItemSearchActivity"
