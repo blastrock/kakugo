@@ -4,8 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Path
-import android.os.Build
-import androidx.preference.PreferenceManager
 import org.kaqui.LocaleManager
 import org.kaqui.asUnicodeCodePoint
 
@@ -85,12 +83,12 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
-    fun getHiragana(id: Int): Item = getKana(HIRAGANAS_TABLE_NAME, HIRAGANA_STROKES_TABLE_NAME, SIMILAR_HIRAGANAS_TABLE_NAME, id)
-    fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, KATAKANA_STROKES_TABLE_NAME, SIMILAR_KATAKANAS_TABLE_NAME, id)
+    fun getHiragana(id: Int): Item = getKana(HIRAGANAS_TABLE_NAME, id)
+    fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, id)
 
-    private fun getKana(tableName: String, strokesTableName: String, similarKanaTableName: String, id: Int): Item {
+    private fun getKana(tableName: String, id: Int): Item {
         val strokes = mutableListOf<Path>()
-        database.query(strokesTableName, arrayOf("path"), "id_kana = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
+        database.query(ITEM_STROKES_TABLE_NAME, arrayOf("path"), "id_item = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
             val PathParser = Class.forName("androidx.core.graphics.PathParser")
             val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
             while (cursor.moveToNext()) {
@@ -98,7 +96,7 @@ class Database private constructor(context: Context, private val database: SQLit
             }
         }
         val similarities = mutableListOf<Item>()
-        database.query(similarKanaTableName, arrayOf("id_kana2"), "id_kana1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf(), listOf()), 0.0, 0.0, 0, false))
         }
@@ -121,7 +119,7 @@ class Database private constructor(context: Context, private val database: SQLit
 
     fun getKanji(id: Int): Item {
         val strokes = mutableListOf<Path>()
-        database.query(STROKES_TABLE_NAME, arrayOf("path"), "id_kanji = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
+        database.query(ITEM_STROKES_TABLE_NAME, arrayOf("path"), "id_item = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
             val PathParser = Class.forName("androidx.core.graphics.PathParser")
             val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
             while (cursor.moveToNext()) {
@@ -129,7 +127,7 @@ class Database private constructor(context: Context, private val database: SQLit
             }
         }
         val similarities = mutableListOf<Item>()
-        database.query(SIMILARITIES_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
@@ -338,19 +336,17 @@ class Database private constructor(context: Context, private val database: SQLit
         const val DATABASE_NAME = "kanjis"
 
         const val HIRAGANAS_TABLE_NAME = "hiraganas"
-        const val HIRAGANA_STROKES_TABLE_NAME = "hiragana_strokes"
-        const val SIMILAR_HIRAGANAS_TABLE_NAME = "similar_hiraganas"
 
         const val KATAKANAS_TABLE_NAME = "katakanas"
-        const val KATAKANA_STROKES_TABLE_NAME = "katakana_strokes"
-        const val SIMILAR_KATAKANAS_TABLE_NAME = "similar_katakanas"
 
         const val KANJIS_TABLE_NAME = "kanjis"
-        const val SIMILARITIES_TABLE_NAME = "similarities"
+        const val KANJIS_COMPOSITION_TABLE_NAME = "kanjis_composition"
+
+        const val SIMILAR_ITEMS_TABLE_NAME = "similar_items"
+        const val ITEM_STROKES_TABLE_NAME = "item_strokes"
+
         const val KANJIS_SELECTION_TABLE_NAME = "kanjis_selection"
         const val KANJIS_ITEM_SELECTION_TABLE_NAME = "kanjis_item_selection"
-        const val STROKES_TABLE_NAME = "strokes"
-        const val KANJIS_COMPOSITION_TABLE_NAME = "kanjis_composition"
 
         const val WORDS_TABLE_NAME = "words"
 

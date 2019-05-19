@@ -20,7 +20,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
                         + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
-                        + "kaqui_level INTEGER NOT NULL DEFAULT 0,"
+                        + "rtk_index INTEGER NOT NULL DEFAULT 0,"
+                        + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
                         + "part_count INTEGER NOT NULL DEFAULT 0,"
                         + "radical INTEGER NOT NULL DEFAULT 0,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
@@ -29,24 +30,24 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS ${Database.STROKES_TABLE_NAME} ("
+                "CREATE TABLE IF NOT EXISTS ${Database.ITEM_STROKES_TABLE_NAME} ("
                         + "id INTEGER PRIMARY KEY,"
-                        + "id_kanji INTEGER NOT NULL REFERENCES kanjis(id),"
+                        + "id_item INTEGER NOT NULL,"
                         + "ordinal INT NOT NULL,"
                         + "path TEXT NOT NULL,"
-                        + "UNIQUE(id_kanji, ordinal)"
+                        + "UNIQUE(id_item, ordinal)"
+                        + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.SIMILAR_ITEMS_TABLE_NAME} ("
+                        + "id_item1 INTEGER NOT NULL,"
+                        + "id_item2 INTEGER NOT NULL,"
+                        + "PRIMARY KEY (id_item1, id_item2)"
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.KANJIS_COMPOSITION_TABLE_NAME} ("
                         + "id_composition INTEGER PRIMARY KEY,"
                         + "id_kanji1 INTEGER NOT NULL REFERENCES kanjis(id),"
                         + "id_kanji2 INTEGER NOT NULL REFERENCES kanjis(id)"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS ${Database.SIMILARITIES_TABLE_NAME} ("
-                        + "id_kanji1 INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "id_kanji2 INTEGER NOT NULL REFERENCES kanjis(id),"
-                        + "PRIMARY KEY (id_kanji1, id_kanji2)"
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.KANJIS_ITEM_SELECTION_TABLE_NAME} ("
@@ -67,6 +68,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
                         + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
+                        + "rtk_index INTEGER NOT NULL DEFAULT 0,"
+                        + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
                         + "similarity_class INTEGER NOT NULL DEFAULT 0,"
                         + "short_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
@@ -75,11 +78,11 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "UNIQUE(item, reading)"
                         + ")")
 
-        createKanaTable(Database.HIRAGANAS_TABLE_NAME, Database.HIRAGANA_STROKES_TABLE_NAME, Database.SIMILAR_HIRAGANAS_TABLE_NAME)
-        createKanaTable(Database.KATAKANAS_TABLE_NAME, Database.KATAKANA_STROKES_TABLE_NAME, Database.SIMILAR_KATAKANAS_TABLE_NAME)
+        createKanaTable(Database.HIRAGANAS_TABLE_NAME)
+        createKanaTable(Database.KATAKANAS_TABLE_NAME)
     }
 
-    private fun createKanaTable(tableName: String, strokesTableName: String, similarKanaTableName: String) {
+    private fun createKanaTable(tableName: String) {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS $tableName ("
                         + "id INTEGER PRIMARY KEY NOT NULL,"
@@ -89,20 +92,6 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "long_score FLOAT NOT NULL DEFAULT 0.0,"
                         + "last_correct INTEGER NOT NULL DEFAULT 0,"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $strokesTableName ("
-                        + "id INTEGER PRIMARY KEY NOT NULL,"
-                        + "id_kana INTEGER NOT NULL,"
-                        + "ordinal INTEGER NOT NULL,"
-                        + "path TEXT NOT NULL,"
-                        + "UNIQUE (id_kana, ordinal)"
-                        + ")")
-        database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $similarKanaTableName ("
-                        + "id_kana1 INTEGER NOT NULL REFERENCES $tableName(id),"
-                        + "id_kana2 INTEGER NOT NULL REFERENCES $tableName(id),"
-                        + "PRIMARY KEY (id_kana1, id_kana2)"
                         + ")")
     }
 
@@ -122,16 +111,20 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                     }
             database.execSQL("DROP TABLE IF EXISTS main.meanings")
             database.execSQL("DROP TABLE IF EXISTS main.readings")
-            database.execSQL("DROP TABLE IF EXISTS main.${Database.SIMILARITIES_TABLE_NAME}")
-            database.execSQL("DROP TABLE IF EXISTS main.${Database.STROKES_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.similarities")
+            database.execSQL("DROP TABLE IF EXISTS main.strokes")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.SIMILAR_ITEMS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.ITEM_STROKES_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_ITEM_SELECTION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_SELECTION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_COMPOSITION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.HIRAGANAS_TABLE_NAME}")
-            database.execSQL("DROP TABLE IF EXISTS main.${Database.SIMILAR_HIRAGANAS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.similar_hiraganas")
+            database.execSQL("DROP TABLE IF EXISTS main.hiragana_strokes")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KATAKANAS_TABLE_NAME}")
-            database.execSQL("DROP TABLE IF EXISTS main.${Database.SIMILAR_KATAKANAS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.similar_katakanas")
+            database.execSQL("DROP TABLE IF EXISTS main.katakana_strokes")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.WORDS_TABLE_NAME}")
             createDatabase()
 
@@ -147,30 +140,30 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
     }
 
     private fun replaceDict() {
-        replaceKanas(Database.HIRAGANAS_TABLE_NAME, Database.HIRAGANA_STROKES_TABLE_NAME, Database.SIMILAR_HIRAGANAS_TABLE_NAME)
-        replaceKanas(Database.KATAKANAS_TABLE_NAME, Database.KATAKANA_STROKES_TABLE_NAME, Database.SIMILAR_KATAKANAS_TABLE_NAME)
+        replaceKanas(Database.HIRAGANAS_TABLE_NAME)
+        replaceKanas(Database.KATAKANAS_TABLE_NAME)
 
-        database.delete(Database.SIMILARITIES_TABLE_NAME, null, null)
-        database.delete(Database.STROKES_TABLE_NAME, null, null)
+        database.delete(Database.SIMILAR_ITEMS_TABLE_NAME, null, null)
+        database.delete(Database.ITEM_STROKES_TABLE_NAME, null, null)
         database.delete(Database.KANJIS_COMPOSITION_TABLE_NAME, null, null)
         database.delete(Database.KANJIS_TABLE_NAME, null, null)
         database.execSQL(
                 "INSERT INTO ${Database.KANJIS_TABLE_NAME} "
-                        + "(id, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, kaqui_level, part_count, radical, enabled) "
-                        + "SELECT id, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, kaqui_level, part_count, radical, jlpt_level = 5 "
+                        + "(id, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, rtk_index, rtk6_index, part_count, radical, enabled) "
+                        + "SELECT id, on_readings, kun_readings, meanings_en, meanings_fr, jlpt_level, rtk_index, rtk6_index, part_count, radical, jlpt_level = 5 "
                         + "FROM dict.kanjis"
         )
         database.execSQL(
-                "INSERT INTO ${Database.STROKES_TABLE_NAME} "
-                        + "(id, id_kanji, ordinal, path) "
-                        + "SELECT id, id_kanji, ordinal, path "
-                        + "FROM dict.strokes"
+                "INSERT INTO ${Database.ITEM_STROKES_TABLE_NAME} "
+                        + "(id, id_item, ordinal, path) "
+                        + "SELECT id, id_item, ordinal, path "
+                        + "FROM dict.item_strokes"
         )
         database.execSQL(
-                "INSERT INTO ${Database.SIMILARITIES_TABLE_NAME} "
-                        + "(id_kanji1, id_kanji2) "
-                        + "SELECT id_kanji1, id_kanji2 "
-                        + "FROM dict.kanjis_similars "
+                "INSERT INTO ${Database.SIMILAR_ITEMS_TABLE_NAME} "
+                        + "(id_item1, id_item2) "
+                        + "SELECT id_item1, id_item2 "
+                        + "FROM dict.similar_items "
         )
         database.execSQL(
                 "INSERT INTO ${Database.KANJIS_COMPOSITION_TABLE_NAME} "
@@ -182,33 +175,20 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.delete(Database.WORDS_TABLE_NAME, null, null)
         database.execSQL(
                 "INSERT INTO ${Database.WORDS_TABLE_NAME} "
-                        + "(id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class) "
-                        + "SELECT id, item, reading, meanings_en, meanings_fr, jlpt_level, similarity_class "
+                        + "(id, item, reading, meanings_en, meanings_fr, jlpt_level, rtk_index, rtk6_index, similarity_class) "
+                        + "SELECT id, item, reading, meanings_en, meanings_fr, jlpt_level, rtk_index, rtk6_index, similarity_class "
                         + "FROM dict.words"
         )
     }
 
-    private fun replaceKanas(tableName: String, strokesTableName: String, similarKanaTableName: String) {
+    private fun replaceKanas(tableName: String) {
         database.delete(tableName, null, null)
-        database.delete(similarKanaTableName, null, null)
 
         database.execSQL(
                 "INSERT INTO $tableName "
                         + "(id, romaji, unique_romaji) "
                         + "SELECT id, romaji, unique_romaji "
                         + "FROM dict.$tableName"
-        )
-        database.execSQL(
-                "INSERT INTO $strokesTableName "
-                        + "(id, id_kana, ordinal, path) "
-                        + "SELECT id, id_kana, ordinal, path "
-                        + "FROM dict.$strokesTableName"
-        )
-        database.execSQL(
-                "INSERT INTO $similarKanaTableName "
-                        + "(id_kana1, id_kana2) "
-                        + "SELECT id_kana1, id_kana2 "
-                        + "FROM dict.$similarKanaTableName"
         )
     }
 
@@ -388,7 +368,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 17
+        const val DATABASE_VERSION = 18
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
