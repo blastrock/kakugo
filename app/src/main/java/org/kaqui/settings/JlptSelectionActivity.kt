@@ -15,7 +15,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
-import kotlinx.android.synthetic.main.jlpt_selection_activity.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
@@ -30,6 +29,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
     private lateinit var dbView: LearningDbView
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
+    private lateinit var adapter: JlptLevelSelectionAdapter
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
@@ -46,7 +46,21 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
 
         mode = intent.getSerializableExtra("mode") as Mode
 
-        setContentView(R.layout.jlpt_selection_activity)
+        dbView = when (mode) {
+            Mode.KANJI -> Database.getInstance(this).kanjiView
+            Mode.WORD -> Database.getInstance(this).wordView
+        }
+
+        verticalLayout {
+            frameLayout {
+                id = R.id.global_stats
+            }.lparams(width = matchParent, height = wrapContent)
+            listView{
+                this@JlptSelectionActivity.adapter = JlptLevelSelectionAdapter(context, dbView)
+                adapter = this@JlptSelectionActivity.adapter
+                onItemClickListener = AdapterView.OnItemClickListener(this@JlptSelectionActivity::onListItemClick)
+            }.lparams(width = matchParent, height = matchParent)
+        }
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -55,14 +69,6 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
         supportFragmentManager.beginTransaction()
                 .replace(R.id.global_stats, statsFragment)
                 .commit()
-
-        dbView = when (mode) {
-            Mode.KANJI -> Database.getInstance(this).kanjiView
-            Mode.WORD -> Database.getInstance(this).wordView
-        }
-
-        jlpt_selection_list.adapter = JlptLevelSelectionAdapter(this, dbView)
-        jlpt_selection_list.onItemClickListener = AdapterView.OnItemClickListener(this::onListItemClick)
     }
 
     override fun onDestroy() {
@@ -74,7 +80,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
         super.onStart()
 
         statsFragment.updateStats(dbView)
-        (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -130,7 +136,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
 
                     withContext(Dispatchers.Default) { Database.getInstance(this@JlptSelectionActivity).autoSelectWords() }
 
-                    (jlpt_selection_list.adapter as JlptLevelSelectionAdapter).notifyDataSetChanged()
+                    adapter.notifyDataSetChanged()
                     statsFragment.updateStats(dbView)
 
                     progressDialog.dismiss()
