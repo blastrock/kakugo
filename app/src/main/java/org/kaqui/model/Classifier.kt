@@ -28,6 +28,13 @@ fun Classifier.whereArguments() =
             is Rtk6Index -> arrayOf(this.from.toString(), this.to.toString())
         }
 
+fun Classifier.orderColumn() =
+        when (this) {
+            is JlptLevel -> "jlpt_level, rtk6_index" // sort also by something else because level is not enough
+            is RtkIndex -> "rtk_index"
+            is Rtk6Index -> "rtk6_index"
+        }
+
 fun Classifier.name(context: Context): String =
         when (this) {
             is JlptLevel ->

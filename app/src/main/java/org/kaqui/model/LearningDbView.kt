@@ -24,7 +24,7 @@ class LearningDbView(
 
     private fun getAllItemsForAnyLevel(): List<Int> {
         val ret = mutableListOf<Int>()
-        database.query(tableName, arrayOf("id"), filter, null, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("id"), filter, null, null, null, classifier?.orderColumn()).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
@@ -34,7 +34,7 @@ class LearningDbView(
 
     private fun getItemsForLevel(classifier: Classifier): List<Int> {
         val ret = mutableListOf<Int>()
-        database.query(tableName, arrayOf("id"), "$filter AND " + classifier.whereClause(), classifier.whereArguments(), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("id"), "$filter AND " + classifier.whereClause(), classifier.whereArguments(), null, null, classifier.orderColumn()).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
