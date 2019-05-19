@@ -99,14 +99,13 @@ class CompositionTestFragment : Fragment(), TestFragment {
             true
         }
 
-        refreshQuestion()
-
         if (checkedAnswers != null)
             for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
                 if (answer.id in checkedAnswers)
                     button.isChecked = true
-                colorCheckedButton(button)
             }
+
+        refreshQuestion()
 
         if (finished) {
             doneButton.visibility = View.GONE
@@ -216,6 +215,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
             button.text = answer.getAnswerText(testType)
             button.textOn = answer.getAnswerText(testType)
             button.textOff = answer.getAnswerText(testType)
+            colorCheckedButton(button)
         }
     }
 
