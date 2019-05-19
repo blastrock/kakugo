@@ -15,18 +15,16 @@ class Database private constructor(context: Context, private val database: SQLit
     val katakanaView: LearningDbView
         get() = LearningDbView(database, KATAKANAS_TABLE_NAME, "id", itemGetter = this::getKatakana)
     val kanjiView: LearningDbView
-        get() = LearningDbView(database, KANJIS_TABLE_NAME, "id", "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
-    val composedKanjiView: LearningDbView
         get() = LearningDbView(database, KANJIS_TABLE_NAME, "id", filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     fun getKanjiView(level: Int?): LearningDbView =
-            LearningDbView(database, KANJIS_TABLE_NAME, "id", "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+            LearningDbView(database, KANJIS_TABLE_NAME, "id", filter = "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     val wordView: LearningDbView
         get() = LearningDbView(database, WORDS_TABLE_NAME, "id", itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(database, WORDS_TABLE_NAME, "id", "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
+            LearningDbView(database, WORDS_TABLE_NAME, "id", filter = "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""
