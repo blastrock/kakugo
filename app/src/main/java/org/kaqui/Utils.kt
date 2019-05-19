@@ -102,6 +102,7 @@ fun startTest(activity: Activity, type: TestType) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
+        return
     }
     activity.startActivity<TestActivity>("test_type" to type)
 }
