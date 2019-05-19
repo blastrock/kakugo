@@ -11,12 +11,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import org.kaqui.R
 import org.kaqui.StatsFragment
-import org.kaqui.model.JlptLevel
-import org.kaqui.model.LearningDbView
+import org.kaqui.model.*
 
-class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView) : BaseAdapter() {
-    private val levels = (5 downTo 1).map { mapOf("label" to context.getString(R.string.jlpt_level_n, it.toString()), "level" to it) } +
-            mapOf("label" to context.getString(R.string.additional_kanji), "level" to 0)
+class JlptLevelSelectionAdapter(private val context: Context, private val dbView: LearningDbView, classification: Classification) : BaseAdapter() {
+    private val levels = getClassifiers(classification).map { mapOf("label" to it.name(context), "classifier" to it) }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.jlpt_level_item, parent, false)
@@ -31,7 +29,7 @@ class JlptLevelSelectionAdapter(private val context: Context, private val dbView
             statsLayout.elevation = 8.0f
             statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
         }
-        StatsFragment.updateStats(dbView.getStats(JlptLevel(levels[position]["level"] as Int)), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
+        StatsFragment.updateStats(dbView.getStats(levels[position]["classifier"] as Classifier), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view
     }
@@ -40,7 +38,7 @@ class JlptLevelSelectionAdapter(private val context: Context, private val dbView
         return levels[position]
     }
 
-    override fun getItemId(position: Int): Long = (levels[position]["level"] as Int).toLong()
+    override fun getItemId(position: Int): Long = 0L
 
-    override fun getCount(): Int = 6
+    override fun getCount(): Int = levels.size
 }

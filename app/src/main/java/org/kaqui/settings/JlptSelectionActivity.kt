@@ -20,8 +20,7 @@ import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
-import org.kaqui.model.Database
-import org.kaqui.model.LearningDbView
+import org.kaqui.model.*
 import java.io.Serializable
 import kotlin.coroutines.CoroutineContext
 
@@ -56,7 +55,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
                 id = R.id.global_stats
             }.lparams(width = matchParent, height = wrapContent)
             listView{
-                this@JlptSelectionActivity.adapter = JlptLevelSelectionAdapter(context, dbView)
+                this@JlptSelectionActivity.adapter = JlptLevelSelectionAdapter(context, dbView, Classification.JlptLevel)
                 adapter = this@JlptSelectionActivity.adapter
                 onItemClickListener = AdapterView.OnItemClickListener(this@JlptSelectionActivity::onListItemClick)
             }.lparams(width = matchParent, height = matchParent)
@@ -150,7 +149,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
 
     private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
         val item = l.adapter.getItem(position) as Map<String, Any>
-        val level = item["level"] as Int
+        val level = (item["classifier"] as JlptLevel).level
 
         startActivity(Intent(this, ItemSelectionActivity::class.java)
                 .putExtra("mode", when (mode) {

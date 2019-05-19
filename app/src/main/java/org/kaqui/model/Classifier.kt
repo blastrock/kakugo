@@ -1,5 +1,8 @@
 package org.kaqui.model
 
+import android.content.Context
+import org.kaqui.R
+
 sealed class Classifier
 
 data class JlptLevel(val level: Int) : Classifier()
@@ -18,4 +21,26 @@ fun Classifier.whereArguments() =
             is JlptLevel -> arrayOf(this.level.toString())
             is RtkIndex -> arrayOf(this.from.toString(), this.to.toString())
             is Rtk6Index -> arrayOf(this.from.toString(), this.to.toString())
+        }
+
+fun Classifier.name(context: Context) =
+        when (this) {
+            is JlptLevel ->
+                if (this.level == 0)
+                    context.getString(R.string.additional_kanji)
+                else
+                    context.getString(R.string.jlpt_level_n, this.level.toString())
+            else -> TODO("not implemented")
+        }
+
+enum class Classification {
+    JlptLevel,
+    RtkIndexRange,
+    Rtk6IndexRange,
+}
+
+fun getClassifiers(type: Classification): List<Classifier> =
+        when (type) {
+            Classification.JlptLevel -> (5 downTo 0).map { JlptLevel(it) }
+            else -> TODO("not implemented")
         }
