@@ -7,8 +7,8 @@ import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.model.Classifier
 import org.kaqui.model.Database
-import org.kaqui.model.JlptLevel
 import org.kaqui.model.LearningDbView
 
 class ItemSelectionActivity : BaseActivity() {
@@ -16,7 +16,7 @@ class ItemSelectionActivity : BaseActivity() {
     private lateinit var listAdapter: ItemSelectionAdapter
     private lateinit var statsFragment: StatsFragment
     private lateinit var mode: Mode
-    private var selectedLevel: Int? = null
+    private var classifier: Classifier? = null
 
     enum class Mode {
         HIRAGANA,
@@ -31,9 +31,7 @@ class ItemSelectionActivity : BaseActivity() {
         mode = intent.getSerializableExtra("mode") as Mode
 
         if (mode == Mode.KANJI || mode == Mode.WORD) {
-            selectedLevel = intent.getIntExtra("level", -1)
-            if (selectedLevel!! < 0)
-                throw RuntimeException("Invalid level $selectedLevel")
+            classifier = intent.getParcelableExtra("classifier")
         }
 
         setContentView(R.layout.item_selection_activity)
@@ -49,8 +47,8 @@ class ItemSelectionActivity : BaseActivity() {
         dbView = when (mode) {
             Mode.HIRAGANA -> Database.getInstance(this).hiraganaView
             Mode.KATAKANA -> Database.getInstance(this).katakanaView
-            Mode.KANJI -> Database.getInstance(this).getKanjiView(JlptLevel(selectedLevel!!))
-            Mode.WORD -> Database.getInstance(this).getWordView(JlptLevel(selectedLevel!!))
+            Mode.KANJI -> Database.getInstance(this).getKanjiView(classifier!!)
+            Mode.WORD -> Database.getInstance(this).getWordView(classifier!!)
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

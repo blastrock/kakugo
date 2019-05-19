@@ -1,12 +1,17 @@
 package org.kaqui.model
 
 import android.content.Context
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import org.kaqui.R
 
-sealed class Classifier
+sealed class Classifier : Parcelable
 
+@Parcelize
 data class JlptLevel(val level: Int) : Classifier()
+@Parcelize
 data class RtkIndex(val from: Int, val to: Int) : Classifier()
+@Parcelize
 data class Rtk6Index(val from: Int, val to: Int) : Classifier()
 
 fun Classifier.whereClause() =

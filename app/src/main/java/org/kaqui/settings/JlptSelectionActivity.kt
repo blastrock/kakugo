@@ -149,14 +149,14 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
 
     private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
         val item = l.adapter.getItem(position) as Map<String, Any>
-        val level = (item["classifier"] as JlptLevel).level
+        val classifier = item["classifier"] as Classifier
 
         startActivity(Intent(this, ItemSelectionActivity::class.java)
                 .putExtra("mode", when (mode) {
                     Mode.KANJI -> ItemSelectionActivity.Mode.KANJI
                     Mode.WORD -> ItemSelectionActivity.Mode.WORD
                 } as Serializable)
-                .putExtra("level", level))
+                .putExtra("classifier", classifier))
     }
 
     private fun saveSelection(name: String) {
