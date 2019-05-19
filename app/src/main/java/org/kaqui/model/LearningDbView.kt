@@ -7,7 +7,6 @@ import org.kaqui.SrsCalculator
 class LearningDbView(
         private val database: SQLiteDatabase,
         private val tableName: String,
-        private val idColumnName: String,
         private val filter: String = "1",
         private val level: Int? = null,
         private val itemGetter: (id: Int) -> Item,
@@ -25,7 +24,7 @@ class LearningDbView(
 
     private fun getAllItemsForAnyLevel(): List<Int> {
         val ret = mutableListOf<Int>()
-        database.query(tableName, arrayOf(idColumnName), filter, null, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("id"), filter, null, null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
@@ -35,7 +34,7 @@ class LearningDbView(
 
     private fun getItemsForLevel(level: Int): List<Int> {
         val ret = mutableListOf<Int>()
-        database.query(tableName, arrayOf(idColumnName), "$filter AND jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("id"), "$filter AND jlpt_level = ?", arrayOf(level.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
             }
@@ -64,18 +63,18 @@ class LearningDbView(
     fun setItemEnabled(itemId: Int, enabled: Boolean) {
         val cv = ContentValues()
         cv.put("enabled", if (enabled) 1 else 0)
-        database.update(tableName, cv, "$idColumnName = ?", arrayOf(itemId.toString()))
+        database.update(tableName, cv, "id = ?", arrayOf(itemId.toString()))
     }
 
     fun isItemEnabled(id: Int): Boolean {
-        database.query(tableName, arrayOf("enabled"), "$idColumnName = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("enabled"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0) != 0
         }
     }
 
     fun getEnabledItemsAndScores(): List<SrsCalculator.ProbabilityData> {
-        database.query(tableName, arrayOf(idColumnName, "short_score", "long_score", "last_correct"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
+        database.query(tableName, arrayOf("id", "short_score", "long_score", "last_correct"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
             val ret = mutableListOf<SrsCalculator.ProbabilityData>()
             while (cursor.moveToNext()) {
                 ret.add(SrsCalculator.ProbabilityData(cursor.getInt(0), cursor.getDouble(1), 0.0, cursor.getDouble(2), 0.0, cursor.getLong(3), 0.0, 0.0))
@@ -109,7 +108,7 @@ class LearningDbView(
         cv.put("long_score", scoreUpdate.longScore)
         if (scoreUpdate.lastCorrect != null)
             cv.put("last_correct", scoreUpdate.lastCorrect)
-        database.update(tableName, cv, "$idColumnName = ?", arrayOf(scoreUpdate.itemId.toString()))
+        database.update(tableName, cv, "id = ?", arrayOf(scoreUpdate.itemId.toString()))
     }
 
 

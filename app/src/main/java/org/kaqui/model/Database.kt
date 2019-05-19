@@ -11,20 +11,20 @@ class Database private constructor(context: Context, private val database: SQLit
     private val locale: String get() = LocaleManager.getDictionaryLocale()
 
     val hiraganaView: LearningDbView
-        get() = LearningDbView(database, HIRAGANAS_TABLE_NAME, "id", itemGetter = this::getHiragana)
+        get() = LearningDbView(database, HIRAGANAS_TABLE_NAME, itemGetter = this::getHiragana)
     val katakanaView: LearningDbView
-        get() = LearningDbView(database, KATAKANAS_TABLE_NAME, "id", itemGetter = this::getKatakana)
+        get() = LearningDbView(database, KATAKANAS_TABLE_NAME, itemGetter = this::getKatakana)
     val kanjiView: LearningDbView
-        get() = LearningDbView(database, KANJIS_TABLE_NAME, "id", filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+        get() = LearningDbView(database, KANJIS_TABLE_NAME, filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     fun getKanjiView(level: Int?): LearningDbView =
-            LearningDbView(database, KANJIS_TABLE_NAME, "id", filter = "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
+            LearningDbView(database, KANJIS_TABLE_NAME, filter = "radical = 0", level = level, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
     val wordView: LearningDbView
-        get() = LearningDbView(database, WORDS_TABLE_NAME, "id", itemGetter = this::getWord, itemSearcher = this::searchWord)
+        get() = LearningDbView(database, WORDS_TABLE_NAME, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getWordView(level: Int?): LearningDbView =
-            LearningDbView(database, WORDS_TABLE_NAME, "id", filter = "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
+            LearningDbView(database, WORDS_TABLE_NAME, filter = "1", level = level, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""
