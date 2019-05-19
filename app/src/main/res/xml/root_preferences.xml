@@ -13,4 +13,12 @@
         app:entryValues="@array/language_ids"
         app:defaultValue="" />
 
+    <ListPreference
+        app:key="item_classification"
+        app:title="@string/kanji_classification"
+        app:summary="%s"
+        app:entries="@array/kanji_classification_strings"
+        app:entryValues="@array/kanji_classification_ids"
+        app:defaultValue="jlpt" />
+
 </androidx.preference.PreferenceScreen>

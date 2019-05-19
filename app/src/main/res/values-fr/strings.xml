@@ -60,6 +60,8 @@
     <string name="could_not_import_file">Impossible d\'importer le fichier: %1$s</string>
     <string name="additional_kanji">Kanji additionnels</string>
     <string name="jlpt_level_n">JLPT niveau %1$s</string>
+    <string name="rtk_index_range">Index %1$s+</string>
+    <string name="rtk6_index_range">Index %1$s+</string>
     <string name="search_word_hint">Rechercher un mot&#8230;</string>
     <string name="word_title">Vocabulaire</string>
     <string name="enable_dark_theme">Activer le thème sombre</string>
@@ -68,4 +70,5 @@
     <string name="will_update_later">Pris en compte lorsque vous quittez les paramètres</string>
     <string name="dictionary_language">Langue du dictionnaire</string>
     <string name="lang_system_default">Langue du système</string>
+    <string name="kanji_classification">Classification des kanji</string>
 </resources>

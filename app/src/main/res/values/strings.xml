@@ -66,6 +66,8 @@
     <string name="could_not_import_file">Could not import file: %1$s</string>
     <string name="additional_kanji">Additional kanji</string>
     <string name="jlpt_level_n">JLPT level %1$s</string>
+    <string name="rtk_index_range">Indexes %1$s+</string>
+    <string name="rtk6_index_range">Indexes %1$s+</string>
     <string name="hiragana_title" translatable="false">Hiragana</string>
     <string name="katakana_title" translatable="false">Katakana</string>
     <string name="kanji_title" translatable="false">Kanji</string>
@@ -78,4 +80,8 @@
     <string name="lang_system_default">System default</string>
     <string name="lang_english" translatable="false">English</string>
     <string name="lang_french" translatable="false">Français</string>
+    <string name="kanji_classification">Kanji classification</string>
+    <string name="kanji_class_jlpt" translatable="false">JLPT</string>
+    <string name="kanji_class_rtk" translatable="false">Remembering The Kanji</string>
+    <string name="kanji_class_rtk6" translatable="false">Remembering The Kanji (6th edition)</string>
 </resources>

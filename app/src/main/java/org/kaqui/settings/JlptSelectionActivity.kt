@@ -15,6 +15,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.*
 import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
@@ -43,6 +44,14 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         job = Job()
 
+        val classificationStr = PreferenceManager.getDefaultSharedPreferences(this).getString("item_classification", "jlpt")
+        val classification = when (classificationStr) {
+            "jlpt" -> Classification.JlptLevel
+            "rtk" -> Classification.RtkIndexRange
+            "rtk6" -> Classification.Rtk6IndexRange
+            else -> throw RuntimeException("unknown kanji classification: $classificationStr")
+        }
+
         mode = intent.getSerializableExtra("mode") as Mode
 
         dbView = when (mode) {
@@ -55,7 +64,7 @@ class JlptSelectionActivity : BaseActivity(), CoroutineScope {
                 id = R.id.global_stats
             }.lparams(width = matchParent, height = wrapContent)
             listView{
-                this@JlptSelectionActivity.adapter = JlptLevelSelectionAdapter(context, dbView, Classification.JlptLevel)
+                this@JlptSelectionActivity.adapter = JlptLevelSelectionAdapter(context, dbView, classification)
                 adapter = this@JlptSelectionActivity.adapter
                 onItemClickListener = AdapterView.OnItemClickListener(this@JlptSelectionActivity::onListItemClick)
             }.lparams(width = matchParent, height = matchParent)

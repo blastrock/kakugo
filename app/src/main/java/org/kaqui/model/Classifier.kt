@@ -28,14 +28,23 @@ fun Classifier.whereArguments() =
             is Rtk6Index -> arrayOf(this.from.toString(), this.to.toString())
         }
 
-fun Classifier.name(context: Context) =
+fun Classifier.name(context: Context): String =
         when (this) {
             is JlptLevel ->
                 if (this.level == 0)
                     context.getString(R.string.additional_kanji)
                 else
                     context.getString(R.string.jlpt_level_n, this.level.toString())
-            else -> TODO("not implemented")
+            is RtkIndex ->
+                if (this.from == RtkUnclassified)
+                    context.getString(R.string.additional_kanji)
+                else
+                    context.getString(R.string.rtk_index_range, this.from.toString())
+            is Rtk6Index ->
+                if (this.from == RtkUnclassified)
+                    context.getString(R.string.additional_kanji)
+                else
+                    context.getString(R.string.rtk6_index_range, this.from.toString())
         }
 
 enum class Classification {
@@ -44,8 +53,12 @@ enum class Classification {
     Rtk6IndexRange,
 }
 
+const val IndexStep = 200
+const val RtkUnclassified = 0x1000000
+
 fun getClassifiers(type: Classification): List<Classifier> =
         when (type) {
             Classification.JlptLevel -> (5 downTo 0).map { JlptLevel(it) }
-            else -> TODO("not implemented")
+            Classification.RtkIndexRange -> (0 until 3007 step IndexStep).map { RtkIndex(it, it+IndexStep) } + listOf(RtkIndex(RtkUnclassified, RtkUnclassified))
+            Classification.Rtk6IndexRange -> (0 until 3000 step IndexStep).map { Rtk6Index(it, it+IndexStep) } + listOf(RtkIndex(RtkUnclassified, RtkUnclassified))
         }
