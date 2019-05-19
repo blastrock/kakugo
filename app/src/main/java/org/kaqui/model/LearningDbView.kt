@@ -116,9 +116,9 @@ class LearningDbView(
 
     fun getStats(): Stats = getStats(level)
     fun getStats(level: Int?): Stats =
-            Stats(getCountForWeight(0.0f, BAD_WEIGHT, level), getCountForWeight(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForWeight(GOOD_WEIGHT, 1.0f, level), getDisabledCount(level))
+            Stats(getCountForScore(0.0f, BAD_WEIGHT, level), getCountForScore(BAD_WEIGHT, GOOD_WEIGHT, level), getCountForScore(GOOD_WEIGHT, 1.0f, level), getDisabledCount(level))
 
-    private fun getCountForWeight(from: Float, to: Float, level: Int?): Int {
+    private fun getCountForScore(from: Float, to: Float, level: Int?): Int {
         val selection = "$filter AND enabled = 1 AND short_score BETWEEN ? AND ?" +
                 if (level != null)
                     " AND jlpt_level = ?"
