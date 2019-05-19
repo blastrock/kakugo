@@ -112,7 +112,9 @@ class MainActivity : BaseActivity(), CoroutineScope {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize database", e)
             launch(job) {
-                Toast.makeText(this@MainActivity, getString(R.string.failed_to_init_db, e.message), Toast.LENGTH_LONG).show()
+                alert(getString(R.string.failed_to_init_db, e.message), getString(R.string.database_error)) {
+                    okButton {}
+                }.show()
             }
         } finally {
             tmpFile.delete()

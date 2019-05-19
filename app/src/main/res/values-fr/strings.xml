@@ -10,6 +10,7 @@
     <string name="autoselect_from_kanji">Sélectionner automatiquement les mots à partir des kanji sélectionnés</string>
     <string name="autoselect_from_kanji_short">Auto</string>
     <string name="import_selection">Importer une sélection de kanji</string>
+    <string name="database_error">Erreur de base de données</string>
 
     <string name="hiragana_romaji_quiz">Quizz hiragana à romaji (ひ→hi)</string>
     <string name="romaji_hiragana_quiz">Quizz romaji à hiragana (hi→ひ)</string>
