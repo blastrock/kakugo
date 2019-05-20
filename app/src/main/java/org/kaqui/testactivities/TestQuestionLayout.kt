@@ -48,7 +48,7 @@ class TestQuestionLayout {
                             }
                     gravity = Gravity.CENTER
                     questionText = appCompatTextView {
-                        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, questionMinSize, 200, 2, TypedValue.COMPLEX_UNIT_SP)
+                        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, questionMinSize, 200, 10, TypedValue.COMPLEX_UNIT_SP)
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                         gravity = Gravity.CENTER
                     }.lparams(width = matchParent, height = 0, weight = weightQuestion) {
