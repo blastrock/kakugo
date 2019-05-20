@@ -4,10 +4,13 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -18,9 +21,12 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NavUtils
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.NestedScrollView
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.transaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -47,6 +53,10 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     private lateinit var historyScrollView: NestedScrollView
     private lateinit var historyActionButton: FloatingActionButton
     private lateinit var historyView: LinearLayout
+    private lateinit var lastItem: LinearLayout
+    private lateinit var lastKanji: TextView
+    private lateinit var lastInfo: ImageView
+    private lateinit var lastDescription: TextView
     private lateinit var sessionScore: TextView
     private lateinit var mainView: View
     private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -67,12 +77,42 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     sessionScore = textView {
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                     }
-                }.lparams(width = matchParent, height = wrapContent)
-                mainView = frameLayout {
-                    id = R.id.main_test_block
-                }.lparams(width = matchParent, height = matchParent) {
-                    topMargin = dip(16)
-                }
+                    mainView = frameLayout {
+                        id = R.id.main_test_block
+                    }.lparams(width = matchParent, height = matchParent, weight = 1f)
+                    lastItem = linearLayout {
+                        backgroundColor = getColorFromAttr(R.attr.historyBackground)
+                        relativeLayout {
+                            lastKanji = textView {
+                                id = View.generateViewId()
+                                textSize = 25f
+                                textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                            }.lparams(width = matchParent, height = matchParent)
+                            lastInfo = imageView {
+                                val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
+                                val mWrappedDrawable = DrawableCompat.wrap(drawable)
+                                DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
+                                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+                                setImageDrawable(drawable)
+                                contentDescription = context.getString(R.string.info_button)
+                                visibility = View.INVISIBLE
+                            }.lparams(width = sp(10), height = sp(10)) {
+                                sameBottom(lastKanji)
+                                sameEnd(lastKanji)
+                            }
+                        }.lparams(width = sp(35), height = sp(35)) {
+                            margin = dip(8)
+                            gravity = Gravity.CENTER
+                        }
+                        lastDescription = textView {
+                            // disable line wrapping
+                            setHorizontallyScrolling(true)
+                            setLineSpacing(0f, .8f)
+                        }.lparams(height = wrapContent) {
+                            gravity = Gravity.CENTER
+                        }
+                    }.lparams(width = matchParent, height = sp(50))
+                }.lparams(width = matchParent, height = matchParent)
                 historyScrollView = nestedScrollView {
                     id = R.id.history_scroll_view
                     backgroundColor = getColorFromAttr(R.attr.historyBackground)
@@ -90,10 +130,10 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     setImageResource(R.drawable.ic_arrow_upward)
                 }.lparams(width = matchParent, height = wrapContent) {
                     anchorId = R.id.history_scroll_view
-                    @SuppressLint("RtlHardcoded")
-                    anchorGravity = Gravity.TOP or Gravity.RIGHT
+                    anchorGravity = Gravity.TOP or Gravity.END
 
-                    marginEnd = dip(20)
+                    marginEnd = dip(6)
+                    bottomMargin = dip(6)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         elevation = 12.0f
                     }
@@ -234,8 +274,26 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         sessionScore.text = getString(R.string.score_string, testEngine.correctCount, testEngine.questionCount)
     }
 
+    private fun setLastLine(correct: Item, style: Int) {
+        lastKanji.text = correct.text
+        lastKanji.background = ContextCompat.getDrawable(this, R.drawable.round_green)
+        lastDescription.text = correct.description
+        if (correct.contents is Kanji) {
+            lastInfo.visibility = View.VISIBLE
+            lastKanji.setOnClickListener {
+                showItemInDict(correct.contents as Kanji)
+            }
+        } else if (correct.contents is Word) {
+            lastInfo.visibility = View.VISIBLE
+            lastKanji.setOnClickListener {
+                showItemInDict(correct.contents as Word)
+            }
+        }
+    }
+
     private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
+        setLastLine(correct, R.drawable.round_green)
 
         historyView.addView(layout, 0)
         if (refresh) {
@@ -247,6 +305,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) {
         val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
+        setLastLine(correct, R.drawable.round_red)
 
         historyView.addView(layoutBad, 0)
         historyView.addView(layoutGood, 0)
@@ -258,6 +317,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
     private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
+        setLastLine(correct, R.drawable.round_red)
 
         historyView.addView(layout, 0)
         if (refresh) {
@@ -338,26 +398,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
         if (sheetBehavior.peekHeight == 0)
             historyActionButton.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400).start()
-
-        run {
-            val va = ValueAnimator.ofInt(sheetBehavior.peekHeight, v.measuredHeight)
-            va.duration = 200 // ms
-            va.addUpdateListener {
-                sheetBehavior.peekHeight = it.animatedValue as Int
-                mainView.layoutParams.height = mainCoordLayout.height - it.animatedValue as Int
-            }
-            va.start()
-        }
-
-        run {
-            val va = ValueAnimator.ofInt(-v.measuredHeight, 0)
-            va.duration = 200 // ms
-            va.addUpdateListener {
-                (v.layoutParams as LinearLayout.LayoutParams).topMargin = it.animatedValue as Int
-                historyView.requestLayout()
-            }
-            va.start()
-        }
     }
 
     private fun discardOldHistory() {
