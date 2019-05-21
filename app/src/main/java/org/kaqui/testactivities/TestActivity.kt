@@ -396,8 +396,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun updateSheetPeekHeight(v: View) {
-        v.measure(MeasureSpec.makeMeasureSpec(resources.displayMetrics.widthPixels, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
-
         if (sheetBehavior.peekHeight == 0)
             historyActionButton.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400).start()
     }
