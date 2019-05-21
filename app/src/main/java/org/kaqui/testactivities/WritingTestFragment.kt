@@ -51,7 +51,7 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
     private val testType
         get() = testFragmentHolder.testType
 
-    private val currentStrokes get() = testEngine.currentQuestion.strokes
+    private lateinit var currentStrokes: List<Path>
     private lateinit var currentScaledStrokes: List<Path>
     private var currentStroke = 0
     private var missCount = 0
@@ -59,6 +59,7 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
     private lateinit var testQuestionLayout: TestQuestionLayout
 
     private lateinit var drawCanvas: DrawView
+    private lateinit var buttons: LinearLayout
     private lateinit var hintButton: Button
     private lateinit var dontKnowButton: Button
     private lateinit var nextButton: Button
@@ -81,7 +82,7 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
                     drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
                         gravity = Gravity.CENTER
                     }
-                    linearLayout {
+                    buttons = linearLayout {
                         hintButton = button(R.string.hint) {
                             setExtTint(R.color.answerMaybe)
                         }.lparams(weight = 1.0f)
@@ -112,13 +113,6 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
             missCount = savedInstanceState.getInt("missCount")
         }
 
-        if (currentStroke == currentStrokes.size) {
-            dontKnowButton.visibility = View.GONE
-            hintButton.visibility = View.GONE
-        } else {
-            nextButton.visibility = View.GONE
-        }
-
         drawCanvas.post { refreshQuestion() }
 
         return mainBlock
@@ -145,6 +139,7 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
             dontKnowButton.visibility = View.VISIBLE
             hintButton.visibility = View.VISIBLE
         }
+        buttons.requestLayout()
     }
 
     override fun startNewQuestion() {
@@ -153,6 +148,8 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
     }
 
     override fun refreshQuestion() {
+        currentStrokes = Database.getInstance(context!!).getStrokes(testEngine.currentQuestion.id)
+
         refreshState()
 
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)

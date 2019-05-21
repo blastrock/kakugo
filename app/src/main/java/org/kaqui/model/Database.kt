@@ -84,7 +84,7 @@ class Database private constructor(context: Context, private val database: SQLit
     fun getHiragana(id: Int): Item = getKana(HIRAGANAS_TABLE_NAME, id)
     fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, id)
 
-    private fun getKana(tableName: String, id: Int): Item {
+    fun getStrokes(id: Int): List<Path> {
         val strokes = mutableListOf<Path>()
         database.query(ITEM_STROKES_TABLE_NAME, arrayOf("path"), "id_item = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
             val PathParser = Class.forName("androidx.core.graphics.PathParser")
@@ -93,12 +93,16 @@ class Database private constructor(context: Context, private val database: SQLit
                 strokes.add(createPathFromPathData.invoke(null, cursor.getString(0)) as Path)
             }
         }
+        return strokes
+    }
+
+    private fun getKana(tableName: String, id: Int): Item {
         val similarities = mutableListOf<Item>()
         database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf(), listOf()), 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf()), 0.0, 0.0, 0, false))
         }
-        val contents = Kana("", "", "", strokes, similarities)
+        val contents = Kana("", "", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         database.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
@@ -116,25 +120,17 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     fun getKanji(id: Int): Item {
-        val strokes = mutableListOf<Path>()
-        database.query(ITEM_STROKES_TABLE_NAME, arrayOf("path"), "id_item = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
-            val PathParser = Class.forName("androidx.core.graphics.PathParser")
-            val createPathFromPathData = PathParser.getMethod("createPathFromPathData", String::class.java)
-            while (cursor.moveToNext()) {
-                strokes.add(createPathFromPathData.invoke(null, cursor.getString(0)) as Path)
-            }
-        }
         val similarities = mutableListOf<Item>()
         database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
+                similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
         val parts = mutableListOf<Item>()
         database.query(KANJIS_COMPOSITION_TABLE_NAME, arrayOf("id_kanji2"), "id_kanji1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
-                parts.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
+                parts.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
-        val contents = Kanji("", listOf(), listOf(), listOf(), strokes, similarities, parts, 0)
+        val contents = Kanji("", listOf(), listOf(), listOf(), similarities, parts, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         database.query(KANJIS_TABLE_NAME,
                 arrayOf("jlpt_level", "short_score", "long_score", "last_correct", "enabled", "on_readings", "kun_readings", "meanings_$locale", "meanings_en"),

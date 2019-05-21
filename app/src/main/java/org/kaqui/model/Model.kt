@@ -9,7 +9,6 @@ data class Kanji(
         var on_readings: List<String>,
         var kun_readings: List<String>,
         var meanings: List<String>,
-        var strokes: List<Path>,
         var similarities: List<Item>,
         var parts: List<Item>,
         var jlptLevel: Int
@@ -19,7 +18,6 @@ data class Kana(
         var kana: String,
         var romaji: String,
         var uniqueRomaji: String,
-        var strokes: List<Path>,
         var similarities: List<Item>
 ) : ItemContents()
 
@@ -44,13 +42,6 @@ val Item.similarities: List<Item>
         is Kana -> (contents as Kana).similarities
         is Kanji -> (contents as Kanji).similarities
         is Word -> (contents as Word).similarities
-    }
-
-val Item.strokes: List<Path>
-    get() = when (contents) {
-        is Kana -> (contents as Kana).strokes
-        is Kanji -> (contents as Kanji).strokes
-        is Word -> throw RuntimeException("Can't get strokes of word")
     }
 
 fun Item.getQuestionText(testType: TestType): String =
