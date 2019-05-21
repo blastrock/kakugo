@@ -26,3 +26,7 @@
 
 -keep class androidx.appcompat.widget.SearchView { *; }
 -keep class androidx.core.graphics.PathParser { android.graphics.Path createPathFromPathData(java.lang.String); }
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+}
