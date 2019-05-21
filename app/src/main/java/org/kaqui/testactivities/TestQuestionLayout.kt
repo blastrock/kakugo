@@ -17,8 +17,6 @@ class TestQuestionLayout {
     fun <T : ViewManager> makeMainBlock(activity: Activity, subLayout: T, questionMinSize: Int, answersBlock: _LinearLayout.() -> View): LinearLayout {
         with(subLayout) {
             return verticalLayout {
-                padding = dip(16)
-
                 activity.configuration(orientation = Orientation.LANDSCAPE) {
                     linearLayout {
                         gravity = Gravity.CENTER

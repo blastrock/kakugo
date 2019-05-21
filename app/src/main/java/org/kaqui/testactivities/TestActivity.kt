@@ -79,7 +79,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     }
                     mainView = frameLayout {
                         id = R.id.main_test_block
-                    }.lparams(width = matchParent, height = matchParent, weight = 1f)
+                    }.lparams(width = matchParent, height = matchParent, weight = 1f) {
+                        horizontalMargin = dip(16)
+                    }
                     lastItem = linearLayout {
                         backgroundColor = getColorFromAttr(R.attr.historyBackground)
                         relativeLayout {
