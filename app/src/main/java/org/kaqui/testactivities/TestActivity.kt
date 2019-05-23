@@ -1,5 +1,7 @@
 package org.kaqui.testactivities
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
@@ -82,36 +84,38 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     }.lparams(width = matchParent, height = matchParent, weight = 1f) {
                         horizontalMargin = dip(16)
                     }
-                    lastItem = linearLayout {
+                    frameLayout {
                         backgroundColor = getColorFromAttr(R.attr.historyBackground)
-                        relativeLayout {
-                            lastKanji = textView {
-                                id = View.generateViewId()
-                                textSize = 25f
-                                textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                            }.lparams(width = matchParent, height = matchParent)
-                            lastInfo = imageView {
-                                val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
-                                val mWrappedDrawable = DrawableCompat.wrap(drawable)
-                                DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
-                                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
-                                setImageDrawable(drawable)
-                                contentDescription = context.getString(R.string.info_button)
-                                visibility = View.INVISIBLE
-                            }.lparams(width = sp(10), height = sp(10)) {
-                                sameBottom(lastKanji)
-                                sameEnd(lastKanji)
+                        lastItem = linearLayout {
+                            relativeLayout {
+                                lastKanji = textView {
+                                    id = View.generateViewId()
+                                    textSize = 25f
+                                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                                }.lparams(width = matchParent, height = matchParent)
+                                lastInfo = imageView {
+                                    val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
+                                    val mWrappedDrawable = DrawableCompat.wrap(drawable)
+                                    DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
+                                    DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+                                    setImageDrawable(drawable)
+                                    contentDescription = context.getString(R.string.info_button)
+                                    visibility = View.INVISIBLE
+                                }.lparams(width = sp(10), height = sp(10)) {
+                                    sameBottom(lastKanji)
+                                    sameEnd(lastKanji)
+                                }
+                            }.lparams(width = sp(35), height = sp(35)) {
+                                margin = dip(8)
+                                gravity = Gravity.CENTER
                             }
-                        }.lparams(width = sp(35), height = sp(35)) {
-                            margin = dip(8)
-                            gravity = Gravity.CENTER
-                        }
-                        lastDescription = textView {
-                            // disable line wrapping
-                            setHorizontallyScrolling(true)
-                            setLineSpacing(0f, .8f)
-                        }.lparams(height = wrapContent) {
-                            gravity = Gravity.CENTER
+                            lastDescription = textView {
+                                // disable line wrapping
+                                setHorizontallyScrolling(true)
+                                setLineSpacing(0f, .8f)
+                            }.lparams(height = wrapContent) {
+                                gravity = Gravity.CENTER
+                            }
                         }
                     }.lparams(width = matchParent, height = sp(50))
                 }.lparams(width = matchParent, height = matchParent)
@@ -277,8 +281,30 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun setLastLine(correct: Item, style: Int) {
+        ObjectAnimator.ofFloat(lastItem, "translationY", lastItem.height.toFloat()).apply {
+            duration = 100
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationEnd(animation: Animator?) {
+                    lastItem.translationY = -lastItem.height.toFloat()
+                    updateLastLine(correct, style)
+
+                    ObjectAnimator.ofFloat(lastItem, "translationY", 0f).apply {
+                        duration = 200
+                        start()
+                    }
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+                override fun onAnimationCancel(animation: Animator?) {}
+                override fun onAnimationStart(animation: Animator?) {}
+            })
+            start()
+        }
+    }
+
+    private fun updateLastLine(correct: Item, style: Int) {
         lastKanji.text = correct.text
-        lastKanji.background = ContextCompat.getDrawable(this, R.drawable.round_green)
+        lastKanji.background = ContextCompat.getDrawable(this, style)
         lastDescription.text = correct.description
         if (correct.contents is Kanji) {
             lastInfo.visibility = View.VISIBLE
