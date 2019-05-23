@@ -17,8 +17,8 @@ data class Rtk6Index(val from: Int, val to: Int) : Classifier()
 fun Classifier.whereClause() =
         when (this) {
             is JlptLevel -> "jlpt_level = ?"
-            is RtkIndex -> "rtk_index BETWEEN ? AND ?"
-            is Rtk6Index -> "rtk6_index BETWEEN ? AND ?"
+            is RtkIndex -> "rtk_index BETWEEN ? AND (? - 1)"
+            is Rtk6Index -> "rtk6_index BETWEEN ? AND (? - 1)"
         }
 
 fun Classifier.whereArguments() =
