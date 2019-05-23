@@ -1,5 +1,6 @@
 package org.kaqui.testactivities
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
@@ -58,10 +59,18 @@ class QuizTestFragment : Fragment(), TestFragment {
                                             answerTexts.add(answerText)
 
                                             button(R.string.maybe) {
+                                                if (resources.configuration.smallestScreenWidthDp < 480) {
+                                                    minimumWidth = 0
+                                                    minWidth = 0
+                                                }
                                                 setExtTint(R.color.answerMaybe)
                                                 setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
                                             }
                                             button(R.string.sure) {
+                                                if (resources.configuration.smallestScreenWidthDp < 480) {
+                                                    minimumWidth = 0
+                                                    minWidth = 0
+                                                }
                                                 setExtTint(R.color.answerSure)
                                                 setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                             }
