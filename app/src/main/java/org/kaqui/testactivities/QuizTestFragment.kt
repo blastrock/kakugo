@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import org.jetbrains.anko.*
@@ -25,6 +26,7 @@ class QuizTestFragment : Fragment(), TestFragment {
     private lateinit var answerTexts: List<TextView>
     private lateinit var answerButtons: List<Button>
     private lateinit var answerViews: List<LinearLayout>
+    private lateinit var scrollView: ScrollView
 
     private var answer: Int? = null
 
@@ -54,6 +56,7 @@ class QuizTestFragment : Fragment(), TestFragment {
         val mainBlock = UI {
             testQuestionLayout.makeMainBlock(activity!!, this, questionMinSize) {
                 wrapInScrollView(this) {
+                    scrollView = this
                     verticalLayout {
                         separator(activity!!)
                         when (testType) {
@@ -215,6 +218,7 @@ class QuizTestFragment : Fragment(), TestFragment {
         for (i in 0 until answerTexts.size) {
             answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType)
         }
+        scrollView.scrollTo(0, 0)
 
         refreshState()
     }
