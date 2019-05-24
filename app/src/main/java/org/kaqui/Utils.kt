@@ -57,6 +57,12 @@ fun PathMeasure.getPoint(position: Float): PointF {
     return PointF(out[0], out[1])
 }
 
+fun Button.setExtTextColor(@ColorRes color: Int) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        textColor = ContextCompat.getColor(context, color)
+    }
+}
+
 fun Button.setExtTint(@ColorRes color: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         textColor = ContextCompat.getColor(context, R.color.answerTextColor)
@@ -82,7 +88,7 @@ fun _LinearLayout.separator(context: Context) =
         backgroundColor = ContextCompat.getColor(context, R.color.separator)
     }.lparams(width = matchParent, height = dip(1))
 
-inline fun ViewManager.appTitleImage(context: Context) =
+fun ViewManager.appTitleImage(context: Context) =
         imageView {
             val drawable = AppCompatResources.getDrawable(context, R.drawable.kakugo)!!
             val mWrappedDrawable = DrawableCompat.wrap(drawable)

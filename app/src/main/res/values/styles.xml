@@ -1,10 +1,15 @@
 <resources>
     <attr name="historyBackground" format="color" />
+    <attr name="wrongAnswerBackground" format="color" />
+    <attr name="correctAnswerBackground" format="color" />
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="wrongAnswerBackground">#ffdddd</item>
+        <item name="correctAnswerBackground">#deffd3</item>
 
         <item name="historyBackground">#dddddd</item>
     </style>
@@ -13,6 +18,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="wrongAnswerBackground">#350000</item>
+        <item name="correctAnswerBackground">#092600</item>
 
         <item name="historyBackground">#222222</item>
     </style>
