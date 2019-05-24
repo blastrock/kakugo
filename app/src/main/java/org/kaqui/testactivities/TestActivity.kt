@@ -92,6 +92,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                     id = View.generateViewId()
                                     textSize = 25f
                                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                                    textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 }.lparams(width = matchParent, height = matchParent)
                                 lastInfo = imageView {
                                     val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
