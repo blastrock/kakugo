@@ -44,52 +44,42 @@ class TextTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
-            testQuestionLayout.makeMainBlock(activity!!, this, questionMinSize) {
+            testQuestionLayout.makeMainBlock(activity!!, this, questionMinSize, forceLandscape = true) {
                 wrapInScrollView(this) {
                     verticalLayout {
-                        separator(context!!)
+                        answerField = editText {
+                            gravity = Gravity.CENTER
+                            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                            setOnEditorActionListener { v, actionId, _ ->
+                                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
+                                    this@TextTestFragment.onTextAnswerClicked(v, Certainty.SURE)
+                                else
+                                    false
+                            }
+                        }.lparams(width = matchParent)
 
-                        verticalLayout {
-                            linearLayout {
-                                gravity = Gravity.CENTER_VERTICAL
-
-                                val field = editText {
-                                    gravity = Gravity.CENTER
-                                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                                    setOnEditorActionListener { v, actionId, event ->
-                                        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
-                                            this@TextTestFragment.onTextAnswerClicked(v, Certainty.SURE)
-                                        else
-                                            false
-                                    }
-                                }.lparams(weight = 1f)
-                                answerField = field
-
-                                button(R.string.maybe) {
-                                    setExtTint(R.color.answerMaybe)
-                                    setOnClickListener {
-                                        this@TextTestFragment.onTextAnswerClicked(this, Certainty.MAYBE)
-                                    }
+                        linearLayout {
+                            button(R.string.maybe) {
+                                setExtTint(R.color.answerMaybe)
+                                setOnClickListener {
+                                    this@TextTestFragment.onTextAnswerClicked(this, Certainty.MAYBE)
                                 }
+                            }.lparams(weight = 1f)
 
-                                button(R.string.sure) {
-                                    setExtTint(R.color.answerSure)
-                                    setOnClickListener {
-                                        this@TextTestFragment.onTextAnswerClicked(this, Certainty.SURE)
-                                    }
+                            button(R.string.sure) {
+                                setExtTint(R.color.answerSure)
+                                setOnClickListener {
+                                    this@TextTestFragment.onTextAnswerClicked(this, Certainty.SURE)
                                 }
-                            }.lparams(width = matchParent, height = wrapContent)
+                            }.lparams(weight = 1f)
+                        }.lparams(width = matchParent, height = wrapContent)
 
-                            linearLayout {
-                                button(R.string.dont_know) {
-                                    setExtTint(R.color.answerDontKnow)
-                                    setOnClickListener { this@TextTestFragment.onTextAnswerClicked(this, Certainty.DONTKNOW) }
-                                }.lparams(width = matchParent)
-                            }.lparams(width = matchParent, height = wrapContent)
-
-                            separator(context!!)
-                        }
-
+                        linearLayout {
+                            button(R.string.dont_know) {
+                                setExtTint(R.color.answerDontKnow)
+                                setOnClickListener { this@TextTestFragment.onTextAnswerClicked(this, Certainty.DONTKNOW) }
+                            }.lparams(width = matchParent)
+                        }.lparams(width = matchParent, height = wrapContent)
                     }.lparams(width = matchParent, height = wrapContent)
                 }
             }

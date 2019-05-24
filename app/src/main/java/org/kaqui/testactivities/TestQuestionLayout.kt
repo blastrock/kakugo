@@ -1,6 +1,7 @@
 package org.kaqui.testactivities
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -14,10 +15,10 @@ import org.kaqui.appCompatTextView
 class TestQuestionLayout {
     lateinit var questionText: TextView
 
-    fun <T : ViewManager> makeMainBlock(activity: Activity, subLayout: T, questionMinSize: Int, answersBlock: _LinearLayout.() -> View): LinearLayout {
+    fun <T : ViewManager> makeMainBlock(activity: Activity, subLayout: T, questionMinSize: Int, forceLandscape: Boolean = false, answersBlock: _LinearLayout.() -> View): LinearLayout {
         with(subLayout) {
             return verticalLayout {
-                activity.configuration(orientation = Orientation.LANDSCAPE) {
+                if (forceLandscape || activity.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     linearLayout {
                         gravity = Gravity.CENTER
                         questionText = appCompatTextView {
@@ -36,8 +37,7 @@ class TestQuestionLayout {
                             this.answersBlock().lparams(width = 0, height = matchParent, weight = 1f)
                         }
                     }.lparams(width = matchParent, height = matchParent)
-                }
-                activity.configuration(orientation = Orientation.PORTRAIT) {
+                } else if (activity.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     val (weightQuestion, weightAnswers) =
                             when {
                                 resources.configuration.screenHeightDp < 800 -> Pair(.25f, .75f)
