@@ -66,6 +66,10 @@
             android:name=".settings.MainSettingsActivity"
             android:label="@string/title_activity_main_settings"
             android:parentActivityName=".mainmenu.MainActivity" />
+        <activity
+            android:name=".settings.AboutActivity"
+            android:label="@string/title_about"
+            android:parentActivityName=".settings.MainSettingsActivity" />
     </application>
 
 </manifest>

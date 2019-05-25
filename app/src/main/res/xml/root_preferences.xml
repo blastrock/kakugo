@@ -1,24 +1,32 @@
-<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreferenceCompat
         app:key="dark_theme"
-        app:title="@string/enable_dark_theme"
-        app:summary="@string/will_update_later" />
+        app:summary="@string/will_update_later"
+        app:title="@string/enable_dark_theme" />
 
     <ListPreference
-        app:key="dictionary_language"
-        app:title="@string/dictionary_language"
-        app:summary="%s"
+        app:defaultValue=""
         app:entries="@array/language_strings"
         app:entryValues="@array/language_ids"
-        app:defaultValue="" />
+        app:key="dictionary_language"
+        app:summary="%s"
+        app:title="@string/dictionary_language" />
 
     <ListPreference
-        app:key="item_classification"
-        app:title="@string/kanji_classification"
-        app:summary="%s"
+        app:defaultValue="jlpt"
         app:entries="@array/kanji_classification_strings"
         app:entryValues="@array/kanji_classification_ids"
-        app:defaultValue="jlpt" />
+        app:key="item_classification"
+        app:summary="%s"
+        app:title="@string/kanji_classification" />
+
+    <Preference
+        app:key="about"
+        app:title="@string/title_about">
+        <intent android:targetPackage="org.kaqui" android:targetClass="org.kaqui.settings.AboutActivity" />
+    </Preference>
+
 
 </androidx.preference.PreferenceScreen>

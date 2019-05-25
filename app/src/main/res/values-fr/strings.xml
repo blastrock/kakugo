@@ -72,4 +72,18 @@
     <string name="dictionary_language">Langue du dictionnaire</string>
     <string name="lang_system_default">Langue du système</string>
     <string name="kanji_classification">Classification des kanji</string>
+
+    <string name="title_about">À propos de Kakugo</string>
+    <string name="about_text"><![CDATA[
+        <p>Kakugo est une application pour apprendre le Japonais.</p>
+
+        <p>Elle est open-source et disponible sur <a href="https://github.com/blastrock/kakugo/">github</a>.<p>
+
+        <p>Le dictionnaire de kanji est basé sur <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.<p>
+        <p>Le dictionnaire de vocabulaire est basé sur <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.<p>
+        <p>Les données de similarité des kanji viennent d&apos;<a href="http://lars.yencken.org/datasets/phd/">une étude du Dr. Lars Yencken</a>.<p>
+        <p>Les données de composition et de dessin de kanji viennent de <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.<p>
+        <p>La police de caractères de l'icône de l'application est <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
+        <p>La police de caractères du titres de l'application est <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
+    ]]></string>
 </resources>
