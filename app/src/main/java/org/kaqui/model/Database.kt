@@ -255,14 +255,21 @@ class Database private constructor(context: Context, private val database: SQLit
 
     data class KanjiSelection(
             val id: Long,
-            val name: String
+            val name: String,
+            val count: Int
     )
 
     fun listKanjiSelections(): List<KanjiSelection> {
         val out = mutableListOf<KanjiSelection>()
-        database.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection", "name"), null, null, null, null, null).use { cursor ->
+        database.rawQuery("""
+            SELECT id_selection, name, (
+                SELECT COUNT(*)
+                FROM $KANJIS_ITEM_SELECTION_TABLE_NAME ss WHERE ss.id_selection = s.id_selection
+            )
+            FROM $KANJIS_SELECTION_TABLE_NAME s
+            """, arrayOf()).use { cursor ->
             while (cursor.moveToNext())
-                out.add(KanjiSelection(cursor.getLong(0), cursor.getString(1)))
+                out.add(KanjiSelection(cursor.getLong(0), cursor.getString(1), cursor.getInt(2)))
         }
         return out
     }
