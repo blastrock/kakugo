@@ -62,7 +62,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     private lateinit var sessionScore: TextView
     private lateinit var mainView: View
     private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
-    private lateinit var fadeOverlay: FadeOverlay
 
     override val testType
         get() = intent.extras!!.getSerializable("test_type") as TestType
@@ -70,89 +69,81 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        frameLayout {
-            mainCoordLayout = coordinatorLayout {
-                verticalLayout {
-                    frameLayout {
-                        id = R.id.global_stats
-                    }.lparams(width = matchParent, height = wrapContent)
-                    sessionScore = textView {
-                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    }
-                    mainView = frameLayout {
-                        id = R.id.main_test_block
-                    }.lparams(width = matchParent, height = matchParent, weight = 1f) {
-                        horizontalMargin = dip(16)
-                    }
-                    frameLayout {
-                        backgroundColor = getColorFromAttr(R.attr.historyBackground)
-                        lastItem = linearLayout {
-                            relativeLayout {
-                                lastKanji = textView {
-                                    id = View.generateViewId()
-                                    textSize = 25f
-                                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                                    textColor = ContextCompat.getColor(context, R.color.itemTextColor)
-                                }.lparams(width = matchParent, height = matchParent)
-                                lastInfo = imageView {
-                                    val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
-                                    val mWrappedDrawable = DrawableCompat.wrap(drawable)
-                                    DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
-                                    DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
-                                    setImageDrawable(drawable)
-                                    contentDescription = context.getString(R.string.info_button)
-                                    visibility = View.INVISIBLE
-                                }.lparams(width = sp(10), height = sp(10)) {
-                                    sameBottom(lastKanji)
-                                    sameEnd(lastKanji)
-                                }
-                            }.lparams(width = sp(35), height = sp(35)) {
-                                margin = dip(8)
-                                gravity = Gravity.CENTER
-                            }
-                            lastDescription = textView {
-                                // disable line wrapping
-                                setHorizontallyScrolling(true)
-                                setLineSpacing(0f, .8f)
-                            }.lparams(height = wrapContent) {
-                                gravity = Gravity.CENTER
-                            }
-                        }
-                    }.lparams(width = matchParent, height = sp(50))
-                }.lparams(width = matchParent, height = matchParent)
-                historyScrollView = nestedScrollView {
-                    id = R.id.history_scroll_view
+        mainCoordLayout = coordinatorLayout {
+            verticalLayout {
+                frameLayout {
+                    id = R.id.global_stats
+                }.lparams(width = matchParent, height = wrapContent)
+                sessionScore = textView {
+                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                }
+                mainView = frameLayout {
+                    id = R.id.main_test_block
+                }.lparams(width = matchParent, height = matchParent, weight = 1f) {
+                    horizontalMargin = dip(16)
+                }
+                frameLayout {
                     backgroundColor = getColorFromAttr(R.attr.historyBackground)
-                    historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
-                }.lparams(width = matchParent, height = matchParent) {
-                    val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
-                    bottomSheetBehavior.peekHeight = 0
-                    bottomSheetBehavior.isHideable = false
-                    behavior = bottomSheetBehavior
-                }
-                historyActionButton = floatingActionButton {
-                    size = FloatingActionButton.SIZE_MINI
-                    scaleX = 0f
-                    scaleY = 0f
-                    setImageResource(R.drawable.ic_arrow_upward)
-                }.lparams(width = matchParent, height = wrapContent) {
-                    anchorId = R.id.history_scroll_view
-                    anchorGravity = Gravity.TOP or Gravity.END
-
-                    marginEnd = dip(6)
-                    bottomMargin = dip(6)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        elevation = 12.0f
+                    lastItem = linearLayout {
+                        relativeLayout {
+                            lastKanji = textView {
+                                id = View.generateViewId()
+                                textSize = 25f
+                                textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                                textColor = ContextCompat.getColor(context, R.color.itemTextColor)
+                            }.lparams(width = matchParent, height = matchParent)
+                            lastInfo = imageView {
+                                val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
+                                val mWrappedDrawable = DrawableCompat.wrap(drawable)
+                                DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
+                                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+                                setImageDrawable(drawable)
+                                contentDescription = context.getString(R.string.info_button)
+                                visibility = View.INVISIBLE
+                            }.lparams(width = sp(10), height = sp(10)) {
+                                sameBottom(lastKanji)
+                                sameEnd(lastKanji)
+                            }
+                        }.lparams(width = sp(35), height = sp(35)) {
+                            margin = dip(8)
+                            gravity = Gravity.CENTER
+                        }
+                        lastDescription = textView {
+                            // disable line wrapping
+                            setHorizontallyScrolling(true)
+                            setLineSpacing(0f, .8f)
+                        }.lparams(height = wrapContent) {
+                            gravity = Gravity.CENTER
+                        }
                     }
-                }
+                }.lparams(width = matchParent, height = sp(50))
+            }.lparams(width = matchParent, height = matchParent)
+            historyScrollView = nestedScrollView {
+                id = R.id.history_scroll_view
+                backgroundColor = getColorFromAttr(R.attr.historyBackground)
+                historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
+            }.lparams(width = matchParent, height = matchParent) {
+                val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
+                bottomSheetBehavior.peekHeight = 0
+                bottomSheetBehavior.isHideable = false
+                behavior = bottomSheetBehavior
             }
-            fadeOverlay = fadeOverlay {
+            historyActionButton = floatingActionButton {
+                size = FloatingActionButton.SIZE_MINI
+                scaleX = 0f
+                scaleY = 0f
+                setImageResource(R.drawable.ic_arrow_upward)
+            }.lparams(width = matchParent, height = wrapContent) {
+                anchorId = R.id.history_scroll_view
+                anchorGravity = Gravity.TOP or Gravity.END
+
+                marginEnd = dip(6)
+                bottomMargin = dip(6)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    elevation = 100f
+                    elevation = 12.0f
                 }
             }
         }
-
 
         statsFragment = StatsFragment.newInstance()
 
@@ -252,18 +243,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
     override fun onAnswer(button: View?, certainty: Certainty, wrong: Item?) {
         testEngine.markAnswer(certainty, wrong)
-        triggerFeedback(button, certainty)
-    }
-
-    private fun triggerFeedback(button: View?, certainty: Certainty) {
-        if (button != null) {
-            val offsetViewBounds = Rect()
-            button.getDrawingRect(offsetViewBounds)
-            mainCoordLayout.offsetDescendantRectToMyCoords(button, offsetViewBounds)
-            fadeOverlay.trigger(offsetViewBounds.centerX(), offsetViewBounds.centerY(), ContextCompat.getColor(this, certainty.toColorRes()))
-        } else {
-            fadeOverlay.trigger(fadeOverlay.width / 2, fadeOverlay.height / 2, ContextCompat.getColor(this, certainty.toColorRes()))
-        }
     }
 
     override fun nextQuestion() {

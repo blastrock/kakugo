@@ -79,10 +79,6 @@ inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
     return ankoView({ DrawView(it) }, theme = 0, init = init)
 }
 
-inline fun ViewManager.fadeOverlay(init: FadeOverlay.() -> Unit = {}): FadeOverlay {
-    return ankoView({ FadeOverlay(it) }, theme = 0, init = init)
-}
-
 fun _LinearLayout.separator(context: Context) =
     view {
         backgroundColor = ContextCompat.getColor(context, R.color.separator)
