@@ -51,6 +51,7 @@
     <string name="hint">Indice</string>
     <string name="save_current_selection">Sauvegarder la sélection courrante</string>
     <string name="load_selection">Charger une sélection</string>
+    <string name="selection_presentation">%1$s (%2$d éléments)</string>
     <string name="delete">Supprimer</string>
     <string name="loaded_selection">Sélection \"%1$s\" chargée</string>
     <string name="deleted_selection">Sélection \"%1$s\" supprimée</string>

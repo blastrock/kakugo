@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import org.jetbrains.anko.*
+import org.kaqui.R
 import org.kaqui.model.Database
 
 class SavedSelectionsAdapter(context: Context, var savedSelections: List<Database.KanjiSelection>) : BaseAdapter() {
@@ -20,7 +21,7 @@ class SavedSelectionsAdapter(context: Context, var savedSelections: List<Databas
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view = (convertView ?: createView()) as TextView
-        view.text = savedSelections[position].name
+        view.text = view.context.getString(R.string.selection_presentation, savedSelections[position].name, savedSelections[position].count)
         return view
     }
 
