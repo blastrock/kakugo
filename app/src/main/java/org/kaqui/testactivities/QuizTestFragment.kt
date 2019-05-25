@@ -28,7 +28,7 @@ class QuizTestFragment : Fragment(), TestFragment {
     private lateinit var answerViews: List<LinearLayout>
     private lateinit var scrollView: ScrollView
 
-    private var answer: Int? = null
+    private var answer: Int = NO_ANSWER
 
     private val testFragmentHolder
         get() = (activity!! as TestFragmentHolder)
@@ -167,11 +167,7 @@ class QuizTestFragment : Fragment(), TestFragment {
         this.answerViews = answerViews
 
         if (savedInstanceState != null) {
-            answer =
-                    if (savedInstanceState.containsKey("answer"))
-                        savedInstanceState.getInt("answer")
-                    else
-                        null
+            answer = savedInstanceState.getInt("answer")
         }
 
         refreshQuestion()
@@ -181,17 +177,17 @@ class QuizTestFragment : Fragment(), TestFragment {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (answer != null)
-            outState.putInt("answer", answer!!)
+        outState.putInt("answer", answer)
     }
 
     private fun refreshState() {
-        if (answer != null) {
+        if (answer != NO_ANSWER) {
             nextButton.visibility = View.VISIBLE
             dontKnowButton.visibility = View.GONE
 
             val correct = testEngine.currentAnswers.indexOfFirst { it.id == testEngine.currentQuestion.id }
-            answerViews[answer!!].backgroundColor = context!!.getColorFromAttr(R.attr.wrongAnswerBackground)
+            if (answer != DONT_KNOW)
+                answerViews[answer].backgroundColor = context!!.getColorFromAttr(R.attr.wrongAnswerBackground)
             answerViews[correct].backgroundColor = context!!.getColorFromAttr(R.attr.correctAnswerBackground)
 
             for (answerButton in answerButtons) {
@@ -236,23 +232,27 @@ class QuizTestFragment : Fragment(), TestFragment {
         } else {
             if (certainty == Certainty.DONTKNOW) {
                 testFragmentHolder.onAnswer(button, Certainty.DONTKNOW, null)
+                answer = DONT_KNOW
             } else {
                 testFragmentHolder.onAnswer(button, Certainty.DONTKNOW, testEngine.currentAnswers[position])
+                answer = position
             }
 
-            answer = position
             refreshState()
         }
     }
 
     private fun onNextClicked() {
-        answer = null
+        answer = NO_ANSWER
         testFragmentHolder.nextQuestion()
     }
 
     companion object {
         private const val TAG = "QuizTestFragment"
         private const val COLUMNS = 2
+
+        private const val NO_ANSWER = 0x1000
+        private const val DONT_KNOW = 0x1001
 
         @JvmStatic
         fun newInstance() = QuizTestFragment()
