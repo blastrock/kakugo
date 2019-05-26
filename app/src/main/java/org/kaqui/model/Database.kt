@@ -10,6 +10,13 @@ import org.kaqui.asUnicodeCodePoint
 class Database private constructor(context: Context, private val database: SQLiteDatabase) {
     private val locale: String get() = LocaleManager.getDictionaryLocale()
 
+    init {
+        // the app can be restored from android without going through the main activity,
+        // we need a locale here though and we can't try to fetch it every time we need it
+        if (!LocaleManager.isReady())
+            LocaleManager.updateDictionaryLocale(context)
+    }
+
     val hiraganaView: LearningDbView
         get() = LearningDbView(database, HIRAGANAS_TABLE_NAME, itemGetter = this::getHiragana)
     val katakanaView: LearningDbView

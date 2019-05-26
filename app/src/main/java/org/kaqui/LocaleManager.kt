@@ -6,7 +6,7 @@ import androidx.preference.PreferenceManager
 
 class LocaleManager {
     companion object {
-        private lateinit var dictionaryLocale: String
+        private var dictionaryLocale: String? = null
 
         fun updateDictionaryLocale(context: Context) {
             val forcedLocale = PreferenceManager.getDefaultSharedPreferences(context).getString("dictionary_language", "")!!
@@ -29,7 +29,9 @@ class LocaleManager {
         }
 
         fun getDictionaryLocale(): String {
-            return dictionaryLocale
+            return dictionaryLocale!!
         }
+
+        fun isReady() = dictionaryLocale != null
     }
 }
