@@ -69,9 +69,14 @@ class TextTestFragment : Fragment(), TestFragment {
                         answerField = editText {
                             gravity = Gravity.CENTER
                             inputType = defaultInputType
-                            setOnEditorActionListener { v, actionId, _ ->
+                            setOnEditorActionListener { v, actionId, event ->
                                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
-                                    this@TextTestFragment.onTextAnswerClicked(v, Certainty.SURE)
+                                    if (event == null || event.action == KeyEvent.ACTION_DOWN)
+                                        this@TextTestFragment.onTextAnswerClicked(v, Certainty.SURE)
+                                    else if (event.action == KeyEvent.ACTION_UP)
+                                        true
+                                    else
+                                        false
                                 else
                                     false
                             }
@@ -168,13 +173,13 @@ class TextTestFragment : Fragment(), TestFragment {
         refreshState()
 
         answerField.requestFocus()
-        val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE)!! as InputMethodManager
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
     }
 
     private fun onTextAnswerClicked(view: View, certainty: Certainty): Boolean {
-        if (answer != null)
+        if (answer != null) {
             onNextClicked()
+            return true
+        }
 
         if (certainty == Certainty.DONTKNOW)
             answerField.text.clear()
@@ -186,7 +191,7 @@ class TextTestFragment : Fragment(), TestFragment {
                     val answer = answerField.text.trim().toString().toLowerCase()
 
                     if (answer.isBlank())
-                        return false
+                        return true
 
                     if (answer == currentKana.romaji) {
                         certainty
