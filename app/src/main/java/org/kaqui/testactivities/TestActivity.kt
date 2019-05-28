@@ -2,22 +2,16 @@ package org.kaqui.testactivities
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.View.MeasureSpec
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -28,7 +22,6 @@ import androidx.core.app.NavUtils
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.NestedScrollView
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.transaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -56,7 +49,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     private lateinit var historyActionButton: FloatingActionButton
     private lateinit var historyView: LinearLayout
     private lateinit var lastItem: LinearLayout
-    private lateinit var lastKanji: TextView
+    private lateinit var lastItemText: TextView
     private lateinit var lastInfo: ImageView
     private lateinit var lastDescription: TextView
     private lateinit var sessionScore: TextView
@@ -86,7 +79,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     backgroundColor = getColorFromAttr(R.attr.historyBackground)
                     lastItem = linearLayout {
                         relativeLayout {
-                            lastKanji = textView {
+                            lastItemText = textView {
                                 id = View.generateViewId()
                                 textSize = 25f
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
@@ -101,8 +94,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 contentDescription = context.getString(R.string.info_button)
                                 visibility = View.INVISIBLE
                             }.lparams(width = sp(10), height = sp(10)) {
-                                sameBottom(lastKanji)
-                                sameEnd(lastKanji)
+                                sameBottom(lastItemText)
+                                sameEnd(lastItemText)
                             }
                         }.lparams(width = sp(35), height = sp(35)) {
                             margin = dip(8)
@@ -287,21 +280,21 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun updateLastLine(correct: Item, probabilityData: TestEngine.DebugData?, style: Int) {
-        lastKanji.text = correct.text
-        lastKanji.background = ContextCompat.getDrawable(this, style)
+        lastItemText.text = correct.text
+        lastItemText.background = ContextCompat.getDrawable(this, style)
         lastDescription.text = correct.description
         if (correct.contents is Kanji) {
             lastInfo.visibility = View.VISIBLE
-            lastKanji.setOnClickListener {
+            lastItemText.setOnClickListener {
                 showItemInDict(correct.contents as Kanji)
             }
         } else if (correct.contents is Word) {
             lastInfo.visibility = View.VISIBLE
-            lastKanji.setOnClickListener {
+            lastItemText.setOnClickListener {
                 showItemInDict(correct.contents as Word)
             }
         }
-        lastKanji.setOnLongClickListener {
+        lastItemText.setOnLongClickListener {
             if (probabilityData != null)
                 showItemProbabilityData(this, correct.text, probabilityData)
             true
