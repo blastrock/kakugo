@@ -264,13 +264,13 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
             statsFragment.updateStats(getDbView(Database.getInstance(this)))
     }
 
-    private fun setLastLine(correct: Item, style: Int) {
+    private fun setLastLine(correct: Item, probabilityData: TestEngine.DebugData?, style: Int) {
         ObjectAnimator.ofFloat(lastItem, "translationY", lastItem.height.toFloat()).apply {
             duration = 100
             addListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
                     lastItem.translationY = -lastItem.height.toFloat()
-                    updateLastLine(correct, style)
+                    updateLastLine(correct, probabilityData, style)
 
                     ObjectAnimator.ofFloat(lastItem, "translationY", 0f).apply {
                         duration = 200
@@ -286,7 +286,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         }
     }
 
-    private fun updateLastLine(correct: Item, style: Int) {
+    private fun updateLastLine(correct: Item, probabilityData: TestEngine.DebugData?, style: Int) {
         lastKanji.text = correct.text
         lastKanji.background = ContextCompat.getDrawable(this, style)
         lastDescription.text = correct.description
@@ -301,40 +301,45 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                 showItemInDict(correct.contents as Word)
             }
         }
+        lastKanji.setOnLongClickListener {
+            if (probabilityData != null)
+                showItemProbabilityData(this, correct.text, probabilityData)
+            true
+        }
     }
 
     private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
-        setLastLine(correct, R.drawable.round_green)
 
         historyView.addView(layout, 0)
         if (refresh) {
             updateSheetPeekHeight(layout)
             discardOldHistory()
+            setLastLine(correct, probabilityData, R.drawable.round_green)
         }
     }
 
     private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) {
         val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
-        setLastLine(correct, R.drawable.round_red)
 
         historyView.addView(layoutBad, 0)
         historyView.addView(layoutGood, 0)
         if (refresh) {
             updateSheetPeekHeight(layoutGood)
             discardOldHistory()
+            setLastLine(correct, probabilityData, R.drawable.round_red)
         }
     }
 
     private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
         val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
-        setLastLine(correct, R.drawable.round_red)
 
         historyView.addView(layout, 0)
         if (refresh) {
             updateSheetPeekHeight(layout)
             discardOldHistory()
+            setLastLine(correct, probabilityData, R.drawable.round_red)
         }
     }
 
