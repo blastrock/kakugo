@@ -243,6 +243,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
     override fun onAnswer(button: View?, certainty: Certainty, wrong: Item?) {
         testEngine.markAnswer(certainty, wrong)
+        updateSessionScore()
     }
 
     override fun nextQuestion() {
@@ -253,11 +254,14 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         // when showNewQuestion is called in onCreate, statsFragment is not visible yet
         if (statsFragment.isVisible)
             statsFragment.updateStats(getDbView(Database.getInstance(this)))
-        updateSessionScore()
     }
 
     private fun updateSessionScore() {
         sessionScore.text = getString(R.string.score_string, testEngine.correctCount, testEngine.questionCount)
+
+        // when showNewQuestion is called in onCreate, statsFragment is not visible yet
+        if (statsFragment.isVisible)
+            statsFragment.updateStats(getDbView(Database.getInstance(this)))
     }
 
     private fun setLastLine(correct: Item, style: Int) {
