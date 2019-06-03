@@ -1,42 +1,52 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <SwitchPreferenceCompat
-        app:key="dark_theme"
-        app:summary="@string/will_update_later"
-        app:title="@string/enable_dark_theme" />
+    <PreferenceCategory app:title="@string/pref_cat_classification">
+        <ListPreference
+            app:defaultValue="jlpt"
+            app:entries="@array/kanji_classification_strings"
+            app:entryValues="@array/kanji_classification_ids"
+            app:key="item_classification"
+            app:summary="%s"
+            app:title="@string/kanji_classification" />
+    </PreferenceCategory>
 
-    <ListPreference
-        app:defaultValue=""
-        app:entries="@array/language_strings"
-        app:entryValues="@array/language_ids"
-        app:key="dictionary_language"
-        app:summary="%s"
-        app:title="@string/dictionary_language" />
+    <PreferenceCategory app:title="@string/pref_cat_language">
+        <ListPreference
+            app:defaultValue=""
+            app:entries="@array/language_strings"
+            app:entryValues="@array/language_ids"
+            app:key="dictionary_language"
+            app:summary="%s"
+            app:title="@string/dictionary_language" />
+    </PreferenceCategory>
 
-    <ListPreference
-        app:defaultValue="jlpt"
-        app:entries="@array/kanji_classification_strings"
-        app:entryValues="@array/kanji_classification_ids"
-        app:key="item_classification"
-        app:summary="%s"
-        app:title="@string/kanji_classification" />
+    <PreferenceCategory app:title="@string/pref_cat_appearance">
 
-    <SwitchPreferenceCompat
-        app:key="useCustomFont"
-        app:title="@string/use_custom_font" />
+        <SwitchPreferenceCompat
+            app:key="dark_theme"
+            app:summary="@string/will_update_later"
+            app:title="@string/enable_dark_theme" />
 
-    <Preference
-        app:key="pickCustomFont"
-        app:title="@string/pick_custom_font"
-        app:dependency="useCustomFont" />
+        <SwitchPreferenceCompat
+            app:key="useCustomFont"
+            app:title="@string/use_custom_font" />
 
-    <Preference
-        app:key="about"
-        app:title="@string/title_about">
-        <intent
-            android:targetClass="org.kaqui.settings.AboutActivity"
-            android:targetPackage="org.kaqui" />
-    </Preference>
+        <Preference
+            app:dependency="useCustomFont"
+            app:key="pickCustomFont"
+            app:title="@string/pick_custom_font" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pref_cat_about">
+        <Preference
+            app:key="about"
+            app:title="@string/title_about">
+            <intent
+                android:targetClass="org.kaqui.settings.AboutActivity"
+                android:targetPackage="org.kaqui" />
+        </Preference>
+    </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>
