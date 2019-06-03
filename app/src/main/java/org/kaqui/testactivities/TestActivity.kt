@@ -81,9 +81,11 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                         relativeLayout {
                             lastItemText = textView {
                                 id = View.generateViewId()
+                                typeface = TypefaceManager.getTypeface(context)
                                 textSize = 25f
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 textColor = ContextCompat.getColor(context, R.color.itemTextColor)
+                                gravity = Gravity.CENTER
                             }.lparams(width = matchParent, height = matchParent)
                             lastInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -102,6 +104,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                             gravity = Gravity.CENTER
                         }
                         lastDescription = textView {
+                            typeface = TypefaceManager.getTypeface(context)
                             // disable line wrapping
                             setHorizontallyScrolling(true)
                             setLineSpacing(0f, .8f)

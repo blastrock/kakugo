@@ -1,14 +1,25 @@
 package org.kaqui.settings
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import androidx.core.content.ContextCompat
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreferenceCompat
 import org.jetbrains.anko.frameLayout
 import org.jetbrains.anko.linearLayout
 import org.jetbrains.anko.matchParent
-import org.kaqui.BaseActivity
-import org.kaqui.LocaleManager
-import org.kaqui.R
+import org.jetbrains.anko.support.v4.defaultSharedPreferences
+import org.jetbrains.anko.support.v4.startActivityForResult
+import org.kaqui.*
+import java.io.File
+import java.net.URI
 
 class MainSettingsActivity : BaseActivity() {
 
@@ -31,6 +42,18 @@ class MainSettingsActivity : BaseActivity() {
     class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+            findPreference<Preference>("pickCustomFont")!!.setOnPreferenceClickListener {
+                pickCustomFont()
+                true
+            }
+            findPreference<SwitchPreferenceCompat>("useCustomFont")!!.setOnPreferenceClickListener {
+                if (!(it as SwitchPreferenceCompat).isChecked) {
+                    setCustomFontPath(null)
+                    true
+                } else {
+                    false
+                }
+            }
         }
 
         override fun onStart() {
@@ -46,6 +69,46 @@ class MainSettingsActivity : BaseActivity() {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
             if (key == "dictionary_language")
                 LocaleManager.updateDictionaryLocale(context!!)
+        }
+
+        private fun pickCustomFont() {
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+                    return
+                }
+            }
+
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "*/*"
+            startActivityForResult(intent, PICK_CUSTOM_FONT)
+        }
+
+        override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED })
+                pickCustomFont()
+        }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            if (requestCode != PICK_CUSTOM_FONT)
+                return super.onActivityResult(requestCode, resultCode, data)
+
+            if (resultCode != RESULT_OK || data == null)
+                return
+
+            setCustomFontPath(UriResolver.getFilePath(context!!, data.data!!))
+        }
+
+        @SuppressLint("ApplySharedPref")
+        private fun setCustomFontPath(path: String?) {
+            defaultSharedPreferences.edit()
+                    .putString("custom_font", path)
+                    .commit()
+            TypefaceManager.updateTypeface(context!!)
+        }
+
+        companion object {
+            const val PICK_CUSTOM_FONT = 1
         }
     }
 }

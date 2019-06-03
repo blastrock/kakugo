@@ -14,13 +14,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.jetbrains.anko.*
-import org.kaqui.R
-import org.kaqui.StatsFragment
-import org.kaqui.getBackgroundFromScore
+import org.kaqui.*
 import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
 import org.kaqui.model.text
-import org.kaqui.separator
 
 class ItemSelectionAdapter(private val view: LearningDbView, private val context: Context, private val statsFragment: StatsFragment) : RecyclerView.Adapter<ItemSelectionViewHolder>() {
     private val ankoContext = AnkoContext.createReusable(context, this)
@@ -62,8 +59,10 @@ class ItemSelectionAdapter(private val view: LearningDbView, private val context
                     }
                     textView {
                         id = R.id.item_text
+                        typeface = TypefaceManager.getTypeface(context)
                         textSize = 25f
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                        gravity = Gravity.CENTER
                         textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                     }.lparams(width = sp(35), height = sp(35)) {
                         margin = dip(8)
@@ -71,6 +70,7 @@ class ItemSelectionAdapter(private val view: LearningDbView, private val context
                     }
                     textView {
                         id = R.id.item_description
+                        typeface = TypefaceManager.getTypeface(context)
                     }.lparams(width = matchParent, height = wrapContent, weight = 1f) {
                         gravity = Gravity.CENTER_VERTICAL
                         horizontalMargin = dip(8)

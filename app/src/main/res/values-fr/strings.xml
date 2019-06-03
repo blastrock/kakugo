@@ -72,6 +72,10 @@
     <string name="dictionary_language">Langue du dictionnaire</string>
     <string name="lang_system_default">Langue du système</string>
     <string name="kanji_classification">Classification des kanji</string>
+    <string name="use_custom_font">Utiliser une police de caractères personalisée</string>
+    <string name="pick_custom_font">Sélectionner une police de caractères japonaise</string>
+    <string name="failed_to_load_font">Impossible de charger la police: %s</string>
+    <string name="failed_to_load_resource">Impossible de charger la ressource: %s</string>
 
     <string name="title_about">À propos de Kakugo</string>
     <string name="about_text"><![CDATA[

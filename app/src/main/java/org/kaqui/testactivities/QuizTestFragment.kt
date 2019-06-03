@@ -66,7 +66,9 @@ class QuizTestFragment : Fragment(), TestFragment {
                                         linearLayout {
                                             gravity = Gravity.CENTER_VERTICAL
 
-                                            val answerText = textView().lparams(weight = 1f)
+                                            val answerText = textView {
+                                                typeface = TypefaceManager.getTypeface(context)
+                                            }.lparams(weight = 1f)
                                             val position = answerTexts.size
                                             answerTexts.add(answerText)
 
@@ -104,6 +106,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                     gravity = Gravity.CENTER_VERTICAL
 
                                                     val answerText = textView {
+                                                        typeface = TypefaceManager.getTypeface(context)
                                                         setTextSize(TypedValue.COMPLEX_UNIT_SP,
                                                                 when (testType) {
                                                                     TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30f

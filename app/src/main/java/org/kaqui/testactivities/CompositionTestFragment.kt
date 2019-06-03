@@ -58,6 +58,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
                             linearLayout {
                                 repeat(COLUMNS) {
                                     val button = toggleButton {
+                                        typeface = TypefaceManager.getTypeface(context)
                                         textSize = 30.0f
                                         setOnClickListener { colorCheckedButton(it as ToggleButton) }
                                     }.lparams(width = wrapContent, height = wrapContent, weight = 1f)

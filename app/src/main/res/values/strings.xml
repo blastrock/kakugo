@@ -85,6 +85,10 @@
     <string name="kanji_class_jlpt" translatable="false">JLPT</string>
     <string name="kanji_class_rtk" translatable="false">Remembering The Kanji</string>
     <string name="kanji_class_rtk6" translatable="false">Remembering The Kanji (6th edition)</string>
+    <string name="use_custom_font">Use a custom font</string>
+    <string name="pick_custom_font">Pick a custom Japanese font</string>
+    <string name="failed_to_load_font">Failed to load custom font: %s</string>
+    <string name="failed_to_load_resource">Failed to load resource: %s</string>
 
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[

@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.widget.TextViewCompat
 import org.jetbrains.anko.*
+import org.kaqui.TypefaceManager
 import org.kaqui.appCompatTextView
 
 class TestQuestionLayout {
@@ -22,6 +23,7 @@ class TestQuestionLayout {
                     linearLayout {
                         gravity = Gravity.CENTER
                         questionText = appCompatTextView {
+                            typeface = TypefaceManager.getTypeface(activity)
                             TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, questionMinSize, 200, 10, TypedValue.COMPLEX_UNIT_SP)
                             textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                             gravity = Gravity.CENTER
@@ -46,6 +48,7 @@ class TestQuestionLayout {
                             }
                     gravity = Gravity.CENTER
                     questionText = appCompatTextView {
+                        typeface = TypefaceManager.getTypeface(activity)
                         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, questionMinSize, 200, 10, TypedValue.COMPLEX_UNIT_SP)
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                         gravity = Gravity.CENTER
