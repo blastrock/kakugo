@@ -18,9 +18,9 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     val hiraganaView: LearningDbView
-        get() = LearningDbView(database, HIRAGANAS_TABLE_NAME, itemGetter = this::getHiragana)
+        get() = LearningDbView(database, KANAS_TABLE_NAME, filter = "id BETWEEN ${HiraganaRange.start} AND ${HiraganaRange.endInclusive}", itemGetter = this::getKana)
     val katakanaView: LearningDbView
-        get() = LearningDbView(database, KATAKANAS_TABLE_NAME, itemGetter = this::getKatakana)
+        get() = LearningDbView(database, KANAS_TABLE_NAME, filter = "id BETWEEN ${KatakanaRange.start} AND ${KatakanaRange.endInclusive}", itemGetter = this::getKana)
     val kanjiView: LearningDbView
         get() = LearningDbView(database, KANJIS_TABLE_NAME, filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
@@ -88,9 +88,6 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
-    fun getHiragana(id: Int): Item = getKana(HIRAGANAS_TABLE_NAME, id)
-    fun getKatakana(id: Int): Item = getKana(KATAKANAS_TABLE_NAME, id)
-
     fun getStrokes(id: Int): List<Path> {
         val strokes = mutableListOf<Path>()
         database.query(ITEM_STROKES_TABLE_NAME, arrayOf("path"), "id_item = ?", arrayOf(id.toString()), null, null, "ordinal").use { cursor ->
@@ -103,7 +100,7 @@ class Database private constructor(context: Context, private val database: SQLit
         return strokes
     }
 
-    private fun getKana(tableName: String, id: Int): Item {
+    private fun getKana(id: Int): Item {
         val similarities = mutableListOf<Item>()
         database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -111,9 +108,9 @@ class Database private constructor(context: Context, private val database: SQLit
         }
         val contents = Kana("", "", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
-        database.query(tableName, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(KANAS_TABLE_NAME, arrayOf("romaji", "short_score", "long_score", "last_correct", "enabled", "unique_romaji"), "id = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             if (cursor.count == 0)
-                throw RuntimeException("Can't find kana with id $id in $tableName")
+                throw RuntimeException("Can't find kana with id $id")
             cursor.moveToFirst()
             contents.kana = id.asUnicodeCodePoint()
             contents.romaji = cursor.getString(0)
@@ -343,9 +340,7 @@ class Database private constructor(context: Context, private val database: SQLit
 
         const val DATABASE_NAME = "kanjis"
 
-        const val HIRAGANAS_TABLE_NAME = "hiraganas"
-
-        const val KATAKANAS_TABLE_NAME = "katakanas"
+        const val KANAS_TABLE_NAME = "kanas"
 
         const val KANJIS_TABLE_NAME = "kanjis"
         const val KANJIS_COMPOSITION_TABLE_NAME = "kanjis_composition"

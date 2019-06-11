@@ -8,7 +8,7 @@ import android.util.Log
 import org.kaqui.asUnicodeCodePoint
 
 class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: String) {
-    data class Dump(val hiraganas: List<DumpRow>, val katakanas: List<DumpRow>, val kanjis: List<DumpRow>, val words: List<DumpRow>, val kanjiSelections: Map<String, List<String>>)
+    data class Dump(val kanas: List<DumpRow>, val kanjis: List<DumpRow>, val words: List<DumpRow>, val kanjiSelections: Map<String, List<String>>)
     data class DumpRow(val item: String, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val enabled: Boolean)
 
     private fun createDatabase() {
@@ -78,13 +78,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "UNIQUE(item, reading)"
                         + ")")
 
-        createKanaTable(Database.HIRAGANAS_TABLE_NAME)
-        createKanaTable(Database.KATAKANAS_TABLE_NAME)
-    }
-
-    private fun createKanaTable(tableName: String) {
         database.execSQL(
-                "CREATE TABLE IF NOT EXISTS $tableName ("
+                "CREATE TABLE IF NOT EXISTS ${Database.KANAS_TABLE_NAME} ("
                         + "id INTEGER PRIMARY KEY NOT NULL,"
                         + "romaji TEXT NOT NULL DEFAULT '',"
                         + "unique_romaji TEXT NOT NULL DEFAULT '',"
@@ -107,6 +102,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         oldVersion < 10 -> dumpUserDataV9()
                         oldVersion < 13 -> dumpUserDataV12()
                         oldVersion < 17 -> dumpUserDataV16()
+                        oldVersion < 19 -> dumpUserDataV18()
                         else -> dumpUserData()
                     }
             database.execSQL("DROP TABLE IF EXISTS main.meanings")
@@ -119,10 +115,11 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_SELECTION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_COMPOSITION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_TABLE_NAME}")
-            database.execSQL("DROP TABLE IF EXISTS main.${Database.HIRAGANAS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.KANAS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.hiraganas")
             database.execSQL("DROP TABLE IF EXISTS main.similar_hiraganas")
             database.execSQL("DROP TABLE IF EXISTS main.hiragana_strokes")
-            database.execSQL("DROP TABLE IF EXISTS main.${Database.KATAKANAS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.katakanas")
             database.execSQL("DROP TABLE IF EXISTS main.similar_katakanas")
             database.execSQL("DROP TABLE IF EXISTS main.katakana_strokes")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.WORDS_TABLE_NAME}")
@@ -140,8 +137,13 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
     }
 
     private fun replaceDict() {
-        replaceKanas(Database.HIRAGANAS_TABLE_NAME)
-        replaceKanas(Database.KATAKANAS_TABLE_NAME)
+        database.delete(Database.KANAS_TABLE_NAME, null, null)
+        database.execSQL(
+                "INSERT INTO ${Database.KANAS_TABLE_NAME} "
+                        + "(id, romaji, unique_romaji) "
+                        + "SELECT id, romaji, unique_romaji "
+                        + "FROM dict.${Database.KANAS_TABLE_NAME}"
+        )
 
         database.delete(Database.SIMILAR_ITEMS_TABLE_NAME, null, null)
         database.delete(Database.ITEM_STROKES_TABLE_NAME, null, null)
@@ -181,25 +183,14 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         )
     }
 
-    private fun replaceKanas(tableName: String) {
-        database.delete(tableName, null, null)
-
-        database.execSQL(
-                "INSERT INTO $tableName "
-                        + "(id, romaji, unique_romaji) "
-                        + "SELECT id, romaji, unique_romaji "
-                        + "FROM dict.$tableName"
-        )
-    }
-
     private fun dumpUserDataV9(): Dump {
         val hiraganas = mutableListOf<DumpRow>()
-        database.query(Database.HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val katakanas = mutableListOf<DumpRow>()
-        database.query(Database.KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("katakanas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
@@ -208,17 +199,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             while (cursor.moveToNext())
                 kanjis.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
-        return Dump(hiraganas, katakanas, kanjis, listOf(), mapOf())
+        return Dump(hiraganas + katakanas, kanjis, listOf(), mapOf())
     }
 
     private fun dumpUserDataV12(): Dump {
         val hiraganas = mutableListOf<DumpRow>()
-        database.query(Database.HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val katakanas = mutableListOf<DumpRow>()
-        database.query(Database.KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("katakanas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
@@ -232,17 +223,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             while (cursor.moveToNext())
                 words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
-        return Dump(hiraganas, katakanas, kanjis, words, mapOf())
+        return Dump(hiraganas + katakanas, kanjis, words, mapOf())
     }
 
     private fun dumpUserDataV16(): Dump {
         val hiraganas = mutableListOf<DumpRow>()
-        database.query(Database.HIRAGANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 hiraganas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val katakanas = mutableListOf<DumpRow>()
-        database.query(Database.KATAKANAS_TABLE_NAME, arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("katakanas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 katakanas.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
@@ -266,17 +257,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             while (cursor.moveToNext())
                 words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
-        return Dump(hiraganas, katakanas, kanjis, words, kanjiSelections)
+        return Dump(hiraganas + katakanas, kanjis, words, kanjiSelections)
     }
 
-    private fun dumpUserData(): Dump {
+    private fun dumpUserDataV18(): Dump {
         val hiraganas = mutableListOf<DumpRow>()
-        database.query(Database.HIRAGANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("hiraganas", arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 hiraganas.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
         val katakanas = mutableListOf<DumpRow>()
-        database.query(Database.KATAKANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query("katakanas", arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 katakanas.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
@@ -299,7 +290,35 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             while (cursor.moveToNext())
                 words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
         }
-        return Dump(hiraganas, katakanas, kanjis, words, kanjiSelections)
+        return Dump(hiraganas + katakanas, kanjis, words, kanjiSelections)
+    }
+
+    private fun dumpUserData(): Dump {
+        val kanas = mutableListOf<DumpRow>()
+        database.query(Database.KANAS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                kanas.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+        }
+        val kanjis = mutableListOf<DumpRow>()
+        database.query(Database.KANJIS_TABLE_NAME, arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                kanjis.add(DumpRow(cursor.getInt(0).asUnicodeCodePoint(), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+        }
+        val kanjiSelections = mutableMapOf<String, MutableList<String>>()
+        database.rawQuery("""
+                SELECT ks.name, kis.id_kanji
+                FROM ${Database.KANJIS_SELECTION_TABLE_NAME} ks
+                LEFT JOIN ${Database.KANJIS_ITEM_SELECTION_TABLE_NAME} kis USING(id_selection)
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getInt(1).asUnicodeCodePoint())
+        }
+        val words = mutableListOf<DumpRow>()
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                words.add(DumpRow(cursor.getString(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getLong(3), cursor.getInt(4) != 0))
+        }
+        return Dump(kanas, kanjis, words, kanjiSelections)
     }
 
     private fun restoreUserData(data: Dump) {
@@ -307,22 +326,12 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         try {
             run {
                 val cv = ContentValues()
-                for (row in data.hiraganas) {
+                for (row in data.kanas) {
                     cv.put("short_score", row.shortScore)
                     cv.put("long_score", row.longScore)
                     cv.put("last_correct", row.lastCorrect)
                     cv.put("enabled", if (row.enabled) 1 else 0)
-                    database.update(Database.HIRAGANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
-                }
-            }
-            run {
-                val cv = ContentValues()
-                for (row in data.katakanas) {
-                    cv.put("short_score", row.shortScore)
-                    cv.put("long_score", row.longScore)
-                    cv.put("last_correct", row.lastCorrect)
-                    cv.put("enabled", if (row.enabled) 1 else 0)
-                    database.update(Database.KATAKANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
+                    database.update(Database.KANAS_TABLE_NAME, cv, "id = ?", arrayOf(row.item.codePointAt(0).toString()))
                 }
             }
             run {
@@ -368,7 +377,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 18
+        const val DATABASE_VERSION = 19
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
