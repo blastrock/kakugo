@@ -187,7 +187,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     override fun onStart() {
         super.onStart()
 
-        statsFragment.updateStats(getDbView(Database.getInstance(this)))
+        statsFragment.updateStats(testEngine.itemView)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -249,7 +249,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
         // when showNewQuestion is called in onCreate, statsFragment is not visible yet
         if (statsFragment.isVisible)
-            statsFragment.updateStats(getDbView(Database.getInstance(this)))
+            statsFragment.updateStats(testEngine.itemView)
     }
 
     private fun updateSessionScore() {
@@ -257,7 +257,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
         // when showNewQuestion is called in onCreate, statsFragment is not visible yet
         if (statsFragment.isVisible)
-            statsFragment.updateStats(getDbView(Database.getInstance(this)))
+            statsFragment.updateStats(testEngine.itemView)
     }
 
     private fun setLastLine(correct: Item, probabilityData: TestEngine.DebugData?, style: Int) {
@@ -415,14 +415,4 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         for (position in historyView.childCount - 1 downTo TestEngine.MAX_HISTORY_SIZE - 1)
             historyView.removeViewAt(position)
     }
-
-    private fun getDbView(db: Database): LearningDbView =
-            when (testType) {
-                TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_HIRAGANA, TestType.HIRAGANA_WRITING -> db.hiraganaView
-                TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_KATAKANA, TestType.KATAKANA_WRITING -> db.katakanaView
-
-                TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_WRITING, TestType.KANJI_COMPOSITION -> db.kanjiView
-
-                TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> db.wordView
-            }
 }
