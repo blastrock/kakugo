@@ -9,6 +9,7 @@ import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Classifier
 import org.kaqui.model.Database
+import org.kaqui.model.KnowledgeType
 import org.kaqui.model.LearningDbView
 
 class ItemSelectionActivity : BaseActivity() {
@@ -45,10 +46,10 @@ class ItemSelectionActivity : BaseActivity() {
                 .commit()
 
         dbView = when (mode) {
-            Mode.HIRAGANA -> Database.getInstance(this).hiraganaView
-            Mode.KATAKANA -> Database.getInstance(this).katakanaView
-            Mode.KANJI -> Database.getInstance(this).getKanjiView(classifier!!)
-            Mode.WORD -> Database.getInstance(this).getWordView(classifier!!)
+            Mode.HIRAGANA -> Database.getInstance(this).getHiraganaView(KnowledgeType.Reading)
+            Mode.KATAKANA -> Database.getInstance(this).getKatakanaView(KnowledgeType.Reading)
+            Mode.KANJI -> Database.getInstance(this).getKanjiView(KnowledgeType.Reading, classifier!!)
+            Mode.WORD -> Database.getInstance(this).getWordView(KnowledgeType.Reading, classifier!!)
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

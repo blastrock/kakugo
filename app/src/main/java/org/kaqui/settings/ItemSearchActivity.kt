@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.ContextThemeWrapper
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.SearchView
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Database
+import org.kaqui.model.KnowledgeType
 import org.kaqui.model.LearningDbView
 
 class ItemSearchActivity : BaseActivity() {
@@ -38,13 +40,13 @@ class ItemSearchActivity : BaseActivity() {
                 .commit()
 
         dbView = when (mode) {
-            Mode.KANJI -> Database.getInstance(this).kanjiView
-            Mode.WORD -> Database.getInstance(this).wordView
+            Mode.KANJI -> Database.getInstance(this).getKanjiView(KnowledgeType.Reading)
+            Mode.WORD -> Database.getInstance(this).getWordView(KnowledgeType.Reading)
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
         item_list.adapter = listAdapter
-        item_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        item_list.layoutManager = LinearLayoutManager(this)
 
         val searchView = SearchView(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Dark))
         searchView.isSubmitButtonEnabled = false

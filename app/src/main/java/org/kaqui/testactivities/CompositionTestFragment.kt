@@ -170,6 +170,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
 
     override fun startNewQuestion() {
         val db = Database.getInstance(context!!)
+        val knowledgeType = TestEngine.getKnowledgeType(testType)
         val ids = testEngine.prepareNewQuestion().map { it.itemId }
 
         val questionPartsIds = currentKanji.parts.map { it.id }
@@ -177,7 +178,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
         val similarItemIds = testEngine.currentQuestion.similarities.map { it.id }.filter { testEngine.itemView.isItemEnabled(it) } - testEngine.currentQuestion.id
         val restOfAnswers = ids - testEngine.currentQuestion.id
 
-        Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it).contents as Kanji).kanji }}")
+        Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
 
         val wholeKanjisRatio = db.getEnabledWholeKanjiRatio()
         val threshold = lerp(0.1f, 0.5f, wholeKanjisRatio)
@@ -185,11 +186,11 @@ class CompositionTestFragment : Fragment(), TestFragment {
         val currentAnswers =
                 if (partMode) {
                     Log.d(TAG, "Composition mode: part")
-                    sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it) }.toMutableList()
+                    sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
                 } else {
                     Log.d(TAG, "Composition mode: kanji")
                     // remove just one part from all sets so that the user can't answer with parts and is forced to select the whole kanji
-                    sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers).map { it - currentKanji.parts.random().id }, listOf(testEngine.currentQuestion.id)).map { db.getKanji(it) }.toMutableList()
+                    sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers).map { it - currentKanji.parts.random().id }, listOf(testEngine.currentQuestion.id)).map { db.getKanji(it, knowledgeType) }.toMutableList()
                 }
 
         if (currentAnswers.size != testEngine.answerCount)

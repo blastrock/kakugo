@@ -7,12 +7,13 @@ import org.kaqui.SrsCalculator
 class LearningDbView(
         private val database: SQLiteDatabase,
         private val tableName: String,
+        private val knowledgeType: KnowledgeType,
         private val filter: String = "1",
         private val classifier: Classifier? = null,
-        private val itemGetter: (id: Int) -> Item,
+        private val itemGetter: (id: Int, knowledgeType: KnowledgeType) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
 
-    fun getItem(id: Int): Item = itemGetter(id)
+    fun getItem(id: Int): Item = itemGetter(id, knowledgeType)
 
     fun search(text: String): List<Int> = itemSearcher!!(text)
 
@@ -74,7 +75,12 @@ class LearningDbView(
     }
 
     fun getEnabledItemsAndScores(): List<SrsCalculator.ProbabilityData> {
-        database.query(tableName, arrayOf("id", "short_score", "long_score", "last_correct"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
+        database.rawQuery("""
+            SELECT $tableName.id, ifnull(s.short_score, 0.0), ifnull(s.long_score, 0.0), ifnull(s.last_correct, 0)
+            FROM $tableName
+            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
+            WHERE $filter AND $tableName.enabled = 1
+        """, null).use { cursor ->
             val ret = mutableListOf<SrsCalculator.ProbabilityData>()
             while (cursor.moveToNext()) {
                 ret.add(SrsCalculator.ProbabilityData(cursor.getInt(0), cursor.getDouble(1), 0.0, cursor.getDouble(2), 0.0, cursor.getLong(3), 0.0, 0.0))
@@ -89,7 +95,15 @@ class LearningDbView(
             cursor.getInt(0)
         }
         val decile1 = count / 10
-        database.query(tableName, arrayOf("last_correct"), "$filter AND enabled = 1", null, null, null, "last_correct ASC", "$decile1, 1").use { cursor ->
+        // I couldn't find how sqlite handles null values in order by, so I use ifnull there too
+        database.rawQuery("""
+            SELECT ifnull(s.last_correct, 0)
+            FROM $tableName
+            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
+            WHERE $filter AND $tableName.enabled = 1
+            ORDER BY ifnull(s.last_correct, 0) ASC
+            LIMIT $decile1, 1
+        """, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)
         }
@@ -108,7 +122,7 @@ class LearningDbView(
         cv.put("long_score", scoreUpdate.longScore)
         if (scoreUpdate.lastCorrect != null)
             cv.put("last_correct", scoreUpdate.lastCorrect)
-        database.update(tableName, cv, "id = ?", arrayOf(scoreUpdate.itemId.toString()))
+        database.update(Database.ITEM_SCORES_TABLE_NAME, cv, "id = ? AND type = ${knowledgeType.value}", arrayOf(scoreUpdate.itemId.toString()))
     }
 
 
@@ -119,18 +133,28 @@ class LearningDbView(
             Stats(getCountForScore(0.0f, BAD_WEIGHT, classifier), getCountForScore(BAD_WEIGHT, GOOD_WEIGHT, classifier), getCountForScore(GOOD_WEIGHT, 1.0f, classifier), getDisabledCount(classifier))
 
     private fun getCountForScore(from: Float, to: Float, classifier: Classifier?): Int {
-        val selection = "$filter AND enabled = 1 AND short_score BETWEEN ? AND ?" +
+        val andWhereClause =
                 if (classifier != null)
                     " AND " + classifier.whereClause()
                 else
                     ""
-        val selectionArgsBase = arrayOf(from.toString(), to.toString())
+
+        val selectionArgsBase = arrayOf<String>()
         val selectionArgs =
                 if (classifier != null)
                     selectionArgsBase + classifier.whereArguments()
                 else
                     selectionArgsBase
-        database.query(tableName, arrayOf("COUNT(*)"), selection, selectionArgs, null, null, null).use { cursor ->
+
+        database.rawQuery("""
+            SELECT COUNT(*)
+            FROM $tableName
+            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
+            WHERE $filter
+                AND $tableName.enabled = 1
+                AND ifnull(s.short_score, 0.0) BETWEEN $from AND $to
+                $andWhereClause
+        """, selectionArgs).use { cursor ->
             cursor.moveToNext()
             return cursor.getInt(0)
         }

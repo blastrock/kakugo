@@ -2,6 +2,7 @@ package org.kaqui.model
 
 val HiraganaRange = 0x3040..0x309F
 val KatakanaRange = 0x30A0..0x30FF
+val WordBaseId = 0x1000000
 
 sealed class ItemContents
 
@@ -44,6 +45,17 @@ val Item.similarities: List<Item>
         is Kanji -> (contents as Kanji).similarities
         is Word -> (contents as Word).similarities
     }
+
+enum class KnowledgeType(val value: Int) {
+    Reading(1),
+    Meaning(2),
+    Strokes(3);
+
+    companion object {
+        private val map = values().associateBy(KnowledgeType::value)
+        fun fromInt(type: Int) = map.getValue(type)
+    }
+}
 
 fun Item.getQuestionText(testType: TestType): String =
         when (testType) {
