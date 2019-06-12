@@ -63,7 +63,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             frameLayout {
                 id = R.id.global_stats
             }.lparams(width = matchParent, height = wrapContent)
-            listView{
+            listView {
                 this@ClassSelectionActivity.adapter = ClassSelectionAdapter(context, dbView, classification)
                 adapter = this@ClassSelectionActivity.adapter
                 onItemClickListener = AdapterView.OnItemClickListener(this@ClassSelectionActivity::onListItemClick)
@@ -174,6 +174,12 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
     }
 
     private fun importKanjis() {
+        alert(getString(R.string.import_kanji_help)) {
+            okButton { doImportKanjis() }
+        }.show()
+    }
+
+    private fun doImportKanjis() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
