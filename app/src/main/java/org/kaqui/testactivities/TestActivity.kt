@@ -246,10 +246,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         testEngine.prepareNewQuestion()
         testFragment.startNewQuestion()
         testFragment.refreshQuestion()
-
-        // when showNewQuestion is called in onCreate, statsFragment is not visible yet
-        if (statsFragment.isVisible)
-            statsFragment.updateStats(testEngine.itemView)
     }
 
     private fun updateSessionScore() {
