@@ -4,12 +4,9 @@ import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import androidx.core.text.HtmlCompat
+import kotlinx.coroutines.*
 import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.DatabaseUpdater
@@ -83,6 +80,17 @@ class MainActivity : BaseActivity(), CoroutineScope {
             launch(Dispatchers.Default) {
                 initDic()
             }
+        }
+
+        val lastVersionChangelog = defaultSharedPreferences.getInt("last_version_changelog", 0)
+        if (lastVersionChangelog < BuildConfig.VERSION_CODE) {
+            alert(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT)) {
+                okButton {
+                    defaultSharedPreferences.edit()
+                            .putInt("last_version_changelog", BuildConfig.VERSION_CODE)
+                            .apply()
+                }
+            }.show()
         }
     }
 
