@@ -96,6 +96,7 @@
         <p>La police de caractères du titres de l'application est <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
     ]]></string>
 
+    <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
         <h3>Nouveautés en 1.25</h3>
 

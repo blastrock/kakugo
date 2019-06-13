@@ -8,18 +8,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
-import org.jetbrains.anko.frameLayout
-import org.jetbrains.anko.linearLayout
-import org.jetbrains.anko.matchParent
+import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
-import org.jetbrains.anko.support.v4.startActivityForResult
 import org.kaqui.*
-import java.io.File
-import java.net.URI
 
 class MainSettingsActivity : BaseActivity() {
 
@@ -53,6 +48,12 @@ class MainSettingsActivity : BaseActivity() {
                 } else {
                     false
                 }
+            }
+            findPreference<Preference>("showChangelog")!!.setOnPreferenceClickListener {
+                context!!.alert(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT)) {
+                    okButton { }
+                }.show()
+                true
             }
         }
 
