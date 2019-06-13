@@ -84,7 +84,7 @@
 
     <string name="title_about">À propos de Kakugo</string>
     <string name="about_text"><![CDATA[
-        <p>Kakugo est une application pour apprendre le Japonais.</p>
+        <p>Kakugo est une application pour apprendre le Japonais. Version %1$s (%2$d).</p>
 
         <p>Elle est open-source et disponible sur <a href="https://github.com/blastrock/kakugo/">github</a>.<p>
 

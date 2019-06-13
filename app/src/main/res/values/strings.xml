@@ -97,7 +97,7 @@
 
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[
-        <p>Kakugo is a Japanese learning app.</p>
+        <p>Kakugo is a Japanese learning app. Version %1$s (%2$d).</p>
 
         <p>It is open-source and available on <a href="https://github.com/blastrock/kakugo/">github</a>.<p>
 
