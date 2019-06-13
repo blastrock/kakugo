@@ -1,8 +1,8 @@
 package org.kaqui.settings
 
 import android.os.Bundle
-import android.text.Html
 import android.text.method.LinkMovementMethod
+import androidx.core.text.HtmlCompat
 import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
@@ -19,7 +19,7 @@ class AboutActivity : BaseActivity() {
                 }
 
                 textView {
-                    text = Html.fromHtml(getString(R.string.about_text))
+                    text = HtmlCompat.fromHtml(getString(R.string.about_text), HtmlCompat.FROM_HTML_MODE_LEGACY)
                     movementMethod = LinkMovementMethod.getInstance()
                 }.lparams {
                     margin = dip(16)
