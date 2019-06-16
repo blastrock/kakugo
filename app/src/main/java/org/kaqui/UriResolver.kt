@@ -7,12 +7,15 @@ import android.os.Build
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import org.jetbrains.anko.longToast
 
 class UriResolver {
     companion object {
-        fun getFilePath(context: Context, uri: Uri): String? {
-            var uri = uri
+        const val TAG = "UriResolver"
+
+        fun getFilePath(context: Context, auri: Uri): String? {
+            var uri = auri
             var selection: String? = null
             var selectionArgs: Array<String>? = null
             if (Build.VERSION.SDK_INT >= 19 && DocumentsContract.isDocumentUri(context, uri)) {
@@ -51,6 +54,7 @@ class UriResolver {
                                 }
                             }
                 } catch (e: Exception) {
+                    Log.e(TAG, "Couldn't find path of $auri", e)
                     context.longToast(context.getString(R.string.failed_to_load_resource, e.message))
                 }
             } else if ("file".equals(uri.scheme, ignoreCase = true)) {
