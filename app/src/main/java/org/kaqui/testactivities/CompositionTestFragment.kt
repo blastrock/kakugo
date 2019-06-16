@@ -68,10 +68,10 @@ class CompositionTestFragment : Fragment(), TestFragment {
                         }
                         linearLayout {
                             doneButton = button(R.string.answerDone) {
-                                setExtTint(R.color.answerSure)
+                                setExtTint(R.attr.backgroundSure)
                             }.lparams(width = 0, weight = 1.0f)
                             dontKnowButton = button(R.string.dont_know) {
-                                setExtTint(R.color.answerDontKnow)
+                                setExtTint(R.attr.backgroundDontKnow)
                             }.lparams(width = 0, weight = 1.0f)
                             nextButton = button(R.string.next).lparams(weight = 1.0f)
                         }.lparams(width = matchParent, height = wrapContent)
@@ -135,13 +135,13 @@ class CompositionTestFragment : Fragment(), TestFragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val color =
                     if (button.isChecked)
-                        R.color.compositionGood
+                        ContextCompat.getColor(context!!, R.color.compositionGood)
                     else
-                        R.color.answerDontKnow
+                        context!!.getColorFromAttr(R.attr.backgroundDontKnow)
 
             button.textColor = ContextCompat.getColor(context!!, R.color.answerTextColor)
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context!!, color))
+            button.backgroundTintList = ColorStateList.valueOf(color)
         }
     }
 

@@ -84,10 +84,10 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
                     }
                     buttons = linearLayout {
                         hintButton = button(R.string.hint) {
-                            setExtTint(R.color.answerMaybe)
+                            setExtTint(R.attr.backgroundMaybe)
                         }.lparams(weight = 1.0f)
                         dontKnowButton = button(R.string.dont_know) {
-                            setExtTint(R.color.answerDontKnow)
+                            setExtTint(R.attr.backgroundDontKnow)
                         }.lparams(weight = 1.0f)
                         nextButton = button(R.string.next).lparams(weight = 1.0f)
                     }.lparams(width = matchParent, height = wrapContent)

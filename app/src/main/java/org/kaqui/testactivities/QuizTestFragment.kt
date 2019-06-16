@@ -77,7 +77,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                     minimumWidth = 0
                                                     minWidth = 0
                                                 }
-                                                setExtTint(R.color.answerMaybe)
+                                                setExtTint(R.attr.backgroundMaybe)
                                                 setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
                                             }
                                             val sureButton = button(R.string.sure) {
@@ -85,7 +85,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                     minimumWidth = 0
                                                     minWidth = 0
                                                 }
-                                                setExtTint(R.color.answerSure)
+                                                setExtTint(R.attr.backgroundSure)
                                                 setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                             }
                                             answerButtons.add(maybeButton)
@@ -123,7 +123,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                             minimumWidth = 0
                                                             minHeight = 0
                                                             minWidth = 0
-                                                            setExtTint(R.color.answerSure)
+                                                            setExtTint(R.attr.backgroundSure)
                                                             setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                         val maybeButton = button(R.string.maybe) {
@@ -131,7 +131,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                             minimumWidth = 0
                                                             minHeight = 0
                                                             minWidth = 0
-                                                            setExtTint(R.color.answerMaybe)
+                                                            setExtTint(R.attr.backgroundMaybe)
                                                             setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
                                                         }.lparams(width = matchParent, height = wrapContent)
                                                         answerButtons.add(sureButton)
@@ -151,7 +151,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                             setOnClickListener { onNextClicked() }
                         }.lparams(width = matchParent)
                         dontKnowButton = button(R.string.dont_know) {
-                            setExtTint(R.color.answerDontKnow)
+                            setExtTint(R.attr.backgroundDontKnow)
                             setOnClickListener { onAnswerClicked(this, Certainty.DONTKNOW, 0) }
                         }.lparams(width = matchParent)
                     }.lparams(width = matchParent, height = wrapContent)

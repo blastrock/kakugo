@@ -85,14 +85,14 @@ class TextTestFragment : Fragment(), TestFragment {
 
                         linearLayout {
                             val maybeButton = button(R.string.maybe) {
-                                setExtTint(R.color.answerMaybe)
+                                setExtTint(R.attr.backgroundMaybe)
                                 setOnClickListener {
                                     this@TextTestFragment.onTextAnswerClicked(this, Certainty.MAYBE)
                                 }
                             }.lparams(weight = 1f)
 
                             val sureButton = button(R.string.sure) {
-                                setExtTint(R.color.answerSure)
+                                setExtTint(R.attr.backgroundSure)
                                 setOnClickListener {
                                     this@TextTestFragment.onTextAnswerClicked(this, Certainty.SURE)
                                 }
@@ -103,7 +103,7 @@ class TextTestFragment : Fragment(), TestFragment {
 
                         linearLayout {
                             val dontKnowButton = button(R.string.dont_know) {
-                                setExtTint(R.color.answerDontKnow)
+                                setExtTint(R.attr.backgroundDontKnow)
                                 setOnClickListener { this@TextTestFragment.onTextAnswerClicked(this, Certainty.DONTKNOW) }
                             }.lparams(width = matchParent)
                             answerButtons.add(dontKnowButton)

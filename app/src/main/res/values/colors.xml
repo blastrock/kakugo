@@ -6,9 +6,6 @@
 
     <color name="answerTextColor">#222222</color>
     <color name="answerDisabledText">#888888</color>
-    <color name="answerSure">#9ccc65</color>
-    <color name="answerMaybe">#dcedc8</color>
-    <color name="answerDontKnow">#e0e0e0</color>
 
     <color name="statsTextColor">#222222</color>
     <color name="statsUnknown">#E0E0E0</color>

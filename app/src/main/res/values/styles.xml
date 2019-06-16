@@ -2,11 +2,18 @@
     <attr name="historyBackground" format="color" />
     <attr name="wrongAnswerBackground" format="color" />
     <attr name="correctAnswerBackground" format="color" />
+    <attr name="backgroundSure" format="color" />
+    <attr name="backgroundMaybe" format="color" />
+    <attr name="backgroundDontKnow" format="color" />
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="backgroundSure">#9ccc65</item>
+        <item name="backgroundMaybe">#dcedc8</item>
+        <item name="backgroundDontKnow">#e0e0e0</item>
 
         <item name="wrongAnswerBackground">#ffdddd</item>
         <item name="correctAnswerBackground">#deffd3</item>
@@ -22,6 +29,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="backgroundSure">#9ccc65</item>
+        <item name="backgroundMaybe">#dcedc8</item>
+        <item name="backgroundDontKnow">#e0e0e0</item>
 
         <item name="wrongAnswerBackground">#350000</item>
         <item name="correctAnswerBackground">#092600</item>

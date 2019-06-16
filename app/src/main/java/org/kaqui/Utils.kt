@@ -63,11 +63,11 @@ fun Button.setExtTextColor(@ColorRes color: Int) {
     }
 }
 
-fun Button.setExtTint(@ColorRes color: Int) {
+fun Button.setExtTint(@AttrRes attrColor: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         textColor = ContextCompat.getColor(context, R.color.answerTextColor)
         backgroundTintMode = PorterDuff.Mode.MULTIPLY
-        backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, color))
+        backgroundTintList = ColorStateList.valueOf(context.getColorFromAttr(attrColor))
     }
 }
 
