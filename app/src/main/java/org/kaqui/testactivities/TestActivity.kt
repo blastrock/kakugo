@@ -96,7 +96,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 gravity = Gravity.CENTER
                                 background = getColoredCircle(context, R.attr.itemBad)
-                            }.lparams(width = matchParent, height = matchParent)
+                                minWidth = sp(35)
+                            }.lparams(width = wrapContent, height = sp(35))
                             lastWrongInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
                                 val mWrappedDrawable = DrawableCompat.wrap(drawable)
@@ -109,7 +110,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 sameBottom(lastWrongItemText)
                                 sameEnd(lastWrongItemText)
                             }
-                        }.lparams(width = sp(35), height = sp(35)) {
+                        }.lparams {
                             margin = dip(8)
                             gravity = Gravity.CENTER
                         }
@@ -122,7 +123,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 gravity = Gravity.CENTER
                                 background = getColoredCircle(context, R.attr.itemGood)
-                            }.lparams(width = matchParent, height = matchParent)
+                                minWidth = sp(35)
+                            }.lparams(width = wrapContent, height = sp(35))
                             lastInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
                                 val mWrappedDrawable = DrawableCompat.wrap(drawable)
@@ -135,7 +137,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 sameBottom(lastItemText)
                                 sameEnd(lastItemText)
                             }
-                        }.lparams(width = sp(35), height = sp(35)) {
+                        }.lparams {
                             margin = dip(8)
                             gravity = Gravity.CENTER
                         }
@@ -413,8 +415,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
             (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         if (style != null) {
             itemView.background = getColoredCircle(this, style)
-        }
-        else
+        } else
             itemView.textColor = getColorFromAttr(android.R.attr.colorForeground)
         if (item.contents is Kanji) {
             line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
