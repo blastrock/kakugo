@@ -195,7 +195,6 @@ class QuizTestFragment : Fragment(), TestFragment {
 
             for (answerButton in answerButtons) {
                 answerButton.isEnabled = false
-                answerButton.setExtTextColor(R.color.answerDisabledText)
             }
         } else {
             nextButton.visibility = View.GONE
@@ -206,7 +205,6 @@ class QuizTestFragment : Fragment(), TestFragment {
 
             for (answerButton in answerButtons) {
                 answerButton.isEnabled = true
-                answerButton.setExtTextColor(R.color.answerTextColor)
             }
         }
     }

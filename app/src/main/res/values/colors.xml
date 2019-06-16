@@ -4,9 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#99CC00</color>
 
-    <color name="answerTextColor">#222222</color>
-    <color name="answerDisabledText">#888888</color>
-
     <color name="statsTextColor">#222222</color>
     <color name="statsUnknown">#E0E0E0</color>
     <color name="statsBad">#fce4ec</color>

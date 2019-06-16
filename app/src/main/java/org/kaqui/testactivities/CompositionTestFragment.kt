@@ -139,7 +139,6 @@ class CompositionTestFragment : Fragment(), TestFragment {
                     else
                         context!!.getColorFromAttr(R.attr.backgroundDontKnow)
 
-            button.textColor = ContextCompat.getColor(context!!, R.color.answerTextColor)
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
             button.backgroundTintList = ColorStateList.valueOf(color)
         }
@@ -147,7 +146,6 @@ class CompositionTestFragment : Fragment(), TestFragment {
 
     private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            button.textColor = ContextCompat.getColor(context!!, R.color.answerTextColor)
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
             button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context!!, color))
         } else {
