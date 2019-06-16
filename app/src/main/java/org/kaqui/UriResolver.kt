@@ -24,9 +24,15 @@ class UriResolver {
                     val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                     return Environment.getExternalStorageDirectory().path + "/" + split[1]
                 } else if (isDownloadsDocument(uri)) {
-                    val id = DocumentsContract.getDocumentId(uri)
-                    uri = ContentUris.withAppendedId(
-                            Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
+                    try {
+                        val id = DocumentsContract.getDocumentId(uri)
+                        uri = ContentUris.withAppendedId(
+                                Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Couldn't find path of $auri", e)
+                        context.longToast(context.getString(R.string.failed_to_load_resource, e.message))
+                        return null
+                    }
                 } else if (isMediaDocument(uri)) {
                     val docId = DocumentsContract.getDocumentId(uri)
                     val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -56,6 +62,7 @@ class UriResolver {
                 } catch (e: Exception) {
                     Log.e(TAG, "Couldn't find path of $auri", e)
                     context.longToast(context.getString(R.string.failed_to_load_resource, e.message))
+                    return null
                 }
             } else if ("file".equals(uri.scheme, ignoreCase = true)) {
                 return uri.path
