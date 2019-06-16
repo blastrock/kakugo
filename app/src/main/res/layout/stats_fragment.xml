@@ -10,8 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@color/statsUnknown"
-        android:textColor="@color/statsTextColor"
+        android:background="?attr/backgroundDontKnow"
         android:textAlignment="center" />
 
     <TextView
@@ -19,8 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@color/statsBad"
-        android:textColor="@color/statsTextColor"
+        android:background="?attr/itemBad"
         android:textAlignment="center" />
 
     <TextView
@@ -28,8 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@color/statsMeh"
-        android:textColor="@color/statsTextColor"
+        android:background="?attr/itemMeh"
         android:textAlignment="center" />
 
     <TextView
@@ -37,7 +34,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="@color/statsGood"
-        android:textColor="@color/statsTextColor"
+        android:background="?attr/itemGood"
         android:textAlignment="center" />
 </LinearLayout>

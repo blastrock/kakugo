@@ -4,12 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#99CC00</color>
 
-    <color name="statsTextColor">#222222</color>
-    <color name="statsUnknown">#E0E0E0</color>
-    <color name="statsBad">#fce4ec</color>
-    <color name="statsMeh">#c5cae9</color>
-    <color name="statsGood">#9ccc65</color>
-
     <color name="drawingHintColor">@android:color/holo_green_light</color>
 
     <color name="separator">#cccccc</color>
