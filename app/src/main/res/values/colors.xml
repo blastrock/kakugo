@@ -16,10 +16,6 @@
     <color name="statsMeh">#c5cae9</color>
     <color name="statsGood">#9ccc65</color>
 
-    <color name="feedbackSure">#99cc00</color>
-    <color name="feedbackMaybe">#dcedc8</color>
-    <color name="feedbackDontKnow">#F44336</color>
-
     <color name="itemTextColor">#222222</color>
     <color name="itemGood">#dcedc8</color>
     <color name="itemMeh">#fff9c4</color>

@@ -93,13 +93,6 @@ fun ViewManager.appTitleImage(context: Context) =
             setImageDrawable(drawable)
         }
 
-fun Certainty.toColorRes() =
-        when (this) {
-            Certainty.DONTKNOW -> R.color.feedbackDontKnow
-            Certainty.MAYBE -> R.color.feedbackMaybe
-            Certainty.SURE -> R.color.feedbackSure
-        }
-
 fun startTest(activity: Activity, type: TestType) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
