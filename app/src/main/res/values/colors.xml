@@ -32,4 +32,6 @@
     <color name="drawingHintColor">@android:color/holo_green_light</color>
 
     <color name="separator">#cccccc</color>
+
+    <color name="darkBackground">#000000</color>
 </resources>

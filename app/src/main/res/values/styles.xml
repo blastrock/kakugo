@@ -15,6 +15,10 @@
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat">
+        <item name="android:windowBackground">@color/darkBackground</item>
+        <item name="android:colorBackground">@color/darkBackground</item>
+        <item name="colorButtonNormal">#333333</item>
+
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
