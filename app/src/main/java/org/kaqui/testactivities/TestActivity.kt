@@ -48,10 +48,16 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     private lateinit var historyScrollView: NestedScrollView
     private lateinit var historyActionButton: FloatingActionButton
     private lateinit var historyView: LinearLayout
+
     private lateinit var lastItem: LinearLayout
+    private lateinit var lastWrongItemBundle: View
+    private lateinit var lastWrongItemText: TextView
+    private lateinit var lastWrongInfo: ImageView
+    private lateinit var lastItemBundle: View
     private lateinit var lastItemText: TextView
     private lateinit var lastInfo: ImageView
     private lateinit var lastDescription: TextView
+
     private lateinit var sessionScore: TextView
     private lateinit var mainView: View
     private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -78,7 +84,35 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                 frameLayout {
                     backgroundColor = getColorFromAttr(R.attr.historyBackground)
                     lastItem = linearLayout {
-                        relativeLayout {
+                        lastWrongItemBundle = relativeLayout {
+                            visibility = View.GONE
+                            lastWrongItemText = textView {
+                                id = View.generateViewId()
+                                typeface = TypefaceManager.getTypeface(context)
+                                textSize = 25f
+                                textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                                textColor = ContextCompat.getColor(context, R.color.itemTextColor)
+                                gravity = Gravity.CENTER
+                                background = ContextCompat.getDrawable(context, R.drawable.round_red)
+                            }.lparams(width = matchParent, height = matchParent)
+                            lastWrongInfo = imageView {
+                                val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
+                                val mWrappedDrawable = DrawableCompat.wrap(drawable)
+                                DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
+                                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+                                setImageDrawable(drawable)
+                                contentDescription = context.getString(R.string.info_button)
+                                visibility = View.INVISIBLE
+                            }.lparams(width = sp(10), height = sp(10)) {
+                                sameBottom(lastWrongItemText)
+                                sameEnd(lastWrongItemText)
+                            }
+                        }.lparams(width = sp(35), height = sp(35)) {
+                            margin = dip(8)
+                            gravity = Gravity.CENTER
+                        }
+                        lastItemBundle = relativeLayout {
+                            visibility = View.GONE
                             lastItemText = textView {
                                 id = View.generateViewId()
                                 typeface = TypefaceManager.getTypeface(context)
@@ -86,6 +120,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
+                                background = ContextCompat.getDrawable(context, R.drawable.round_green)
                             }.lparams(width = matchParent, height = matchParent)
                             lastInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -256,13 +291,13 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
             statsFragment.updateStats(testEngine.itemView)
     }
 
-    private fun setLastLine(correct: Item, probabilityData: TestEngine.DebugData?, style: Int) {
+    private fun setLastLine(correct: Item, wrong: Item?, probabilityData: TestEngine.DebugData?) {
         ObjectAnimator.ofFloat(lastItem, "translationY", lastItem.height.toFloat()).apply {
             duration = 100
             addListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
                     lastItem.translationY = -lastItem.height.toFloat()
-                    updateLastLine(correct, probabilityData, style)
+                    updateLastLine(correct, wrong, probabilityData)
 
                     ObjectAnimator.ofFloat(lastItem, "translationY", 0f).apply {
                         duration = 200
@@ -278,21 +313,51 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         }
     }
 
-    private fun updateLastLine(correct: Item, probabilityData: TestEngine.DebugData?, style: Int) {
-        lastItemText.text = correct.text
-        lastItemText.background = ContextCompat.getDrawable(this, style)
-        lastDescription.text = correct.description
-        if (correct.contents is Kanji) {
-            lastInfo.visibility = View.VISIBLE
-            lastItemText.setOnClickListener {
-                showItemInDict(correct.contents as Kanji)
+    private fun updateLastLine(correct: Item, wrong: Item?, probabilityData: TestEngine.DebugData?) {
+        if (wrong != null) {
+            lastWrongItemText.text = wrong.text
+            lastWrongItemBundle.visibility = View.VISIBLE
+            if (correct.contents is Kanji) {
+                lastWrongInfo.visibility = View.VISIBLE
+                lastWrongItemText.setOnClickListener {
+                    showItemInDict(wrong.contents as Kanji)
+                }
+            } else if (correct.contents is Word) {
+                lastWrongInfo.visibility = View.VISIBLE
+                lastWrongItemText.setOnClickListener {
+                    showItemInDict(wrong.contents as Word)
+                }
             }
-        } else if (correct.contents is Word) {
-            lastInfo.visibility = View.VISIBLE
-            lastItemText.setOnClickListener {
-                showItemInDict(correct.contents as Word)
-            }
+        } else {
+            lastWrongItemBundle.visibility = View.GONE
         }
+        if (correct != wrong) {
+            lastItemText.text = correct.text
+            lastItemBundle.visibility = View.VISIBLE
+            if (correct.contents is Kanji) {
+                lastInfo.visibility = View.VISIBLE
+                lastItemText.setOnClickListener {
+                    showItemInDict(correct.contents as Kanji)
+                }
+            } else if (correct.contents is Word) {
+                lastInfo.visibility = View.VISIBLE
+                lastItemText.setOnClickListener {
+                    showItemInDict(correct.contents as Word)
+                }
+            }
+        } else {
+            lastItemBundle.visibility = View.GONE
+        }
+
+        if (lastItemBundle.visibility == View.VISIBLE && lastWrongItemBundle.visibility == View.VISIBLE) {
+            (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = 0
+            (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = 0
+        } else {
+            (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = dip(8)
+            (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = dip(8)
+        }
+
+        lastDescription.text = correct.description
         lastItemText.setOnLongClickListener {
             if (probabilityData != null)
                 showItemProbabilityData(this, correct.text, probabilityData)
@@ -307,7 +372,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         if (refresh) {
             updateSheetPeekHeight(layout)
             discardOldHistory()
-            setLastLine(correct, probabilityData, R.drawable.round_green)
+            setLastLine(correct, null, probabilityData)
         }
     }
 
@@ -320,7 +385,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         if (refresh) {
             updateSheetPeekHeight(layoutGood)
             discardOldHistory()
-            setLastLine(correct, probabilityData, R.drawable.round_red)
+            setLastLine(correct, wrong, probabilityData)
         }
     }
 
@@ -331,7 +396,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         if (refresh) {
             updateSheetPeekHeight(layout)
             discardOldHistory()
-            setLastLine(correct, probabilityData, R.drawable.round_red)
+            setLastLine(correct, correct, probabilityData)
         }
     }
 
