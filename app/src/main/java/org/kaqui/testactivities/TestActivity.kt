@@ -94,7 +94,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 typeface = TypefaceManager.getTypeface(context)
                                 textSize = 25f
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                                textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
                                 background = getColoredCircle(context, R.attr.itemBad)
                             }.lparams(width = matchParent, height = matchParent)
@@ -121,7 +120,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 typeface = TypefaceManager.getTypeface(context)
                                 textSize = 25f
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                                textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
                                 background = getColoredCircle(context, R.attr.itemGood)
                             }.lparams(width = matchParent, height = matchParent)

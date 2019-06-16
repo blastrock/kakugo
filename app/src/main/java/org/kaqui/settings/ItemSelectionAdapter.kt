@@ -63,7 +63,6 @@ class ItemSelectionAdapter(private val view: LearningDbView, private val context
                         textSize = 25f
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                         gravity = Gravity.CENTER
-                        textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                     }.lparams(width = sp(35), height = sp(35)) {
                         margin = dip(8)
                         gravity = Gravity.CENTER
