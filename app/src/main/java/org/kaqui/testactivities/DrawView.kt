@@ -48,7 +48,7 @@ class DrawView(context: Context) : View(context) {
         mBoundingBoxPaint.apply {
             style = Paint.Style.STROKE
             strokeWidth = 1f
-            color = Color.argb(150, 0, 0, 0)
+            color = Color.argb(150, 128, 128, 128)
         }
         mDebugPaint.apply {
             strokeWidth = debugStrokeWidth

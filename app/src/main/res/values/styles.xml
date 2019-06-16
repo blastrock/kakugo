@@ -17,9 +17,9 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="itemGood">#dcedc8</item>
-        <item name="itemMeh">#fff9c4</item>
-        <item name="itemBad">#ffcdd2</item>
+        <item name="itemGood">#9ccc65</item>
+        <item name="itemMeh">#c5cae9</item>
+        <item name="itemBad">#fce4ec</item>
 
         <item name="backgroundSure">#9ccc65</item>
         <item name="backgroundMaybe">#dcedc8</item>
@@ -38,27 +38,26 @@
     <style name="AppThemeDark" parent="Theme.AppCompat">
         <item name="android:windowBackground">@color/darkBackground</item>
         <item name="android:colorBackground">@color/darkBackground</item>
-        <item name="colorButtonNormal">#333333</item>
+        <item name="colorButtonNormal">#282828</item>
 
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
+        <item name="backgroundSure">#085300</item>
+        <item name="backgroundMaybe">#303F30</item>
+        <item name="backgroundDontKnow">#282828</item>
 
-        <item name="backgroundSure">#9ccc65</item>
-        <item name="backgroundMaybe">#dcedc8</item>
-        <item name="backgroundDontKnow">#e0e0e0</item>
-
-        <item name="itemGood">#dcedc8</item>
-        <item name="itemMeh">#fff9c4</item>
-        <item name="itemBad">#ffcdd2</item>
+        <item name="itemGood">#085300</item>
+        <item name="itemMeh">#313F4D</item>
+        <item name="itemBad">#500000</item>
 
         <item name="wrongAnswerBackground">#350000</item>
         <item name="correctAnswerBackground">#092600</item>
 
-        <item name="compositionGood">#9ccc65</item>
-        <item name="compositionBadSelected">#ef9a9a</item>
-        <item name="compositionBadNotSelected">#ffcdd2</item>
+        <item name="compositionGood">#085300</item>
+        <item name="compositionBadSelected">#350000</item>
+        <item name="compositionBadNotSelected">#650000</item>
 
         <item name="historyBackground">#222222</item>
     </style>
