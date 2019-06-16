@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.TypedValue
 import android.view.Gravity
@@ -13,6 +14,7 @@ import android.view.ViewManager
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
@@ -23,16 +25,21 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
 import org.kaqui.model.*
 import org.kaqui.testactivities.*
-import java.util.*
 import kotlin.math.pow
 
-fun getBackgroundFromScore(score: Double) =
+fun getColorFromScore(score: Double) =
         when (score) {
-            in 0.0f..BAD_WEIGHT -> R.drawable.round_red
-            in BAD_WEIGHT..GOOD_WEIGHT -> R.drawable.round_yellow
-            in GOOD_WEIGHT..1.0f -> R.drawable.round_green
-            else -> R.drawable.round_red
+            in 0.0f..BAD_WEIGHT -> R.color.itemBad
+            in BAD_WEIGHT..GOOD_WEIGHT -> R.color.itemMeh
+            in GOOD_WEIGHT..1.0f -> R.color.itemGood
+            else -> R.color.itemBad
         }
+
+fun getColoredCircle(context: Context, @ColorRes color: Int): Drawable {
+    val drawable = ContextCompat.getDrawable(context, R.drawable.round)!!
+    drawable.applyTint(ContextCompat.getColor(context, color))
+    return drawable
+}
 
 fun lerp(a: Float, b: Float, r: Float): Float = a + (r * (b - a))
 
@@ -83,12 +90,17 @@ fun _LinearLayout.separator(context: Context) =
         backgroundColor = ContextCompat.getColor(context, R.color.separator)
     }.lparams(width = matchParent, height = dip(1))
 
+fun Drawable.applyTint(@ColorInt color: Int): Drawable {
+    val mWrappedDrawable = DrawableCompat.wrap(this)
+    DrawableCompat.setTint(mWrappedDrawable, color)
+    DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+    return this
+}
+
 fun ViewManager.appTitleImage(context: Context) =
         imageView {
             val drawable = AppCompatResources.getDrawable(context, R.drawable.kakugo)!!
-            val mWrappedDrawable = DrawableCompat.wrap(drawable)
-            DrawableCompat.setTint(mWrappedDrawable, context.getColorFromAttr(android.R.attr.colorForeground))
-            DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
+            drawable.applyTint(context.getColorFromAttr(android.R.attr.colorForeground))
             setImageDrawable(drawable)
         }
 

@@ -91,8 +91,7 @@ class ItemSelectionAdapter(private val view: LearningDbView, private val context
         holder.itemText.text = item.text
         if (item.text.length > 1)
             (holder.itemText.layoutParams as LinearLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
-        val background = getBackgroundFromScore(item.shortScore)
-        holder.itemText.background = ContextCompat.getDrawable(context, background)
+        holder.itemText.background = getColoredCircle(context, getColorFromScore(item.shortScore))
         holder.itemDescription.text = item.description
     }
 }

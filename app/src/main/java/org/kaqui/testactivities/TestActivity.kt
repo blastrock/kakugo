@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +17,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NavUtils
@@ -93,7 +95,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
-                                background = ContextCompat.getDrawable(context, R.drawable.round_red)
+                                background = getColoredCircle(context, R.color.itemBad)
                             }.lparams(width = matchParent, height = matchParent)
                             lastWrongInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -120,7 +122,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
-                                background = ContextCompat.getDrawable(context, R.drawable.round_green)
+                                background = getColoredCircle(context, R.color.itemGood)
                             }.lparams(width = matchParent, height = matchParent)
                             lastInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -366,7 +368,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
-        val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_green)
+        val layout = makeHistoryLine(correct, probabilityData, R.color.itemGood)
 
         historyView.addView(layout, 0)
         if (refresh) {
@@ -377,7 +379,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) {
-        val layoutGood = makeHistoryLine(correct, probabilityData, R.drawable.round_red, false)
+        val layoutGood = makeHistoryLine(correct, probabilityData, R.color.itemBad, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
 
         historyView.addView(layoutBad, 0)
@@ -390,7 +392,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
-        val layout = makeHistoryLine(correct, probabilityData, R.drawable.round_red)
+        val layout = makeHistoryLine(correct, probabilityData, R.color.itemBad)
 
         historyView.addView(layout, 0)
         if (refresh) {
@@ -400,7 +402,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         }
     }
 
-    private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, style: Int?, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, @ColorRes style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.selection_item, historyView, false)
 
         val checkbox = line.findViewById<View>(R.id.item_checkbox)
@@ -410,8 +412,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         itemView.text = item.text
         if (item.text.length > 1)
             (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
-        if (style != null)
-            itemView.background = ContextCompat.getDrawable(this, style)
+        if (style != null) {
+            itemView.background = getColoredCircle(this, style)
+        }
         else
             itemView.textColor = getColorFromAttr(android.R.attr.colorForeground)
         if (item.contents is Kanji) {
