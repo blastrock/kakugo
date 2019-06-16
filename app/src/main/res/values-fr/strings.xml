@@ -98,7 +98,11 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.25</h3>
+        <h3>Nouveautés en 1.26</h3>
+
+        <br/>- Le thème sombre a été retravaillé
+
+        <br/><br/><h3>Nouveautés en 1.25</h3>
 
         <br/>- Les scores sont maintenant séparés par catégorie de test, les tests de lecture n\'impacteront pas les scores des tests d'écriture
         <br/>- Ajout d\'une option pour personaliser la police de caractères Japonaise

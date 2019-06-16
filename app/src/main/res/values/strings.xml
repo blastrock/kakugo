@@ -111,7 +111,11 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Whats new in 1.25?</h3>
+        <h3>Whats new in 1.26?</h3>
+
+        <br/>- The dark theme has been redesigned
+
+        <br/><br/><h3>Whats new in 1.25?</h3>
 
         <br/>- Scores are now distinct per test category, reading tests will not impact scores of writing tests
         <br/>- Added setting to set a custom Japanese font
