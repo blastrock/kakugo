@@ -29,15 +29,15 @@ import kotlin.math.pow
 
 fun getColorFromScore(score: Double) =
         when (score) {
-            in 0.0f..BAD_WEIGHT -> R.color.itemBad
-            in BAD_WEIGHT..GOOD_WEIGHT -> R.color.itemMeh
-            in GOOD_WEIGHT..1.0f -> R.color.itemGood
-            else -> R.color.itemBad
+            in 0.0f..BAD_WEIGHT -> R.attr.itemBad
+            in BAD_WEIGHT..GOOD_WEIGHT -> R.attr.itemMeh
+            in GOOD_WEIGHT..1.0f -> R.attr.itemGood
+            else -> R.attr.itemBad
         }
 
-fun getColoredCircle(context: Context, @ColorRes color: Int): Drawable {
+fun getColoredCircle(context: Context, @AttrRes color: Int): Drawable {
     val drawable = ContextCompat.getDrawable(context, R.drawable.round)!!
-    drawable.applyTint(ContextCompat.getColor(context, color))
+    drawable.applyTint(context.getColorFromAttr(color))
     return drawable
 }
 
@@ -86,9 +86,9 @@ inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
 }
 
 fun _LinearLayout.separator(context: Context) =
-    view {
-        backgroundColor = ContextCompat.getColor(context, R.color.separator)
-    }.lparams(width = matchParent, height = dip(1))
+        view {
+            backgroundColor = ContextCompat.getColor(context, R.color.separator)
+        }.lparams(width = matchParent, height = dip(1))
 
 fun Drawable.applyTint(@ColorInt color: Int): Drawable {
     val mWrappedDrawable = DrawableCompat.wrap(this)

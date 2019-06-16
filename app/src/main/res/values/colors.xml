@@ -11,9 +11,6 @@
     <color name="statsGood">#9ccc65</color>
 
     <color name="itemTextColor">#222222</color>
-    <color name="itemGood">#dcedc8</color>
-    <color name="itemMeh">#fff9c4</color>
-    <color name="itemBad">#ffcdd2</color>
 
     <color name="drawingHintColor">@android:color/holo_green_light</color>
 

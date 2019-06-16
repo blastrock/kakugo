@@ -1,4 +1,7 @@
 <resources>
+    <attr name="itemGood" format="color" />
+    <attr name="itemMeh" format="color" />
+    <attr name="itemBad" format="color" />
     <attr name="historyBackground" format="color" />
     <attr name="wrongAnswerBackground" format="color" />
     <attr name="correctAnswerBackground" format="color" />
@@ -13,6 +16,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="itemGood">#dcedc8</item>
+        <item name="itemMeh">#fff9c4</item>
+        <item name="itemBad">#ffcdd2</item>
 
         <item name="backgroundSure">#9ccc65</item>
         <item name="backgroundMaybe">#dcedc8</item>
@@ -37,9 +44,14 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
+
         <item name="backgroundSure">#9ccc65</item>
         <item name="backgroundMaybe">#dcedc8</item>
         <item name="backgroundDontKnow">#e0e0e0</item>
+
+        <item name="itemGood">#dcedc8</item>
+        <item name="itemMeh">#fff9c4</item>
+        <item name="itemBad">#ffcdd2</item>
 
         <item name="wrongAnswerBackground">#350000</item>
         <item name="correctAnswerBackground">#092600</item>

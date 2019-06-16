@@ -17,6 +17,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
@@ -95,7 +96,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
-                                background = getColoredCircle(context, R.color.itemBad)
+                                background = getColoredCircle(context, R.attr.itemBad)
                             }.lparams(width = matchParent, height = matchParent)
                             lastWrongInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -122,7 +123,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                                 textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                 textColor = ContextCompat.getColor(context, R.color.itemTextColor)
                                 gravity = Gravity.CENTER
-                                background = getColoredCircle(context, R.color.itemGood)
+                                background = getColoredCircle(context, R.attr.itemGood)
                             }.lparams(width = matchParent, height = matchParent)
                             lastInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -368,7 +369,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
-        val layout = makeHistoryLine(correct, probabilityData, R.color.itemGood)
+        val layout = makeHistoryLine(correct, probabilityData, R.attr.itemGood)
 
         historyView.addView(layout, 0)
         if (refresh) {
@@ -379,7 +380,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) {
-        val layoutGood = makeHistoryLine(correct, probabilityData, R.color.itemBad, false)
+        val layoutGood = makeHistoryLine(correct, probabilityData, R.attr.itemBad, false)
         val layoutBad = makeHistoryLine(wrong, null, null)
 
         historyView.addView(layoutBad, 0)
@@ -392,7 +393,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     }
 
     private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
-        val layout = makeHistoryLine(correct, probabilityData, R.color.itemBad)
+        val layout = makeHistoryLine(correct, probabilityData, R.attr.itemBad)
 
         historyView.addView(layout, 0)
         if (refresh) {
@@ -402,7 +403,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         }
     }
 
-    private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, @ColorRes style: Int?, withSeparator: Boolean = true): View {
+    private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, @AttrRes style: Int?, withSeparator: Boolean = true): View {
         val line = LayoutInflater.from(this).inflate(R.layout.selection_item, historyView, false)
 
         val checkbox = line.findViewById<View>(R.id.item_checkbox)
