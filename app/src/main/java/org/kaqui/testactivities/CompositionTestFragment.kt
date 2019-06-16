@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ToggleButton
+import androidx.annotation.AttrRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import org.jetbrains.anko.*
@@ -135,19 +136,19 @@ class CompositionTestFragment : Fragment(), TestFragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val color =
                     if (button.isChecked)
-                        ContextCompat.getColor(context!!, R.color.compositionGood)
+                        R.attr.compositionGood
                     else
-                        context!!.getColorFromAttr(R.attr.backgroundDontKnow)
+                        R.attr.backgroundDontKnow
 
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(color)
+            button.backgroundTintList = ColorStateList.valueOf(context!!.getColorFromAttr(color))
         }
     }
 
-    private fun setButtonTint(button: ToggleButton, color: Int, checked: Boolean) {
+    private fun setButtonTint(button: ToggleButton, @AttrRes color: Int, checked: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context!!, color))
+            button.backgroundTintList = ColorStateList.valueOf(context!!.getColorFromAttr(color))
         } else {
             button.isChecked = checked
         }
@@ -230,13 +231,13 @@ class CompositionTestFragment : Fragment(), TestFragment {
                     else
                         answer.id == testEngine.currentQuestion.id
             if (buttonChecked && answerValid) {
-                setButtonTint(button, R.color.compositionGood, true)
+                setButtonTint(button, R.attr.compositionGood, true)
             } else if (buttonChecked && !answerValid) {
                 ok = false
-                setButtonTint(button, R.color.compositionBadSelected, false)
+                setButtonTint(button, R.attr.compositionBadSelected, false)
             } else if (!buttonChecked && answerValid) {
                 ok = false
-                setButtonTint(button, R.color.compositionBadNotSelected, true)
+                setButtonTint(button, R.attr.compositionBadNotSelected, true)
             }
         }
         return ok

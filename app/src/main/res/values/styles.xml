@@ -5,6 +5,9 @@
     <attr name="backgroundSure" format="color" />
     <attr name="backgroundMaybe" format="color" />
     <attr name="backgroundDontKnow" format="color" />
+    <attr name="compositionGood" format="color" />
+    <attr name="compositionBadSelected" format="color" />
+    <attr name="compositionBadNotSelected" format="color" />
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -17,6 +20,10 @@
 
         <item name="wrongAnswerBackground">#ffdddd</item>
         <item name="correctAnswerBackground">#deffd3</item>
+
+        <item name="compositionGood">#9ccc65</item>
+        <item name="compositionBadSelected">#ef9a9a</item>
+        <item name="compositionBadNotSelected">#ffcdd2</item>
 
         <item name="historyBackground">#dddddd</item>
     </style>
@@ -36,6 +43,10 @@
 
         <item name="wrongAnswerBackground">#350000</item>
         <item name="correctAnswerBackground">#092600</item>
+
+        <item name="compositionGood">#9ccc65</item>
+        <item name="compositionBadSelected">#ef9a9a</item>
+        <item name="compositionBadNotSelected">#ffcdd2</item>
 
         <item name="historyBackground">#222222</item>
     </style>
