@@ -118,11 +118,13 @@ class LearningDbView(
 
     fun applyScoreUpdate(scoreUpdate: SrsCalculator.ScoreUpdate) {
         val cv = ContentValues()
+        cv.put("id", scoreUpdate.itemId)
+        cv.put("type", knowledgeType.value)
         cv.put("short_score", scoreUpdate.shortScore)
         cv.put("long_score", scoreUpdate.longScore)
         if (scoreUpdate.lastCorrect != null)
             cv.put("last_correct", scoreUpdate.lastCorrect)
-        database.update(Database.ITEM_SCORES_TABLE_NAME, cv, "id = ? AND type = ${knowledgeType.value}", arrayOf(scoreUpdate.itemId.toString()))
+        database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
 

@@ -98,9 +98,10 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.26</h3>
+        <h3>Nouveautés en 1.26.1</h3>
 
         <br/>- Le thème sombre a été retravaillé
+        <br/>- Correction du bug empêchant la mise à jour des scores pour les nouveaux éléments
 
         <br/><br/><h3>Nouveautés en 1.25</h3>
 
