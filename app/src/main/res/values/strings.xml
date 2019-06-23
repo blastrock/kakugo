@@ -38,6 +38,28 @@
     <string name="word_to_meaning">Word to meaning (日の出→sunrise)</string>
     <string name="meaning_to_word">Meaning to word (sunrise→日の出)</string>
 
+    <string name="hiragana_to_romaji_title">Hiragana to romaji quiz</string>
+    <string name="romaji_to_hiragana_title">Romaji to hiragana</string>
+    <string name="hiragana_to_romaji_typing_title">Hiragana to romaji writing</string>
+    <string name="hiragana_drawing_title">Hiragana drawing</string>
+
+    <string name="katakana_to_romaji_title">Katakana to romaji</string>
+    <string name="romaji_to_katakana_title">Romaji to katakana</string>
+    <string name="katakana_to_romaji_typing_title">Katakana to romaji writing</string>
+    <string name="katakana_drawing_title">Katakana drawing</string>
+
+    <string name="kanji_to_reading_title">Kanji to reading</string>
+    <string name="reading_to_kanji_title">Reading to kanji</string>
+    <string name="kanji_to_meaning_title">Kanji to meaning</string>
+    <string name="meaning_to_kanji_title">Meaning to kanji</string>
+    <string name="kanji_composition_title">Kanji composition</string>
+    <string name="kanji_drawing_title">Kanji drawing</string>
+
+    <string name="word_to_reading_title">Word to reading</string>
+    <string name="reading_to_word_title">Reading to word</string>
+    <string name="word_to_meaning_title">Word to meaning</string>
+    <string name="meaning_to_word_title">Meaning to word</string>
+
     <string name="sure">Sure</string>
     <string name="maybe">Maybe</string>
     <string name="dont_know">Don\'t know</string>
@@ -111,12 +133,12 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Whats new in 1.26.1?</h3>
+        <h3>What\'s new in 1.26.1?</h3>
 
         <br/>- The dark theme has been redesigned
         <br/>- Fixed bug that prevented score update for new items
 
-        <br/><br/><h3>Whats new in 1.25?</h3>
+        <br/><br/><h3>What\'s new in 1.25?</h3>
 
         <br/>- Scores are now distinct per test category, reading tests will not impact scores of writing tests
         <br/>- Added setting to set a custom Japanese font

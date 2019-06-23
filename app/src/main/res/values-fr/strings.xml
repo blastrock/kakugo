@@ -34,6 +34,28 @@
     <string name="word_to_meaning">Quizz mot à sens (日の出→lever de soleil)</string>
     <string name="meaning_to_word">Quizz sens à mot (lever de soleil→日の出)</string>
 
+    <string name="hiragana_to_romaji_title">Quizz hiragana à romaji</string>
+    <string name="romaji_to_hiragana_title">Quizz romaji à hiragana</string>
+    <string name="hiragana_to_romaji_typing_title">Écriture d\'hiragana en romaji</string>
+    <string name="hiragana_drawing_title">Dessin d\'hiragana</string>
+
+    <string name="katakana_to_romaji_title">Quizz katakana à romaji</string>
+    <string name="romaji_to_katakana_title">Quizz romaji à katakana</string>
+    <string name="katakana_to_romaji_typing_title">Écriture de katakana en romaji</string>
+    <string name="katakana_drawing_title">Dessin de katakana</string>
+
+    <string name="kanji_to_reading_title">Quizz kanji à lecture</string>
+    <string name="reading_to_kanji_title">Quizz lecture à kanji</string>
+    <string name="kanji_to_meaning_title">Quizz kanji à sens</string>
+    <string name="meaning_to_kanji_title">Quizz sens à kanji</string>
+    <string name="kanji_composition_title">Composition de kanji</string>
+    <string name="kanji_drawing_title">Dessin de kanji</string>
+
+    <string name="word_to_reading_title">Quizz mot à lecture</string>
+    <string name="reading_to_word_title">Quizz lecture à mot</string>
+    <string name="word_to_meaning_title">Quizz mot à sens</string>
+    <string name="meaning_to_word_title">Quizz sens à mot</string>
+
     <string name="sure">Sûr</string>
     <string name="maybe">Pas sûr</string>
     <string name="dont_know">Ne sait pas</string>
