@@ -17,23 +17,17 @@ class Database private constructor(context: Context, private val database: SQLit
             LocaleManager.updateDictionaryLocale(context)
     }
 
-    fun getHiraganaView(knowledgeType: KnowledgeType) =
+    fun getHiraganaView(knowledgeType: KnowledgeType? = null) =
             LearningDbView(database, KANAS_TABLE_NAME, knowledgeType, filter = "$KANAS_TABLE_NAME.id BETWEEN ${HiraganaRange.start} AND ${HiraganaRange.endInclusive}", itemGetter = this::getKana)
 
-    fun getKatakanaView(knowledgeType: KnowledgeType) =
+    fun getKatakanaView(knowledgeType: KnowledgeType? = null) =
             LearningDbView(database, KANAS_TABLE_NAME, knowledgeType, filter = "$KANAS_TABLE_NAME.id BETWEEN ${KatakanaRange.start} AND ${KatakanaRange.endInclusive}", itemGetter = this::getKana)
 
-    fun getKanjiView(knowledgeType: KnowledgeType) =
-            LearningDbView(database, KANJIS_TABLE_NAME, knowledgeType, filter = "radical = 0", itemGetter = this::getKanji, itemSearcher = this::searchKanji)
-
-    fun getKanjiView(knowledgeType: KnowledgeType, classifier: Classifier?): LearningDbView =
+    fun getKanjiView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
             LearningDbView(database, KANJIS_TABLE_NAME, knowledgeType, filter = "radical = 0", classifier = classifier, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
-    fun getWordView(knowledgeType: KnowledgeType) =
-            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, itemGetter = this::getWord, itemSearcher = this::searchWord)
-
-    fun getWordView(knowledgeType: KnowledgeType, classifier: Classifier?): LearningDbView =
-            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, filter = "1", classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord)
+    fun getWordView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
+            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
     fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""

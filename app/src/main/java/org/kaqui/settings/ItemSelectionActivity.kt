@@ -46,10 +46,10 @@ class ItemSelectionActivity : BaseActivity() {
                 .commit()
 
         dbView = when (mode) {
-            Mode.HIRAGANA -> Database.getInstance(this).getHiraganaView(KnowledgeType.Reading)
-            Mode.KATAKANA -> Database.getInstance(this).getKatakanaView(KnowledgeType.Reading)
-            Mode.KANJI -> Database.getInstance(this).getKanjiView(KnowledgeType.Reading, classifier!!)
-            Mode.WORD -> Database.getInstance(this).getWordView(KnowledgeType.Reading, classifier!!)
+            Mode.HIRAGANA -> Database.getInstance(this).getHiraganaView()
+            Mode.KATAKANA -> Database.getInstance(this).getKatakanaView()
+            Mode.KANJI -> Database.getInstance(this).getKanjiView(classifier = classifier!!)
+            Mode.WORD -> Database.getInstance(this).getWordView(classifier = classifier!!)
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

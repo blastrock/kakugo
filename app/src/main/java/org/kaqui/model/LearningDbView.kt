@@ -7,13 +7,15 @@ import org.kaqui.SrsCalculator
 class LearningDbView(
         private val database: SQLiteDatabase,
         private val tableName: String,
-        private val knowledgeType: KnowledgeType,
+        private val knowledgeType: KnowledgeType?,
         private val filter: String = "1",
         private val classifier: Classifier? = null,
         private val itemGetter: (id: Int, knowledgeType: KnowledgeType) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
+    fun withClassifier(classifier: Classifier) =
+            LearningDbView(database, tableName, knowledgeType, filter, classifier, itemGetter, itemSearcher)
 
-    fun getItem(id: Int): Item = itemGetter(id, knowledgeType)
+    fun getItem(id: Int): Item = itemGetter(id, knowledgeType ?: KnowledgeType.Reading) // FIXME do not force reading scores
 
     fun search(text: String): List<Int> = itemSearcher!!(text)
 
@@ -78,7 +80,7 @@ class LearningDbView(
         database.rawQuery("""
             SELECT $tableName.id, ifnull(s.short_score, 0.0), ifnull(s.long_score, 0.0), ifnull(s.last_correct, 0)
             FROM $tableName
-            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
+            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType!!.value}
             WHERE $filter AND $tableName.enabled = 1
         """, null).use { cursor ->
             val ret = mutableListOf<SrsCalculator.ProbabilityData>()
@@ -99,7 +101,7 @@ class LearningDbView(
         database.rawQuery("""
             SELECT ifnull(s.last_correct, 0)
             FROM $tableName
-            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
+            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType!!.value}
             WHERE $filter AND $tableName.enabled = 1
             ORDER BY ifnull(s.last_correct, 0) ASC
             LIMIT $decile1, 1
@@ -119,7 +121,7 @@ class LearningDbView(
     fun applyScoreUpdate(scoreUpdate: SrsCalculator.ScoreUpdate) {
         val cv = ContentValues()
         cv.put("id", scoreUpdate.itemId)
-        cv.put("type", knowledgeType.value)
+        cv.put("type", knowledgeType!!.value)
         cv.put("short_score", scoreUpdate.shortScore)
         cv.put("long_score", scoreUpdate.longScore)
         if (scoreUpdate.lastCorrect != null)
@@ -130,14 +132,22 @@ class LearningDbView(
 
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
 
-    fun getStats(): Stats = getStats(classifier)
-    fun getStats(classifier: Classifier?): Stats =
-            Stats(getCountForScore(0.0f, BAD_WEIGHT, classifier), getCountForScore(BAD_WEIGHT, GOOD_WEIGHT, classifier), getCountForScore(GOOD_WEIGHT, 1.0f, classifier), getDisabledCount(classifier))
+    fun getStats(): Stats {
+        val stats = getCountsForEnabled(classifier, knowledgeType)
+        val disabledCount = getDisabledCount(classifier)
+        return Stats(stats.first, stats.second, stats.third, disabledCount)
+    }
 
-    private fun getCountForScore(from: Float, to: Float, classifier: Classifier?): Int {
+    private fun getCountsForEnabled(classifier: Classifier?, knowledgeType: KnowledgeType?): Triple<Int, Int, Int> {
         val andWhereClause =
                 if (classifier != null)
                     " AND " + classifier.whereClause()
+                else
+                    ""
+
+        val joinFiterAndClause =
+                if (knowledgeType != null)
+                    " AND s.type = ${knowledgeType.value}"
                 else
                     ""
 
@@ -149,16 +159,25 @@ class LearningDbView(
                     selectionArgsBase
 
         database.rawQuery("""
-            SELECT COUNT(*)
-            FROM $tableName
-            LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
-            WHERE $filter
-                AND $tableName.enabled = 1
-                AND ifnull(s.short_score, 0.0) BETWEEN $from AND $to
-                $andWhereClause
+            WITH stats AS (
+                SELECT MAX(ifnull(s.short_score, 0.0)) as stats_score
+                FROM $tableName
+                LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s
+                    ON $tableName.id = s.id
+                    $joinFiterAndClause
+                WHERE $filter
+                    AND $tableName.enabled = 1
+                    $andWhereClause
+                GROUP BY $tableName.id
+            )
+            SELECT
+                SUM(case when stats_score BETWEEN 0.0 AND $BAD_WEIGHT then 1 else 0 end),
+                SUM(case when stats_score BETWEEN $BAD_WEIGHT AND $GOOD_WEIGHT then 1 else 0 end),
+                SUM(case when stats_score BETWEEN $GOOD_WEIGHT AND 1.0 then 1 else 0 end)
+            FROM stats
         """, selectionArgs).use { cursor ->
             cursor.moveToNext()
-            return cursor.getInt(0)
+            return Triple(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2))
         }
     }
 

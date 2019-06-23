@@ -55,8 +55,8 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
         mode = intent.getSerializableExtra("mode") as Mode
 
         dbView = when (mode) {
-            Mode.KANJI -> Database.getInstance(this).getKanjiView(KnowledgeType.Reading)
-            Mode.WORD -> Database.getInstance(this).getWordView(KnowledgeType.Reading)
+            Mode.KANJI -> Database.getInstance(this).getKanjiView()
+            Mode.WORD -> Database.getInstance(this).getWordView()
         }
 
         verticalLayout {

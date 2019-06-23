@@ -40,8 +40,8 @@ class ItemSearchActivity : BaseActivity() {
                 .commit()
 
         dbView = when (mode) {
-            Mode.KANJI -> Database.getInstance(this).getKanjiView(KnowledgeType.Reading)
-            Mode.WORD -> Database.getInstance(this).getWordView(KnowledgeType.Reading)
+            Mode.KANJI -> Database.getInstance(this).getKanjiView()
+            Mode.WORD -> Database.getInstance(this).getWordView()
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)

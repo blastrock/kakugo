@@ -29,7 +29,7 @@ class ClassSelectionAdapter(private val context: Context, private val dbView: Le
             statsLayout.elevation = 8.0f
             statsLayout.outlineProvider = ViewOutlineProvider.BOUNDS
         }
-        StatsFragment.updateStats(dbView.getStats(levels[position]["classifier"] as Classifier), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
+        StatsFragment.updateStats(dbView.withClassifier(levels[position]["classifier"] as Classifier).getStats(), disabledCount, badCount, mehCount, goodCount, showDisabled = true)
 
         return view
     }
