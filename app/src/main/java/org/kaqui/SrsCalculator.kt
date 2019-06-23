@@ -22,7 +22,7 @@ class SrsCalculator {
     companion object {
         private const val TAG = "SrsCalculator"
 
-        private const val MIN_PROBA_SHORT_UNKNOWN = 0.1
+        private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.8
         private const val MAX_COUNT_SHORT_UNKNOWN = 50
 
@@ -51,6 +51,9 @@ class SrsCalculator {
             stage0.longWeight = sigmoid(Math.min(sigmoidArg, 10.0))
             if (stage0.longWeight < 0 || stage0.longWeight > 1)
                 Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastCorrect: ${stage0.lastCorrect}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
+
+            // square long weight to increase gaps
+            stage0.longWeight *= stage0.longWeight
 
             return stage0
         }
