@@ -133,14 +133,13 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.26.1?</h3>
+        <h3>What\'s new in 1.27?</h3>
+
+        <br/>- During drawing tests, after clicking on "don\'t know", it is now possible to try to draw the character
+
+        <br/><br/><h3>What\'s new in 1.26.1?</h3>
 
         <br/>- The dark theme has been redesigned
         <br/>- Fixed bug that prevented score update for new items
-
-        <br/><br/><h3>What\'s new in 1.25?</h3>
-
-        <br/>- Scores are now distinct per test category, reading tests will not impact scores of writing tests
-        <br/>- Added setting to set a custom Japanese font
     ]]></string>
 </resources>

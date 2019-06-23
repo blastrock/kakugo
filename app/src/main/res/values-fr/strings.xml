@@ -120,14 +120,13 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.26.1</h3>
+        <h3>Nouveautés en 1.27</h3>
+
+        <br/>- Pendant les tests de dessin, après avoir cliqué sur "ne sait pas", il est maintenant possible de s\'entrainer à dessiner le caractère
+
+        <br/><br/><h3>Nouveautés en 1.26.1</h3>
 
         <br/>- Le thème sombre a été retravaillé
         <br/>- Correction du bug empêchant la mise à jour des scores pour les nouveaux éléments
-
-        <br/><br/><h3>Nouveautés en 1.25</h3>
-
-        <br/>- Les scores sont maintenant séparés par catégorie de test, les tests de lecture n\'impacteront pas les scores des tests d'écriture
-        <br/>- Ajout d\'une option pour personaliser la police de caractères Japonaise
     ]]></string>
 </resources>

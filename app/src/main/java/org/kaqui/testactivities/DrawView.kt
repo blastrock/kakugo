@@ -12,11 +12,10 @@ import org.kaqui.getColorFromAttr
 import kotlin.math.min
 
 class DrawView(context: Context) : View(context) {
-    private var mPaths = mutableListOf<Path>()
-
     private var mPaint = Paint()
     private var mBoundingBoxPaint = Paint()
     private var mDebugPaint = Paint()
+    private var mAnswerPaint = Paint()
     private var mPath = Path()
     private var mHintPath = Path()
     private var mHintAnimator: ValueAnimator? = null
@@ -29,6 +28,10 @@ class DrawView(context: Context) : View(context) {
     private var mStartY = 0f
 
     private var boundingPath = Path()
+
+    private var mPaths = mutableListOf<Path>()
+
+    private var mAnswerPaths = listOf<Path>()
 
     var debugPaths = listOf<Path>()
     var debugStrokeWidth = 0f
@@ -43,6 +46,14 @@ class DrawView(context: Context) : View(context) {
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
             strokeWidth = 20f
+            isAntiAlias = true
+        }
+        mAnswerPaint.apply {
+            color = context.getColorFromAttr(R.attr.drawingDontKnow)
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = 19f
             isAntiAlias = true
         }
         mBoundingBoxPaint.apply {
@@ -85,6 +96,11 @@ class DrawView(context: Context) : View(context) {
         mHintAnimator = animator
     }
 
+    fun setAnswerPaths(paths: List<Path>) {
+        mAnswerPaths = paths
+        invalidate()
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val size = min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec))
 
@@ -104,6 +120,10 @@ class DrawView(context: Context) : View(context) {
         }
 
         canvas.drawPath(boundingPath, mBoundingBoxPaint)
+
+        for (path in mAnswerPaths) {
+            canvas.drawPath(path, mAnswerPaint)
+        }
 
         for (path in mPaths) {
             canvas.drawPath(path, mPaint)

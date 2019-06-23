@@ -49,6 +49,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
 
     private lateinit var currentStrokes: List<Path>
     private lateinit var currentScaledStrokes: List<Path>
+    private var finished = false
     private var currentStroke = 0
     private var missCount = 0
 
@@ -107,6 +108,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
         if (savedInstanceState != null) {
             currentStroke = savedInstanceState.getInt("currentStroke")
             missCount = savedInstanceState.getInt("missCount")
+            finished = savedInstanceState.getBoolean("finished")
         }
 
         drawCanvas.post { refreshQuestion() }
@@ -117,6 +119,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("currentStroke", currentStroke)
         outState.putInt("missCount", missCount)
+        outState.putBoolean("finished", finished)
         super.onSaveInstanceState(outState)
     }
 
@@ -126,11 +129,13 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     }
 
     private fun refreshState() {
-        if (currentStroke == currentStrokes.size) {
+        if (finished) {
+            drawCanvas.setAnswerPaths(currentScaledStrokes)
             dontKnowButton.visibility = View.GONE
             hintButton.visibility = View.GONE
             nextButton.visibility = View.VISIBLE
         } else {
+            drawCanvas.setAnswerPaths(listOf())
             nextButton.visibility = View.GONE
             dontKnowButton.visibility = View.VISIBLE
             hintButton.visibility = View.VISIBLE
@@ -141,12 +146,11 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     override fun startNewQuestion() {
         currentStroke = 0
         missCount = 0
+        finished = false
     }
 
     override fun refreshQuestion() {
         currentStrokes = Database.getInstance(context!!).getStrokes(testEngine.currentQuestion.id)
-
-        refreshState()
 
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
@@ -164,6 +168,8 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
 
         for (stroke in currentScaledStrokes.subList(0, currentStroke))
             drawCanvas.addPath(stroke)
+
+        refreshState()
 
         //setupDebug()
     }
@@ -227,16 +233,14 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     }
 
     private fun onAnswerDone(correct: Boolean) {
+        if (finished)
+            return
+
+        finished = true
         if (correct)
             testFragmentHolder.onAnswer(null, Certainty.SURE, null)
         else
             testFragmentHolder.onAnswer(null, Certainty.DONTKNOW, null)
-
-        currentStroke = currentStrokes.size
-
-        drawCanvas.clearCanvas()
-        for (stroke in currentScaledStrokes)
-            drawCanvas.addPath(stroke)
 
         refreshState()
     }
