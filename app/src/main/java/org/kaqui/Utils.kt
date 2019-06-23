@@ -167,18 +167,18 @@ fun TestType.toName(): Int =
             TestType.HIRAGANA_TO_ROMAJI -> R.string.hiragana_to_romaji_title
             TestType.ROMAJI_TO_HIRAGANA -> R.string.romaji_to_hiragana_title
             TestType.HIRAGANA_TO_ROMAJI_TEXT -> R.string.hiragana_to_romaji_typing_title
-            TestType.HIRAGANA_WRITING -> R.string.hiragana_drawing_title
+            TestType.HIRAGANA_DRAWING -> R.string.hiragana_drawing_title
             TestType.KATAKANA_TO_ROMAJI -> R.string.katakana_to_romaji_title
             TestType.ROMAJI_TO_KATAKANA -> R.string.romaji_to_katakana_title
             TestType.KATAKANA_TO_ROMAJI_TEXT -> R.string.katakana_to_romaji_typing_title
-            TestType.KATAKANA_WRITING -> R.string.katakana_drawing_title
+            TestType.KATAKANA_DRAWING -> R.string.katakana_drawing_title
 
             TestType.KANJI_TO_READING -> R.string.kanji_to_reading_title
             TestType.KANJI_TO_MEANING -> R.string.kanji_to_meaning_title
             TestType.READING_TO_KANJI -> R.string.reading_to_kanji_title
             TestType.MEANING_TO_KANJI -> R.string.meaning_to_kanji_title
             TestType.KANJI_COMPOSITION -> R.string.kanji_composition_title
-            TestType.KANJI_WRITING -> R.string.kanji_drawing_title
+            TestType.KANJI_DRAWING -> R.string.kanji_drawing_title
 
             TestType.WORD_TO_READING -> R.string.word_to_reading_title
             TestType.WORD_TO_MEANING -> R.string.word_to_meaning_title

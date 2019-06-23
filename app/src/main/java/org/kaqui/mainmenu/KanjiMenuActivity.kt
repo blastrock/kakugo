@@ -50,7 +50,7 @@ class KanjiMenuActivity : BaseActivity() {
                             margin = dip(4)
                         }
                         button(R.string.kanji_drawing) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_WRITING) }
+                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_DRAWING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

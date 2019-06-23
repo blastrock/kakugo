@@ -8,11 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,9 +19,9 @@ import org.kaqui.model.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 
-class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
+class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     companion object {
-        private const val TAG = "WritingTestFragment"
+        private const val TAG = "DrawingTestFragment"
 
         private const val KANJI_SIZE = 109
 
@@ -41,7 +37,7 @@ class WritingTestFragment : Fragment(), CoroutineScope, TestFragment {
         }
 
         @JvmStatic
-        fun newInstance() = WritingTestFragment()
+        fun newInstance() = DrawingTestFragment()
     }
 
     private val testFragmentHolder

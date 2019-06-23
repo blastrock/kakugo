@@ -40,7 +40,7 @@ class KatakanaMenuActivity : BaseActivity() {
                             margin = dip(4)
                         }
                         button(R.string.katakana_drawing) {
-                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_WRITING) }
+                            setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_DRAWING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

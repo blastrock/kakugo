@@ -61,7 +61,7 @@ fun Item.getQuestionText(testType: TestType): String =
         when (testType) {
             TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT -> (contents as Kana).kana
             TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
-            TestType.HIRAGANA_WRITING, TestType.KATAKANA_WRITING -> {
+            TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING -> {
                 val kana = contents as Kana
                 if (kana.romaji in arrayOf("ji", "zu"))
                     "${kana.romaji} (${kana.uniqueRomaji})"
@@ -77,7 +77,7 @@ fun Item.getQuestionText(testType: TestType): String =
             TestType.READING_TO_WORD -> (contents as Word).reading
             TestType.MEANING_TO_WORD -> (contents as Word).meaningsText
 
-            TestType.KANJI_WRITING, TestType.KANJI_COMPOSITION -> "${(contents as Kanji).readingsText}\n${(contents as Kanji).meaningsText}"
+            TestType.KANJI_DRAWING, TestType.KANJI_COMPOSITION -> "${(contents as Kanji).readingsText}\n${(contents as Kanji).meaningsText}"
         }
 
 fun Item.getAnswerText(testType: TestType): String =
@@ -93,7 +93,7 @@ fun Item.getAnswerText(testType: TestType): String =
             TestType.WORD_TO_MEANING -> (contents as Word).meaningsText
             TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> (contents as Word).word
 
-            TestType.KANJI_WRITING, TestType.HIRAGANA_WRITING, TestType.KATAKANA_WRITING -> throw RuntimeException("No answer text for writing test")
+            TestType.KANJI_DRAWING, TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING -> throw RuntimeException("No answer text for writing test")
         }
 
 val Kanji.readingsText: String

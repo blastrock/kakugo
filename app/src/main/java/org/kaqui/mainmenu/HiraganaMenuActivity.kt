@@ -40,7 +40,7 @@ class HiraganaMenuActivity : BaseActivity() {
                             margin = dip(4)
                         }
                         button(R.string.hiragana_drawing) {
-                            setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_WRITING) }
+                            setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_DRAWING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
