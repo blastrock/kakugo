@@ -331,6 +331,11 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     showItemInDict(wrong.contents as Word)
                 }
             }
+            lastWrongItemText.setOnLongClickListener {
+                if (probabilityData != null)
+                    showItemProbabilityData(this, wrong.text, probabilityData)
+                true
+            }
         } else {
             lastWrongItemBundle.visibility = View.GONE
         }
@@ -348,6 +353,11 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
                     showItemInDict(correct.contents as Word)
                 }
             }
+            lastItemText.setOnLongClickListener {
+                if (probabilityData != null)
+                    showItemProbabilityData(this, correct.text, probabilityData)
+                true
+            }
         } else {
             lastItemBundle.visibility = View.GONE
         }
@@ -361,11 +371,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         }
 
         lastDescription.text = correct.description
-        lastItemText.setOnLongClickListener {
-            if (probabilityData != null)
-                showItemProbabilityData(this, correct.text, probabilityData)
-            true
-        }
     }
 
     private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
