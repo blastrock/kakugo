@@ -24,32 +24,32 @@ class KanjiMenuActivity : BaseActivity() {
                     }
 
                     verticalLayout {
-                        button(R.string.kanji_reading_quiz) {
+                        button(R.string.kanji_to_reading) {
                             setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_TO_READING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.reading_kanji_quiz) {
+                        button(R.string.reading_to_kanji) {
                             setOnClickListener { startTest(this@KanjiMenuActivity, TestType.READING_TO_KANJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.kanji_meaning_quiz) {
+                        button(R.string.kanji_to_meaning) {
                             setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_TO_MEANING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.meaning_kanji_quiz) {
+                        button(R.string.meaning_to_kanji) {
                             setOnClickListener { startTest(this@KanjiMenuActivity, TestType.MEANING_TO_KANJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.kanji_composition_test) {
+                        button(R.string.kanji_composition) {
                             setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_COMPOSITION) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.kanji_drawing_quiz) {
+                        button(R.string.kanji_drawing) {
                             setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_WRITING) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)

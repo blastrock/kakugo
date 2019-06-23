@@ -24,17 +24,17 @@ class KatakanaMenuActivity : BaseActivity() {
                     }
 
                     verticalLayout {
-                        button(R.string.katakana_romaji_quiz) {
+                        button(R.string.katakana_to_romaji) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.romaji_katakana_quiz) {
+                        button(R.string.romaji_to_katakana) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.ROMAJI_TO_KATAKANA) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.katakana_romaji_writing) {
+                        button(R.string.katakana_to_romaji_typing) {
                             setOnClickListener { startTest(this@KatakanaMenuActivity, TestType.KATAKANA_TO_ROMAJI_TEXT) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)

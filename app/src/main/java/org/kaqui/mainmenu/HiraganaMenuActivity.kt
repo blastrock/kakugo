@@ -24,17 +24,17 @@ class HiraganaMenuActivity : BaseActivity() {
                     }
 
                     verticalLayout {
-                        button(R.string.hiragana_romaji_quiz) {
+                        button(R.string.hiragana_to_romaji) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.romaji_hiragana_quiz) {
+                        button(R.string.romaji_to_hiragana) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.ROMAJI_TO_HIRAGANA) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
-                        button(R.string.hiragana_romaji_writing) {
+                        button(R.string.hiragana_to_romaji_typing) {
                             setOnClickListener { startTest(this@HiraganaMenuActivity, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)

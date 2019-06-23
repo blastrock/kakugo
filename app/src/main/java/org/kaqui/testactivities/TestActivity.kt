@@ -71,6 +71,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        title = getString(testType.toName())
+
         mainCoordLayout = coordinatorLayout {
             verticalLayout {
                 frameLayout {

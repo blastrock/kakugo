@@ -12,27 +12,27 @@
     <string name="import_selection">Importer une sélection de kanji</string>
     <string name="database_error">Erreur de base de données</string>
 
-    <string name="hiragana_romaji_quiz">Quizz hiragana à romaji (ひ→hi)</string>
-    <string name="romaji_hiragana_quiz">Quizz romaji à hiragana (hi→ひ)</string>
-    <string name="hiragana_romaji_writing">Écriture d\'hiragana en romaji (ひ→hi)</string>
+    <string name="hiragana_to_romaji">Quizz hiragana à romaji (ひ→hi)</string>
+    <string name="romaji_to_hiragana">Quizz romaji à hiragana (hi→ひ)</string>
+    <string name="hiragana_to_romaji_typing">Écriture d\'hiragana en romaji (ひ→hi)</string>
     <string name="hiragana_drawing">Dessin d\'hiragana</string>
 
-    <string name="katakana_romaji_quiz">Quizz katakana à romaji (ヒ→hi)</string>
-    <string name="romaji_katakana_quiz">Quizz romaji à katakana (hi→ヒ)</string>
-    <string name="katakana_romaji_writing">Écriture de katakana en romaji (ヒ→hi)</string>
+    <string name="katakana_to_romaji">Quizz katakana à romaji (ヒ→hi)</string>
+    <string name="romaji_to_katakana">Quizz romaji à katakana (hi→ヒ)</string>
+    <string name="katakana_to_romaji_typing">Écriture de katakana en romaji (ヒ→hi)</string>
     <string name="katakana_drawing">Dessin de katakana</string>
 
-    <string name="kanji_reading_quiz">Quizz kanji à lecture (日→ひ)</string>
-    <string name="reading_kanji_quiz">Quizz lecture à kanji (ひ→日)</string>
-    <string name="kanji_meaning_quiz">Quizz kanji à sens (日→jour)</string>
-    <string name="meaning_kanji_quiz">Quizz sens à kanji (jour→日)</string>
-    <string name="kanji_composition_test">Composition de kanji (休→亻+木)</string>
-    <string name="kanji_drawing_quiz">Dessin de kanji</string>
+    <string name="kanji_to_reading">Quizz kanji à lecture (日→ひ)</string>
+    <string name="reading_to_kanji">Quizz lecture à kanji (ひ→日)</string>
+    <string name="kanji_to_meaning">Quizz kanji à sens (日→jour)</string>
+    <string name="meaning_to_kanji">Quizz sens à kanji (jour→日)</string>
+    <string name="kanji_composition">Composition de kanji (休→亻+木)</string>
+    <string name="kanji_drawing">Dessin de kanji</string>
 
-    <string name="word_reading_quiz">Quizz mot à lecture (日の出→ひので)</string>
-    <string name="reading_word_quiz">Quizz lecture à mot (ひので→日の出)</string>
-    <string name="word_meaning_quiz">Quizz mot à sens (日の出→lever de soleil)</string>
-    <string name="meaning_word_quiz">Quizz sens à mot (lever de soleil→日の出)</string>
+    <string name="word_to_reading">Quizz mot à lecture (日の出→ひので)</string>
+    <string name="reading_to_word">Quizz lecture à mot (ひので→日の出)</string>
+    <string name="word_to_meaning">Quizz mot à sens (日の出→lever de soleil)</string>
+    <string name="meaning_to_word">Quizz sens à mot (lever de soleil→日の出)</string>
 
     <string name="sure">Sûr</string>
     <string name="maybe">Pas sûr</string>
