@@ -123,6 +123,8 @@
         <h3>Nouveautés en 1.27</h3>
 
         <br/>- Pendant les tests de dessin, après avoir cliqué sur "ne sait pas", il est maintenant possible de s\'entrainer à dessiner le caractère
+        <br/>- Les écrans de sélection montrent maintenant vos meilleurs scores au lieu des scores de lecture uniquement
+        <br/>- La formule de SRS à été ajustée pour mieux éviter d'interroger l'utilisateur sur des kanji connus
 
         <br/><br/><h3>Nouveautés en 1.26.1</h3>
 
