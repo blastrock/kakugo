@@ -10,12 +10,12 @@ class LearningDbView(
         private val knowledgeType: KnowledgeType?,
         private val filter: String = "1",
         private val classifier: Classifier? = null,
-        private val itemGetter: (id: Int, knowledgeType: KnowledgeType) -> Item,
+        private val itemGetter: (id: Int, knowledgeType: KnowledgeType?) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
     fun withClassifier(classifier: Classifier) =
             LearningDbView(database, tableName, knowledgeType, filter, classifier, itemGetter, itemSearcher)
 
-    fun getItem(id: Int): Item = itemGetter(id, knowledgeType ?: KnowledgeType.Reading) // FIXME do not force reading scores
+    fun getItem(id: Int): Item = itemGetter(id, knowledgeType)
 
     fun search(text: String): List<Int> = itemSearcher!!(text)
 

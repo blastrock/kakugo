@@ -96,7 +96,13 @@ class Database private constructor(context: Context, private val database: SQLit
         return strokes
     }
 
-    private fun getKana(id: Int, knowledgeType: KnowledgeType): Item {
+    private fun getOnClause(knowledgeType: KnowledgeType?) =
+            if (knowledgeType != null)
+                " AND s.type = ${knowledgeType.value} "
+            else
+                ""
+
+    private fun getKana(id: Int, knowledgeType: KnowledgeType?): Item {
         val similarities = mutableListOf<Item>()
         database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -105,10 +111,11 @@ class Database private constructor(context: Context, private val database: SQLit
         val contents = Kana("", "", "", similarities)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         database.rawQuery("""
-            SELECT romaji, ifnull(short_score, 0.0), ifnull(long_score, 0.0), ifnull(last_correct, 0), enabled, unique_romaji
+            SELECT romaji, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, unique_romaji
             FROM $KANAS_TABLE_NAME k
-            LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id AND s.type = ${knowledgeType.value}
+            LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
+            GROUP BY k.id
             """, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kana with id $id")
@@ -124,7 +131,7 @@ class Database private constructor(context: Context, private val database: SQLit
         return item
     }
 
-    fun getKanji(id: Int, knowledgeType: KnowledgeType): Item {
+    fun getKanji(id: Int, knowledgeType: KnowledgeType?): Item {
         val similarities = mutableListOf<Item>()
         database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -138,10 +145,11 @@ class Database private constructor(context: Context, private val database: SQLit
         val contents = Kanji("", listOf(), listOf(), listOf(), similarities, parts, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         database.rawQuery("""
-            SELECT jlpt_level, ifnull(short_score, 0.0), ifnull(long_score, 0.0), ifnull(last_correct, 0), enabled, on_readings, kun_readings, meanings_$locale, meanings_en
+            SELECT jlpt_level, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, on_readings, kun_readings, meanings_$locale, meanings_en
             FROM $KANJIS_TABLE_NAME k
-            LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id AND s.type = ${knowledgeType.value}
+            LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
+            GROUP BY k.id
             """, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find kanji with id $id")
@@ -176,15 +184,16 @@ class Database private constructor(context: Context, private val database: SQLit
         return wholeKanjis.toFloat() / enabledKanjis.toFloat()
     }
 
-    fun getWord(id: Int, knowledgeType: KnowledgeType): Item {
+    fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {
         val contents = Word("", "", listOf(), listOf())
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         database.rawQuery("""
-            SELECT item, reading, meanings_$locale, ifnull(short_score, 0.0), ifnull(long_score, 0.0), ifnull(last_correct, 0), enabled, similarity_class, meanings_en
+            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en
             FROM $WORDS_TABLE_NAME k
-            LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id AND s.type = ${knowledgeType.value}
+            LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
+            GROUP BY k.id
             """, null).use { cursor ->
             if (cursor.count == 0)
                 throw RuntimeException("Can't find word with id $id")
