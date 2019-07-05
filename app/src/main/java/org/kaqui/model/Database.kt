@@ -229,7 +229,7 @@ class Database private constructor(context: Context, private val database: SQLit
             cv.put("enabled", false)
             database.update(KANJIS_TABLE_NAME, cv, null, null)
             cv.put("enabled", true)
-            for (i in 0..kanjis.codePointCount(0, kanjis.length)) {
+            for (i in 0 until kanjis.codePointCount(0, kanjis.length)) {
                 database.update(KANJIS_TABLE_NAME, cv, "id = ?", arrayOf(kanjis.codePointAt(i).toString()))
             }
             database.setTransactionSuccessful()
