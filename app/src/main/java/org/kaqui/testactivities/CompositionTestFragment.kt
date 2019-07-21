@@ -209,6 +209,15 @@ class CompositionTestFragment : Fragment(), TestFragment {
         }
     }
 
+    override fun setSensible(e: Boolean) {
+        doneButton.isClickable = e
+        nextButton.isClickable = e
+        dontKnowButton.isClickable = e
+        for ((button, _) in answerButtons.zip(testEngine.currentAnswers)) {
+            button.isClickable = e
+        }
+    }
+
     override fun refreshQuestion() {
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 

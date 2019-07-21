@@ -183,6 +183,14 @@ class QuizTestFragment : Fragment(), TestFragment {
         outState.putInt("answer", answer)
     }
 
+    override fun setSensible(e: Boolean) {
+        nextButton.isClickable = e
+        dontKnowButton.isClickable = e
+        for (answerButton in answerButtons) {
+            answerButton.isClickable = e
+        }
+    }
+
     private fun refreshState() {
         if (answer != NO_ANSWER) {
             nextButton.visibility = View.VISIBLE

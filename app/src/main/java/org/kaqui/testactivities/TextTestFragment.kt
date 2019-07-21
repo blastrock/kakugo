@@ -167,6 +167,13 @@ class TextTestFragment : Fragment(), TestFragment {
         }
     }
 
+    override fun setSensible(e: Boolean) {
+        nextButton.isClickable = e
+        for (button in answerButtons) {
+            button.isClickable = e
+        }
+    }
+
     override fun refreshQuestion() {
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 

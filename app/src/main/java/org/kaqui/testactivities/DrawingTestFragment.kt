@@ -149,6 +149,12 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
         finished = false
     }
 
+    override fun setSensible(e: Boolean) {
+        nextButton.isClickable = e
+        hintButton.isClickable = e
+        dontKnowButton.isClickable = e
+    }
+
     override fun refreshQuestion() {
         currentStrokes = Database.getInstance(context!!).getStrokes(testEngine.currentQuestion.id)
 
