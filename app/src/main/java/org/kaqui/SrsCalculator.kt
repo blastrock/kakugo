@@ -23,8 +23,8 @@ class SrsCalculator {
         private const val TAG = "SrsCalculator"
 
         private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
-        private const val MAX_PROBA_SHORT_UNKNOWN = 0.8
-        private const val MAX_COUNT_SHORT_UNKNOWN = 50
+        private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
+        private const val MAX_COUNT_SHORT_UNKNOWN = 30
 
         fun fillProbalities(items: List<ProbabilityData>, minLastCorrect: Int): Pair<List<ProbabilityData>, DebugParams> {
             val now = Calendar.getInstance().timeInMillis / 1000
