@@ -42,3 +42,22 @@ Crédit
 - Les tests de vocabulaire sont basés sur `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
 - La base de données de similarité des kanji vient de https://minerva-access.unimelb.edu.au/handle/11343/35336 and http://lars.yencken.org/datasets/phd/
 - La base de données de composition et de tracé des kanji vient de `KanjiVG <https://kanjivg.tagaini.net/>`_.
+
+Dons
+====
+
+Si vous aimez ce projet et désirez me remercier, je suis ouverts aux dons.
+N'oubliez pas de donner aux projets cités ci-dessus desquel le plus gros du
+travail provient.
+
+.. raw:: html
+
+   <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+   <input type="hidden" name="cmd" value="_donations" />
+   <input type="hidden" name="business" value="MACMBD35R2BB6" />
+   <input type="hidden" name="currency_code" value="EUR" />
+   <input type="image" src="https://www.paypalobjects.com/fr_FR/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Faire un don" /> avec Paypal
+   <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
+   </form>
+
+Ou si vous préférez les dons Bitcoin, voici mon adresse: 12bnT7epKmf9ztkAeuM8dHCcoc76r9rgVX
