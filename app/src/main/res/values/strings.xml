@@ -121,14 +121,16 @@
     <string name="about_text"><![CDATA[
         <p>Kakugo is a Japanese learning app. Version %1$s (%2$d).</p>
 
-        <p>It is open-source and available on <a href="https://github.com/blastrock/kakugo/">github</a>.<p>
+        <p>It is open-source and available on <a href="https://github.com/blastrock/kakugo/">github</a> under the GPLv3 license.</p>
 
-        <p>The kanji dictionary is based on <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.<p>
-        <p>The vocabulary dictionary is based on <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.<p>
-        <p>The kanji similarity data comes from <a href="http://lars.yencken.org/datasets/phd/">a study from Dr. Lars Yencken</a>.<p>
-        <p>The kanji composition and drawing data comes from <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.<p>
+        <p>The kanji dictionary is based on <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
+        <p>The vocabulary dictionary is based on <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
+        <p>The kanji similarity data comes from <a href="http://lars.yencken.org/datasets/phd/">a study from Dr. Lars Yencken</a>.</p>
+        <p>The kanji composition and drawing data comes from <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
         <p>The app icon font is <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
         <p>The app title font is <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
+
+        <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
     ]]></string>
 
     <string name="changelog">Changelog</string>
