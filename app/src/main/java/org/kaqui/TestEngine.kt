@@ -155,7 +155,7 @@ class TestEngine(
     }
 
     fun markAnswer(certainty: Certainty, wrong: Item? = null) {
-        val minLastCorrect = itemView.getLastCorrectFirstDecile()
+        val minLastCorrect = itemView.getMinLastCorrect()
 
         if (certainty == Certainty.DONTKNOW) {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)

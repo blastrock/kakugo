@@ -91,12 +91,18 @@ class LearningDbView(
         }
     }
 
+    fun getMinLastCorrect(): Int = getLastCorrectFrom(0)
+
     fun getLastCorrectFirstDecile(): Int {
         val count = database.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             cursor.getInt(0)
         }
         val decile1 = count / 10
+        return getLastCorrectFrom(decile1)
+    }
+
+    private fun getLastCorrectFrom(from: Int): Int {
         // I couldn't find how sqlite handles null values in order by, so I use ifnull there too
         database.rawQuery("""
             SELECT ifnull(s.last_correct, 0)
@@ -104,7 +110,7 @@ class LearningDbView(
             LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType!!.value}
             WHERE $filter AND $tableName.enabled = 1
             ORDER BY ifnull(s.last_correct, 0) ASC
-            LIMIT $decile1, 1
+            LIMIT $from, 1
         """, null).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0)

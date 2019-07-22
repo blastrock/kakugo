@@ -43,6 +43,8 @@ fun getColoredCircle(context: Context, @AttrRes color: Int): Drawable {
 
 fun lerp(a: Float, b: Float, r: Float): Float = a + (r * (b - a))
 
+fun secondsToDays(timestamp: Long) = timestamp / 3600.0 / 24.0
+
 fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
     if (sample > list.size - avoid.size)
         throw RuntimeException("can't get a sample of size $sample on list of size ${list.size - avoid.size}")
@@ -144,6 +146,10 @@ fun showItemProbabilityData(context: Context, item: String, probabilityData: Tes
                             probabilityData.probaParamsStage2.longCoefficient,
                             probabilityData.probabilityData.finalProbability,
                             probabilityData.totalWeight,
+                            if (probabilityData.scoreUpdate != null)
+                                secondsToDays(probabilityData.scoreUpdate!!.lastCorrect - probabilityData.scoreUpdate!!.minLastCorrect)
+                            else
+                                null,
                             probabilityData.scoreUpdate?.shortScore,
                             probabilityData.scoreUpdate?.longScore))
             .setPositiveButton(android.R.string.ok, null)
