@@ -9,10 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.annotation.AttrRes
+import androidx.preference.PreferenceManager
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
@@ -25,7 +25,7 @@ class QuizTestFragment : Fragment(), TestFragment {
 
     private lateinit var answerTexts: List<TextView>
     private lateinit var answerButtons: List<Button>
-    private lateinit var answerViews: List<LinearLayout>
+    private lateinit var answerViews: List<View>
     private lateinit var scrollView: ScrollView
 
     private var answer: Int = NO_ANSWER
@@ -37,12 +37,16 @@ class QuizTestFragment : Fragment(), TestFragment {
     private val testType
         get() = testFragmentHolder.testType
 
+    private var singleButtonMode = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        singleButtonMode = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("single_button_mode", false)
+
         val answerCount = getAnswerCount(testType)
         val answerTexts = mutableListOf<TextView>()
         val answerButtons = mutableListOf<Button>()
-        val answerViews = mutableListOf<LinearLayout>()
+        val answerViews = mutableListOf<View>()
 
         val questionMinSize =
                 when (testType) {
@@ -58,41 +62,55 @@ class QuizTestFragment : Fragment(), TestFragment {
                 wrapInScrollView(this) {
                     scrollView = this
                     verticalLayout {
-                        separator(activity!!)
                         when (testType) {
                             TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
                                 repeat(answerCount) {
-                                    val answerView = verticalLayout {
-                                        linearLayout {
-                                            gravity = Gravity.CENTER_VERTICAL
+                                    val answerView =
+                                            if (singleButtonMode) {
+                                                val position = answerTexts.size
+                                                val answerText = button {
+                                                    gravity = Gravity.START
+                                                    typeface = TypefaceManager.getTypeface(context)
 
-                                            val answerText = textView {
-                                                typeface = TypefaceManager.getTypeface(context)
-                                            }.lparams(weight = 1f)
-                                            val position = answerTexts.size
-                                            answerTexts.add(answerText)
+                                                    setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
+                                                    setOnLongClickListener { onAnswerClicked(this, Certainty.MAYBE, position); true }
+                                                }.lparams(width = matchParent)
+                                                answerTexts.add(answerText)
+                                                answerButtons.add(answerText)
+                                                answerText
+                                            } else {
+                                                verticalLayout {
+                                                    separator(activity!!)
+                                                    linearLayout {
+                                                        gravity = Gravity.CENTER_VERTICAL
 
-                                            val maybeButton = button(R.string.maybe) {
-                                                if (resources.configuration.smallestScreenWidthDp < 480) {
-                                                    minimumWidth = 0
-                                                    minWidth = 0
+                                                        val answerText = textView {
+                                                            typeface = TypefaceManager.getTypeface(context)
+                                                        }.lparams(weight = 1f)
+                                                        val position = answerTexts.size
+                                                        answerTexts.add(answerText)
+
+                                                        val maybeButton = button(R.string.maybe) {
+                                                            if (resources.configuration.smallestScreenWidthDp < 480) {
+                                                                minimumWidth = 0
+                                                                minWidth = 0
+                                                            }
+                                                            setExtTint(R.attr.backgroundMaybe)
+                                                            setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
+                                                        }
+                                                        val sureButton = button(R.string.sure) {
+                                                            if (resources.configuration.smallestScreenWidthDp < 480) {
+                                                                minimumWidth = 0
+                                                                minWidth = 0
+                                                            }
+                                                            setExtTint(R.attr.backgroundSure)
+                                                            setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
+                                                        }
+                                                        answerButtons.add(maybeButton)
+                                                        answerButtons.add(sureButton)
+                                                    }
                                                 }
-                                                setExtTint(R.attr.backgroundMaybe)
-                                                setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
                                             }
-                                            val sureButton = button(R.string.sure) {
-                                                if (resources.configuration.smallestScreenWidthDp < 480) {
-                                                    minimumWidth = 0
-                                                    minWidth = 0
-                                                }
-                                                setExtTint(R.attr.backgroundSure)
-                                                setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
-                                            }
-                                            answerButtons.add(maybeButton)
-                                            answerButtons.add(sureButton)
-                                        }
-                                        separator(activity!!)
-                                    }
                                     answerViews.add(answerView)
                                 }
                             }
@@ -101,45 +119,66 @@ class QuizTestFragment : Fragment(), TestFragment {
                                 repeat(answerCount / COLUMNS) {
                                     linearLayout {
                                         repeat(COLUMNS) {
-                                            val answerView = verticalLayout {
-                                                linearLayout {
-                                                    gravity = Gravity.CENTER_VERTICAL
+                                            val answerView =
+                                                    if (singleButtonMode) {
+                                                        gravity = Gravity.CENTER_VERTICAL
 
-                                                    val answerText = textView {
-                                                        typeface = TypefaceManager.getTypeface(context)
-                                                        setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                                                                when (testType) {
-                                                                    TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30f
-                                                                    else -> 50f
-                                                                })
-                                                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                                                    }.lparams(weight = 1f)
-                                                    val position = answerTexts.size
-                                                    answerTexts.add(answerText)
-
-                                                    verticalLayout {
-                                                        val sureButton = button(R.string.sure) {
-                                                            minimumHeight = 0
-                                                            minimumWidth = 0
-                                                            minHeight = 0
-                                                            minWidth = 0
-                                                            setExtTint(R.attr.backgroundSure)
+                                                        val position = answerTexts.size
+                                                        val answerText = button {
+                                                            typeface = TypefaceManager.getTypeface(context)
+                                                            setTextSize(TypedValue.COMPLEX_UNIT_SP,
+                                                                    when (testType) {
+                                                                        TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30f
+                                                                        else -> 50f
+                                                                    })
+                                                            textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                                                             setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
-                                                        }.lparams(width = matchParent, height = wrapContent)
-                                                        val maybeButton = button(R.string.maybe) {
-                                                            minimumHeight = 0
-                                                            minimumWidth = 0
-                                                            minHeight = 0
-                                                            minWidth = 0
-                                                            setExtTint(R.attr.backgroundMaybe)
-                                                            setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
-                                                        }.lparams(width = matchParent, height = wrapContent)
-                                                        answerButtons.add(sureButton)
-                                                        answerButtons.add(maybeButton)
-                                                    }.lparams(weight = 0f)
-                                                }.lparams(width = matchParent, height = wrapContent)
-                                                separator(activity!!)
-                                            }.lparams(weight = 1f)
+                                                            setOnLongClickListener { onAnswerClicked(this, Certainty.MAYBE, position); true }
+                                                        }.lparams(weight = 1f)
+                                                        answerTexts.add(answerText)
+                                                        answerButtons.add(answerText)
+                                                        answerText
+                                                    } else {
+                                                        verticalLayout {
+                                                            separator(activity!!)
+                                                            linearLayout {
+                                                                gravity = Gravity.CENTER_VERTICAL
+
+                                                                val answerText = textView {
+                                                                    typeface = TypefaceManager.getTypeface(context)
+                                                                    setTextSize(TypedValue.COMPLEX_UNIT_SP,
+                                                                            when (testType) {
+                                                                                TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30f
+                                                                                else -> 50f
+                                                                            })
+                                                                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                                                                }.lparams(weight = 1f)
+                                                                val position = answerTexts.size
+                                                                answerTexts.add(answerText)
+
+                                                                verticalLayout {
+                                                                    val sureButton = button(R.string.sure) {
+                                                                        minimumHeight = 0
+                                                                        minimumWidth = 0
+                                                                        minHeight = 0
+                                                                        minWidth = 0
+                                                                        setExtTint(R.attr.backgroundSure)
+                                                                        setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
+                                                                    }.lparams(width = matchParent, height = wrapContent)
+                                                                    val maybeButton = button(R.string.maybe) {
+                                                                        minimumHeight = 0
+                                                                        minimumWidth = 0
+                                                                        minHeight = 0
+                                                                        minWidth = 0
+                                                                        setExtTint(R.attr.backgroundMaybe)
+                                                                        setOnClickListener { onAnswerClicked(this, Certainty.MAYBE, position) }
+                                                                    }.lparams(width = matchParent, height = wrapContent)
+                                                                    answerButtons.add(sureButton)
+                                                                    answerButtons.add(maybeButton)
+                                                                }.lparams(weight = 0f)
+                                                            }.lparams(width = matchParent, height = wrapContent)
+                                                        }.lparams(weight = 1f)
+                                                    }
                                             answerViews.add(answerView)
                                         }
                                     }.lparams(width = matchParent, height = wrapContent)
@@ -147,6 +186,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                             }
                             else -> throw RuntimeException("unsupported test type for TestActivity")
                         }
+                        separator(activity!!)
                         nextButton = button(R.string.next) {
                             setOnClickListener { onNextClicked() }
                         }.lparams(width = matchParent)
@@ -191,6 +231,19 @@ class QuizTestFragment : Fragment(), TestFragment {
         }
     }
 
+    private fun setColor(index: Int, @AttrRes color: Int?) {
+        if (color != null)
+            if (singleButtonMode)
+                (answerViews[index] as Button).setExtTint(color)
+            else
+                answerViews[index].backgroundColor = context!!.getColorFromAttr(color)
+        else
+            if (singleButtonMode)
+                (answerViews[index] as Button).setExtTint(null)
+            else
+                answerViews[index].backgroundColor = Color.TRANSPARENT
+    }
+
     private fun refreshState() {
         if (answer != NO_ANSWER) {
             nextButton.visibility = View.VISIBLE
@@ -198,8 +251,8 @@ class QuizTestFragment : Fragment(), TestFragment {
 
             val correct = testEngine.currentAnswers.indexOfFirst { it.id == testEngine.currentQuestion.id }
             if (answer != DONT_KNOW)
-                answerViews[answer].backgroundColor = context!!.getColorFromAttr(R.attr.wrongAnswerBackground)
-            answerViews[correct].backgroundColor = context!!.getColorFromAttr(R.attr.correctAnswerBackground)
+                setColor(answer, R.attr.wrongAnswerBackground)
+            setColor(correct, R.attr.correctAnswerBackground)
 
             for (answerButton in answerButtons) {
                 answerButton.isEnabled = false
@@ -208,8 +261,8 @@ class QuizTestFragment : Fragment(), TestFragment {
             nextButton.visibility = View.GONE
             dontKnowButton.visibility = View.VISIBLE
 
-            for (answerView in answerViews)
-                answerView.backgroundColor = Color.TRANSPARENT
+            for (i in 0 until answerViews.size)
+                setColor(i, null)
 
             for (answerButton in answerButtons) {
                 answerButton.isEnabled = true

@@ -72,10 +72,15 @@ fun Button.setExtTextColor(@ColorRes color: Int) {
     }
 }
 
-fun Button.setExtTint(@AttrRes attrColor: Int) {
+fun Button.setExtTint(@AttrRes attrColor: Int?) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        backgroundTintMode = PorterDuff.Mode.MULTIPLY
-        backgroundTintList = ColorStateList.valueOf(context.getColorFromAttr(attrColor))
+        if (attrColor != null) {
+            backgroundTintMode = PorterDuff.Mode.MULTIPLY
+            backgroundTintList = ColorStateList.valueOf(context.getColorFromAttr(attrColor))
+        } else {
+            backgroundTintMode = PorterDuff.Mode.MULTIPLY
+            backgroundTintList = ColorStateList.valueOf(context.getColorFromAttr(R.attr.backgroundDontKnow))
+        }
     }
 }
 

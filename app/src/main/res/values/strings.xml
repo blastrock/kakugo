@@ -98,7 +98,7 @@
     <string name="word_title">Vocabulary</string>
 
     <string name="title_activity_main_settings">Settings</string>
-    <string name="pref_cat_appearance">Appearance</string>
+    <string name="pref_cat_appearance">Appearance and behavior</string>
     <string name="pref_cat_language">Language</string>
     <string name="pref_cat_classification">Classification</string>
     <string name="pref_cat_about">About</string>
@@ -114,6 +114,9 @@
     <string name="kanji_class_rtk6" translatable="false">Remembering The Kanji (6th edition)</string>
     <string name="use_custom_font">Use a custom font</string>
     <string name="pick_custom_font">Pick a custom Japanese font</string>
+    <string name="single_button_off_summary">Two buttons \"sure\" and \"maybe\" will appear</string>
+    <string name="single_button_on_summary">Long pressing an answer will validate it as \"maybe\"</string>
+    <string name="single_button_mode">Single button mode</string>
     <string name="failed_to_load_font">Failed to load custom font: %s</string>
     <string name="failed_to_load_resource">Failed to load resource: %s</string>
 

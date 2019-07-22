@@ -37,6 +37,12 @@
             app:key="pickCustomFont"
             app:title="@string/pick_custom_font" />
 
+        <SwitchPreference
+            app:key="single_button_mode"
+            app:summaryOff="@string/single_button_off_summary"
+            app:summaryOn="@string/single_button_on_summary"
+            app:title="@string/single_button_mode" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_cat_about">
