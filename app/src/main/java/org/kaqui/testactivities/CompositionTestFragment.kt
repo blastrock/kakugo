@@ -37,7 +37,6 @@ class CompositionTestFragment : Fragment(), TestFragment {
         get() = testFragmentHolder.testType
 
     private lateinit var answerButtons: List<ToggleButton>
-    private var partMode = false
 
     private val currentKanji get() = testEngine.currentQuestion.contents as Kanji
 
@@ -86,7 +85,6 @@ class CompositionTestFragment : Fragment(), TestFragment {
         var finished = false
         var checkedAnswers: ArrayList<Int>? = null
         if (savedInstanceState != null) {
-            partMode = savedInstanceState.getBoolean("partMode")
             finished = savedInstanceState.getBoolean("finished")
             checkedAnswers = savedInstanceState.getIntegerArrayList("checkedAnswers")!!
         }
@@ -122,7 +120,6 @@ class CompositionTestFragment : Fragment(), TestFragment {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean("partMode", partMode)
         outState.putBoolean("finished", nextButton.visibility == View.VISIBLE)
         outState.putIntegerArrayList("checkedAnswers", ArrayList(answerButtons.zip(testEngine.currentAnswers).mapNotNull { (button, answer) ->
             if (button.isChecked)
@@ -177,20 +174,10 @@ class CompositionTestFragment : Fragment(), TestFragment {
         val similarItemIds = testEngine.currentQuestion.similarities.map { it.id }.filter { testEngine.itemView.isItemEnabled(it) } - testEngine.currentQuestion.id
         val restOfAnswers = ids - testEngine.currentQuestion.id
 
+        Log.d(TAG, "Parts of ${currentKanji.kanji}: ${questionPartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
         Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
 
-        val wholeKanjisRatio = db.getEnabledWholeKanjiRatio()
-        val threshold = lerp(0.1f, 0.5f, wholeKanjisRatio)
-        partMode = Math.random() > threshold
-        val currentAnswers =
-                if (partMode) {
-                    Log.d(TAG, "Composition mode: part")
-                    sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
-                } else {
-                    Log.d(TAG, "Composition mode: kanji")
-                    // remove just one part from all sets so that the user can't answer with parts and is forced to select the whole kanji
-                    sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers).map { it - currentKanji.parts.random().id }, listOf(testEngine.currentQuestion.id)).map { db.getKanji(it, knowledgeType) }.toMutableList()
-                }
+        val currentAnswers = sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
 
         if (currentAnswers.size != testEngine.answerCount)
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of ${testEngine.answerCount}")
@@ -234,11 +221,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
             button.isClickable = false
             val buttonChecked = button.isChecked
-            val answerValid =
-                    if (partMode)
-                        currentKanji.parts.find { it.id == answer.id } != null
-                    else
-                        answer.id == testEngine.currentQuestion.id
+            val answerValid = currentKanji.parts.find { it.id == answer.id } != null
             if (buttonChecked && answerValid) {
                 setButtonTint(button, R.attr.compositionGood, true)
             } else if (buttonChecked && !answerValid) {
