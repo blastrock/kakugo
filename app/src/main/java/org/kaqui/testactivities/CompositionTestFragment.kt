@@ -151,40 +151,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
         }
     }
 
-    private fun sampleAnswers(possibleAnswers: List<List<Int>>, currentAnswers: List<Int>): List<Int> {
-        if (possibleAnswers.isEmpty() || currentAnswers.size == testEngine.answerCount)
-            return currentAnswers
-
-        val currentList = possibleAnswers[0] - currentAnswers
-
-        return if (currentList.size <= testEngine.answerCount - currentAnswers.size) {
-            sampleAnswers(possibleAnswers.drop(1), currentAnswers + currentList)
-        } else {
-            currentAnswers + pickRandom(currentList, testEngine.answerCount - currentAnswers.size, setOf())
-        }
-    }
-
     override fun startNewQuestion() {
-        val db = Database.getInstance(context!!)
-        val knowledgeType = TestEngine.getKnowledgeType(testType)
-        val ids = testEngine.prepareNewQuestion().map { it.itemId }
-
-        val questionPartsIds = currentKanji.parts.map { it.id }
-        val possiblePartsIds = db.getCompositionAnswerIds(testEngine.currentQuestion.id) - testEngine.currentQuestion.id
-        val similarItemIds = testEngine.currentQuestion.similarities.map { it.id }.filter { testEngine.itemView.isItemEnabled(it) } - testEngine.currentQuestion.id
-        val restOfAnswers = ids - testEngine.currentQuestion.id
-
-        Log.d(TAG, "Parts of ${currentKanji.kanji}: ${questionPartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
-        Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
-
-        val currentAnswers = sampleAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
-
-        if (currentAnswers.size != testEngine.answerCount)
-            Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of ${testEngine.answerCount}")
-        currentAnswers.shuffle()
-
-        testEngine.currentAnswers = currentAnswers
-
         doneButton.visibility = View.VISIBLE
         dontKnowButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE

@@ -71,7 +71,7 @@ class TestEngine(
     private val lastQuestionsIds = ArrayDeque<Int>()
 
     val answerCount
-        get () = getAnswerCount(testType)
+        get() = getAnswerCount(testType)
 
     fun loadState(savedInstanceState: Bundle) {
         currentQuestion = getItem(db, savedInstanceState.getInt("question"))
@@ -130,7 +130,13 @@ class TestEngine(
         return PickedQuestion(getItem(db, question.itemId), question, totalWeight)
     }
 
-    private fun pickAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
+    private fun pickAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> =
+            when (testType) {
+                TestType.KANJI_COMPOSITION -> pickCompositionAnswers(db, ids, currentQuestion)
+                else -> pickNormalTestAnswers(db, ids, currentQuestion)
+            }
+
+    private fun pickNormalTestAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
         val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) }
         val similarItems =
                 if (similarItemIds.size >= answerCount - 1)
@@ -146,6 +152,39 @@ class TestEngine(
         currentAnswers.shuffle()
 
         return currentAnswers
+    }
+
+    private fun pickCompositionAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
+        val knowledgeType = getKnowledgeType(testType)
+
+        val currentKanji = currentQuestion.contents as Kanji
+        val questionPartsIds = currentKanji.parts.map { it.id }
+        val possiblePartsIds = db.getCompositionAnswerIds(currentQuestion.id) - currentQuestion.id
+        val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) } - currentQuestion.id
+        val restOfAnswers = ids.map { it.itemId } - currentQuestion.id
+
+        Log.d(TAG, "Parts of ${currentKanji.kanji}: ${questionPartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
+        Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
+
+        val currentAnswers = sampleCompositionAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
+        if (currentAnswers.size != answerCount)
+            Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $answerCount")
+        currentAnswers.shuffle()
+
+        return currentAnswers
+    }
+
+    private fun sampleCompositionAnswers(possibleAnswers: List<List<Int>>, currentAnswers: List<Int>): List<Int> {
+        if (possibleAnswers.isEmpty() || currentAnswers.size == answerCount)
+            return currentAnswers
+
+        val currentList = possibleAnswers[0] - currentAnswers
+
+        return if (currentList.size <= answerCount - currentAnswers.size) {
+            sampleCompositionAnswers(possibleAnswers.drop(1), currentAnswers + currentList)
+        } else {
+            currentAnswers + pickRandom(currentList, answerCount - currentAnswers.size, setOf())
+        }
     }
 
     private fun addIdToLastQuestions(id: Int) {
