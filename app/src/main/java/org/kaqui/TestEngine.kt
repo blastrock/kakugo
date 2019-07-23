@@ -74,8 +74,8 @@ class TestEngine(
         get() = getAnswerCount(testType)
 
     fun loadState(savedInstanceState: Bundle) {
-        currentQuestion = getItem(db, savedInstanceState.getInt("question"))
-        currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(db, it) }
+        currentQuestion = getItem(savedInstanceState.getInt("question"))
+        currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
         correctCount = savedInstanceState.getInt("correctCount")
         questionCount = savedInstanceState.getInt("questionCount")
         unserializeHistory(savedInstanceState.getByteArray("history")!!)
@@ -127,7 +127,7 @@ class TestEngine(
                 Log.v(TAG, "Couldn't pick a question")
         }
 
-        return PickedQuestion(getItem(db, question.itemId), question, totalWeight)
+        return PickedQuestion(getItem(question.itemId), question, totalWeight)
     }
 
     private fun pickAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> =
@@ -146,7 +146,7 @@ class TestEngine(
 
         val additionalAnswers = pickRandom(ids.map { it.itemId }, answerCount - 1 - similarItems.size, setOf(currentQuestion.id) + similarItems)
 
-        val currentAnswers = ((additionalAnswers + similarItems).map { getItem(db, it) } + listOf(currentQuestion)).toMutableList()
+        val currentAnswers = ((additionalAnswers + similarItems).map { getItem(it) } + listOf(currentQuestion)).toMutableList()
         if (currentAnswers.size != answerCount)
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $answerCount")
         currentAnswers.shuffle()
@@ -282,13 +282,13 @@ class TestEngine(
             val type = parcel.readByte()
             when (type.toInt()) {
                 0 -> {
-                    addGoodAnswerToHistory(getItem(db, parcel.readInt()), iteration == count - 1)
+                    addGoodAnswerToHistory(getItem(parcel.readInt()), iteration == count - 1)
                 }
                 1 -> {
-                    addUnknownAnswerToHistory(getItem(db, parcel.readInt()), iteration == count - 1)
+                    addUnknownAnswerToHistory(getItem(parcel.readInt()), iteration == count - 1)
                 }
                 2 -> {
-                    addWrongAnswerToHistory(getItem(db, parcel.readInt()), getItem(db, parcel.readInt()), iteration == count - 1)
+                    addWrongAnswerToHistory(getItem(parcel.readInt()), getItem(parcel.readInt()), iteration == count - 1)
                 }
             }
         }
@@ -296,7 +296,7 @@ class TestEngine(
         parcel.recycle()
     }
 
-    private fun getItem(db: Database, id: Int): Item =
+    private fun getItem(id: Int): Item =
             itemView.getItem(id)
 
     val itemView: LearningDbView
