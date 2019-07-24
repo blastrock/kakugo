@@ -50,14 +50,9 @@ If you like this project and would like to thank me, I am open to donations. Do
 not forget to donate to the projects listed above from which most of the work
 comes.
 
-.. raw:: html
-
-   <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-   <input type="hidden" name="cmd" value="_donations" />
-   <input type="hidden" name="business" value="MACMBD35R2BB6" />
-   <input type="hidden" name="currency_code" value="EUR" />
-   <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate" /> with PayPal
-   <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
-   </form>
+|Donate|_ with PayPal.
 
 Or if you prefer Bitcoin donations, here is my address: 12bnT7epKmf9ztkAeuM8dHCcoc76r9rgVX
+
+.. |Donate| image:: https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif
+.. _Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MACMBD35R2BB6&currency_code=EUR
