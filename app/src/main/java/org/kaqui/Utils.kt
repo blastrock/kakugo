@@ -139,7 +139,7 @@ fun Int.asUnicodeCodePoint() = Character.toChars(this).joinToString("")
 
 fun showItemProbabilityData(context: Context, item: String, probabilityData: TestEngine.DebugData) {
     AlertDialog.Builder(context)
-            .setTitle(item)
+            .setTitle("$item - ${item.codePointAt(0)}")
             .setMessage(
                     context.getString(R.string.debug_info,
                             probabilityData.probabilityData.daysSinceCorrect,
