@@ -29,7 +29,7 @@ class Database private constructor(context: Context, private val database: SQLit
     fun getWordView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
             LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord)
 
-    fun getCompositionAnswerIds(kanjiId: Int): List<Int> {
+    fun getOtherCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""
             SELECT c3.id_kanji2
             FROM $KANJIS_COMPOSITION_TABLE_NAME c1
@@ -43,6 +43,22 @@ class Database private constructor(context: Context, private val database: SQLit
             JOIN $KANJIS_TABLE_NAME k ON c.id_kanji1 = k.id AND k.enabled = 1
             WHERE c.id_kanji2 = ?
             """, arrayOf(kanjiId.toString(), kanjiId.toString())).use { cursor ->
+            val ret = mutableListOf<Int>()
+            while (cursor.moveToNext()) {
+                ret.add(cursor.getInt(0))
+            }
+            return ret
+        }
+    }
+
+    fun getSimilarCompositionAnswerIds(kanjiId: Int): List<Int> {
+        database.rawQuery("""
+            SELECT DISTINCT c.id_kanji2
+            FROM $SIMILAR_ITEMS_TABLE_NAME s
+            JOIN $KANJIS_TABLE_NAME sk ON s.id_item2 = sk.id AND sk.enabled = 1
+            JOIN $KANJIS_COMPOSITION_TABLE_NAME c ON c.id_kanji1 = s.id_item2
+            WHERE s.id_item1 = ?
+            """, arrayOf(kanjiId.toString())).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))

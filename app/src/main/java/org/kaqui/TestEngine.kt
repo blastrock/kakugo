@@ -159,14 +159,15 @@ class TestEngine(
 
         val currentKanji = currentQuestion.contents as Kanji
         val questionPartsIds = currentKanji.parts.map { it.id }
-        val possiblePartsIds = db.getCompositionAnswerIds(currentQuestion.id) - currentQuestion.id
-        val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) } - currentQuestion.id
+        val similarPartsIds = db.getSimilarCompositionAnswerIds(currentQuestion.id) - currentQuestion.id
+        val otherPartsIds = db.getOtherCompositionAnswerIds(currentQuestion.id) - currentQuestion.id
         val restOfAnswers = ids.map { it.itemId } - currentQuestion.id
 
-        Log.d(TAG, "Parts of ${currentKanji.kanji}: ${questionPartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
-        Log.d(TAG, "Possible parts for ${currentKanji.kanji}: ${possiblePartsIds.map { (db.getKanji(it, knowledgeType).contents as Kanji).kanji }}")
+        Log.d(TAG, "Parts of ${currentKanji.kanji}: ${questionPartsIds.map { it.asUnicodeCodePoint() }}")
+        Log.d(TAG, "Similar parts for ${currentKanji.kanji}: ${similarPartsIds.map { it.asUnicodeCodePoint() }}")
+        Log.d(TAG, "Other parts for ${currentKanji.kanji}: ${otherPartsIds.map { it.asUnicodeCodePoint() }}")
 
-        val currentAnswers = sampleCompositionAnswers(listOf(possiblePartsIds, similarItemIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
+        val currentAnswers = sampleCompositionAnswers(listOf(similarPartsIds, otherPartsIds, restOfAnswers), questionPartsIds).map { db.getKanji(it, knowledgeType) }.toMutableList()
         if (currentAnswers.size != answerCount)
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $answerCount")
         currentAnswers.shuffle()
