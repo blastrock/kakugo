@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import kotlinx.android.synthetic.main.stats_fragment.*
+import org.jetbrains.anko.support.v4.UI
 import org.kaqui.model.LearningDbView
 
 class StatsFragment : androidx.fragment.app.Fragment() {
@@ -15,7 +15,9 @@ class StatsFragment : androidx.fragment.app.Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.stats_fragment, container, false)
+        return UI {
+            statsComponent()
+        }.view
     }
 
     fun setShowDisabled(v: Boolean) {
@@ -23,12 +25,16 @@ class StatsFragment : androidx.fragment.app.Fragment() {
     }
 
     fun updateStats(dbView: LearningDbView) {
-        updateStats(dbView.getStats(), disabled_count, bad_count, meh_count, good_count, showDisabled = showDisabled)
+        updateStats(this.view!!, dbView.getStats(), showDisabled = showDisabled)
     }
 
     companion object {
         fun newInstance(): StatsFragment {
             return StatsFragment()
+        }
+
+        fun updateStats(statsComponent: View, stats: LearningDbView.Stats, showDisabled: Boolean = false) {
+            updateStats(stats, statsComponent.findViewById(R.id.disabled_count), statsComponent.findViewById(R.id.bad_count), statsComponent.findViewById(R.id.meh_count), statsComponent.findViewById(R.id.good_count), showDisabled)
         }
 
         fun updateStats(stats: LearningDbView.Stats, disabled_count: TextView, bad_count: TextView, meh_count: TextView, good_count: TextView, showDisabled: Boolean = false) {
