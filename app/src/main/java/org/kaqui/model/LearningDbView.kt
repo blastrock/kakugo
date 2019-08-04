@@ -135,7 +135,6 @@ class LearningDbView(
         database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
-
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)
 
     fun getStats(): Stats {
@@ -165,7 +164,11 @@ class LearningDbView(
                     selectionArgsBase
 
         database.rawQuery("""
-            WITH stats AS (
+            SELECT
+                SUM(case when stats_score BETWEEN 0.0 AND $BAD_WEIGHT then 1 else 0 end),
+                SUM(case when stats_score BETWEEN $BAD_WEIGHT AND $GOOD_WEIGHT then 1 else 0 end),
+                SUM(case when stats_score BETWEEN $GOOD_WEIGHT AND 1.0 then 1 else 0 end)
+            FROM (
                 SELECT MAX(ifnull(s.short_score, 0.0)) as stats_score
                 FROM $tableName
                 LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s
@@ -176,11 +179,6 @@ class LearningDbView(
                     $andWhereClause
                 GROUP BY $tableName.id
             )
-            SELECT
-                SUM(case when stats_score BETWEEN 0.0 AND $BAD_WEIGHT then 1 else 0 end),
-                SUM(case when stats_score BETWEEN $BAD_WEIGHT AND $GOOD_WEIGHT then 1 else 0 end),
-                SUM(case when stats_score BETWEEN $GOOD_WEIGHT AND 1.0 then 1 else 0 end)
-            FROM stats
         """, selectionArgs).use { cursor ->
             cursor.moveToNext()
             return Triple(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2))
