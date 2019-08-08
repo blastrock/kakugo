@@ -65,8 +65,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
     private lateinit var mainView: View
     private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
 
-    override val testType
-        get() = intent.extras!!.getSerializable("test_type") as TestType
+    private val testTypes
+        get() = intent.extras!!.getSerializable("test_types") as List<TestType>
+    private var localTestType: TestType? = null
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
@@ -76,8 +77,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         super.onCreate(savedInstanceState)
 
         job = Job()
-
-        title = getString(testType.toName())
 
         mainCoordLayout = coordinatorLayout {
             verticalLayout {
@@ -198,36 +197,26 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        testEngine = TestEngine(Database.getInstance(this), testType, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
-
-        if (savedInstanceState == null)
-            testEngine.prepareNewQuestion()
-        else
-            testEngine.loadState(savedInstanceState)
+        testEngine = TestEngine(Database.getInstance(this), testTypes, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
 
         // handle view resize due to keyboard opening and closing
         val rootView = findViewById<View>(android.R.id.content)
         rootView.addOnLayoutChangeListener(this::onLayoutChange)
 
-        updateSessionScore()
-
-        val previousFragment = supportFragmentManager.findFragmentById(R.id.main_test_block)
-        val testFragment: Fragment =
-                if (previousFragment != null)
-                    previousFragment
-                else
-                    when (testType) {
-                        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragment.newInstance()
-                        TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragment.newInstance()
-                        TestType.KANJI_COMPOSITION -> CompositionTestFragment.newInstance()
-                        TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragment.newInstance()
-                    }
-        this@TestActivity.testFragment = testFragment as TestFragment
-
         supportFragmentManager.transaction {
-            replace(R.id.main_test_block, testFragment)
             replace(R.id.global_stats, statsFragment)
         }
+
+        val previousFragment = supportFragmentManager.findFragmentById(R.id.main_test_block)
+        if (previousFragment != null)
+            testFragment = previousFragment as TestFragment
+
+        if (savedInstanceState == null) {
+            nextQuestion()
+        } else
+            testEngine.loadState(savedInstanceState)
+
+        updateSessionScore()
     }
 
     override fun onStart() {
@@ -295,12 +284,33 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
 
     override fun nextQuestion() {
         testEngine.prepareNewQuestion()
-        testFragment.startNewQuestion()
-        testFragment.refreshQuestion()
-        testFragment.setSensible(false)
-        launch(job) {
-            delay(300)
-            testFragment.setSensible(true)
+
+        if (localTestType == testType) {
+            testFragment.startNewQuestion()
+            testFragment.refreshQuestion()
+            testFragment.setSensible(false)
+            launch(job) {
+                delay(300)
+                testFragment.setSensible(true)
+            }
+        } else {
+            localTestType = testType
+            val testFragment: Fragment =
+                    when (testType) {
+                        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragment.newInstance()
+                        TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragment.newInstance()
+                        TestType.KANJI_COMPOSITION -> CompositionTestFragment.newInstance()
+                        TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragment.newInstance()
+                    }
+            this@TestActivity.testFragment = testFragment as TestFragment
+
+            supportFragmentManager.transaction {
+                replace(R.id.main_test_block, testFragment)
+            }
+
+            title = getString(testType.toName())
+
+            updateSessionScore()
         }
     }
 

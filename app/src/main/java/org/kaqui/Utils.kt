@@ -117,7 +117,7 @@ fun startTest(activity: Activity, type: TestType) {
         activity.longToast(R.string.enable_a_few_items)
         return
     }
-    activity.startActivity<TestActivity>("test_type" to type)
+    activity.startActivity<TestActivity>("test_types" to listOf(type))
 }
 
 val Activity.menuWidth

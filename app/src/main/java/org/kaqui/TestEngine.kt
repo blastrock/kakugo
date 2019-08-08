@@ -8,7 +8,7 @@ import java.util.*
 
 class TestEngine(
         private val db: Database,
-        private val testType: TestType,
+        private val testTypes: List<TestType>,
         private val goodAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit,
         private val wrongAnswerCallback: (correct: Item, probabilityData: DebugData?, wrong: Item, refresh: Boolean) -> Unit,
         private val unknownAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit) {
@@ -56,6 +56,7 @@ class TestEngine(
 
     data class PickedQuestion(val item: Item, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
+    lateinit var testType: TestType
     lateinit var currentQuestion: Item
         private set
     var currentDebugData: DebugData? = null
@@ -89,7 +90,9 @@ class TestEngine(
         outState.putByteArray("history", serializeHistory())
     }
 
-    fun prepareNewQuestion(): List<SrsCalculator.ProbabilityData> {
+    fun prepareNewQuestion() {
+        testType = testTypes[Random().nextInt(testTypes.size)]
+
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
         if (ids.size < answerCount) {
             Log.wtf(TAG, "Enabled items ${ids.size} must at least be $answerCount")
@@ -103,8 +106,6 @@ class TestEngine(
         currentAnswers = pickAnswers(db, ids, currentQuestion)
 
         addIdToLastQuestions(currentQuestion.id)
-
-        return ids
     }
 
     private fun pickQuestion(db: Database, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {

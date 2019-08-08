@@ -9,6 +9,7 @@ import org.kaqui.model.TestType
 interface TestFragmentHolder {
     val testEngine: TestEngine
     val testType: TestType
+        get() = testEngine.testType
 
     fun onAnswer(button: View?, certainty: Certainty, wrong: Item?)
     fun nextQuestion()
