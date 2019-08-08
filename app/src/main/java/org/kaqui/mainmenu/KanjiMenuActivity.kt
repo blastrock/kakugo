@@ -54,6 +54,11 @@ class KanjiMenuActivity : BaseActivity() {
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }
+                        button(R.string.custom_test) {
+                            setOnClickListener { startTest(this@KanjiMenuActivity, listOf(TestType.KANJI_TO_READING, TestType.READING_TO_KANJI, TestType.KANJI_TO_MEANING, TestType.MEANING_TO_KANJI, TestType.KANJI_COMPOSITION, TestType.KANJI_DRAWING)) }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(4)
+                        }
                         separator(this@KanjiMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.kanji_selection) {
                             setOnClickListener { startActivity<ClassSelectionActivity>("mode" to ClassSelectionActivity.Mode.KANJI as Serializable) }

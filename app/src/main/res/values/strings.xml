@@ -15,6 +15,9 @@
     <string name="autoselect_from_kanji_short">Auto</string>
     <string name="import_selection">Import kanji selection</string>
     <string name="database_error">Database error</string>
+    <string name="custom_test">Custom test</string>
+    <string name="select_test_types">Select the desired types of questions:</string>
+    <string name="select_at_least_one_type">You must select at least one type of question.</string>
 
     <string name="hiragana_to_romaji">Hiragana to romaji quiz (ひ→hi)</string>
     <string name="romaji_to_hiragana">Romaji to hiragana (hi→ひ)</string>

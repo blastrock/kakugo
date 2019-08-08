@@ -111,6 +111,33 @@ fun ViewManager.appTitleImage(context: Context) =
             setImageDrawable(drawable)
         }
 
+fun startTest(activity: Activity, types: List<TestType>) {
+    val db = Database.getInstance(activity)
+    if (TestEngine.getItemView(db, types[0]).getEnabledCount() < 10) {
+        activity.longToast(R.string.enable_a_few_items)
+        return
+    }
+    val selected = mutableListOf<TestType>()
+    AlertDialog.Builder(activity)
+            .setTitle(R.string.select_test_types)
+            .setMultiChoiceItems(types.map { activity.getString(it.toName()) }.toTypedArray(), null) { _, which, isChecked ->
+                if (isChecked)
+                    selected.add(types[which])
+                else
+                    selected.remove(types[which])
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                if (selected.isEmpty())
+                    activity.alert(R.string.select_at_least_one_type) {
+                        positiveButton(android.R.string.ok) {}
+                    }.show()
+                else
+                    activity.startActivity<TestActivity>("test_types" to selected)
+            }
+            .setNegativeButton(android.R.string.cancel) { _, _ -> }
+            .show()
+}
+
 fun startTest(activity: Activity, type: TestType) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
