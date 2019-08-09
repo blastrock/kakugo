@@ -141,16 +141,15 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.28?</h3>
+        <h3>What\'s new in 1.29?</h3>
+
+        <br/>- Added new custom test mode for kanji
+        <br/>- Reworked kanji composition test
+
+        <br/><br/><h3>What\'s new in 1.28?</h3>
 
         <br/>- Added "single button mode" setting
         <br/>- The SRS formula was tweaked to focus more on item that are not marked as known
         <br/>- Kakugo is now licensed under the GPLv3
-
-        <br/><br/><h3>What\'s new in 1.27?</h3>
-
-        <br/>- During drawing tests, after clicking on "don\'t know", it is now possible to try to draw the character
-        <br/>- The selection screen now shows your best scores instead of just the reading scores
-        <br/>- The SRS formula was tweaked a bit to better avoid asking known kanji
     ]]></string>
 </resources>
