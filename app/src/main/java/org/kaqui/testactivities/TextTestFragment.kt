@@ -1,6 +1,5 @@
 package org.kaqui.testactivities
 
-import android.content.Context
 import android.os.Bundle
 import android.text.InputType
 import android.text.method.KeyListener
@@ -17,7 +16,6 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.Kana
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
-import android.view.inputmethod.InputMethodManager
 
 class TextTestFragment : Fragment(), TestFragment {
     companion object {

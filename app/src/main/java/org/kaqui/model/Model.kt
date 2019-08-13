@@ -2,7 +2,7 @@ package org.kaqui.model
 
 val HiraganaRange = 0x3040..0x309F
 val KatakanaRange = 0x30A0..0x30FF
-val WordBaseId = 0x1000000
+const val WordBaseId = 0x1000000
 
 sealed class ItemContents
 

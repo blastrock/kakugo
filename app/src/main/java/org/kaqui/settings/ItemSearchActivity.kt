@@ -10,7 +10,6 @@ import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Database
-import org.kaqui.model.KnowledgeType
 import org.kaqui.model.LearningDbView
 
 class ItemSearchActivity : BaseActivity() {

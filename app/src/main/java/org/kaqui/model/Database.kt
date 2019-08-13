@@ -18,10 +18,10 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     fun getHiraganaView(knowledgeType: KnowledgeType? = null) =
-            LearningDbView(database, KANAS_TABLE_NAME, knowledgeType, filter = "$KANAS_TABLE_NAME.id BETWEEN ${HiraganaRange.start} AND ${HiraganaRange.endInclusive}", itemGetter = this::getKana)
+            LearningDbView(database, KANAS_TABLE_NAME, knowledgeType, filter = "$KANAS_TABLE_NAME.id BETWEEN ${HiraganaRange.first} AND ${HiraganaRange.last}", itemGetter = this::getKana)
 
     fun getKatakanaView(knowledgeType: KnowledgeType? = null) =
-            LearningDbView(database, KANAS_TABLE_NAME, knowledgeType, filter = "$KANAS_TABLE_NAME.id BETWEEN ${KatakanaRange.start} AND ${KatakanaRange.endInclusive}", itemGetter = this::getKana)
+            LearningDbView(database, KANAS_TABLE_NAME, knowledgeType, filter = "$KANAS_TABLE_NAME.id BETWEEN ${KatakanaRange.first} AND ${KatakanaRange.last}", itemGetter = this::getKana)
 
     fun getKanjiView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
             LearningDbView(database, KANJIS_TABLE_NAME, knowledgeType, filter = "radical = 0", classifier = classifier, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
@@ -185,19 +185,6 @@ class Database private constructor(context: Context, private val database: SQLit
             item.enabled = cursor.getInt(4) != 0
         }
         return item
-    }
-
-    fun getEnabledWholeKanjiRatio(): Float {
-        val wholeKanjis = database.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1 AND part_count = 1", null, null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            cursor.getInt(0)
-        }
-        val enabledKanjis = database.query(KANJIS_TABLE_NAME, arrayOf("COUNT(*)"), "enabled = 1", null, null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            cursor.getInt(0)
-        }
-
-        return wholeKanjis.toFloat() / enabledKanjis.toFloat()
     }
 
     fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {

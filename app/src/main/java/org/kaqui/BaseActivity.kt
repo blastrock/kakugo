@@ -20,7 +20,7 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onResume()
     }
 
-    protected fun refreshTheme() {
+    private fun refreshTheme() {
         val newTheme = getPrefTheme()
         if (newTheme != currentTheme) {
             recreate()

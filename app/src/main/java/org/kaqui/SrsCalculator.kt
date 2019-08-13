@@ -5,6 +5,8 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.GOOD_WEIGHT
 import org.kaqui.model.Item
 import java.util.*
+import kotlin.math.exp
+import kotlin.math.min
 
 class SrsCalculator {
 
@@ -48,7 +50,7 @@ class SrsCalculator {
             val sigmoidArg = (stage0.daysSinceAsked - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * stage0.longScore) /
                     (probaParams.spreadBegin + (probaParams.spreadEnd - probaParams.spreadBegin) * stage0.longScore)
             // cap it to avoid overflow on Math.exp in the sigmoid
-            stage0.longWeight = sigmoid(Math.min(sigmoidArg, 10.0))
+            stage0.longWeight = sigmoid(min(sigmoidArg, 10.0))
             if (stage0.longWeight < 0 || stage0.longWeight > 1)
                 Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastAsked: ${stage0.lastAsked}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
 
@@ -108,8 +110,8 @@ class SrsCalculator {
             val newLongScore =
                     when {
                         previousLongScore < targetScore ->
-                            Math.min(1.0, previousLongScore + (1.0 / 10.0 *
-                                    Math.min(daysSinceAsked / 2.0 /
+                            min(1.0, previousLongScore + (1.0 / 10.0 *
+                                    min(daysSinceAsked / 2.0 /
                                             (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)))
                         previousLongScore > targetScore ->
                             previousLongScore - (-targetScore + previousLongScore) / 2
@@ -134,7 +136,7 @@ class SrsCalculator {
                     Certainty.DONTKNOW -> 0.0
                 }
 
-        private fun sigmoid(x: Double) = Math.exp(x) / (1 + Math.exp(x))
+        private fun sigmoid(x: Double) = exp(x) / (1 + exp(x))
 
         private fun getProbaParamsStage1(now: Long, minLastAsked: Int): ProbaParamsStage1 {
             val daysEnd = (now - minLastAsked) / 3600.0 / 24.0
@@ -149,7 +151,7 @@ class SrsCalculator {
             if (stage1Stats.totalShortWeight == 0.0 || stage1Stats.totalLongWeight == 0.0)
                 return ProbaParamsStage2(1.0, 1.0)
 
-            val neededShortWeight = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, Math.min(stage1Stats.countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
+            val neededShortWeight = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, min(stage1Stats.countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
             val totalWeight = stage1Stats.totalShortWeight + stage1Stats.totalLongWeight
             val shortCoefficient = neededShortWeight * totalWeight / stage1Stats.totalShortWeight
             return ProbaParamsStage2(shortCoefficient, 1.0)
