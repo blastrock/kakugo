@@ -91,18 +91,18 @@ class LearningDbView(
         }
     }
 
-    fun getMinLastCorrect(): Int = getLastCorrectFrom(0)
+    fun getMinLastAsked(): Int = getLastAskedFrom(0)
 
-    fun getLastCorrectFirstDecile(): Int {
+    fun getLastAskedFirstDecile(): Int {
         val count = database.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
             cursor.moveToFirst()
             cursor.getInt(0)
         }
         val decile1 = count / 10
-        return getLastCorrectFrom(decile1)
+        return getLastAskedFrom(decile1)
     }
 
-    private fun getLastCorrectFrom(from: Int): Int {
+    private fun getLastAskedFrom(from: Int): Int {
         // I couldn't find how sqlite handles null values in order by, so I use ifnull there too
         database.rawQuery("""
             SELECT s.last_correct
@@ -132,8 +132,8 @@ class LearningDbView(
         cv.put("type", knowledgeType!!.value)
         cv.put("short_score", scoreUpdate.shortScore)
         cv.put("long_score", scoreUpdate.longScore)
-        if (scoreUpdate.lastCorrect != null)
-            cv.put("last_correct", scoreUpdate.lastCorrect)
+        if (scoreUpdate.lastAsked != null)
+            cv.put("last_correct", scoreUpdate.lastAsked)
         database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
     }
 

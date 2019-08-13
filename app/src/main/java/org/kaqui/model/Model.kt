@@ -35,7 +35,7 @@ data class Item(
         var contents: ItemContents,
         var shortScore: Double,
         var longScore: Double,
-        var lastCorrect: Long,
+        var lastAsked: Long,
         var enabled: Boolean
 )
 

@@ -93,7 +93,7 @@ class TestEngine(
     fun prepareNewQuestion() {
         testType = testTypes[Random().nextInt(testTypes.size)]
 
-        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastCorrectFirstDecile())
+        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastAskedFirstDecile())
         if (ids.size < answerCount) {
             Log.wtf(TAG, "Enabled items ${ids.size} must at least be $answerCount")
             throw RuntimeException("Too few items selected")
@@ -196,7 +196,7 @@ class TestEngine(
     }
 
     fun markAnswer(certainty: Certainty, wrong: Item? = null) {
-        val minLastCorrect = itemView.getMinLastCorrect()
+        val minLastCorrect = itemView.getMinLastAsked()
 
         if (certainty == Certainty.DONTKNOW) {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)

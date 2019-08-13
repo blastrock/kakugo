@@ -8,14 +8,14 @@ import java.util.*
 
 class SrsCalculator {
 
-    data class ProbabilityData(@JvmField var itemId: Int, @JvmField var shortScore: Double, @JvmField var shortWeight: Double, @JvmField var longScore: Double, @JvmField var longWeight: Double, @JvmField var lastCorrect: Long, @JvmField var daysSinceCorrect: Double, @JvmField var finalProbability: Double)
+    data class ProbabilityData(@JvmField var itemId: Int, @JvmField var shortScore: Double, @JvmField var shortWeight: Double, @JvmField var longScore: Double, @JvmField var longWeight: Double, @JvmField var lastAsked: Long, @JvmField var daysSinceAsked: Double, @JvmField var finalProbability: Double)
 
     data class ProbaParamsStage1(@JvmField val daysBegin: Double, @JvmField val daysEnd: Double, @JvmField val spreadBegin: Double, @JvmField val spreadEnd: Double)
     data class ProbaParamsStage2(@JvmField val shortCoefficient: Double, @JvmField val longCoefficient: Double)
 
     data class DebugParams(var probaParamsStage1: ProbaParamsStage1, var probaParamsStage2: ProbaParamsStage2)
 
-    data class ScoreUpdate(val itemId: Int, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val minLastCorrect: Int)
+    data class ScoreUpdate(val itemId: Int, val shortScore: Float, val longScore: Float, val lastAsked: Long, val minLastAsked: Int)
 
     private data class Stage1Stats(@JvmField val totalShortWeight: Double, @JvmField val totalLongWeight: Double, @JvmField val countUnknown: Int)
 
@@ -26,11 +26,11 @@ class SrsCalculator {
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
 
-        fun fillProbalities(items: List<ProbabilityData>, minLastCorrect: Int): Pair<List<ProbabilityData>, DebugParams> {
+        fun fillProbalities(items: List<ProbabilityData>, minLastAsked: Int): Pair<List<ProbabilityData>, DebugParams> {
             val now = Calendar.getInstance().timeInMillis / 1000
 
-            val probaParams = getProbaParamsStage1(now, minLastCorrect)
-            Log.v(TAG, "probaParamsStage1: $probaParams, minLastCorrect: $minLastCorrect")
+            val probaParams = getProbaParamsStage1(now, minLastAsked)
+            Log.v(TAG, "probaParamsStage1: $probaParams, minLastAsked: $minLastAsked")
             val ret = items.map { getProbabilityDataStage1(now, probaParams, it) }
             val stage1Stats = getStage1Stats(ret)
             val probaParams2 = getProbaParamsStage2(stage1Stats)
@@ -43,14 +43,14 @@ class SrsCalculator {
             if (stage0.shortWeight < 0 || stage0.shortWeight > 1)
                 Log.wtf(TAG, "Invalid shortWeight: ${stage0.shortWeight}, shortScore: ${stage0.shortScore}")
 
-            stage0.daysSinceCorrect = (now - stage0.lastCorrect) / 3600.0 / 24.0
+            stage0.daysSinceAsked = (now - stage0.lastAsked) / 3600.0 / 24.0
 
-            val sigmoidArg = (stage0.daysSinceCorrect - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * stage0.longScore) /
+            val sigmoidArg = (stage0.daysSinceAsked - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * stage0.longScore) /
                     (probaParams.spreadBegin + (probaParams.spreadEnd - probaParams.spreadBegin) * stage0.longScore)
             // cap it to avoid overflow on Math.exp in the sigmoid
             stage0.longWeight = sigmoid(Math.min(sigmoidArg, 10.0))
             if (stage0.longWeight < 0 || stage0.longWeight > 1)
-                Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastCorrect: ${stage0.lastCorrect}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
+                Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastAsked: ${stage0.lastAsked}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
 
             // square long weight to increase gaps
             stage0.longWeight *= stage0.longWeight
@@ -78,10 +78,10 @@ class SrsCalculator {
             return stage1
         }
 
-        fun getScoreUpdate(minLastCorrect: Int, item: Item, certainty: Certainty): ScoreUpdate {
+        fun getScoreUpdate(minLastAsked: Int, item: Item, certainty: Certainty): ScoreUpdate {
             val now = Calendar.getInstance().timeInMillis / 1000
 
-            val probaParams = getProbaParamsStage1(now, minLastCorrect)
+            val probaParams = getProbaParamsStage1(now, minLastAsked)
             val targetScore = certaintyToWeight(certainty)
 
             val previousShortScore = item.shortScore
@@ -95,13 +95,13 @@ class SrsCalculator {
             }
 
             val previousLongScore = item.longScore
-            // if lastCorrect wasn't initialized, set it to now
-            val lastCorrect =
-                    if (item.lastCorrect > 0)
-                        item.lastCorrect
+            // if lastAsked wasn't initialized, set it to now
+            val lastAsked =
+                    if (item.lastAsked > 0)
+                        item.lastAsked
                     else
                         now
-            val daysSinceCorrect = secondsToDays(now - lastCorrect)
+            val daysSinceAsked = secondsToDays(now - lastAsked)
             // long score goes down by one half of the distance to the target score
             // and it goes up by one half of that distance prorated by the time since the last
             // correct answer
@@ -109,7 +109,7 @@ class SrsCalculator {
                     when {
                         previousLongScore < targetScore ->
                             Math.min(1.0, previousLongScore + (1.0 / 10.0 *
-                                    Math.min(daysSinceCorrect / 2.0 /
+                                    Math.min(daysSinceAsked / 2.0 /
                                             (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)))
                         previousLongScore > targetScore ->
                             previousLongScore - (-targetScore + previousLongScore) / 2
@@ -117,14 +117,14 @@ class SrsCalculator {
                             previousLongScore
                     }
             if (newLongScore !in 0f..1f) {
-                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceCorrect = $daysSinceCorrect, targetScore = $targetScore, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
+                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceAsked = $daysSinceAsked, targetScore = $targetScore, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
             }
 
-            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceCorrect: $daysSinceCorrect, probaParamsStage1: $probaParams")
+            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceAsked: $daysSinceAsked, probaParamsStage1: $probaParams")
             Log.v(TAG, "Short score of $item going from $previousShortScore to $newShortScore")
             Log.v(TAG, "Long score of $item going from $previousLongScore to $newLongScore")
 
-            return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(), now, minLastCorrect)
+            return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(), now, minLastAsked)
         }
 
         private fun certaintyToWeight(certainty: Certainty): Double =
@@ -136,8 +136,8 @@ class SrsCalculator {
 
         private fun sigmoid(x: Double) = Math.exp(x) / (1 + Math.exp(x))
 
-        private fun getProbaParamsStage1(now: Long, minLastCorrect: Int): ProbaParamsStage1 {
-            val daysEnd = (now - minLastCorrect) / 3600.0 / 24.0
+        private fun getProbaParamsStage1(now: Long, minLastAsked: Int): ProbaParamsStage1 {
+            val daysEnd = (now - minLastAsked) / 3600.0 / 24.0
             val spreadEnd = (daysEnd * 0.5) / 7.0
 
             return ProbaParamsStage1(0.5, daysEnd, 0.5 / 7.0, spreadEnd)

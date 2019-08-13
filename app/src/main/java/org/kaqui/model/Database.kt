@@ -141,7 +141,7 @@ class Database private constructor(context: Context, private val database: SQLit
             contents.uniqueRomaji = cursor.getString(5)
             item.shortScore = cursor.getDouble(1)
             item.longScore = cursor.getDouble(2)
-            item.lastCorrect = cursor.getLong(3)
+            item.lastAsked = cursor.getLong(3)
             item.enabled = cursor.getInt(4) != 0
         }
         return item
@@ -181,7 +181,7 @@ class Database private constructor(context: Context, private val database: SQLit
             contents.jlptLevel = cursor.getInt(0)
             item.shortScore = cursor.getDouble(1)
             item.longScore = cursor.getDouble(2)
-            item.lastCorrect = cursor.getLong(3)
+            item.lastAsked = cursor.getLong(3)
             item.enabled = cursor.getInt(4) != 0
         }
         return item
@@ -223,7 +223,7 @@ class Database private constructor(context: Context, private val database: SQLit
                 contents.meanings = cursor.getString(8).split('_')
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
-            item.lastCorrect = cursor.getLong(5)
+            item.lastAsked = cursor.getLong(5)
             item.enabled = cursor.getInt(6) != 0
             similarityClass = cursor.getInt(7)
         }

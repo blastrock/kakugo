@@ -169,7 +169,7 @@ fun showItemProbabilityData(context: Context, item: String, probabilityData: Tes
             .setTitle("$item - ${item.codePointAt(0)}")
             .setMessage(
                     context.getString(R.string.debug_info,
-                            probabilityData.probabilityData.daysSinceCorrect,
+                            probabilityData.probabilityData.daysSinceAsked,
                             probabilityData.probabilityData.longScore,
                             probabilityData.probabilityData.longWeight,
                             probabilityData.probabilityData.shortScore,
@@ -179,7 +179,7 @@ fun showItemProbabilityData(context: Context, item: String, probabilityData: Tes
                             probabilityData.probabilityData.finalProbability,
                             probabilityData.totalWeight,
                             if (probabilityData.scoreUpdate != null)
-                                secondsToDays(probabilityData.scoreUpdate!!.lastCorrect - probabilityData.scoreUpdate!!.minLastCorrect)
+                                secondsToDays(probabilityData.scoreUpdate!!.lastAsked - probabilityData.scoreUpdate!!.minLastAsked)
                             else
                                 null,
                             probabilityData.scoreUpdate?.shortScore,
