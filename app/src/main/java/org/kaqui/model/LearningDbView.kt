@@ -105,15 +105,17 @@ class LearningDbView(
     private fun getLastCorrectFrom(from: Int): Int {
         // I couldn't find how sqlite handles null values in order by, so I use ifnull there too
         database.rawQuery("""
-            SELECT ifnull(s.last_correct, 0)
+            SELECT s.last_correct
             FROM $tableName
             LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s ON $tableName.id = s.id AND s.type = ${knowledgeType!!.value}
-            WHERE $filter AND $tableName.enabled = 1
-            ORDER BY ifnull(s.last_correct, 0) ASC
+            WHERE $filter AND $tableName.enabled = 1 AND s.last_correct IS NOT NULL
+            ORDER BY s.last_correct ASC
             LIMIT $from, 1
         """, null).use { cursor ->
-            cursor.moveToFirst()
-            return cursor.getInt(0)
+            if (cursor.moveToFirst())
+                return cursor.getInt(0)
+            else
+                return 0
         }
     }
 
