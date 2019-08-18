@@ -75,6 +75,7 @@ class TestEngine(
         get() = getAnswerCount(testType)
 
     fun loadState(savedInstanceState: Bundle) {
+        testType = savedInstanceState.getSerializable("testType") as TestType
         currentQuestion = getItem(savedInstanceState.getInt("question"))
         currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
         correctCount = savedInstanceState.getInt("correctCount")
@@ -83,6 +84,7 @@ class TestEngine(
     }
 
     fun saveState(outState: Bundle) {
+        outState.putSerializable("testType", testType)
         outState.putInt("question", currentQuestion.id)
         outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
         outState.putInt("correctCount", correctCount)
