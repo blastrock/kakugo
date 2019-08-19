@@ -43,6 +43,11 @@ Crédit
 - La base de données de similarité des kanji vient de https://minerva-access.unimelb.edu.au/handle/11343/35336 and http://lars.yencken.org/datasets/phd/
 - La base de données de composition et de tracé des kanji vient de `KanjiVG <https://kanjivg.tagaini.net/>`_.
 
+Licence
+=======
+
+Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant les termes de la GNU General Public License telle que publiée par la Free Software Foundation, soit la version 3 de la Licence, soit toute version ultérieure.
+
 Dons
 ====
 
