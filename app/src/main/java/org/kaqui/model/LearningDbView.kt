@@ -93,15 +93,6 @@ class LearningDbView(
 
     fun getMinLastAsked(): Int = getLastAskedFrom(0)
 
-    fun getLastAskedFirstDecile(): Int {
-        val count = database.query(tableName, arrayOf("COUNT(*)"), "$filter AND enabled = 1", null, null, null, null).use { cursor ->
-            cursor.moveToFirst()
-            cursor.getInt(0)
-        }
-        val decile1 = count / 10
-        return getLastAskedFrom(decile1)
-    }
-
     private fun getLastAskedFrom(from: Int): Int {
         // I couldn't find how sqlite handles null values in order by, so I use ifnull there too
         database.rawQuery("""

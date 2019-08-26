@@ -5,7 +5,7 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.GOOD_WEIGHT
 import org.kaqui.model.Item
 import java.util.*
-import kotlin.math.exp
+import kotlin.math.max
 import kotlin.math.min
 
 class SrsCalculator {
@@ -24,9 +24,11 @@ class SrsCalculator {
     companion object {
         private const val TAG = "SrsCalculator"
 
-        private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
+        private const val MIN_PROBA_SHORT_UNKNOWN = 0.1
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
+        private const val MIN_LONG_WEIGHT = 0.2
+        private const val MAX_LONG_SCORE_UPDATE_INCREMENT = 0.05
 
         fun fillProbalities(items: List<ProbabilityData>, minLastAsked: Int): Pair<List<ProbabilityData>, DebugParams> {
             val now = Calendar.getInstance().timeInMillis / 1000
@@ -47,15 +49,9 @@ class SrsCalculator {
 
             stage0.daysSinceAsked = (now - stage0.lastAsked) / 3600.0 / 24.0
 
-            val sigmoidArg = (stage0.daysSinceAsked - probaParams.daysBegin - (probaParams.daysEnd - probaParams.daysBegin) * stage0.longScore) /
-                    (probaParams.spreadBegin + (probaParams.spreadEnd - probaParams.spreadBegin) * stage0.longScore)
-            // cap it to avoid overflow on Math.exp in the sigmoid
-            stage0.longWeight = sigmoid(min(sigmoidArg, 10.0))
+            stage0.longWeight = unitStep(stage0.daysSinceAsked - (probaParams.daysEnd * 0.99) * stage0.longScore) * lerp(MIN_LONG_WEIGHT, 1.0, (1 - stage0.longScore))
             if (stage0.longWeight < 0 || stage0.longWeight > 1)
                 Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastAsked: ${stage0.lastAsked}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
-
-            // square long weight to increase gaps
-            stage0.longWeight *= stage0.longWeight
 
             return stage0
         }
@@ -104,19 +100,20 @@ class SrsCalculator {
                     else
                         now
             val daysSinceAsked = secondsToDays(now - lastAsked)
-            // long score goes down by one half of the distance to the target score
-            // and it goes up by one half of that distance prorated by the time since the last
-            // correct answer
             val newLongScore =
                     when {
-                        previousLongScore < targetScore ->
-                            min(1.0, previousLongScore + (1.0 / 10.0 *
-                                    min(daysSinceAsked / 2.0 /
-                                            (probaParams.daysBegin + (probaParams.daysEnd - probaParams.daysBegin) * previousLongScore), 1.0)))
-                        previousLongScore > targetScore ->
-                            previousLongScore - (-targetScore + previousLongScore) / 2
-                        else ->
+                        certainty == Certainty.MAYBE ->
+                            max(0.0, previousLongScore - MAX_LONG_SCORE_UPDATE_INCREMENT)
+                        certainty == Certainty.DONTKNOW ->
+                            previousLongScore / 2
+                        newShortScore < GOOD_WEIGHT ->
                             previousLongScore
+                        certainty == Certainty.SURE ->
+                            min(1.0, previousLongScore + (MAX_LONG_SCORE_UPDATE_INCREMENT *
+                                    min(daysSinceAsked /
+                                            (probaParams.daysEnd * 0.99 * previousLongScore), 1.0)))
+                        else ->
+                            throw RuntimeException("Unknown certainty $certainty")
                     }
             if (newLongScore !in 0f..1f) {
                 Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceAsked = $daysSinceAsked, targetScore = $targetScore, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
@@ -136,16 +133,12 @@ class SrsCalculator {
                     Certainty.DONTKNOW -> 0.0
                 }
 
-        private fun sigmoid(x: Double) = exp(x) / (1 + exp(x))
-
         private fun getProbaParamsStage1(now: Long, minLastAsked: Int): ProbaParamsStage1 {
             val daysEnd = (now - minLastAsked) / 3600.0 / 24.0
             val spreadEnd = (daysEnd * 0.5) / 7.0
 
             return ProbaParamsStage1(0.5, daysEnd, 0.5 / 7.0, spreadEnd)
         }
-
-        private fun lerp(start: Double, end: Double, value: Double): Double = start + value * (end - start)
 
         private fun getProbaParamsStage2(stage1Stats: Stage1Stats): ProbaParamsStage2 {
             if (stage1Stats.totalShortWeight == 0.0 || stage1Stats.totalLongWeight == 0.0)

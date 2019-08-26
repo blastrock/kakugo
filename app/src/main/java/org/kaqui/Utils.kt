@@ -41,7 +41,13 @@ fun getColoredCircle(context: Context, @AttrRes color: Int): Drawable {
     return drawable
 }
 
-fun lerp(a: Float, b: Float, r: Float): Float = a + (r * (b - a))
+fun unitStep(x: Double): Double =
+        if (x < 0)
+            0.0
+        else
+            1.0
+
+fun lerp(a: Double, b: Double, r: Double): Double = a + (r * (b - a))
 
 fun secondsToDays(timestamp: Long) = timestamp / 3600.0 / 24.0
 

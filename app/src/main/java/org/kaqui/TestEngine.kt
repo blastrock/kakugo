@@ -95,7 +95,7 @@ class TestEngine(
     fun prepareNewQuestion() {
         testType = testTypes[Random().nextInt(testTypes.size)]
 
-        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getLastAskedFirstDecile())
+        val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getMinLastAsked())
         if (ids.size < answerCount) {
             Log.wtf(TAG, "Enabled items ${ids.size} must at least be $answerCount")
             throw RuntimeException("Too few items selected")

@@ -128,15 +128,13 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.29</h3>
+        <h3>Nouveautés en 1.30</h3>
+
+        <br/>- Ajout du nouveau système de répétition espacée plus précis
+
+        <br/><br/><h3>Nouveautés en 1.29</h3>
 
         <br/>- Ajout du nouveau mode test personalisé pour les kanji
         <br/>- Le test de composition de kanji a été retravaillé
-
-        <br/><br/><h3>Nouveautés en 1.28</h3>
-
-        <br/>- Ajout de l\'option "Mode bouton unique"
-        <br/>- La formule de SRS à été ajustée pour se concentrer plus sur les éléments qui ne sont pas marqués comme connus
-        <br/>- Kakugo est maintenant sous license GPLv3
     ]]></string>
 </resources>
