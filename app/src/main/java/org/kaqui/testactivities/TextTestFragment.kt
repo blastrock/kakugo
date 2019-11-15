@@ -1,5 +1,6 @@
 package org.kaqui.testactivities
 
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import android.text.method.KeyListener
@@ -67,6 +68,8 @@ class TextTestFragment : Fragment(), TestFragment {
                         answerField = editText {
                             gravity = Gravity.CENTER
                             inputType = defaultInputType
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
                             setOnEditorActionListener { v, actionId, event ->
                                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_NULL)
                                     if (event == null || event.action == KeyEvent.ACTION_DOWN)
