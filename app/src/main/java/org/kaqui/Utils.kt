@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
@@ -120,10 +121,15 @@ fun startTest(activity: Activity, types: List<TestType>) {
         activity.longToast(R.string.enable_a_few_items)
         return
     }
-    val selected = mutableListOf<TestType>()
+    
+    val sharedPrefs = activity.defaultSharedPreferences
+    val defaultTypes = sharedPrefs.getStringSet("custom_test_types", setOf())!!
+    
+    val selected = types.filter { it.name in defaultTypes }.toMutableList()
+    val checkedIndexes = types.map { v -> v in selected }.toBooleanArray()
     AlertDialog.Builder(activity)
             .setTitle(R.string.select_test_types)
-            .setMultiChoiceItems(types.map { activity.getString(it.toName()) }.toTypedArray(), null) { _, which, isChecked ->
+            .setMultiChoiceItems(types.map { activity.getString(it.toName()) }.toTypedArray(), checkedIndexes) { _, which, isChecked ->
                 if (isChecked)
                     selected.add(types[which])
                 else
@@ -134,8 +140,12 @@ fun startTest(activity: Activity, types: List<TestType>) {
                     activity.alert(R.string.select_at_least_one_type) {
                         positiveButton(android.R.string.ok) {}
                     }.show()
-                else
+                else {
+                    sharedPrefs.edit(true) {
+                        putStringSet("custom_test_types", selected.map { it.name }.toSet())
+                    }
                     activity.startActivity<TestActivity>("test_types" to selected)
+                }
             }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
             .show()
