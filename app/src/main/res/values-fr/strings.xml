@@ -128,13 +128,10 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.30</h3>
+        <h3>Nouveautés en 1.31</h3>
 
+        <br/>- Les paramètres des tests personalisés sont maintenant sauvegardés
+        <!-- -->
         <br/>- Ajout du nouveau système de répétition espacée plus précis
-
-        <br/><br/><h3>Nouveautés en 1.29</h3>
-
-        <br/>- Ajout du nouveau mode test personalisé pour les kanji
-        <br/>- Le test de composition de kanji a été retravaillé
     ]]></string>
 </resources>
