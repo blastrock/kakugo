@@ -15,7 +15,10 @@ import kotlinx.coroutines.Job
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
-import org.kaqui.model.*
+import org.kaqui.model.Certainty
+import org.kaqui.model.Database
+import org.kaqui.model.getQuestionText
+import org.kaqui.model.text
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 
@@ -41,7 +44,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     }
 
     private val testFragmentHolder
-        get() = (activity!! as TestFragmentHolder)
+        get() = (requireActivity() as TestFragmentHolder)
     private val testEngine
         get() = testFragmentHolder.testEngine
     private val testType
@@ -74,7 +77,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
-            testQuestionLayout.makeMainBlock(activity!!, this, 10) {
+            testQuestionLayout.makeMainBlock(requireActivity(), this, 10) {
                 verticalLayout {
                     drawCanvas = drawView().lparams(width = wrapContent, height = wrapContent, weight = 1.0f) {
                         gravity = Gravity.CENTER
@@ -101,7 +104,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
@@ -156,7 +159,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     }
 
     override fun refreshQuestion() {
-        currentStrokes = Database.getInstance(context!!).getStrokes(testEngine.currentQuestion.id)
+        currentStrokes = Database.getInstance(requireContext()).getStrokes(testEngine.currentQuestion.id)
 
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 

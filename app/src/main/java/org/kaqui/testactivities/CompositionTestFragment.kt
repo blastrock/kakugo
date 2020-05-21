@@ -27,7 +27,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
     }
 
     private val testFragmentHolder
-        get() = (activity!! as TestFragmentHolder)
+        get() = (requireActivity() as TestFragmentHolder)
     private val testEngine
         get() = testFragmentHolder.testEngine
     private val testType
@@ -48,7 +48,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
-            testQuestionLayout.makeMainBlock(activity!!, this, 10) {
+            testQuestionLayout.makeMainBlock(requireActivity(), this, 10) {
                 wrapInScrollView(this) {
                     verticalLayout {
                         repeat(answerCount / COLUMNS) {
@@ -92,7 +92,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
@@ -135,14 +135,14 @@ class CompositionTestFragment : Fragment(), TestFragment {
                         R.attr.backgroundDontKnow
 
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(context!!.getColorFromAttr(color))
+            button.backgroundTintList = ColorStateList.valueOf(requireContext().getColorFromAttr(color))
         }
     }
 
     private fun setButtonTint(button: ToggleButton, @AttrRes color: Int, checked: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             button.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            button.backgroundTintList = ColorStateList.valueOf(context!!.getColorFromAttr(color))
+            button.backgroundTintList = ColorStateList.valueOf(requireContext().getColorFromAttr(color))
         } else {
             button.isChecked = checked
         }

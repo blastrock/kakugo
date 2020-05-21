@@ -50,7 +50,7 @@ class MainSettingsActivity : BaseActivity() {
                 }
             }
             findPreference<Preference>("showChangelog")!!.setOnPreferenceClickListener {
-                context!!.alert(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT)) {
+                requireContext().alert(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT)) {
                     okButton { }
                 }.show()
                 true
@@ -69,12 +69,12 @@ class MainSettingsActivity : BaseActivity() {
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
             if (key == "dictionary_language")
-                LocaleManager.updateDictionaryLocale(context!!)
+                LocaleManager.updateDictionaryLocale(requireContext())
         }
 
         private fun pickCustomFont() {
             if (Build.VERSION.SDK_INT >= 23) {
-                if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
                     return
                 }
@@ -97,7 +97,7 @@ class MainSettingsActivity : BaseActivity() {
             if (resultCode != RESULT_OK || data == null)
                 return
 
-            setCustomFontPath(UriResolver.getFilePath(context!!, data.data!!))
+            setCustomFontPath(UriResolver.getFilePath(requireContext(), data.data!!))
         }
 
         @SuppressLint("ApplySharedPref")
@@ -105,7 +105,7 @@ class MainSettingsActivity : BaseActivity() {
             defaultSharedPreferences.edit()
                     .putString("custom_font", path)
                     .commit()
-            TypefaceManager.updateTypeface(context!!)
+            TypefaceManager.updateTypeface(requireContext())
         }
 
         companion object {

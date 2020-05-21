@@ -3,7 +3,10 @@ package org.kaqui
 import android.view.ViewManager
 import android.widget.LinearLayout
 import android.widget.TextView
-import org.jetbrains.anko.*
+import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.linearLayout
+import org.jetbrains.anko.textView
+import org.jetbrains.anko.wrapContent
 
 fun ViewManager.statsComponent() =
         linearLayout {

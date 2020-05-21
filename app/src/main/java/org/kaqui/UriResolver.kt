@@ -1,12 +1,12 @@
 package org.kaqui
 
-import android.provider.MediaStore
-import android.provider.DocumentsContract
 import android.content.ContentUris
-import android.os.Build
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.util.Log
 import org.jetbrains.anko.longToast
 

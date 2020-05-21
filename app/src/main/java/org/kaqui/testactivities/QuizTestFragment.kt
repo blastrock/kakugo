@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import android.widget.Button
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.AttrRes
+import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
@@ -31,7 +31,7 @@ class QuizTestFragment : Fragment(), TestFragment {
     private var answer: Int = NO_ANSWER
 
     private val testFragmentHolder
-        get() = (activity!! as TestFragmentHolder)
+        get() = (requireActivity() as TestFragmentHolder)
     private val testEngine
         get() = testFragmentHolder.testEngine
     private val testType
@@ -58,7 +58,7 @@ class QuizTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
-            testQuestionLayout.makeMainBlock(activity!!, this, questionMinSize) {
+            testQuestionLayout.makeMainBlock(requireActivity(), this, questionMinSize) {
                 wrapInScrollView(this) {
                     scrollView = this
                     verticalLayout {
@@ -80,7 +80,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                 answerText
                                             } else {
                                                 verticalLayout {
-                                                    separator(activity!!)
+                                                    separator(requireActivity())
                                                     linearLayout {
                                                         gravity = Gravity.CENTER_VERTICAL
 
@@ -140,7 +140,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                         answerText
                                                     } else {
                                                         verticalLayout {
-                                                            separator(activity!!)
+                                                            separator(requireActivity())
                                                             linearLayout {
                                                                 gravity = Gravity.CENTER_VERTICAL
 
@@ -186,7 +186,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                             }
                             else -> throw RuntimeException("unsupported test type for TestActivity")
                         }
-                        separator(activity!!)
+                        separator(requireActivity())
                         nextButton = button(R.string.next) {
                             setOnClickListener { onNextClicked() }
                         }.lparams(width = matchParent)
@@ -201,7 +201,7 @@ class QuizTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
@@ -236,7 +236,7 @@ class QuizTestFragment : Fragment(), TestFragment {
             if (singleButtonMode)
                 (answerViews[index] as Button).setExtTint(color)
             else
-                answerViews[index].backgroundColor = context!!.getColorFromAttr(color)
+                answerViews[index].backgroundColor = requireContext().getColorFromAttr(color)
         else
             if (singleButtonMode)
                 (answerViews[index] as Button).setExtTint(null)
@@ -261,7 +261,7 @@ class QuizTestFragment : Fragment(), TestFragment {
             nextButton.visibility = View.GONE
             dontKnowButton.visibility = View.VISIBLE
 
-            for (i in 0 until answerViews.size)
+            for (i in answerViews.indices)
                 setColor(i, null)
 
             for (answerButton in answerButtons) {
@@ -273,7 +273,7 @@ class QuizTestFragment : Fragment(), TestFragment {
     override fun refreshQuestion() {
         testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
 
-        for (i in 0 until answerTexts.size) {
+        for (i in answerTexts.indices) {
             answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType)
         }
         scrollView.scrollTo(0, 0)

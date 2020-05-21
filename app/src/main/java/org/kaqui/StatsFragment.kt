@@ -25,7 +25,7 @@ class StatsFragment : androidx.fragment.app.Fragment() {
     }
 
     fun updateStats(dbView: LearningDbView) {
-        updateStats(this.view!!, dbView.getStats(), showDisabled = showDisabled)
+        updateStats(this.requireView(), dbView.getStats(), showDisabled = showDisabled)
     }
 
     companion object {

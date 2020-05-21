@@ -103,10 +103,10 @@ class LearningDbView(
             ORDER BY s.last_correct ASC
             LIMIT $from, 1
         """, null).use { cursor ->
-            if (cursor.moveToFirst())
-                return cursor.getInt(0)
+            return if (cursor.moveToFirst())
+                cursor.getInt(0)
             else
-                return 0
+                0
         }
     }
 

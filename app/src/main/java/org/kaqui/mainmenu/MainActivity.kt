@@ -6,7 +6,10 @@ import android.util.Log
 import android.view.Gravity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.text.HtmlCompat
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.DatabaseUpdater

@@ -15,7 +15,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
@@ -23,8 +22,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
-import org.kaqui.model.*
-import org.kaqui.testactivities.*
+import org.kaqui.model.BAD_WEIGHT
+import org.kaqui.model.Database
+import org.kaqui.model.GOOD_WEIGHT
+import org.kaqui.model.TestType
+import org.kaqui.testactivities.DrawView
+import org.kaqui.testactivities.TestActivity
 import kotlin.math.pow
 
 fun getColorFromScore(score: Double) =
@@ -70,12 +73,6 @@ fun PathMeasure.getPoint(position: Float): PointF {
     val out = floatArrayOf(0f, 0f)
     getPosTan(position, out, null)
     return PointF(out[0], out[1])
-}
-
-fun Button.setExtTextColor(@ColorRes color: Int) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        textColor = ContextCompat.getColor(context, color)
-    }
 }
 
 fun Button.setExtTint(@AttrRes attrColor: Int?) {

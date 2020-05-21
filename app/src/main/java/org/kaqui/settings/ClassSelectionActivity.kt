@@ -21,7 +21,10 @@ import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
-import org.kaqui.model.*
+import org.kaqui.model.Classification
+import org.kaqui.model.Classifier
+import org.kaqui.model.Database
+import org.kaqui.model.LearningDbView
 import java.io.Serializable
 import kotlin.coroutines.CoroutineContext
 
@@ -44,8 +47,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         job = Job()
 
-        val classificationStr = PreferenceManager.getDefaultSharedPreferences(this).getString("item_classification", "jlpt")
-        val classification = when (classificationStr) {
+        val classification = when (val classificationStr = PreferenceManager.getDefaultSharedPreferences(this).getString("item_classification", "jlpt")) {
             "jlpt" -> Classification.JlptLevel
             "rtk" -> Classification.RtkIndexRange
             "rtk6" -> Classification.Rtk6IndexRange

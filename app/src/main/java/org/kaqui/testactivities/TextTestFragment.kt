@@ -17,6 +17,7 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.Kana
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
+import java.util.*
 
 class TextTestFragment : Fragment(), TestFragment {
     companion object {
@@ -38,7 +39,7 @@ class TextTestFragment : Fragment(), TestFragment {
     private lateinit var testQuestionLayout: TestQuestionLayout
 
     private val testFragmentHolder
-        get() = (activity!! as TestFragmentHolder)
+        get() = (requireActivity() as TestFragmentHolder)
     private val testEngine
         get() = testFragmentHolder.testEngine
     private val testType
@@ -55,14 +56,14 @@ class TextTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
-            testQuestionLayout.makeMainBlock(activity!!, this, questionMinSize, forceLandscape = true) {
+            testQuestionLayout.makeMainBlock(requireActivity(), this, questionMinSize, forceLandscape = true) {
                 wrapInScrollView(this) {
                     verticalLayout {
                         correctAnswer = textView {
                             textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                             visibility = View.GONE
                             textSize = 18f
-                            backgroundColor = context!!.getColorFromAttr(R.attr.correctAnswerBackground)
+                            backgroundColor = requireContext().getColorFromAttr(R.attr.correctAnswerBackground)
                         }.lparams(width = matchParent, height = wrapContent)
 
                         answerField = editText {
@@ -120,7 +121,7 @@ class TextTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(context!!, testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
             true
         }
 
@@ -148,7 +149,7 @@ class TextTestFragment : Fragment(), TestFragment {
     private fun refreshState() {
         if (answer != null) {
             answerField.setText(answer!!, TextView.BufferType.NORMAL)
-            answerField.backgroundColor = context!!.getColorFromAttr(R.attr.wrongAnswerBackground)
+            answerField.backgroundColor = requireContext().getColorFromAttr(R.attr.wrongAnswerBackground)
             answerField.keyListener = null
             correctAnswer.text = currentKana.romaji
             correctAnswer.visibility = View.VISIBLE
@@ -157,7 +158,7 @@ class TextTestFragment : Fragment(), TestFragment {
             nextButton.visibility = View.VISIBLE
         } else {
             answerField.text.clear()
-            val attrs = context!!.obtainStyledAttributes(intArrayOf(android.R.attr.editTextBackground))
+            val attrs = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.editTextBackground))
             answerField.background = attrs.getDrawable(0)
             attrs.recycle()
             answerField.inputType = defaultInputType
@@ -196,7 +197,7 @@ class TextTestFragment : Fragment(), TestFragment {
                 if (certainty == Certainty.DONTKNOW) {
                     Certainty.DONTKNOW
                 } else {
-                    val answer = answerField.text.trim().toString().toLowerCase()
+                    val answer = answerField.text.trim().toString().toLowerCase(Locale.ROOT)
 
                     if (answer.isBlank())
                         return true
