@@ -9,7 +9,7 @@ import org.jetbrains.anko.*
 import org.kaqui.R
 import org.kaqui.model.Database
 
-class SavedSelectionsAdapter(context: Context, var savedSelections: List<Database.KanjiSelection>) : BaseAdapter() {
+class SavedSelectionsAdapter(context: Context, var savedSelections: List<Database.SavedSelection>) : BaseAdapter() {
     private val ankoContext = AnkoContext.createReusable(context, this)
 
     private fun createView() = ankoContext.apply {
@@ -25,7 +25,7 @@ class SavedSelectionsAdapter(context: Context, var savedSelections: List<Databas
         return view
     }
 
-    override fun getItem(position: Int): Database.KanjiSelection {
+    override fun getItem(position: Int): Database.SavedSelection {
         return savedSelections[position]
     }
 

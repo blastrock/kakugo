@@ -130,7 +130,9 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 true
             }
             R.id.load_selection -> {
-                startActivity(Intent(this, SavedSelectionsActivity::class.java))
+                val intent = Intent(this, SavedSelectionsActivity::class.java)
+                intent.putExtra("org.kaqui.MODE", mode.name)
+                startActivity(intent)
                 true
             }
             R.id.import_kanji_selection -> {
@@ -171,7 +173,10 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
     }
 
     private fun saveSelection(name: String) {
-        Database.getInstance(this).saveKanjiSelectionTo(name)
+        when (mode) {
+            Mode.KANJI -> Database.getInstance(this).saveKanjiSelectionTo(name)
+            Mode.WORD -> Database.getInstance(this).saveWordSelectionTo(name)
+        }
         toast(getString(R.string.saved_selection, name))
     }
 

@@ -274,14 +274,14 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
-    data class KanjiSelection(
+    data class SavedSelection(
             val id: Long,
             val name: String,
             val count: Int
     )
 
-    fun listKanjiSelections(): List<KanjiSelection> {
-        val out = mutableListOf<KanjiSelection>()
+    fun listKanjiSelections(): List<SavedSelection> {
+        val out = mutableListOf<SavedSelection>()
         database.rawQuery("""
             SELECT id_selection, name, (
                 SELECT COUNT(*)
@@ -290,7 +290,7 @@ class Database private constructor(context: Context, private val database: SQLit
             FROM $KANJIS_SELECTION_TABLE_NAME s
             """, arrayOf()).use { cursor ->
             while (cursor.moveToNext())
-                out.add(KanjiSelection(cursor.getLong(0), cursor.getString(1), cursor.getInt(2)))
+                out.add(SavedSelection(cursor.getLong(0), cursor.getString(1), cursor.getInt(2)))
         }
         return out
     }
@@ -352,6 +352,78 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
+    fun listWordSelections(): List<SavedSelection> {
+        val out = mutableListOf<SavedSelection>()
+        database.rawQuery("""
+            SELECT id_selection, name, (
+                SELECT COUNT(*)
+                FROM $WORDS_ITEM_SELECTION_TABLE_NAME ss WHERE ss.id_selection = s.id_selection
+            )
+            FROM $WORDS_SELECTION_TABLE_NAME s
+            """, arrayOf()).use { cursor ->
+            while (cursor.moveToNext())
+                out.add(SavedSelection(cursor.getLong(0), cursor.getString(1), cursor.getInt(2)))
+        }
+        return out
+    }
+
+    fun saveWordSelectionTo(name: String) {
+        database.beginTransaction()
+        try {
+            val idSelection = database.query(WORDS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
+                if (cursor.count == 0) {
+                    val cv = ContentValues()
+                    cv.put("name", name)
+                    return@use database.insert(WORDS_SELECTION_TABLE_NAME, null, cv)
+                } else {
+                    cursor.moveToFirst()
+                    return@use cursor.getInt(0)
+                }
+            }
+            database.delete(WORDS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.execSQL("""
+            INSERT INTO $WORDS_ITEM_SELECTION_TABLE_NAME (id_selection, id_word)
+            SELECT ?, id FROM $WORDS_TABLE_NAME WHERE enabled = 1
+            """, arrayOf(idSelection.toString()))
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    fun restoreWordSelectionFrom(idSelection: Long) {
+        database.beginTransaction()
+        try {
+            database.execSQL("""
+                UPDATE $WORDS_TABLE_NAME
+                SET enabled = 0
+                """)
+            database.execSQL("""
+                UPDATE $WORDS_TABLE_NAME
+                SET enabled = 1
+                WHERE id IN (
+                    SELECT id_word
+                    FROM $WORDS_ITEM_SELECTION_TABLE_NAME
+                    WHERE id_selection = ?
+                )
+                """, arrayOf(idSelection.toString()))
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    fun deleteWordSelection(idSelection: Long) {
+        database.beginTransaction()
+        try {
+            database.delete(WORDS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.delete(WORDS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
     companion object {
         private const val TAG = "Database"
 
@@ -369,6 +441,9 @@ class Database private constructor(context: Context, private val database: SQLit
 
         const val KANJIS_SELECTION_TABLE_NAME = "kanjis_selection"
         const val KANJIS_ITEM_SELECTION_TABLE_NAME = "kanjis_item_selection"
+
+        const val WORDS_SELECTION_TABLE_NAME = "word_selection"
+        const val WORDS_ITEM_SELECTION_TABLE_NAME = "word_item_selection"
 
         const val WORDS_TABLE_NAME = "words"
 
