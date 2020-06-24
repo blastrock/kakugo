@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteException
 import android.util.Log
 
 class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: String) {
-    data class Dump(val enabledKanas: List<Int>, val enabledKanjis: List<Int>, val enabledWords: List<Pair<String, String>>, val scores: List<DumpScore>, val wordScores: List<DumpWordScore>, val kanjiSelections: Map<String, List<Int>>)
+    data class Dump(val enabledKanas: List<Int>, val enabledKanjis: List<Int>, val enabledWords: List<Pair<String, String>>, val scores: List<DumpScore>, val wordScores: List<DumpWordScore>, val kanjiSelections: Map<String, List<Int>>, val wordSelections: Map<String, List<Int>>)
     data class DumpScore(val id: Int, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
     data class DumpWordScore(val item: String, val reading: String, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
 
@@ -258,7 +258,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.query(Database.KANJIS_TABLE_NAME, arrayOf("kanji", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0 AND radical = 0", null, null, null, null).use { cursor ->
             dumpScoresV16(scores, enabledKanjis, this::convertKanjiScore, cursor)
         }
-        return Dump(enabledKanas, enabledKanjis, listOf(), scores, listOf(), mapOf())
+        return Dump(enabledKanas, enabledKanjis, listOf(), scores, listOf(), mapOf(), mapOf())
     }
 
     private fun dumpUserDataV12(): Dump {
@@ -279,7 +279,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
             dumpWordScores(wordScores, enabledWords, cursor)
         }
-        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, mapOf())
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, mapOf(), mapOf())
     }
 
     private fun dumpUserDataV16(): Dump {
@@ -310,7 +310,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
             dumpWordScores(wordScores, enabledWords, cursor)
         }
-        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections)
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf())
     }
 
     private fun dumpUserDataV18(): Dump {
@@ -340,7 +340,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
             dumpWordScores(wordScores, enabledWords, cursor)
         }
-        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections)
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf())
     }
 
     private fun dumpUserData(): Dump {
@@ -385,7 +385,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             while (cursor.moveToNext())
                 wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
         }
-        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections)
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf())
     }
 
     private fun enableOnly(tableName: String, toEnable: List<Int>) {
@@ -466,6 +466,21 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         cv.put("id_selection", selectionId)
                         cv.put("id_kanji", item)
                         database.insertOrThrow(Database.KANJIS_ITEM_SELECTION_TABLE_NAME, null, cv)
+                    }
+                }
+            }
+            run {
+                database.delete(Database.WORDS_ITEM_SELECTION_TABLE_NAME, null, null)
+                database.delete(Database.WORDS_SELECTION_TABLE_NAME, null, null)
+                for ((selectionName, selectionItems) in data.wordSelections) {
+                    val cv = ContentValues()
+                    cv.put("name", selectionName)
+                    val selectionId = database.insertOrThrow(Database.WORDS_SELECTION_TABLE_NAME, null, cv)
+                    for (item in selectionItems) {
+                        val cv = ContentValues()
+                        cv.put("id_selection", selectionId)
+                        cv.put("id_word", item)
+                        database.insertOrThrow(Database.WORDS_ITEM_SELECTION_TABLE_NAME, null, cv)
                     }
                 }
             }
