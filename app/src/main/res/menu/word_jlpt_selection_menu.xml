@@ -12,4 +12,10 @@
         app:showAsAction="always"
         android:title="@string/autoselect_from_kanji"
         android:titleCondensed="@string/autoselect_from_kanji_short"/>
+    <item
+        android:id="@+id/save_selection"
+        android:title="@string/save_current_selection" />
+    <item
+        android:id="@+id/load_selection"
+        android:title="@string/load_selection" />
 </menu>

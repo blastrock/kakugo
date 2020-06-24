@@ -14,24 +14,39 @@ import org.kaqui.model.Database
 
 class SavedSelectionsActivity: BaseActivity() {
     private lateinit var listView: ListView
-    private var selectedItem: Database.KanjiSelection? = null
+    private var selectedItem: Database.SavedSelection? = null
+
+    private lateinit var mode: Mode
+
+    enum class Mode {
+        KANJI,
+        WORD,
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        mode = Mode.valueOf(intent.getStringExtra("org.kaqui.MODE"))
         val db = Database.getInstance(this)
         listView = listView {
-            adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, db.listKanjiSelections())
+            adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, when (mode){
+                Mode.KANJI -> db.listKanjiSelections()
+                Mode.WORD -> db.listWordSelections()
+            })
             onItemClickListener = AdapterView.OnItemClickListener(this@SavedSelectionsActivity::onListItemClick)
         }
         registerForContextMenu(listView)
     }
 
     private fun onListItemClick(l: AdapterView<*>, v: View, position: Int, id: Long) {
-        val item = l.adapter.getItem(position) as Database.KanjiSelection
+        val item = l.adapter.getItem(position) as Database.SavedSelection
 
         val db = Database.getInstance(this)
-        db.restoreKanjiSelectionFrom(id)
+
+        when (mode) {
+            Mode.KANJI -> db.restoreKanjiSelectionFrom(id)
+            Mode.WORD -> db.restoreWordSelectionFrom(id)
+        }
 
         toast(getString(R.string.loaded_selection, item.name))
 
@@ -42,7 +57,7 @@ class SavedSelectionsActivity: BaseActivity() {
         super.onCreateContextMenu(menu, v, menuInfo)
 
         val acmi = menuInfo as AdapterView.AdapterContextMenuInfo
-        selectedItem = listView.adapter.getItem(acmi.position) as Database.KanjiSelection
+        selectedItem = listView.adapter.getItem(acmi.position) as Database.SavedSelection
 
         val inflater = menuInflater
         inflater.inflate(R.menu.selection_menu, menu)
@@ -52,9 +67,15 @@ class SavedSelectionsActivity: BaseActivity() {
         val db = Database.getInstance(this)
         return when (item.itemId) {
             R.id.delete -> {
-                db.deleteKanjiSelection(selectedItem!!.id)
+                when (mode) {
+                    Mode.KANJI -> db.deleteKanjiSelection(selectedItem!!.id)
+                    Mode.WORD -> db.deleteWordSelection(selectedItem!!.id)
+                }
                 val adapter = (listView.adapter as SavedSelectionsAdapter)
-                adapter.savedSelections = db.listKanjiSelections()
+                adapter.savedSelections = when (mode) {
+                    Mode.KANJI -> db.listKanjiSelections()
+                    Mode.WORD -> db.listWordSelections()
+                }
                 adapter.notifyDataSetChanged()
                 toast(getString(R.string.deleted_selection, selectedItem!!.name))
                 true

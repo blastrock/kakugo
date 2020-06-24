@@ -60,6 +60,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "name TEXT NOT NULL"
                         + ")")
         database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} ("
+                        + "id_selection INTEGER NOT NULL,"
+                        + "id_word INTEGER NOT NULL REFERENCES words(id),"
+                        + "PRIMARY KEY(id_selection, id_word)"
+                        + ")")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.WORDS_SELECTION_TABLE_NAME} ("
+                        + "id_selection INTEGER PRIMARY KEY,"
+                        + "name TEXT NOT NULL"
+                        + ")")
+        database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.WORDS_TABLE_NAME} ("
                         + "id INTEGER PRIMARY KEY,"
                         + "item TEXT NOT NULL,"
@@ -118,6 +129,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             database.execSQL("DROP TABLE IF EXISTS main.${Database.ITEM_STROKES_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_ITEM_SELECTION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_SELECTION_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.WORDS_ITEM_SELECTION_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.WORDS_SELECTION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_COMPOSITION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANAS_TABLE_NAME}")
