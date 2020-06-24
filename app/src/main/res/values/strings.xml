@@ -89,6 +89,8 @@
     <string name="saved_selection">Current selection saved as \"%1$s\"</string>
     <string name="answerDone">Done</string>
     <string name="enter_name_of_selection">Enter the name of this selection</string>
+    <string name="override_selection_title">Automatically populate vocabulary</string>
+    <string name="override_selection_msg">Do you want to select words based on your chosen kanji?\nThis will override your current selection.</string>
     <string name="could_not_import_file">Could not import file: %1$s</string>
     <string name="import_kanji_help">This feature allows importing a kanji selection from a file. The file must contain all the kanji to be imported, on a single line, without space or any separator.</string>
     <string name="additional_kanji">Additional kanji</string>

@@ -133,19 +133,26 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 true
             }
             R.id.autoselect -> {
-                launch {
-                    val progressDialog = ProgressDialog(this@ClassSelectionActivity)
-                    progressDialog.setMessage(getString(R.string.autoselecting_words))
-                    progressDialog.setCancelable(false)
-                    progressDialog.show()
+                alert {
+                    title = getString(R.string.override_selection_title)
+                    message = getString(R.string.override_selection_msg)
+                    positiveButton(android.R.string.ok) {
+                        launch {
+                            val progressDialog = ProgressDialog(this@ClassSelectionActivity)
+                            progressDialog.setMessage(getString(R.string.autoselecting_words))
+                            progressDialog.setCancelable(false)
+                            progressDialog.show()
 
-                    withContext(Dispatchers.Default) { Database.getInstance(this@ClassSelectionActivity).autoSelectWords() }
+                            withContext(Dispatchers.Default) { Database.getInstance(this@ClassSelectionActivity).autoSelectWords() }
 
-                    adapter.notifyDataSetChanged()
-                    statsFragment.updateStats(dbView)
+                            adapter.notifyDataSetChanged()
+                            statsFragment.updateStats(dbView)
 
-                    progressDialog.dismiss()
-                }
+                            progressDialog.dismiss()
+                        }
+                    }
+                    negativeButton(android.R.string.cancel) {}
+                }.show()
                 return true
             }
             else ->
