@@ -6,6 +6,7 @@ import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ClassSelectionActivity
+import org.kaqui.settings.SelectionMode
 import java.io.Serializable
 
 class KanjiMenuActivity : BaseActivity() {
@@ -61,7 +62,7 @@ class KanjiMenuActivity : BaseActivity() {
                         }
                         separator(this@KanjiMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.kanji_selection) {
-                            setOnClickListener { startActivity<ClassSelectionActivity>("mode" to ClassSelectionActivity.Mode.KANJI as Serializable) }
+                            setOnClickListener { startActivity<ClassSelectionActivity>("mode" to SelectionMode.KANJI as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

@@ -12,26 +12,21 @@ import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.model.Database
 
-class SavedSelectionsActivity: BaseActivity() {
+class SavedSelectionsActivity : BaseActivity() {
     private lateinit var listView: ListView
     private var selectedItem: Database.SavedSelection? = null
 
-    private lateinit var mode: Mode
-
-    enum class Mode {
-        KANJI,
-        WORD,
-    }
+    private lateinit var mode: SelectionMode
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mode = Mode.valueOf(intent.getStringExtra("org.kaqui.MODE"))
+        mode = intent.getSerializableExtra("mode") as SelectionMode
         val db = Database.getInstance(this)
         listView = listView {
-            adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, when (mode){
-                Mode.KANJI -> db.listKanjiSelections()
-                Mode.WORD -> db.listWordSelections()
+            adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, when (mode) {
+                SelectionMode.KANJI -> db.listKanjiSelections()
+                SelectionMode.WORD -> db.listWordSelections()
             })
             onItemClickListener = AdapterView.OnItemClickListener(this@SavedSelectionsActivity::onListItemClick)
         }
@@ -44,8 +39,8 @@ class SavedSelectionsActivity: BaseActivity() {
         val db = Database.getInstance(this)
 
         when (mode) {
-            Mode.KANJI -> db.restoreKanjiSelectionFrom(id)
-            Mode.WORD -> db.restoreWordSelectionFrom(id)
+            SelectionMode.KANJI -> db.restoreKanjiSelectionFrom(id)
+            SelectionMode.WORD -> db.restoreWordSelectionFrom(id)
         }
 
         toast(getString(R.string.loaded_selection, item.name))
@@ -68,13 +63,13 @@ class SavedSelectionsActivity: BaseActivity() {
         return when (item.itemId) {
             R.id.delete -> {
                 when (mode) {
-                    Mode.KANJI -> db.deleteKanjiSelection(selectedItem!!.id)
-                    Mode.WORD -> db.deleteWordSelection(selectedItem!!.id)
+                    SelectionMode.KANJI -> db.deleteKanjiSelection(selectedItem!!.id)
+                    SelectionMode.WORD -> db.deleteWordSelection(selectedItem!!.id)
                 }
                 val adapter = (listView.adapter as SavedSelectionsAdapter)
                 adapter.savedSelections = when (mode) {
-                    Mode.KANJI -> db.listKanjiSelections()
-                    Mode.WORD -> db.listWordSelections()
+                    SelectionMode.KANJI -> db.listKanjiSelections()
+                    SelectionMode.WORD -> db.listWordSelections()
                 }
                 adapter.notifyDataSetChanged()
                 toast(getString(R.string.deleted_selection, selectedItem!!.name))

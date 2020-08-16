@@ -6,6 +6,7 @@ import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ClassSelectionActivity
+import org.kaqui.settings.SelectionMode
 import java.io.Serializable
 
 class VocabularyMenuActivity : BaseActivity() {
@@ -46,7 +47,7 @@ class VocabularyMenuActivity : BaseActivity() {
                         }
                         separator(this@VocabularyMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.word_selection) {
-                            setOnClickListener { startActivity<ClassSelectionActivity>("mode" to ClassSelectionActivity.Mode.WORD as Serializable) }
+                            setOnClickListener { startActivity<ClassSelectionActivity>("mode" to SelectionMode.WORD as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

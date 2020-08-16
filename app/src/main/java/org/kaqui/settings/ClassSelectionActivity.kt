@@ -31,17 +31,12 @@ import kotlin.coroutines.CoroutineContext
 class ClassSelectionActivity : BaseActivity(), CoroutineScope {
     private lateinit var dbView: LearningDbView
     private lateinit var statsFragment: StatsFragment
-    private lateinit var mode: Mode
+    private lateinit var mode: SelectionMode
     private lateinit var adapter: ClassSelectionAdapter
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
-
-    enum class Mode {
-        KANJI,
-        WORD,
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,11 +49,11 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             else -> throw RuntimeException("unknown kanji classification: $classificationStr")
         }
 
-        mode = intent.getSerializableExtra("mode") as Mode
+        mode = intent.getSerializableExtra("mode") as SelectionMode
 
         dbView = when (mode) {
-            Mode.KANJI -> Database.getInstance(this).getKanjiView()
-            Mode.WORD -> Database.getInstance(this).getWordView()
+            SelectionMode.KANJI -> Database.getInstance(this).getKanjiView()
+            SelectionMode.WORD -> Database.getInstance(this).getWordView()
         }
 
         verticalLayout {
@@ -95,8 +90,8 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(when (mode) {
-            Mode.KANJI -> R.menu.kanji_jlpt_selection_menu
-            Mode.WORD -> R.menu.word_jlpt_selection_menu
+            SelectionMode.KANJI -> R.menu.kanji_jlpt_selection_menu
+            SelectionMode.WORD -> R.menu.word_jlpt_selection_menu
         }, menu)
         return true
     }
@@ -106,8 +101,8 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             R.id.search -> {
                 startActivity(Intent(this, ItemSearchActivity::class.java)
                         .putExtra("mode", when (mode) {
-                            Mode.KANJI -> ItemSearchActivity.Mode.KANJI
-                            Mode.WORD -> ItemSearchActivity.Mode.WORD
+                            SelectionMode.KANJI -> ItemSearchActivity.Mode.KANJI
+                            SelectionMode.WORD -> ItemSearchActivity.Mode.WORD
                         }))
                 true
             }
@@ -130,9 +125,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 true
             }
             R.id.load_selection -> {
-                val intent = Intent(this, SavedSelectionsActivity::class.java)
-                intent.putExtra("org.kaqui.MODE", mode.name)
-                startActivity(intent)
+                startActivity<SavedSelectionsActivity>("mode" to mode as Serializable)
                 true
             }
             R.id.import_kanji_selection -> {
@@ -166,16 +159,16 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
         startActivity(Intent(this, ItemSelectionActivity::class.java)
                 .putExtra("mode", when (mode) {
-                    Mode.KANJI -> ItemSelectionActivity.Mode.KANJI
-                    Mode.WORD -> ItemSelectionActivity.Mode.WORD
+                    SelectionMode.KANJI -> ItemSelectionActivity.Mode.KANJI
+                    SelectionMode.WORD -> ItemSelectionActivity.Mode.WORD
                 } as Serializable)
                 .putExtra("classifier", classifier))
     }
 
     private fun saveSelection(name: String) {
         when (mode) {
-            Mode.KANJI -> Database.getInstance(this).saveKanjiSelectionTo(name)
-            Mode.WORD -> Database.getInstance(this).saveWordSelectionTo(name)
+            SelectionMode.KANJI -> Database.getInstance(this).saveKanjiSelectionTo(name)
+            SelectionMode.WORD -> Database.getInstance(this).saveWordSelectionTo(name)
         }
         toast(getString(R.string.saved_selection, name))
     }
