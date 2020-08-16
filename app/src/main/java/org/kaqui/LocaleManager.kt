@@ -12,7 +12,7 @@ class LocaleManager {
             val forcedLocale = PreferenceManager.getDefaultSharedPreferences(context).getString("dictionary_language", "")!!
             val systemLocale =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                        context.resources.configuration.locales.getFirstMatch(arrayOf("en", "fr"))?.language
+                        context.resources.configuration.locales.getFirstMatch(arrayOf("en", "fr", "es"))?.language
                     else
                         context.resources.configuration.locale.language
             val finalLocale =
@@ -22,10 +22,10 @@ class LocaleManager {
                         systemLocale
 
             dictionaryLocale =
-                    if (finalLocale == "fr")
-                        "fr"
-                    else
-                        "en"
+                    when (finalLocale) {
+                        "fr", "es" -> finalLocale
+                        else -> "en"
+                    }
         }
 
         fun getDictionaryLocale(): String {

@@ -3,11 +3,13 @@
     <string-array name="language_strings">
         <item>@string/lang_system_default</item>
         <item>@string/lang_english</item>
+        <item>@string/lang_spanish</item>
         <item>@string/lang_french</item>
     </string-array>
     <string-array name="language_ids">
         <item></item>
         <item>en</item>
+        <item>es</item>
         <item>fr</item>
     </string-array>
 
