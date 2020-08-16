@@ -136,7 +136,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 alert {
                     title = getString(R.string.override_selection_title)
                     message = getString(R.string.override_selection_msg)
-                    positiveButton(android.R.string.ok) {
+                    positiveButton(android.R.string.yes) {
                         launch {
                             val progressDialog = ProgressDialog(this@ClassSelectionActivity)
                             progressDialog.setMessage(getString(R.string.autoselecting_words))
@@ -151,7 +151,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                             progressDialog.dismiss()
                         }
                     }
-                    negativeButton(android.R.string.cancel) {}
+                    negativeButton(android.R.string.no) {}
                 }.show()
                 return true
             }
