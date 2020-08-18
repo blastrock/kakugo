@@ -144,10 +144,11 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.31?</h3>
+        <h3>What\'s new in 1.32?</h3>
 
-        <br/>- Custom test settings are now saved
+        <br/>- Added Spanish translation and dictionaries
+        <br/>- It is now possible to save word selections
         <!-- -->
-        <br/>- Added new more accurate spaced repetition system
+        <br/>- Custom test settings are now saved
     ]]></string>
 </resources>

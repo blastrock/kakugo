@@ -117,7 +117,7 @@
 
         <p>Es de código abierto y está disponible en <a href="https://github.com/blastrock/kakugo/">github</a> sous la licence GPLv3.</p>
 
-        <p>El diccionario Kanji se basa en en <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
+        <p>El diccionario Kanji se basa en <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
         <p>El diccionario de vocabulario se basa en <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
         <p>El diccionario de vocabulario es una similitud de los datos de los kanji cortesía de <a href="http://lars.yencken.org/datasets/phd/">un estudio del Dr. Lars Yencken</a>.</p>
         <p>Los datos de composición y dibujo de los kanji provienen de <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
@@ -128,11 +128,4 @@
     ]]></string>
 
     <string name="changelog">Lista de cambios</string>
-    <string name="changelog_contents"><![CDATA[
-        <h3>Novedades en 1.31</h3>
-
-        <br/>- Las pruebas personalizadas ahoran se guardan
-        <!-- -->
-        <br/>- Añadido un nuevo sistema de repetición espaciada más preciso
-    ]]></string>
 </resources>

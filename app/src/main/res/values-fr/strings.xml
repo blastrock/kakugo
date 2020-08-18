@@ -130,10 +130,11 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.31</h3>
+        <h3>Nouveautés en 1.32</h3>
 
-        <br/>- Les paramètres des tests personalisés sont maintenant sauvegardés
+        <br/>- Ajout de la traduction et des dictionnaires espagnols
+        <br/>- Il est maintenant possible de sauvegarder une sélection de vocabulaire
         <!-- -->
-        <br/>- Ajout du nouveau système de répétition espacée plus précis
+        <br/>- Les paramètres des tests personalisés sont maintenant sauvegardés
     ]]></string>
 </resources>
