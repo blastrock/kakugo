@@ -15,7 +15,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
     private fun createDatabase() {
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.KANJIS_TABLE_NAME} ("
-                        + "id INTEGER PRIMARY KEY NOT NULL,"
+                        + "id INTEGER NOT NULL PRIMARY KEY,"
                         + "on_readings TEXT NOT NULL DEFAULT '',"
                         + "kun_readings TEXT NOT NULL DEFAULT '',"
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
@@ -30,9 +30,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.ITEM_STROKES_TABLE_NAME} ("
-                        + "id INTEGER PRIMARY KEY,"
+                        + "id INTEGER NOT NULL PRIMARY KEY,"
                         + "id_item INTEGER NOT NULL,"
-                        + "ordinal INT NOT NULL,"
+                        + "ordinal INTEGER NOT NULL,"
                         + "path TEXT NOT NULL,"
                         + "UNIQUE(id_item, ordinal)"
                         + ")")
@@ -56,7 +56,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.KANJIS_SELECTION_TABLE_NAME} ("
-                        + "id_selection INTEGER PRIMARY KEY,"
+                        + "id_selection INTEGER NOT NULL PRIMARY KEY,"
                         + "name TEXT NOT NULL"
                         + ")")
         database.execSQL(
@@ -72,13 +72,13 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + ")")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.WORDS_TABLE_NAME} ("
-                        + "id INTEGER PRIMARY KEY,"
+                        + "id INTEGER NOT NULL PRIMARY KEY,"
                         + "item TEXT NOT NULL,"
                         + "reading TEXT NOT NULL DEFAULT '',"
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
                         + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "meanings_es TEXT NOT NULL DEFAULT '',"
-                        + "kana_alone INT NOT NULL DEFAULT 0,"
+                        + "kana_alone INTEGER NOT NULL DEFAULT 0,"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "rtk_index INTEGER NOT NULL DEFAULT 0,"
                         + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
@@ -89,7 +89,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.KANAS_TABLE_NAME} ("
-                        + "id INTEGER PRIMARY KEY NOT NULL,"
+                        + "id INTEGER NOT NULL PRIMARY KEY,"
                         + "romaji TEXT NOT NULL DEFAULT '',"
                         + "unique_romaji TEXT NOT NULL DEFAULT '',"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
@@ -97,7 +97,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.ITEM_SCORES_TABLE_NAME} ("
-                        + "id INTEGER,"
+                        + "id INTEGER NOT NULL,"
                         + "type INTEGER NOT NULL,"
                         + "short_score FLOAT NOT NULL,"
                         + "long_score FLOAT NOT NULL,"
