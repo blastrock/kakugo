@@ -123,8 +123,7 @@ class LearningDbView(
         cv.put("type", knowledgeType!!.value)
         cv.put("short_score", scoreUpdate.shortScore)
         cv.put("long_score", scoreUpdate.longScore)
-        if (scoreUpdate.lastAsked != null)
-            cv.put("last_correct", scoreUpdate.lastAsked)
+        cv.put("last_correct", scoreUpdate.lastAsked)
         database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
     }
 

@@ -48,8 +48,8 @@
                 android:layout_alignEnd="@+id/item_text"
                 android:layout_alignParentEnd="false"
                 android:contentDescription="@string/info_button"
-                android:tint="@color/colorPrimary"
                 android:visibility="invisible"
+                app:tint="@color/colorPrimary"
                 app:srcCompat="@android:drawable/ic_dialog_info"
                 tools:ignore="SmallSp" />
         </RelativeLayout>
