@@ -104,6 +104,41 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "last_correct INTEGER NOT NULL,"
                         + "PRIMARY KEY (id, type)"
                         + ")")
+
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.STATS_SNAPSHOT_TABLE_NAME} ("
+                        + "item_type INTEGER NOT NULL,"
+                        + "knowledge_type INTEGER NOT NULL,"
+                        + "time INTEGER NOT NULL," // timestamp rounded to day in UTC
+                        + "good_count INTEGER NOT NULL,"
+                        + "meh_count INTEGER NOT NULL,"
+                        + "bad_count INTEGER NOT NULL,"
+                        + "long_score_partition TEXT NOT NULL,"
+                        + "long_score_sum FLOAT NOT NULL,"
+                        + "PRIMARY KEY (item_type, knowledge_type, time)"
+                        + ")")
+
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.SESSIONS_TABLE_NAME} ("
+                        + "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                        + "item_type INTEGER NOT NULL,"
+                        + "test_types TEXT NOT NULL," // separated by ','
+                        + "start_time INTEGER NOT NULL,"
+                        + "end_time INTEGER,"
+                        + "item_count INTEGER,"
+                        + "correct_count INTEGER"
+                        + ")")
+
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.SESSION_ITEMS_TABLE_NAME} ("
+                        + "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                        + "id_session INTEGER NOT NULL,"
+                        + "test_type INTEGER NOT NULL,"
+                        + "id_item_question INTEGER NOT NULL,"
+                        + "id_item_wrong INTEGER,"
+                        + "certainty INTEGER NOT NULL,"
+                        + "time INTEGER NOT NULL"
+                        + ")")
     }
 
     private fun doUpgrade() {
@@ -142,6 +177,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             database.execSQL("DROP TABLE IF EXISTS main.katakana_strokes")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.WORDS_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.ITEM_SCORES_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.STATS_SNAPSHOT_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.SESSIONS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.SESSION_ITEMS_TABLE_NAME}")
             createDatabase()
 
             replaceDict()
@@ -495,7 +533,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 21
+        const val DATABASE_VERSION = 22
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {

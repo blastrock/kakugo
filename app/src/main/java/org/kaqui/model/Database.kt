@@ -438,6 +438,9 @@ class Database private constructor(context: Context, private val database: SQLit
         const val ITEM_STROKES_TABLE_NAME = "item_strokes"
 
         const val ITEM_SCORES_TABLE_NAME = "item_scores"
+        const val SESSIONS_TABLE_NAME = "sessions"
+        const val SESSION_ITEMS_TABLE_NAME = "session_items"
+        const val STATS_SNAPSHOT_TABLE_NAME = "stats_snapshots"
 
         const val KANJIS_SELECTION_TABLE_NAME = "kanjis_selection"
         const val KANJIS_ITEM_SELECTION_TABLE_NAME = "kanjis_item_selection"
