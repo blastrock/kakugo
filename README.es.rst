@@ -27,7 +27,7 @@ Las características incluyen:
 - Sesiones ilimitadas de preguntas y respuestas que le permiten tomar una prueba en cualquier momento, por el tiempo que quiera, útil para pasar eficientemente el tiempo de viaje.
 - Mostrar semejanza de aspecto kanji en las respuestas para enseñarte las diferencias
 - Kanji y su vocabulario clasificado por el nivel de JLPT
-- Al hacer clic en kanji se abre `aedict3<https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (un diccionario de japonés no gratuito) o `jisho.org <https://jisho.org>`_
+- Al hacer clic en kanji se abre `aedict3 <https://play.google.com/store/apps/details?id=sk.baka.aedict3>`_ (un diccionario de japonés no libre) o `jisho.org <https://jisho.org>`_
 - Soporte optimizado para tabletas
 - Código abierto
 - Sin anuncios
