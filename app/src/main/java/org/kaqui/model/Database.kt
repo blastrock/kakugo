@@ -4,8 +4,13 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Path
+import android.util.Log
+import androidx.core.database.sqlite.transaction
 import org.kaqui.LocaleManager
 import org.kaqui.asUnicodeCodePoint
+import org.kaqui.roundToPreviousDay
+import java.util.*
+import kotlin.collections.HashSet
 
 class Database private constructor(context: Context, private val database: SQLiteDatabase) {
     private val locale: String get() = LocaleManager.getDictionaryLocale()
@@ -418,6 +423,110 @@ class Database private constructor(context: Context, private val database: SQLit
         try {
             database.delete(WORDS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
             database.delete(WORDS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    private fun takeLastSnapshot(testTypes: List<TestType>) {
+        database.beginTransaction()
+        try {
+            val byItemAndKnowledge = testTypes.map { Pair(getItemType(it), getKnowledgeType(it)) }
+            byItemAndKnowledge.forEach { (itemType, knowledgeType) ->
+                val view = when (itemType) {
+                    ItemType.Hiragana -> getHiraganaView(knowledgeType)
+                    ItemType.Katakana -> getKatakanaView(knowledgeType)
+                    ItemType.Kanji -> getKanjiView(knowledgeType)
+                    ItemType.Word -> getWordView(knowledgeType)
+                }
+                val stats = view.getLongStats(knowledgeType)
+                val testTypesStr = itemAndKnowledgeTypeToTestType(itemType, knowledgeType).joinToString(",") { it.value.toString() }
+                // Get the last time the corresponding stats are updated so that we can make a snapshot for that date
+                var lastQuestion = database.query(SESSION_ITEMS_TABLE_NAME, arrayOf("MAX(time)"), "test_type IN ($testTypesStr)", null, null, null, null).use { cursor ->
+                    cursor.moveToFirst()
+                    cursor.getLong(0)
+                }
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                // If this is the first run, just take today
+                if (lastQuestion != 0L)
+                    calendar.timeInMillis = lastQuestion * 1000
+                calendar.roundToPreviousDay()
+                lastQuestion = calendar.timeInMillis / 1000
+
+                Log.d(TAG, "Taking snapshot for $itemType $knowledgeType, last question was $lastQuestion")
+
+                val cv = ContentValues()
+                cv.put("item_type", itemType.value)
+                cv.put("knowledge_type", knowledgeType.value)
+                cv.put("time", lastQuestion / 3600 / 24 * 3600 * 24)
+                cv.put("good_count", stats.good)
+                cv.put("meh_count", stats.meh)
+                cv.put("bad_count", stats.bad)
+                cv.put("long_score_sum", stats.longScoreSum)
+                cv.put("long_score_partition", stats.longPartition.joinToString(","))
+                // If multiple snapshots were taken for the same day, the last one is the most up to date, so we replace
+                database.insertWithOnConflict(STATS_SNAPSHOT_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    fun initSession(itemType: ItemType, testTypes: List<TestType>): Long {
+        takeLastSnapshot(testTypes)
+
+        val cv = ContentValues()
+        cv.put("item_type", itemType.value)
+        cv.put("test_types", testTypes.joinToString(",") { it.value.toString() })
+        cv.put("start_time", Calendar.getInstance().timeInMillis / 1000)
+        return database.insertOrThrow(SESSIONS_TABLE_NAME, null, cv)
+    }
+
+    private fun commitAllSessions() {
+        // Delete empty sessions
+        val emptySessions = mutableListOf<Long>()
+        database.rawQuery("""
+            SELECT s.id
+            FROM $SESSIONS_TABLE_NAME s
+            LEFT JOIN $SESSION_ITEMS_TABLE_NAME si ON si.id_session = s.id
+            WHERE si.id_session IS NULL
+        """, arrayOf()).use { cursor ->
+            while (cursor.moveToNext())
+                emptySessions.add(cursor.getLong(0))
+        }
+        database.delete(SESSIONS_TABLE_NAME, "id in (${emptySessions.joinToString(",")})", null)
+
+        // Update end_time and item_count for all not committed sessions
+        database.beginTransaction()
+        try {
+            val openSessions = mutableListOf<Long>()
+            database.query(SESSIONS_TABLE_NAME, arrayOf("id"), "end_time IS NULL", null, null, null, null).use { cursor ->
+                while (cursor.moveToNext())
+                    openSessions.add(cursor.getLong(0))
+            }
+
+            data class Session(val id: Long, val totalCount: Int, val correctCount: Int, val endTime: Long)
+
+            val sessions = mutableListOf<Session>()
+            database.query(
+                    SESSION_ITEMS_TABLE_NAME,
+                    arrayOf("id_session, COUNT(*), MAX(time), SUM(CASE WHEN certainty != ${Certainty.DONTKNOW.value} THEN 1 ELSE 0 END)"),
+                    "id_session IN (${openSessions.joinToString(",")})",
+                    null,
+                    "id_session", null, null).use { cursor ->
+                while (cursor.moveToNext())
+                    sessions.add(Session(cursor.getLong(0), cursor.getInt(1), cursor.getInt(3), cursor.getLong(2)))
+            }
+
+            for (session in sessions) {
+                val cv = ContentValues()
+                cv.put("item_count", session.totalCount)
+                cv.put("correct_count", session.correctCount)
+                cv.put("end_time", session.endTime)
+                database.update(SESSIONS_TABLE_NAME, cv, "id = ?", arrayOf(session.id.toString()))
+            }
             database.setTransactionSuccessful()
         } finally {
             database.endTransaction()

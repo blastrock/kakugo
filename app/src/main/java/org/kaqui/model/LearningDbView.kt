@@ -3,6 +3,7 @@ package org.kaqui.model
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import org.kaqui.SrsCalculator
+import java.util.*
 
 class LearningDbView(
         private val database: SQLiteDatabase,
@@ -12,6 +13,9 @@ class LearningDbView(
         private val classifier: Classifier? = null,
         private val itemGetter: (id: Int, knowledgeType: KnowledgeType?) -> Item,
         private val itemSearcher: ((text: String) -> List<Int>)? = null) {
+
+    var sessionId: Long? = null
+
     fun withClassifier(classifier: Classifier) =
             LearningDbView(database, tableName, knowledgeType, filter, classifier, itemGetter, itemSearcher)
 
@@ -125,6 +129,53 @@ class LearningDbView(
         cv.put("long_score", scoreUpdate.longScore)
         cv.put("last_correct", scoreUpdate.lastAsked)
         database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    fun logTestItem(testType: TestType, scoreUpdate: SrsCalculator.ScoreUpdate, certainty: Certainty, wrongAnswer: Int?) {
+        val cv = ContentValues()
+        cv.put("id_session", sessionId!!)
+        cv.put("test_type", testType.value)
+        cv.put("id_item_question", scoreUpdate.itemId)
+        if (wrongAnswer != null)
+            cv.put("id_item_wrong", wrongAnswer)
+        cv.put("certainty", certainty.value)
+        cv.put("time", Calendar.getInstance().timeInMillis / 1000)
+        database.insertOrThrow(Database.SESSION_ITEMS_TABLE_NAME, null, cv)
+    }
+
+    data class LongStats(val bad: Int, val meh: Int, val good: Int, val longScoreSum: Float, val longPartition: List<Int>)
+
+    fun getLongStats(knowledgeType: KnowledgeType): LongStats {
+        database.rawQuery("""
+            SELECT
+                SUM(case when short_score BETWEEN 0.0 AND $BAD_WEIGHT then 1 else 0 end),
+                SUM(case when short_score BETWEEN $BAD_WEIGHT AND $GOOD_WEIGHT then 1 else 0 end),
+                SUM(case when short_score BETWEEN $GOOD_WEIGHT AND 1.0 then 1 else 0 end),
+                SUM(long_score),
+                SUM(case when long_score BETWEEN 0.0 AND 0.2 then 1 else 0 end),
+                SUM(case when long_score BETWEEN 0.2 AND 0.4 then 1 else 0 end),
+                SUM(case when long_score BETWEEN 0.4 AND 0.6 then 1 else 0 end),
+                SUM(case when long_score BETWEEN 0.6 AND 0.8 then 1 else 0 end),
+                SUM(case when long_score BETWEEN 0.8 AND 1.0 then 1 else 0 end)
+            FROM (
+                SELECT
+                    MAX(ifnull(s.short_score, 0.0)) as short_score,
+                    MAX(ifnull(s.long_score, 0.0)) as long_score
+                FROM $tableName
+                LEFT JOIN ${Database.ITEM_SCORES_TABLE_NAME} s
+                    ON $tableName.id = s.id AND s.type = ${knowledgeType.value}
+                WHERE $filter AND s.long_score > 0.0
+                GROUP BY $tableName.id
+            )
+        """, arrayOf()).use { cursor ->
+            cursor.moveToNext()
+            return LongStats(
+                    cursor.getInt(0),
+                    cursor.getInt(1),
+                    cursor.getInt(2),
+                    cursor.getFloat(3),
+                    (4..8).map { cursor.getInt(it) }.toList())
+        }
     }
 
     data class Stats(val bad: Int, val meh: Int, val good: Int, val disabled: Int)

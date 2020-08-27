@@ -57,11 +57,13 @@ class TestEngine(
 
     private val history = ArrayList<HistoryLine>()
     private val lastQuestionsIds = ArrayDeque<Int>()
+    private var sessionId: Long = 0
 
     val answerCount
         get() = getAnswerCount(testType)
 
     fun loadState(savedInstanceState: Bundle) {
+        sessionId = savedInstanceState.getLong("sessionId")
         testType = savedInstanceState.getSerializable("testType") as TestType
         currentQuestion = getItem(savedInstanceState.getInt("question"))
         currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
@@ -71,6 +73,7 @@ class TestEngine(
     }
 
     fun saveState(outState: Bundle) {
+        outState.putLong("sessionId", sessionId)
         outState.putSerializable("testType", testType)
         outState.putInt("question", currentQuestion.id)
         outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
@@ -80,6 +83,9 @@ class TestEngine(
     }
 
     fun prepareNewQuestion() {
+        if (sessionId == 0L)
+            sessionId = db.initSession(getItemType(testTypes[0]), testTypes)
+
         testType = testTypes[Random().nextInt(testTypes.size)]
 
         val (ids, debugParams) = SrsCalculator.fillProbalities(itemView.getEnabledItemsAndScores(), itemView.getMinLastAsked())
@@ -190,6 +196,7 @@ class TestEngine(
         if (certainty == Certainty.DONTKNOW) {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
             itemView.applyScoreUpdate(scoreUpdate)
+            itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
             currentDebugData?.scoreUpdate = scoreUpdate
             if (wrong != null)
                 addWrongAnswerToHistory(currentQuestion, wrong)
@@ -198,6 +205,7 @@ class TestEngine(
         } else {
             val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
             itemView.applyScoreUpdate(scoreUpdate)
+            itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
             currentDebugData?.scoreUpdate = scoreUpdate
             addGoodAnswerToHistory(currentQuestion)
             correctCount += 1
@@ -291,5 +299,9 @@ class TestEngine(
             itemView.getItem(id)
 
     val itemView: LearningDbView
-        get() = getItemView(db, testType)
+        get() {
+            val view = getItemView(db, testType)
+            view.sessionId = sessionId
+            return view
+        }
 }
