@@ -57,6 +57,19 @@ enum class KnowledgeType(val value: Int) {
     }
 }
 
+fun getKnowledgeType(testType: TestType) =
+        when (testType) {
+            TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_HIRAGANA,
+            TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_KATAKANA,
+            TestType.KANJI_TO_READING, TestType.READING_TO_KANJI,
+            TestType.WORD_TO_READING, TestType.READING_TO_WORD -> KnowledgeType.Reading
+
+            TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING, TestType.KANJI_COMPOSITION -> KnowledgeType.Strokes
+
+            TestType.KANJI_TO_MEANING, TestType.MEANING_TO_KANJI,
+            TestType.WORD_TO_MEANING, TestType.MEANING_TO_WORD -> KnowledgeType.Meaning
+        }
+
 fun Item.getQuestionText(testType: TestType): String =
         when (testType) {
             TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT -> (contents as Kana).kana
