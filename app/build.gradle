@@ -60,4 +60,6 @@ dependencies {
     implementation "org.jetbrains.anko:anko-sdk27:$anko_version"
     implementation "org.jetbrains.anko:anko-support-v4:$anko_version"
     implementation "org.jetbrains.anko:anko-design:$anko_version"
+
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
