@@ -68,16 +68,17 @@ class QuizTestFragment : Fragment(), TestFragment {
                                     val answerView =
                                             if (singleButtonMode) {
                                                 val position = answerTexts.size
-                                                val answerText = button {
+                                                val answerButton = button {
                                                     gravity = Gravity.START
                                                     typeface = TypefaceManager.getTypeface(context)
+                                                    transformationMethod = null
 
                                                     setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                                     setOnLongClickListener { onAnswerClicked(this, Certainty.MAYBE, position); true }
                                                 }.lparams(width = matchParent)
-                                                answerTexts.add(answerText)
-                                                answerButtons.add(answerText)
-                                                answerText
+                                                answerTexts.add(answerButton)
+                                                answerButtons.add(answerButton)
+                                                answerButton
                                             } else {
                                                 verticalLayout {
                                                     separator(requireActivity())
@@ -124,8 +125,9 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                         gravity = Gravity.CENTER_VERTICAL
 
                                                         val position = answerTexts.size
-                                                        val answerText = button {
+                                                        val answerButton = button {
                                                             typeface = TypefaceManager.getTypeface(context)
+                                                            transformationMethod = null
                                                             setTextSize(TypedValue.COMPLEX_UNIT_SP,
                                                                     when (testType) {
                                                                         TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30f
@@ -135,9 +137,9 @@ class QuizTestFragment : Fragment(), TestFragment {
                                                             setOnClickListener { onAnswerClicked(this, Certainty.SURE, position) }
                                                             setOnLongClickListener { onAnswerClicked(this, Certainty.MAYBE, position); true }
                                                         }.lparams(weight = 1f)
-                                                        answerTexts.add(answerText)
-                                                        answerButtons.add(answerText)
-                                                        answerText
+                                                        answerTexts.add(answerButton)
+                                                        answerButtons.add(answerButton)
+                                                        answerButton
                                                     } else {
                                                         verticalLayout {
                                                             separator(requireActivity())
