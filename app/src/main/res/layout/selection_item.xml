@@ -28,17 +28,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:layout_weight="0"
+            android:padding="4dp"
+            android:clipToPadding="false"
             android:gravity="center">
 
-            <TextView
+            <Button
                 android:id="@+id/item_text"
                 android:layout_width="35sp"
                 android:layout_height="35sp"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:textSize="25sp" />
+                android:textSize="25sp"
+                android:minWidth="35sp"
+                android:paddingHorizontal="4sp"
+                android:paddingVertical="0dp"
+                />
 
             <ImageView
                 android:id="@+id/item_info"

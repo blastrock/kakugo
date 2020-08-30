@@ -2,20 +2,15 @@ package org.kaqui.testactivities
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.animation.StateListAnimator
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.*
+import android.widget.*
 import androidx.annotation.AttrRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
@@ -65,6 +60,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
     private lateinit var mainView: View
     private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
 
+    private lateinit var lastWrongItemButtonAnimation: StateListAnimator
+    private lateinit var lastItemButtonAnimation: StateListAnimator
+
     private val testTypes
         get() = intent.extras!!.getSerializable("test_types") as List<TestType>
     private var localTestType: TestType? = null
@@ -96,7 +94,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                     lastItem = linearLayout {
                         lastWrongItemBundle = relativeLayout {
                             visibility = View.GONE
-                            lastWrongItemText = textView {
+                            padding = dip(4)
+                            clipToPadding = false
+                            lastWrongItemText = button {
                                 id = View.generateViewId()
                                 typeface = TypefaceManager.getTypeface(context)
                                 textSize = 25f
@@ -104,6 +104,13 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                                 gravity = Gravity.CENTER
                                 background = getColoredCircle(context, R.attr.itemBad)
                                 minWidth = sp(35)
+                                minimumWidth = sp(35)
+                                verticalPadding = dip(0)
+                                horizontalPadding = sp(4)
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    lastWrongItemButtonAnimation = stateListAnimator
+                                }
                             }.lparams(width = wrapContent, height = sp(35))
                             lastWrongInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -118,12 +125,14 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                                 sameEnd(lastWrongItemText)
                             }
                         }.lparams {
-                            margin = dip(8)
+                            margin = dip(4)
                             gravity = Gravity.CENTER
                         }
                         lastItemBundle = relativeLayout {
                             visibility = View.GONE
-                            lastItemText = textView {
+                            padding = dip(4)
+                            clipToPadding = false
+                            lastItemText = button {
                                 id = View.generateViewId()
                                 typeface = TypefaceManager.getTypeface(context)
                                 textSize = 25f
@@ -131,6 +140,13 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                                 gravity = Gravity.CENTER
                                 background = getColoredCircle(context, R.attr.itemGood)
                                 minWidth = sp(35)
+                                minimumWidth = sp(35)
+                                verticalPadding = dip(0)
+                                horizontalPadding = sp(4)
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    lastItemButtonAnimation = stateListAnimator
+                                }
                             }.lparams(width = wrapContent, height = sp(35))
                             lastInfo = imageView {
                                 val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
@@ -145,7 +161,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                                 sameEnd(lastItemText)
                             }
                         }.lparams {
-                            margin = dip(8)
+                            margin = dip(4)
                             gravity = Gravity.CENTER
                         }
                         lastDescription = textView {
@@ -353,10 +369,21 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                 lastWrongItemText.setOnClickListener {
                     showItemInDict(wrong.contents as Kanji)
                 }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    lastWrongItemText.stateListAnimator = lastItemButtonAnimation
+                }
             } else if (correct.contents is Word) {
                 lastWrongInfo.visibility = View.VISIBLE
                 lastWrongItemText.setOnClickListener {
                     showItemInDict(wrong.contents as Word)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    lastWrongItemText.stateListAnimator = lastItemButtonAnimation
+                }
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    lastWrongItemText.stateListAnimator = null
+                    lastWrongItemText.elevation = 0.0f
                 }
             }
             lastWrongItemText.setOnLongClickListener {
@@ -375,10 +402,21 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                 lastItemText.setOnClickListener {
                     showItemInDict(correct.contents as Kanji)
                 }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    lastItemText.stateListAnimator = lastItemButtonAnimation
+                }
             } else if (correct.contents is Word) {
                 lastInfo.visibility = View.VISIBLE
                 lastItemText.setOnClickListener {
                     showItemInDict(correct.contents as Word)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    lastItemText.stateListAnimator = lastItemButtonAnimation
+                }
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    lastItemText.stateListAnimator = null
+                    lastItemText.elevation = 0.0f
                 }
             }
             lastItemText.setOnLongClickListener {
@@ -393,9 +431,13 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         if (lastItemBundle.visibility == View.VISIBLE && lastWrongItemBundle.visibility == View.VISIBLE) {
             (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = 0
             (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = 0
+            lastWrongItemBundle.rightPadding = 0
+            lastItemBundle.leftPadding = 0
         } else {
-            (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = dip(8)
-            (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = dip(8)
+            (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = dip(4)
+            (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = dip(4)
+            lastWrongItemBundle.rightPadding = dip(4)
+            lastItemBundle.leftPadding = dip(4)
         }
 
         lastDescription.text = correct.description
@@ -442,14 +484,16 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         val checkbox = line.findViewById<View>(R.id.item_checkbox)
         checkbox.visibility = View.GONE
 
-        val itemView = line.findViewById<TextView>(R.id.item_text)
+        val itemView = line.findViewById<Button>(R.id.item_text)
         itemView.text = item.text
         if (item.text.length > 1)
             (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         if (style != null) {
             itemView.background = getColoredCircle(this, style)
-        } else
+        } else {
+            itemView.background = getColoredCircle(this, R.attr.historyBackground)
             itemView.textColor = getColorFromAttr(android.R.attr.colorForeground)
+        }
         if (item.contents is Kanji) {
             line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
             itemView.setOnClickListener {
@@ -459,6 +503,11 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
             line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
             itemView.setOnClickListener {
                 showItemInDict(item.contents as Word)
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                itemView.stateListAnimator = null
+                itemView.elevation = 0.0f
             }
         }
         itemView.setOnLongClickListener {
