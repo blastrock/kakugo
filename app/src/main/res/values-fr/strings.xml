@@ -96,7 +96,8 @@
     <string name="enable_dark_theme">Activer le thème sombre</string>
     <string name="settings"><font size="30">設定</font>\nPARAMÈTRES</string>
     <string name="title_activity_main_settings">Paramètres</string>
-    <string name="pref_cat_appearance">Apparance et comportement</string>
+    <string name="pref_cat_appearance">Apparance</string>
+    <string name="pref_cat_behavior">Behavior</string>
     <string name="pref_cat_language">Langue</string>
     <string name="pref_cat_classification">Classification</string>
     <string name="pref_cat_about">À propos</string>
@@ -109,6 +110,10 @@
     <string name="single_button_off_summary">Deux boutons \"sûr\" et \"pas sûr\" vont apparaitre</string>
     <string name="single_button_on_summary">Une pression longue sur une réponse la validera en \"pas sûr\"</string>
     <string name="single_button_mode">Mode bouton unique</string>
+    <string name="hide_answers_off_summary">Les réponses s\'afficheront en même temps que la question</string>
+    <string name="hide_answers_on_summary">Vous devrez cliquer sur un bouton pour afficher les réponses</string>
+    <string name="hide_answers">Cacher les réponses</string>
+    <string name="show_answers">Afficher les réponses</string>
     <string name="failed_to_load_font">Impossible de charger la police: %s</string>
     <string name="failed_to_load_resource">Impossible de charger la ressource: %s</string>
 

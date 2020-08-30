@@ -97,7 +97,8 @@
     <string name="enable_dark_theme">Activar modo oscuro</string>
     <string name="settings"><font size="30">設定</font>\nAJUSTES</string>
     <string name="title_activity_main_settings">Ajustes</string>
-    <string name="pref_cat_appearance">Apariencia y comportamiento</string>
+    <string name="pref_cat_appearance">Apariencia</string>
+    <string name="pref_cat_behavior">Comportamiento</string>
     <string name="pref_cat_language">Idioma</string>
     <string name="pref_cat_classification">Clasificación</string>
     <string name="pref_cat_about">Acerca de</string>
