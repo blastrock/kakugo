@@ -8,56 +8,56 @@
     <string name="select_all">Seleccionar todo</string>
     <string name="select_none">Seleccionar ninguno</string>
     <string name="autoselect_from_kanji">Seleccionar automáticamente palabras de los kanji seleccionados</string>
-    <string name="autoselect_from_kanji_short">Auto/String</string>
+    <string name="autoselect_from_kanji_short">Auto</string>
     <string name="import_selection">Importar una selección de kanji</string>
     <string name="database_error">Error de base de datos</string>
     <string name="custom_test">Prueba personalizada</string>
-    <string name="select_test_types">Seleccione el tipo de pregunta deseada:</string>
+    <string name="select_test_types">Seleccione el tipo de preguntas deseadas:</string>
     <string name="select_at_least_one_type">Debes seleccionar al menos un tipo de pregunta.</string>
 
-    <string name="hiragana_to_romaji">Prueba hiragana a romaji (ひ→hola)</string>
-    <string name="romaji_to_hiragana">Prueba romaji a hiragana (hola→ひ)</string>
-    <string name="hiragana_to_romaji_typing">Escritura latina de hiragana (ひ→hola)</string>
-    <string name="hiragana_drawing">Dibujo de hiragana</string>
+    <string name="hiragana_to_romaji">Prueba de hiragana a romaji (ひ→hi)</string>
+    <string name="romaji_to_hiragana">Prueba de romaji a hiragana (hi→ひ)</string>
+    <string name="hiragana_to_romaji_typing">Romanji a hiragana (ひ→hi)</string>
+    <string name="hiragana_drawing">Dibujar hiragana</string>
 
-    <string name="katakana_to_romaji">Prueba katakana a romaji (ヒ→hola)</string>
-    <string name="romaji_to_katakana">Prueba romaji a katakana (hola→ヒ)</string>
-    <string name="katakana_to_romaji_typing">Escritura latina de katakana (ヒ→hola)</string>
-    <string name="katakana_drawing">Dibujo de katakana</string>
+    <string name="katakana_to_romaji">Prueba de katakana a romaji (ヒ→hi)</string>
+    <string name="romaji_to_katakana">Prueba de romaji a katakana (hi→ヒ)</string>
+    <string name="katakana_to_romaji_typing">Romanji a katakana (ヒ→hi)</string>
+    <string name="katakana_drawing">Dibujar katakana</string>
 
-    <string name="kanji_to_reading">Prueba kanji a dictado (日→ひ)</string>
-    <string name="reading_to_kanji">Prueba dictado a kanji (ひ→日)</string>
-    <string name="kanji_to_meaning">Prueba kanji a significado (日→día)</string>
-    <string name="meaning_to_kanji">Prueba significado a kanji (día→日)</string>
+    <string name="kanji_to_reading">Prueba de kanji a lectura (日→ひ)</string>
+    <string name="reading_to_kanji">Prueba de lectura a kanji (ひ→日)</string>
+    <string name="kanji_to_meaning">Prueba de kanji a significado (日→día)</string>
+    <string name="meaning_to_kanji">Prueba de significado a kanji (día→日)</string>
     <string name="kanji_composition">Composición de kanji (休→亻+木)</string>
-    <string name="kanji_drawing">Dibujo de kanji</string>
+    <string name="kanji_drawing">Dibujar kanji</string>
 
-    <string name="word_to_reading">Prueba palabra a dictado (日の出→ひので)</string>
-    <string name="reading_to_word">Prueba dictado a palabra (ひので→日の出)</string>
-    <string name="word_to_meaning">Prueba palabra a significado (日の出→amanecer)</string>
-    <string name="meaning_to_word">Prueba significado a palabra (amanecer→日の出)</string>
+    <string name="word_to_reading">Prueba de palabra a lectura (日の出→ひので)</string>
+    <string name="reading_to_word">Prueba de lectura a palabra (ひので→日の出)</string>
+    <string name="word_to_meaning">Prueba de palabra a significado (日の出→amanecer)</string>
+    <string name="meaning_to_word">Prueba de significado a palabra (amanecer→日の出)</string>
 
-    <string name="hiragana_to_romaji_title">Prueba hiragana a romaji</string>
-    <string name="romaji_to_hiragana_title">Prueba romaji a hiragana</string>
-    <string name="hiragana_to_romaji_typing_title">Escritura latina de hiragana</string>
-    <string name="hiragana_drawing_title">Dibujo de hiragana</string>
+    <string name="hiragana_to_romaji_title">Prueba de hiragana a romaji</string>
+    <string name="romaji_to_hiragana_title">Prueba de romaji a hiragana</string>
+    <string name="hiragana_to_romaji_typing_title">Romanji a hiragana</string>
+    <string name="hiragana_drawing_title">Dibujar hiragana</string>
 
-    <string name="katakana_to_romaji_title">Prueba katakana à romaji</string>
-    <string name="romaji_to_katakana_title">Prueba romaji à katakana</string>
-    <string name="katakana_to_romaji_typing_title">Escritura latina de katakana</string>
-    <string name="katakana_drawing_title">Dibujo de katakana</string>
+    <string name="katakana_to_romaji_title">Prueba de katakana a romaji</string>
+    <string name="romaji_to_katakana_title">Prueba de romaji a katakana</string>
+    <string name="katakana_to_romaji_typing_title">Romanji a katakana</string>
+    <string name="katakana_drawing_title">Dibujar katakana</string>
 
-    <string name="kanji_to_reading_title">Prueba kanji a dictado</string>
-    <string name="reading_to_kanji_title">Prueba dictado a kanji</string>
-    <string name="kanji_to_meaning_title">Prueba kanji a significado</string>
-    <string name="meaning_to_kanji_title">Prueba significado a kanji</string>
+    <string name="kanji_to_reading_title">Prueba de kanji a lectura</string>
+    <string name="reading_to_kanji_title">Prueba de lectura a kanji</string>
+    <string name="kanji_to_meaning_title">Prueba de kanji a significado</string>
+    <string name="meaning_to_kanji_title">Prueba de significado a kanji</string>
     <string name="kanji_composition_title">Composición de kanji</string>
-    <string name="kanji_drawing_title">Dibujo de kanji</string>
+    <string name="kanji_drawing_title">Dibujar kanji</string>
 
-    <string name="word_to_reading_title">Prueba palabra a dictado</string>
-    <string name="reading_to_word_title">Prueba dictado a palabra</string>
-    <string name="word_to_meaning_title">Prueba palabra a significado</string>
-    <string name="meaning_to_word_title">Prueba significado a palabra</string>
+    <string name="word_to_reading_title">Prueba de palabra a lectura</string>
+    <string name="reading_to_word_title">Prueba de lectura a palabra</string>
+    <string name="word_to_meaning_title">Prueba de palabra a significado</string>
+    <string name="meaning_to_word_title">Prueba de significado a palabra</string>
 
     <string name="sure">Seguro</string>
     <string name="maybe">Tal vez</string>
@@ -67,7 +67,7 @@
     <string name="search_kanji_hint">Buscar kanji&#8230;</string>
     <string name="search_word_hint">Buscar palabra&#8230;</string>
     <string name="confirm_test_stop_title">Terminar sesión</string>
-    <string name="confirm_test_stop_message">¿Estás seguro de que quieres terminar la sesión de prueba?</string>
+    <string name="confirm_test_stop_message">¿Estás seguro de que quieres terminar la sesión?</string>
     <string name="enable_a_few_items">Debes habilitar al menos 10 elementos para iniciar una sesión</string>
     <string name="initializing_kanji_db">Iniciando la base de datos</string>
     <string name="autoselecting_words">Seleccionando automáticamente las palabras de los kanji seleccionados</string>
@@ -76,17 +76,19 @@
     <string name="next">Siguiente</string>
     <string name="hint">Pista</string>
     <string name="save_current_selection">Guardar selección actual</string>
-    <string name="load_selection">Selección de carga</string>
+    <string name="load_selection">Cargar selección</string>
     <string name="selection_presentation">%1$s (%2$d elementos)</string>
     <string name="delete">Borrar</string>
     <string name="loaded_selection">Selección cargada \"%1$s\"</string>
     <string name="deleted_selection">Selección borrada \"%1$s\"</string>
     <string name="saved_selection">Selección actual guardada como \"%1$s\"</string>
-    <string name="answerDone">Done</string>
+    <string name="answerDone">Listo</string>
     <string name="enter_name_of_selection">Introducir el nombre de esta selección</string>
-    <string name="could_not_import_file">No podía importar el archivo: %1$s</string>
-    <string name="import_kanji_help">Esta característica permite importar una selección de kanji de un archivo. El archivo debe contener todos los kanji a importar, en una sola línea, sin espacios ni separadores.</string>
-    <string name="additional_kanji">Kanji adicional</string>
+    <string name="override_selection_title">Seleccionar vocabulario automáticamente</string>
+    <string name="override_selection_msg">¿Quieres seleccionar palabras basadas en tu selección de kanji?\nEsto va a sobreescribir tu selección actual de vocabulario.</string>
+    <string name="could_not_import_file">No se puede importar el archivo: %1$s</string>
+    <string name="import_kanji_help">Esta característica permite importar una selección de kanji desde un archivo. El archivo debe contener todos los kanji a importar, en una sola línea, sin espacios ni separadores.</string>
+    <string name="additional_kanji">Kanji adicionales</string>
     <string name="jlpt_level_n">JLPT nivel %1$s</string>
     <string name="rtk_index_range">Índices %1$s+</string>
     <string name="rtk6_index_range">Índices %1$s+</string>
@@ -102,12 +104,12 @@
     <string name="will_update_later">Se aplicarán al salir de los ajustes</string>
     <string name="dictionary_language">Idioma del diccionario</string>
     <string name="lang_system_default">Idioma del sistema</string>
-    <string name="kanji_classification">Clasificación del kanji</string>
+    <string name="kanji_classification">Clasificación de los kanji</string>
     <string name="use_custom_font">Usar fuente personalizada</string>
-    <string name="pick_custom_font">Escoja una fuente japonesa personalizada</string>
-    <string name="single_button_off_summary">Dos botones \"sure\" y \"tal vez\" aparecerán</string>
-    <string name="single_button_on_summary">Mantener presionado la respuestá expresa como \"tal vez\"</string>
-    <string name="single_button_mode">Modo de boton simple</string>
+    <string name="pick_custom_font">Escojer una fuente japonesa personalizada</string>
+    <string name="single_button_off_summary">Dos botones \"seguro\" y \"tal vez\" aparecerán</string>
+    <string name="single_button_on_summary">Mantener presionada la respuesta la validará como \"tal vez\"</string>
+    <string name="single_button_mode">Modo de un solo botón</string>
     <string name="failed_to_load_font">Error al cargar fuente: %s</string>
     <string name="failed_to_load_resource">Error al cargar recurso: %s</string>
 
@@ -115,14 +117,14 @@
     <string name="about_text"><![CDATA[
         <p>Kakugo es una aplicación para aprender japonés. Versión %1$s (%2$d).</p>
 
-        <p>Es de código abierto y está disponible en <a href="https://github.com/blastrock/kakugo/">github</a> sous la licence GPLv3.</p>
+        <p>Es de código abierto y está disponible en <a href="https://github.com/blastrock/kakugo/">github</a> bajo la licencia GPLv3.</p>
 
-        <p>El diccionario Kanji se basa en <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
+        <p>El diccionario de kanji se basa en <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
         <p>El diccionario de vocabulario se basa en <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
-        <p>El diccionario de vocabulario es una similitud de los datos de los kanji cortesía de <a href="http://lars.yencken.org/datasets/phd/">un estudio del Dr. Lars Yencken</a>.</p>
+        <p>Los datos de similitud de kanji son a cortesía de <a href="http://lars.yencken.org/datasets/phd/">un estudio del Dr. Lars Yencken</a>.</p>
         <p>Los datos de composición y dibujo de los kanji provienen de <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
-        <p>Icono de la aplicación cortesía de <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
-        <p>Yítulo de la aplicación cortesía de <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
+        <p>La fuente del icono de la aplicación es <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
+        <p>La fuente del título de la aplicaión es <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
 
         <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
     ]]></string>
