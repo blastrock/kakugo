@@ -37,6 +37,11 @@
             app:key="pickCustomFont"
             app:title="@string/pick_custom_font" />
 
+        <SwitchPreferenceCompat
+            app:key="keep_on"
+            app:summary="@string/keep_on_sum"
+            app:title="@string/screen_keep_on" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_cat_behavior">

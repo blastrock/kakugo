@@ -130,6 +130,10 @@
     <string name="show_answers">Show answers</string>
     <string name="failed_to_load_font">Failed to load custom font: %s</string>
     <string name="failed_to_load_resource">Failed to load resource: %s</string>
+    <string name="keep_on_sum">Screen keeps lit in Study</string>
+    <string name="screen_keep_on">Keep on</string>
+
+
 
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[

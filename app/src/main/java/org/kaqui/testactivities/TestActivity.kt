@@ -76,6 +76,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
 
         job = Job()
 
+        if(applicationContext.defaultSharedPreferences.getBoolean("keep_on",false))
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         mainCoordLayout = coordinatorLayout {
             verticalLayout {
                 frameLayout {
