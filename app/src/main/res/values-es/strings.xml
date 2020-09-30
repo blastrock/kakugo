@@ -111,6 +111,10 @@
     <string name="single_button_off_summary">Dos botones \"seguro\" y \"tal vez\" aparecerán</string>
     <string name="single_button_on_summary">Mantener presionada la respuesta la validará como \"tal vez\"</string>
     <string name="single_button_mode">Modo de un solo botón</string>
+    <string name="hide_answers_off_summary">Las respuestas se mostrarán al mismo tiempo que las preguntas</string>
+    <string name="hide_answers_on_summary">Necesitaras presionar un botón para mostrar las respuestas</string>
+    <string name="hide_answers">Ocultar respuestas</string>
+    <string name="show_answers">Mostrar respuestas</string>
     <string name="failed_to_load_font">Error al cargar fuente: %s</string>
     <string name="failed_to_load_resource">Error al cargar recurso: %s</string>
 
