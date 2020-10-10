@@ -39,8 +39,8 @@
 
         <SwitchPreferenceCompat
             app:key="keep_on"
-            app:summary="@string/keep_on_sum"
-            app:title="@string/screen_keep_on" />
+            app:summary="@string/keep_screen_on_summary"
+            app:title="@string/keep_screen_on" />
 
     </PreferenceCategory>
 
