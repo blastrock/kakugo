@@ -121,10 +121,10 @@ fun startTest(activity: Activity, types: List<TestType>) {
         activity.longToast(R.string.enable_a_few_items)
         return
     }
-    
+
     val sharedPrefs = activity.defaultSharedPreferences
     val defaultTypes = sharedPrefs.getStringSet("custom_test_types", setOf())!!
-    
+
     val selected = types.filter { it.name in defaultTypes }.toMutableList()
     val checkedIndexes = types.map { v -> v in selected }.toBooleanArray()
     AlertDialog.Builder(activity)
@@ -167,12 +167,16 @@ val Activity.menuWidth
         else
             matchParent
 
+@ColorInt
 fun Context.getColorFromAttr(
         @AttrRes attrColor: Int
 ): Int {
     val typedValue = TypedValue()
     theme.resolveAttribute(attrColor, typedValue, true)
-    return typedValue.data
+    if (typedValue.resourceId != 0)
+        return ContextCompat.getColor(this, typedValue.resourceId)
+    else
+        return typedValue.data
 }
 
 fun Int.asUnicodeCodePoint() = Character.toChars(this).joinToString("")
