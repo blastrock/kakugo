@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.fragment.app.transaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -222,7 +223,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         val rootView = findViewById<View>(android.R.id.content)
         rootView.addOnLayoutChangeListener(this::onLayoutChange)
 
-        supportFragmentManager.transaction {
+        supportFragmentManager.commit {
             replace(R.id.global_stats, statsFragment)
         }
 
@@ -323,7 +324,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                     }
             this@TestActivity.testFragment = testFragment as TestFragment
 
-            supportFragmentManager.transaction {
+            supportFragmentManager.commit {
                 replace(R.id.main_test_block, testFragment)
             }
 

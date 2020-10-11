@@ -513,7 +513,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
         fun upgradeDatabase(context: Context, dictDb: String) {
             // the databases folder may not exist on older androids
-            context.getDatabasePath(Database.DATABASE_NAME).parentFile.mkdirs()
+            context.getDatabasePath(Database.DATABASE_NAME).parentFile!!.mkdirs()
             SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
                 DatabaseUpdater(db, dictDb).doUpgrade()
             }

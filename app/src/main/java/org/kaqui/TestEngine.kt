@@ -101,7 +101,7 @@ class TestEngine(
             throw RuntimeException("Too few items selected")
         }
 
-        val question = pickQuestion(db, ids)
+        val question = pickQuestion(ids)
         Log.v(TAG, "Selected question: $question")
         currentQuestion = question.item
         currentDebugData = DebugData(question.probabilityData, debugParams.probaParamsStage1, debugParams.probaParamsStage2, question.totalWeight, null)
@@ -110,7 +110,7 @@ class TestEngine(
         addIdToLastQuestions(currentQuestion.id)
     }
 
-    private fun pickQuestion(db: Database, ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
+    private fun pickQuestion(ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
 
         val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
@@ -136,10 +136,10 @@ class TestEngine(
     private fun pickAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> =
             when (testType) {
                 TestType.KANJI_COMPOSITION -> pickCompositionAnswers(db, ids, currentQuestion)
-                else -> pickNormalTestAnswers(db, ids, currentQuestion)
+                else -> pickNormalTestAnswers(ids, currentQuestion)
             }
 
-    private fun pickNormalTestAnswers(db: Database, ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
+    private fun pickNormalTestAnswers(ids: List<SrsCalculator.ProbabilityData>, currentQuestion: Item): List<Item> {
         val similarItemIds = currentQuestion.similarities.map { it.id }.filter { itemView.isItemEnabled(it) }
         val similarItems =
                 if (similarItemIds.size >= answerCount - 1)
