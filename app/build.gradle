@@ -55,7 +55,7 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.fragment:fragment-ktx:1.2.5'
-    implementation 'com.google.android.material:material:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
 
     implementation "org.jetbrains.anko:anko-sdk27:$anko_version"
     implementation "org.jetbrains.anko:anko-support-v4:$anko_version"
