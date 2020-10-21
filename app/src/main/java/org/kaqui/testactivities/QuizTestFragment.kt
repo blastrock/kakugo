@@ -68,6 +68,7 @@ class QuizTestFragment : Fragment(), TestFragment {
                     gravity = Gravity.CENTER
                     showAnswersButton = button {
                         text = context.getString(R.string.show_answers)
+                        padding = dip(24)
                         setOnClickListener {
                             showAnswersButton.visibility = View.GONE
                             answersToShow.visibility = View.VISIBLE
