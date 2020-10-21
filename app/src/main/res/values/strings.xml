@@ -156,11 +156,11 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.33?</h3>
+        <h3>What\'s new in 1.34?</h3>
 
-        <br/>- Quiz answers are now hidden by default and there\'s a button to show them (this can be disabled in Settings)
+        <br/>- Added progress report
+        <br/>- Added an option to keep the screen on during tests
         <!-- -->
-        <br/>- Added Spanish translation and dictionaries
-        <br/>- It is now possible to save word selections
+        <br/>- Quiz answers are now hidden by default and there\'s a button to show them (this can be disabled in Settings)
     ]]></string>
 </resources>

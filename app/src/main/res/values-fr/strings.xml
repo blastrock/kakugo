@@ -144,9 +144,9 @@
     <string name="changelog_contents"><![CDATA[
         <h3>Nouveautés en 1.33</h3>
 
-        <br/>- Les réponses aux quizz sont maintenant cachées par défaut et un bouton permet de les afficher (peut être désactivé dans les paramètres)
+        <br/>- Ajout du rapport de progrès
+        <br/>- Ajout d\'une option pour garder l\'écran allumé pendant les exercices
         <!-- -->
-        <br/>- Ajout de la traduction et des dictionnaires espagnols
-        <br/>- Il est maintenant possible de sauvegarder une sélection de vocabulaire
+        <br/>- Les réponses aux quizz sont maintenant cachées par défaut et un bouton permet de les afficher (peut être désactivé dans les paramètres)
     ]]></string>
 </resources>
