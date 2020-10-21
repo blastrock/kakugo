@@ -133,8 +133,6 @@
     <string name="keep_screen_on_summary">Keep screen lit during tests</string>
     <string name="keep_screen_on">Keep screen on</string>
 
-
-
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[
         <p>Kakugo is a Japanese learning app. Version %1$s (%2$d).</p>

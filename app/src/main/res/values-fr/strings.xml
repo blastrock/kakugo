@@ -116,6 +116,8 @@
     <string name="show_answers">Afficher les réponses</string>
     <string name="failed_to_load_font">Impossible de charger la police: %s</string>
     <string name="failed_to_load_resource">Impossible de charger la ressource: %s</string>
+    <string name="keep_screen_on_summary">Garder l\'écran éclairé pendant les exercices</string>
+    <string name="keep_screen_on">Garder l\'écran allumé</string>
 
     <string name="title_about">À propos de Kakugo</string>
     <string name="about_text"><![CDATA[
