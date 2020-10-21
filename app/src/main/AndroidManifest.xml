@@ -70,6 +70,10 @@
             android:name=".settings.AboutActivity"
             android:label="@string/title_about"
             android:parentActivityName=".settings.MainSettingsActivity" />
+        <activity
+            android:name=".stats.StatsActivity"
+            android:label="@string/title_stats"
+            android:parentActivityName=".mainmenu.MainActivity" />
     </application>
 
 </manifest>

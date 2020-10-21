@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="word"><font size="30">語彙</font>\nVOCABULAIRE</string>
+    <string name="stats"><font size="30">進歩</font>\nPROGRÈS</string>
     <string name="hiragana_selection">Sélection des hiragana</string>
     <string name="katakana_selection">Sélection des katakana</string>
     <string name="kanji_selection">Sélection des kanji</string>
@@ -134,6 +135,10 @@
 
         <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
     ]]></string>
+
+    <string name="title_stats">Progrès</string>
+    <string name="stats_no_data">Aucune données disponibles pour l\'instant. Votre progrès apparaîtra ici après avoir fait quelques exercices.</string>
+    <string name="stats_items_answered">Réponses données</string>
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[

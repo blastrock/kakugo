@@ -14,6 +14,7 @@ import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
+import org.kaqui.stats.StatsActivity
 import java.io.File
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.CoroutineContext
@@ -65,6 +66,11 @@ class MainActivity : BaseActivity(), CoroutineScope {
                         }
                         button(R.string.word) {
                             setOnClickListener { startActivity<VocabularyMenuActivity>() }
+                        }.lparams(width = matchParent, height = wrapContent) {
+                            margin = dip(4)
+                        }
+                        button(R.string.stats) {
+                            setOnClickListener { startActivity<StatsActivity>() }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

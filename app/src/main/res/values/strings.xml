@@ -4,6 +4,7 @@
     <string name="katakana" translatable="false"><font size="30">カタカナ</font>\nKATAKANA</string>
     <string name="kanji" translatable="false"><font size="30">漢字</font>\nKANJI</string>
     <string name="word"><font size="30">語彙</font>\nVOCABULARY</string>
+    <string name="stats"><font size="30">進歩</font>\nPROGRESS</string>
     <string name="settings"><font size="30">設定</font>\nSETTINGS</string>
     <string name="hiragana_selection">Hiragana selection</string>
     <string name="katakana_selection">Katakana selection</string>
@@ -148,6 +149,10 @@
 
         <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
     ]]></string>
+
+    <string name="title_stats">Progress</string>
+    <string name="stats_no_data">No data available yet. Your progress will appear here after you have taken tests.</string>
+    <string name="stats_items_answered">Questions answered</string>
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
