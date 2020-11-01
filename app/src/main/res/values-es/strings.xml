@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="word"><font size="30">語彙</font>\nVOCABULARIO</string>
+    <string name="stats"><font size="30">進歩</font>\nPROGRESO</string>
     <string name="hiragana_selection">Selección de hiragana</string>
     <string name="katakana_selection">Selección de katakana</string>
     <string name="kanji_selection">Selección de kanji</string>
@@ -117,6 +118,8 @@
     <string name="show_answers">Mostrar respuestas</string>
     <string name="failed_to_load_font">Error al cargar fuente: %s</string>
     <string name="failed_to_load_resource">Error al cargar recurso: %s</string>
+    <string name="keep_screen_on_summary">Mantener pantalla encendida durante las pruebas</string>
+    <string name="keep_screen_on">Mantener pantalla encendida</string>
 
     <string name="title_about">Acerca de Kakugo</string>
     <string name="about_text"><![CDATA[
@@ -133,6 +136,10 @@
 
         <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
     ]]></string>
+    
+    <string name="title_stats">Progreso</string>
+    <string name="stats_no_data">No hay datos disponibles aún. Tu progreso va a aparecer aquí después de haber tomado pruebas.</string>
+    <string name="stats_items_answered">Preguntas respondidas</string>
 
     <string name="changelog">Lista de cambios</string>
 </resources>
