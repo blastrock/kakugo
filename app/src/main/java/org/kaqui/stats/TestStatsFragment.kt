@@ -18,17 +18,21 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
+import org.jetbrains.anko.support.v4.dip
 import org.kaqui.R
 import org.kaqui.barChart
 import org.kaqui.getColorFromAttr
 import org.kaqui.model.Database
 import org.kaqui.roundToPreviousDay
+import kotlin.math.min
 import java.text.DateFormat
 import java.util.*
 
 class TestStatsFragment: Fragment() {
     companion object {
         const val TAG = "TestStatsFragment"
+
+        private const val AppBarOverhead = 100
     }
 
     private val nextDay = run {
@@ -45,6 +49,19 @@ class TestStatsFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
+        val config = resources.configuration
+        val (chartWidth, chartHeight) =
+            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                val height = dip(config.screenHeightDp - AppBarOverhead)
+                val width = min(dip(config.screenWidthDp), height * 16/9)
+                Pair(width, height)
+            }
+            else {
+                val width = matchParent
+                val height = dip(min(config.screenHeightDp - AppBarOverhead, config.screenWidthDp))
+                Pair(width, height)
+            }
+
         return UI {
             scrollView {
                 verticalLayout {
@@ -56,8 +73,6 @@ class TestStatsFragment: Fragment() {
                     }
 
                     testItemsChart = barChart {
-                        data = barData
-
                         description.isEnabled = false
                         setDrawValueAboveBar(false)
                         axisRight.isEnabled = false
@@ -84,7 +99,9 @@ class TestStatsFragment: Fragment() {
 
                         xAxis.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
                         axisLeft.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
-                    }.lparams(width = matchParent, height = dip(400)) {
+
+                        gravity = Gravity.CENTER
+                    }.lparams(width = chartWidth, height = chartHeight) {
                         bottomPadding = dip(20)
                     }
 
@@ -92,7 +109,7 @@ class TestStatsFragment: Fragment() {
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                     }.lparams {
                         gravity = Gravity.CENTER
-                    }.lparams(width = matchParent, height = dip(400))
+                    }.lparams(width = chartWidth, height = chartHeight)
                 }.lparams(width = matchParent) {
                     margin = dip(16)
                 }
