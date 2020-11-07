@@ -1,6 +1,7 @@
 package org.kaqui.stats
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
@@ -11,6 +12,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -77,13 +79,18 @@ class TestStatsFragment: Fragment() {
                         setDrawValueAboveBar(false)
                         axisRight.isEnabled = false
                         xAxis.position = XAxis.XAxisPosition.BOTTOM
-                        legend.isEnabled = false
                         setPinchZoom(false)
                         isDoubleTapToZoomEnabled = false
                         setScaleEnabled(false)
                         setDrawBorders(true)
                         isHighlightPerTapEnabled = false
                         isHighlightPerDragEnabled = false
+
+                        legend.isEnabled = true
+                        legend.orientation = Legend.LegendOrientation.VERTICAL
+                        legend.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+                        legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
+                        legend.entries
 
                         xAxis.valueFormatter = object : ValueFormatter() {
                             val calendar = Calendar.getInstance()
@@ -99,6 +106,7 @@ class TestStatsFragment: Fragment() {
 
                         xAxis.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
                         axisLeft.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
+                        legend.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
 
                         gravity = Gravity.CENTER
                     }.lparams(width = chartWidth, height = chartHeight) {
@@ -131,13 +139,17 @@ class TestStatsFragment: Fragment() {
             calendar.timeInMillis = it.timestamp * 1000
             calendar.roundToPreviousDay()
             calendar.timeInMillis / 1000
-        }.map { Database.DayStatistics(it.key, it.value.map { it.askedCount }.sum()) }
+        }.map { Database.DayStatistics(it.key, it.value.map { it.askedCount }.sum(), it.value.map { it.correctCount }.sum()) }
 
         val values = dayStats.map { stat ->
             // Save time relative to a point close to now to keep the maximum precision
             // Also, use a date in the future so that we don't have values both positive and negative
             // as it values close to 0, positive or negative, would both round down to 0
-            BarEntry(((stat.timestamp - nextDay) / 24 / 3600).toFloat(), stat.askedCount.toFloat())
+            BarEntry(
+                    ((stat.timestamp - nextDay) / 24 / 3600).toFloat(),
+                    floatArrayOf(
+                            stat.correctCount.toFloat(),
+                            (stat.askedCount - stat.correctCount).toFloat()))
         }.toMutableList()
 
         val today = run {
@@ -146,9 +158,16 @@ class TestStatsFragment: Fragment() {
             cal.timeInMillis / 1000
         }
         if (rawDayStats.isNotEmpty() && rawDayStats.last().timestamp != today)
-            values.add(BarEntry(((today - nextDay) / 24 / 3600).toFloat(), 0f))
+            values.add(BarEntry(((today - nextDay) / 24 / 3600).toFloat(), floatArrayOf(0f, 0f)))
 
-        val dataSet = BarDataSet(values, getString(R.string.stats_items_answered))
+        val dataSet = BarDataSet(values, "")
+        dataSet.colors = listOf(
+                requireContext().getColorFromAttr(R.attr.statsItemsGood),
+                requireContext().getColorFromAttr(R.attr.statsItemsBad))
+        dataSet.stackLabels = arrayOf(
+                "Correct answers",
+                "Wrong answers",
+        )
 
         val barData = BarData(dataSet)
         barData.setDrawValues(false)

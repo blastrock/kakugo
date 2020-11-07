@@ -533,15 +533,15 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
-    data class DayStatistics(val timestamp: Long, val askedCount: Int)
+    data class DayStatistics(val timestamp: Long, val askedCount: Int, val correctCount: Int)
 
     fun getAskedItem(): List<DayStatistics> {
         commitAllSessions()
 
         val stats = mutableListOf<DayStatistics>()
-        database.query(SESSIONS_TABLE_NAME, arrayOf("start_time", "item_count"), null, null, null, null, "start_time").use { cursor ->
+        database.query(SESSIONS_TABLE_NAME, arrayOf("start_time", "item_count", "correct_count"), null, null, null, null, "start_time").use { cursor ->
             while (cursor.moveToNext())
-                stats.add(DayStatistics(cursor.getLong(0), cursor.getInt(1)))
+                stats.add(DayStatistics(cursor.getLong(0), cursor.getInt(1), cursor.getInt(2)))
         }
         return stats
     }

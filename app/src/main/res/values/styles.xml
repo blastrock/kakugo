@@ -11,6 +11,8 @@
     <attr name="compositionGood" format="color" />
     <attr name="compositionBadSelected" format="color" />
     <attr name="compositionBadNotSelected" format="color" />
+    <attr name="statsItemsGood" format="color" />
+    <attr name="statsItemsBad" format="color" />
     <attr name="drawingDontKnow" format="color" />
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -32,6 +34,9 @@
         <item name="compositionGood">#9ccc65</item>
         <item name="compositionBadSelected">#ef9a9a</item>
         <item name="compositionBadNotSelected">#ffcdd2</item>
+
+        <item name="statsItemsGood">#9ccc65</item>
+        <item name="statsItemsBad">#ef9a9a</item>
 
         <item name="drawingDontKnow">#FF7F7F</item>
 
@@ -61,6 +66,9 @@
         <item name="compositionGood">#085300</item>
         <item name="compositionBadSelected">#350000</item>
         <item name="compositionBadNotSelected">#650000</item>
+
+        <item name="statsItemsGood">#085300</item>
+        <item name="statsItemsBad">#650000</item>
 
         <item name="drawingDontKnow">#FF7F7F</item>
 
