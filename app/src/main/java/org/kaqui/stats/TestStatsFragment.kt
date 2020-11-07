@@ -165,8 +165,8 @@ class TestStatsFragment: Fragment() {
                 requireContext().getColorFromAttr(R.attr.statsItemsGood),
                 requireContext().getColorFromAttr(R.attr.statsItemsBad))
         dataSet.stackLabels = arrayOf(
-                "Correct answers",
-                "Wrong answers",
+                getString(R.string.stats_correct_answers),
+                getString(R.string.stats_wrong_answers),
         )
 
         val barData = BarData(dataSet)

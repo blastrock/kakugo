@@ -153,6 +153,8 @@
     <string name="title_stats">Progress</string>
     <string name="stats_no_data">No data available yet. Your progress will appear here after you have taken tests.</string>
     <string name="stats_items_answered">Questions answered</string>
+    <string name="stats_correct_answers">Correct answers</string>
+    <string name="stats_wrong_answers">Wrong answers</string>
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[

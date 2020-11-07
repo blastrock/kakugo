@@ -139,6 +139,8 @@
     <string name="title_stats">Progrès</string>
     <string name="stats_no_data">Aucune données disponibles pour l\'instant. Votre progrès apparaîtra ici après avoir fait quelques exercices.</string>
     <string name="stats_items_answered">Réponses données</string>
+    <string name="stats_correct_answers">Réponses correctes</string>
+    <string name="stats_wrong_answers">Mauvaises réponses</string>
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
