@@ -1,5 +1,6 @@
 package org.kaqui.stats
 
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
@@ -30,7 +31,6 @@ class TestStatsFragment: Fragment() {
         const val TAG = "TestStatsFragment"
     }
 
-    private lateinit var testItems: BarChart
     private val nextDay = run {
         val calendar = Calendar.getInstance()
         calendar.roundToPreviousDay()
@@ -39,9 +39,74 @@ class TestStatsFragment: Fragment() {
         calendar.timeInMillis / 1000
     }
 
+    private lateinit var testItemsChart: BarChart
+    private lateinit var noDataLabel: TextView
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
+        return UI {
+            scrollView {
+                verticalLayout {
+                    textView(R.string.stats_items_answered) {
+                        setTypeface(null, Typeface.BOLD)
+                    }.lparams {
+                        gravity = Gravity.CENTER
+                        verticalMargin = dip(4)
+                    }
+
+                    testItemsChart = barChart {
+                        data = barData
+
+                        description.isEnabled = false
+                        setDrawValueAboveBar(false)
+                        axisRight.isEnabled = false
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        legend.isEnabled = false
+                        setPinchZoom(false)
+                        isDoubleTapToZoomEnabled = false
+                        setScaleEnabled(false)
+                        setDrawBorders(true)
+                        isHighlightPerTapEnabled = false
+                        isHighlightPerDragEnabled = false
+
+                        xAxis.valueFormatter = object : ValueFormatter() {
+                            val calendar = Calendar.getInstance()
+
+                            override fun getAxisLabel(value: Float, axis: AxisBase): String {
+                                calendar.timeInMillis = (value.toLong() * 24 * 3600 + nextDay) * 1000
+                                return DateFormat.getDateInstance(DateFormat.SHORT).format(calendar.time)
+                            }
+                        }
+                        xAxis.granularity = 1f
+                        axisLeft.axisMinimum = 0f
+                        axisLeft.granularity = 1f
+
+                        xAxis.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
+                        axisLeft.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
+                    }.lparams(width = matchParent, height = dip(400)) {
+                        bottomPadding = dip(20)
+                    }
+
+                    noDataLabel = textView(R.string.stats_no_data) {
+                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                    }.lparams {
+                        gravity = Gravity.CENTER
+                    }.lparams(width = matchParent, height = dip(400))
+                }.lparams(width = matchParent) {
+                    margin = dip(16)
+                }
+            }
+        }.view
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        refreshGraph()
+    }
+
+    private fun refreshGraph() {
         val rawDayStats = Database.getInstance(requireContext()).getAskedItem()
 
         val dayStats = rawDayStats.groupBy {
@@ -72,62 +137,13 @@ class TestStatsFragment: Fragment() {
         barData.setDrawValues(false)
         barData.dataSetLabels
 
-        if (values.isEmpty()) {
-            return UI {
-                frameLayout {
-                    textView(R.string.stats_no_data) {
-                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    }.lparams {
-                        gravity = Gravity.CENTER
-                    }
-                }
-            }.view
+        if (values.isNotEmpty()) {
+            testItemsChart.data = barData
+            testItemsChart.visibility = View.VISIBLE
+            noDataLabel.visibility = View.GONE
+        } else {
+            testItemsChart.visibility = View.GONE
+            noDataLabel.visibility = View.VISIBLE
         }
-
-        return UI {
-            scrollView {
-                verticalLayout {
-                    textView(R.string.stats_items_answered) {
-                        setTypeface(null, Typeface.BOLD)
-                    }.lparams {
-                        gravity = Gravity.CENTER
-                        verticalMargin = dip(4)
-                    }
-
-                    testItems = barChart {
-                        data = barData
-
-                        description.isEnabled = false
-                        setDrawValueAboveBar(false)
-                        axisRight.isEnabled = false
-                        xAxis.position = XAxis.XAxisPosition.BOTTOM
-                        legend.isEnabled = false
-                        setPinchZoom(false)
-                        isDoubleTapToZoomEnabled = false
-                        setScaleEnabled(false)
-                        setDrawBorders(true)
-                        isHighlightPerTapEnabled = false
-                        isHighlightPerDragEnabled = false
-
-                        xAxis.valueFormatter = object : ValueFormatter() {
-                            val calendar = Calendar.getInstance()
-
-                            override fun getAxisLabel(value: Float, axis: AxisBase): String {
-                                calendar.timeInMillis = (value.toLong() * 24 * 3600 + nextDay) * 1000
-                                return DateFormat.getDateInstance(DateFormat.SHORT).format(calendar.time)
-                            }
-                        }
-                        xAxis.granularity = 1f
-                        axisLeft.axisMinimum = 0f
-                        axisLeft.granularity = 1f
-
-                        xAxis.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
-                        axisLeft.textColor = context.getColorFromAttr(android.R.attr.textColorPrimary)
-                    }.lparams(width = matchParent, height = dip(400))
-                }.lparams(width = matchParent) {
-                    margin = dip(16)
-                }
-            }
-        }.view
     }
 }
