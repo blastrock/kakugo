@@ -31,8 +31,8 @@ class Database private constructor(context: Context, private val database: SQLit
     fun getKanjiView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
             LearningDbView(database, KANJIS_TABLE_NAME, knowledgeType, filter = "radical = 0", classifier = classifier, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
-    fun getWordView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
-            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord)
+    fun getWordView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null, withKanaAlone: Boolean = true): LearningDbView =
+            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord, filter = if (!withKanaAlone) "kana_alone = 0" else "1")
 
     fun getOtherCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""

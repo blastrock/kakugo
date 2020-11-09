@@ -30,7 +30,8 @@ class TestEngine(
 
                     TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_DRAWING, TestType.KANJI_COMPOSITION -> db.getKanjiView(getKnowledgeType(testType))
 
-                    TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> db.getWordView(getKnowledgeType(testType))
+                    TestType.WORD_TO_READING, TestType.READING_TO_WORD -> db.getWordView(getKnowledgeType(testType), withKanaAlone = false)
+                    TestType.WORD_TO_MEANING, TestType.MEANING_TO_WORD -> db.getWordView(getKnowledgeType(testType))
                 }
     }
 
