@@ -193,11 +193,11 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {
-        val contents = Word("", "", listOf(), listOf())
+        val contents = Word("", "", listOf(), listOf(), false)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         database.rawQuery("""
-            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en
+            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone
             FROM $WORDS_TABLE_NAME k
             LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
@@ -213,6 +213,7 @@ class Database private constructor(context: Context, private val database: SQLit
                 contents.meanings = localMeaning.split('_')
             else
                 contents.meanings = cursor.getString(8).split('_')
+            contents.kanaAlone = cursor.getInt(9) != 0
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
             item.lastAsked = cursor.getLong(5)
@@ -224,7 +225,7 @@ class Database private constructor(context: Context, private val database: SQLit
                 "similarity_class = ? AND id <> ?", arrayOf(similarityClass.toString(), id.toString()),
                 null, null, "RANDOM()", "20").use { cursor ->
             while (cursor.moveToNext())
-                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf()), 0.0, 0.0, 0, false))
+                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf(), false), 0.0, 0.0, 0, false))
         }
         contents.similarities = similarWords
         return item

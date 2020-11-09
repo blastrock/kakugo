@@ -27,7 +27,8 @@ data class Word(
         var word: String,
         var reading: String,
         var meanings: List<String>,
-        var similarities: List<Item>
+        var similarities: List<Item>,
+        var kanaAlone: Boolean,
 ) : ItemContents()
 
 data class Item(
