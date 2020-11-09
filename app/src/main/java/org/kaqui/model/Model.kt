@@ -144,7 +144,7 @@ fun Item.getQuestionText(testType: TestType): String =
             TestType.READING_TO_KANJI -> (contents as Kanji).readingsText
             TestType.MEANING_TO_KANJI -> (contents as Kanji).meaningsText
 
-            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING -> (contents as Word).word
+            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING -> this.text
             TestType.READING_TO_WORD -> (contents as Word).reading
             TestType.MEANING_TO_WORD -> (contents as Word).meaningsText
 
@@ -162,7 +162,7 @@ fun Item.getAnswerText(testType: TestType): String =
 
             TestType.WORD_TO_READING -> (contents as Word).reading
             TestType.WORD_TO_MEANING -> (contents as Word).meaningsText
-            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> (contents as Word).word
+            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> this.text
 
             TestType.KANJI_DRAWING, TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING -> throw RuntimeException("No answer text for writing test")
         }
@@ -189,7 +189,10 @@ val Item.text: String
         }
         is Word -> {
             val word = contents as Word
-            word.word
+            if (!word.kanaAlone)
+                word.word
+            else
+                word.reading
         }
     }
 
