@@ -23,4 +23,15 @@
         <item>rtk</item>
         <item>rtk6</item>
     </string-array>
+
+    <string-array name="dict_list">
+        <item>AE-Dict</item>
+        <item>AkebiFree</item>
+        <item>Jisho_org</item>
+    </string-array>
+    <string-array name="dict_pref_ids">
+        <item>ae</item>
+        <item>akebi</item>
+        <item>jisho</item>
+    </string-array>
 </resources>
