@@ -128,6 +128,12 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 startActivity<SavedSelectionsActivity>("mode" to mode as Serializable)
                 true
             }
+            R.id.select_none -> {
+                dbView.setAllEnabled(false)
+                adapter.notifyDataSetChanged()
+                statsFragment.updateStats(dbView)
+                true
+            }
             R.id.import_selection -> {
                 importItems()
                 true

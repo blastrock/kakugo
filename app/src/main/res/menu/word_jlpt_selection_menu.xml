@@ -7,6 +7,11 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/jlpt_search"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/select_none"
+        android:title="@string/select_none" />
+    
     <item
         android:id="@+id/save_selection"
         android:title="@string/save_current_selection" />
