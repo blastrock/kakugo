@@ -811,7 +811,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 22
+        const val DATABASE_VERSION = 23
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
