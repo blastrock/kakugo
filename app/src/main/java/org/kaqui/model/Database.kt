@@ -247,7 +247,7 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
-    fun autoSelectWords() {
+    fun autoSelectWords(classifier: Classifier? = null) {
         val enabledKanjis = HashSet<Char>()
         database.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
@@ -255,7 +255,7 @@ class Database private constructor(context: Context, private val database: SQLit
             }
         }
         var allWords =
-                database.query(WORDS_TABLE_NAME, arrayOf("id, item"), null, null, null, null, null).use { cursor ->
+                database.query(WORDS_TABLE_NAME, arrayOf("id, item"), classifier?.whereClause(), classifier?.whereArguments(), null, null, null).use { cursor ->
                     val ret = mutableListOf<Pair<Long, String>>()
                     while (cursor.moveToNext()) {
                         ret.add(Pair(cursor.getLong(0), cursor.getString(1)))
@@ -269,7 +269,7 @@ class Database private constructor(context: Context, private val database: SQLit
         try {
             val cv = ContentValues()
             cv.put("enabled", false)
-            database.update(WORDS_TABLE_NAME, cv, null, null)
+            database.update(WORDS_TABLE_NAME, cv, classifier?.whereClause(), classifier?.whereArguments())
             cv.put("enabled", true)
             for (word in allWords) {
                 database.update(WORDS_TABLE_NAME, cv, "id = ?", arrayOf(word.first.toString()))

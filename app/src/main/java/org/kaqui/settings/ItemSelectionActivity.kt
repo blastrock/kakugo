@@ -64,13 +64,25 @@ class ItemSelectionActivity : BaseActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(Menu.NONE, R.id.select_all, 1, R.string.select_all)
-        menu.add(Menu.NONE, R.id.select_none, 2, R.string.select_none)
+        if (mode == Mode.WORD) {
+            menu.add(Menu.NONE, R.id.autoselect, 1, R.string.autoselect_from_kanji)
+                    .setTitleCondensed(getString(R.string.autoselect_from_kanji_short))
+                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        }
+
+        menu.add(Menu.NONE, R.id.select_all, 2, R.string.select_all)
+        menu.add(Menu.NONE, R.id.select_none, 3, R.string.select_none)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.autoselect -> {
+                Database.getInstance(this).autoSelectWords(classifier!!)
+                listAdapter.notifyDataSetChanged()
+                statsFragment.updateStats(dbView)
+                return true
+            }
             R.id.select_all -> {
                 dbView.setAllEnabled(true)
                 listAdapter.notifyDataSetChanged()
