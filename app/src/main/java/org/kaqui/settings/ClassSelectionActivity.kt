@@ -213,7 +213,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
         try {
             val kanjis = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
-            Database.getInstance(this).setSelection(kanjis)
+            Database.getInstance(this).setKanjiSelection(kanjis)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
             Toast.makeText(this, getString(R.string.could_not_import_file, e.toString()), Toast.LENGTH_LONG).show()

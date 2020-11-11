@@ -231,7 +231,7 @@ class Database private constructor(context: Context, private val database: SQLit
         return item
     }
 
-    fun setSelection(kanjis: String) {
+    fun setKanjiSelection(kanjis: String) {
         database.beginTransaction()
         try {
             val cv = ContentValues()
