@@ -87,7 +87,7 @@
     <string name="override_selection_title">Sélection automatique du vocabulaire</string>
     <string name="override_selection_msg">Voulez-vous selectionner les mots correspondants aux kanji sélectionnés ?\nCeci écrasera votre sélection de vocabulaire actuelle.</string>
     <string name="could_not_import_file">Impossible d\'importer le fichier: %1$s</string>
-    <string name="import_kanji_help">Cette fonctionalité permet d\'importer une sélection de kanji à partir d\'un fichier. Le fichier doit contenir tous les kanji à importer, sur une seule ligne, sans espace ou quelconque séparateur.</string>
+    <string name="import_kanji_help">Cette fonctionalité permet d\'importer une sélection de kanji à partir d\'un fichier. Le fichier doit contenir un kanji par ligne. Les kanji seront ajoutés à la sélection courrante.</string>
     <string name="additional_kanji">Kanji additionnels</string>
     <string name="jlpt_level_n">JLPT niveau %1$s</string>
     <string name="rtk_index_range">Index %1$s+</string>
