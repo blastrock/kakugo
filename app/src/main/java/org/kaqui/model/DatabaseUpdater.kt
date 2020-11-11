@@ -477,6 +477,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                 if (cursor.getInt(2) != 0)
                     enabledWords.add(WordId(cursor.getString(0), cursor.getString(1)))
         }
+        val wordSelections = mutableMapOf<String, MutableList<WordId>>()
+        database.rawQuery("""
+                SELECT ws.name, w.item, w.reading
+                FROM ${Database.WORDS_SELECTION_TABLE_NAME} ws
+                LEFT JOIN ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} wis USING(id_selection)
+                JOIN ${Database.WORDS_TABLE_NAME} w ON w.id = wis.id_word
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                wordSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(
+                        WordId(cursor.getString(1), cursor.getString(2)))
+        }
         val scores = mutableListOf<DumpScore>()
         database.query(Database.ITEM_SCORES_TABLE_NAME, arrayOf("id", "type", "short_score", "long_score", "last_correct"), "id < $WordBaseId", null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -490,17 +501,6 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             """, null).use { cursor ->
             while (cursor.moveToNext())
                 wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
-        }
-        val wordSelections = mutableMapOf<String, MutableList<WordId>>()
-        database.rawQuery("""
-                SELECT ws.name, w.item, w.reading
-                FROM ${Database.WORDS_SELECTION_TABLE_NAME} ws
-                LEFT JOIN ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} wis USING(id_selection)
-                JOIN ${Database.WORDS_TABLE_NAME} w ON w.id = wis.id_word
-            """, null).use { cursor ->
-            while (cursor.moveToNext())
-                wordSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(
-                        WordId(cursor.getString(1), cursor.getString(2)))
         }
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, listOf(), listOf())
     }
@@ -532,6 +532,17 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             while (cursor.moveToNext())
                 if (cursor.getInt(2) != 0)
                     enabledWords.add(WordId(cursor.getString(0), cursor.getString(1)))
+        }
+        val wordSelections = mutableMapOf<String, MutableList<WordId>>()
+        database.rawQuery("""
+                SELECT ws.name, w.item, w.reading
+                FROM ${Database.WORDS_SELECTION_TABLE_NAME} ws
+                LEFT JOIN ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} wis USING(id_selection)
+                JOIN ${Database.WORDS_TABLE_NAME} w ON w.id = wis.id_word
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                wordSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(
+                        WordId(cursor.getString(1), cursor.getString(2)))
         }
         val scores = mutableListOf<DumpScore>()
         database.query(Database.ITEM_SCORES_TABLE_NAME, arrayOf("id", "type", "short_score", "long_score", "last_correct"), "id < $WordBaseId", null, null, null, null).use { cursor ->
@@ -615,7 +626,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                 ))
             }
         }
-        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), snapshots, sessions)
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, snapshots, sessions)
     }
 
     private fun enableOnly(tableName: String, toEnable: List<Int>) {
