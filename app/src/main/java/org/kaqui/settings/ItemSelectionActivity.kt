@@ -64,7 +64,8 @@ class ItemSelectionActivity : BaseActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.item_selection_menu, menu)
+        menu.add(Menu.NONE, R.id.select_all, 1, R.string.select_all)
+        menu.add(Menu.NONE, R.id.select_none, 2, R.string.select_none)
         return true
     }
 

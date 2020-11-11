@@ -4,4 +4,6 @@
     <item name="main_test_block" type="id" />
     <item name="history_scroll_view" type="id" />
     <item name="settings_main_view" type="id" />
+    <item name="select_all" type="id" />
+    <item name="select_none" type="id" />
 </resources>
