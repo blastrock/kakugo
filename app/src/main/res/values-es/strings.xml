@@ -10,7 +10,7 @@
     <string name="select_none">Seleccionar ninguno</string>
     <string name="autoselect_from_kanji">Seleccionar automáticamente palabras de los kanji seleccionados</string>
     <string name="autoselect_from_kanji_short">Auto</string>
-    <string name="import_selection">Importar una selección de kanji</string>
+    <string name="import_selection">Importar una selección</string>
     <string name="database_error">Error de base de datos</string>
     <string name="custom_test">Prueba personalizada</string>
     <string name="select_test_types">Seleccione el tipo de preguntas deseadas:</string>

@@ -128,8 +128,8 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 startActivity<SavedSelectionsActivity>("mode" to mode as Serializable)
                 true
             }
-            R.id.import_kanji_selection -> {
-                importKanjis()
+            R.id.import_selection -> {
+                importItems()
                 true
             }
             R.id.autoselect -> {
@@ -180,13 +180,19 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
         toast(getString(R.string.saved_selection, name))
     }
 
-    private fun importKanjis() {
-        alert(getString(R.string.import_kanji_help)) {
-            okButton { doImportKanjis() }
+    private fun importItems() {
+        val msg =
+                if (mode == SelectionMode.KANJI)
+                    R.string.import_kanji_help
+                else
+                    R.string.import_words_help
+
+        alert(msg) {
+            okButton { showSelectFileForImport() }
         }.show()
     }
 
-    private fun doImportKanjis() {
+    private fun showSelectFileForImport() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
@@ -201,7 +207,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED })
-            importKanjis()
+            importItems()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -212,8 +218,11 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             return
 
         try {
-            val kanjis = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
-            Database.getInstance(this).setKanjiSelection(kanjis)
+            val items = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
+            if (mode == SelectionMode.KANJI)
+                Database.getInstance(this).setKanjiSelection(items)
+            else
+                Database.getInstance(this).setWordSelection(items)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
             Toast.makeText(this, getString(R.string.could_not_import_file, e.toString()), Toast.LENGTH_LONG).show()

@@ -245,6 +245,22 @@ class Database private constructor(context: Context, private val database: SQLit
         }
     }
 
+    fun setWordSelection(wordsString: String) {
+        val words = wordsString.split("\n")
+        database.beginTransaction()
+        try {
+            val cv = ContentValues()
+            cv.put("enabled", true)
+            for (word in words) {
+                val trimmedWord = word.trim()
+                database.update(WORDS_TABLE_NAME, cv, "item = ? OR (kana_alone = 1 AND reading = ?)", arrayOf(trimmedWord, trimmedWord))
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
     fun autoSelectWords(classifier: Classifier? = null) {
         val enabledKanjis = HashSet<Char>()
         database.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->

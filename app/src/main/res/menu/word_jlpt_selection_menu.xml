@@ -18,4 +18,7 @@
     <item
         android:id="@+id/load_selection"
         android:title="@string/load_selection" />
+    <item
+        android:id="@+id/import_selection"
+        android:title="@string/import_selection" />
 </menu>

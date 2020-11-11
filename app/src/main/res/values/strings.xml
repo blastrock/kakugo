@@ -14,7 +14,7 @@
     <string name="select_none">Select none</string>
     <string name="autoselect_from_kanji">Automatically select words from selected kanji</string>
     <string name="autoselect_from_kanji_short">Auto</string>
-    <string name="import_selection">Import kanji selection</string>
+    <string name="import_selection">Import selection</string>
     <string name="database_error">Database error</string>
     <string name="custom_test">Custom test</string>
     <string name="select_test_types">Select the desired types of questions:</string>
@@ -94,6 +94,7 @@
     <string name="override_selection_msg">Do you want to select words based on your selected kanji?\nThis will override your current vocabulary selection.</string>
     <string name="could_not_import_file">Could not import file: %1$s</string>
     <string name="import_kanji_help">This feature allows importing a kanji selection from a file. The file must contain one kanji per line. The kanji will be added to the current selection.</string>
+    <string name="import_words_help">This feature allows importing a word selection from a file. The file must contain one word per line. The words will be added to the current selection.</string>
     <string name="additional_kanji">Additional kanji</string>
     <string name="jlpt_level_n">JLPT level %1$s</string>
     <string name="rtk_index_range">Indexes %1$s+</string>

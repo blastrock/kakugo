@@ -10,7 +10,7 @@
     <string name="select_none">Tout désélectionner</string>
     <string name="autoselect_from_kanji">Sélectionner automatiquement les mots à partir des kanji sélectionnés</string>
     <string name="autoselect_from_kanji_short">Auto</string>
-    <string name="import_selection">Importer une sélection de kanji</string>
+    <string name="import_selection">Importer une sélection</string>
     <string name="database_error">Erreur de base de données</string>
     <string name="custom_test">Test personalisé</string>
     <string name="select_test_types">Sélectionnez le type de question désiré:</string>
@@ -88,6 +88,7 @@
     <string name="override_selection_msg">Voulez-vous selectionner les mots correspondants aux kanji sélectionnés ?\nCeci écrasera votre sélection de vocabulaire actuelle.</string>
     <string name="could_not_import_file">Impossible d\'importer le fichier: %1$s</string>
     <string name="import_kanji_help">Cette fonctionalité permet d\'importer une sélection de kanji à partir d\'un fichier. Le fichier doit contenir un kanji par ligne. Les kanji seront ajoutés à la sélection courrante.</string>
+    <string name="import_words_help">Cette fonctionalité permet d\'importer une sélection de mots à partir d\'un fichier. Le fichier doit contenir un mot par ligne. Les mots seront ajoutés à la sélection courrante.</string>
     <string name="additional_kanji">Kanji additionnels</string>
     <string name="jlpt_level_n">JLPT niveau %1$s</string>
     <string name="rtk_index_range">Index %1$s+</string>

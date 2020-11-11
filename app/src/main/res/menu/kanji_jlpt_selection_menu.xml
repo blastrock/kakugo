@@ -13,7 +13,7 @@
         android:id="@+id/load_selection"
         android:title="@string/load_selection" />
     <item
-        android:id="@+id/import_kanji_selection"
+        android:id="@+id/import_selection"
         android:title="@string/import_selection" />
 
 </menu>
