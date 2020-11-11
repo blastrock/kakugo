@@ -6,4 +6,9 @@
     <item name="settings_main_view" type="id" />
     <item name="select_all" type="id" />
     <item name="select_none" type="id" />
+    <item name="search" type="id" />
+    <item name="autoselect" type="id" />
+    <item name="load_selection" type="id" />
+    <item name="save_selection" type="id" />
+    <item name="import_selection" type="id" />
 </resources>

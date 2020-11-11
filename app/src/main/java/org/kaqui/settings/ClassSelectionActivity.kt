@@ -89,10 +89,17 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(when (mode) {
-            SelectionMode.KANJI -> R.menu.kanji_jlpt_selection_menu
-            SelectionMode.WORD -> R.menu.word_jlpt_selection_menu
-        }, menu)
+        menu.add(Menu.NONE, R.id.search, 0, R.string.jlpt_search)
+                .setIcon(android.R.drawable.ic_menu_search)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
+
+        menu.add(Menu.NONE, R.id.save_selection, 1, R.string.save_current_selection)
+        menu.add(Menu.NONE, R.id.load_selection, 2, R.string.load_selection)
+        menu.add(Menu.NONE, R.id.select_none, 3, R.string.select_none)
+        if (mode == SelectionMode.WORD)
+            menu.add(Menu.NONE, R.id.autoselect, 4, R.string.autoselect_from_kanji)
+        menu.add(Menu.NONE, R.id.import_selection, 4, R.string.import_selection)
+
         return true
     }
 
