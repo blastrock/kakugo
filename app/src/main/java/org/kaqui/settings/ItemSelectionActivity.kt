@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.item_selection_activity.*
+import org.jetbrains.anko.alert
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
@@ -78,9 +79,16 @@ class ItemSelectionActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.autoselect -> {
-                Database.getInstance(this).autoSelectWords(classifier!!)
-                listAdapter.notifyDataSetChanged()
-                statsFragment.updateStats(dbView)
+                alert {
+                    titleResource = R.string.override_selection_title
+                    messageResource = R.string.override_selection_msg
+                    positiveButton(android.R.string.yes) {
+                        Database.getInstance(this@ItemSelectionActivity).autoSelectWords(classifier!!)
+                        listAdapter.notifyDataSetChanged()
+                        statsFragment.updateStats(dbView)
+                    }
+                    negativeButton(android.R.string.no) {}
+                }.show()
                 return true
             }
             R.id.select_all -> {
