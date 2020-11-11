@@ -12,8 +12,7 @@
     <string name="word_selection">Word selection</string>
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>
-    <string name="autoselect_from_kanji">Automatically select words from selected kanji</string>
-    <string name="autoselect_from_kanji_short">Auto</string>
+    <string name="autoselect_from_kanji">Automatically select words</string>
     <string name="import_selection">Import selection</string>
     <string name="database_error">Database error</string>
     <string name="custom_test">Custom test</string>

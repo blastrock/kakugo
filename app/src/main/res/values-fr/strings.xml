@@ -8,8 +8,7 @@
     <string name="word_selection">Sélection des mots</string>
     <string name="select_all">Tout sélectioner</string>
     <string name="select_none">Tout désélectionner</string>
-    <string name="autoselect_from_kanji">Sélectionner automatiquement les mots à partir des kanji sélectionnés</string>
-    <string name="autoselect_from_kanji_short">Auto</string>
+    <string name="autoselect_from_kanji">Sélectionner les mots automatiquement</string>
     <string name="import_selection">Importer une sélection</string>
     <string name="database_error">Erreur de base de données</string>
     <string name="custom_test">Test personalisé</string>

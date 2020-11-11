@@ -73,8 +73,6 @@ class ItemSelectionActivity : BaseActivity() {
 
         if (mode == Mode.WORD) {
             menu.add(Menu.NONE, R.id.autoselect, 2, R.string.autoselect_from_kanji)
-                    .setTitleCondensed(getString(R.string.autoselect_from_kanji_short))
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
 
         menu.add(Menu.NONE, R.id.select_all, 3, R.string.select_all)
