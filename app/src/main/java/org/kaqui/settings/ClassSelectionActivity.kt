@@ -207,7 +207,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED })
-            importItems()
+            showSelectFileForImport()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
