@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
+import androidx.core.database.sqlite.transaction
 
 class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: String) {
     data class Dump(
@@ -161,8 +162,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     private fun doUpgrade() {
         database.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
-        database.beginTransaction()
-        try {
+        database.transaction {
             val oldVersion = database.version
 
             val dump =
@@ -207,10 +207,6 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             if (dump != null)
                 restoreUserData(dump)
             database.version = DATABASE_VERSION
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
-            database.execSQL("DETACH DATABASE dict")
         }
     }
 
@@ -657,8 +653,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
     }
 
     private fun restoreUserData(data: Dump) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             database.delete(Database.ITEM_SCORES_TABLE_NAME, null, null)
             run {
                 val cv = ContentValues()
@@ -803,9 +798,6 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                     }
                 }
             }
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
