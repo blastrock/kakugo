@@ -159,11 +159,14 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.34?</h3>
+        <h3>What\'s new in 1.35?</h3>
 
+        <br/>- Reclassified word list per JLPT level using data from Jonathan Waller
+        <br/>- Words usually written in kana are now written in kana
+        <br/>- Word reading tests don\'t include words written in kana anymore
+        <br/>- Added import words from file feature
+        <!-- -->
         <br/>- Added progress report
         <br/>- Added an option to keep the screen on during tests
-        <!-- -->
-        <br/>- Quiz answers are now hidden by default and there\'s a button to show them (this can be disabled in Settings)
     ]]></string>
 </resources>
