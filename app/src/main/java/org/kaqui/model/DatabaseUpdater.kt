@@ -174,6 +174,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         oldVersion < 19 -> dumpUserDataV18()
                         oldVersion < 21 -> dumpUserDataV20()
                         oldVersion < 22 -> dumpUserDataV21()
+                        oldVersion > DATABASE_VERSION -> throw RuntimeException("reverting to an old version of the app is not supported")
                         else -> dumpUserData()
                     }
             database.execSQL("DROP TABLE IF EXISTS main.meanings")
