@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="word"><font size="30">語彙</font>\nVOKABELN</string>
+    <string name="stats"><font size="30">進歩</font>\nFORTSCHRITT</string>
+    <string name="settings"><font size="30">設定</font>\nEINSTELLUNGEN</string>
+    <string name="hiragana_selection">Hiragana Auswahl</string>
+    <string name="katakana_selection">Katakana Auswahl</string>
+    <string name="kanji_selection">Kanji Auswahl</string>
+    <string name="word_selection">Vokabel Auswahl</string>
+    <string name="select_all">Alle auswählen</string>
+    <string name="select_none">Alle abwählen</string>
+    <string name="autoselect_from_kanji_short">Auto</string>
+    <string name="import_selection">Importiere Kanji Auswahl</string>
+    <string name="database_error">Datenbankfehler</string>
+    <string name="custom_test">Benutzerdefinierter Test</string>
+    <string name="select_test_types">Wählen Sie den gewünschten Fragetyp:</string>
+    <string name="select_at_least_one_type">Sie müssen mindestens einen Fragetyp auswählen.</string>
+    <string name="hiragana_to_romaji">Hiragana zu Romaji Quiz (ひ→hi)</string>
+    <string name="romaji_to_hiragana">Romaji zu Hiragana (hi→ひ)</string>
+    <string name="hiragana_to_romaji_typing">Hiragana zu Romaji Schreibung (ひ→hi)</string>
+    <string name="hiragana_drawing">Hiragana Strichfolge</string>
+    <string name="katakana_to_romaji">Katakana zu Romaji (ヒ→hi)</string>
+    <string name="romaji_to_katakana">Romaji zu Katakana (hi→ヒ)</string>
+    <string name="katakana_to_romaji_typing">Katakana zu Romaji Schreibung (ヒ→hi)</string>
+    <string name="katakana_drawing">Katakana Strichfolge</string>
+    <string name="kanji_to_reading">Kanji zu Lesung (日→ひ)</string>
+    <string name="reading_to_kanji">Lesung zu Kanji (ひ→日)</string>
+    <string name="kanji_to_meaning">Kanji zu Bedeutung (日→day)</string>
+    <string name="meaning_to_kanji">Bedeutung zu Kanji (day→日)</string>
+    <string name="kanji_composition">Kanji Komposita (休→亻+木)</string>
+    <string name="kanji_drawing">Kanji Strichfolge</string>
+    <string name="word_to_reading">Vokabel zu Lesung (日の出→ひので)</string>
+    <string name="reading_to_word">Lesung zu Vokabel (ひので→日の出)</string>
+    <string name="word_to_meaning">Vokabel zu Bedeutung (日の出→sunrise)</string>
+    <string name="meaning_to_word">Bedeutung zu Vokabel (sunrise→日の出)</string>
+    <string name="hiragana_to_romaji_title">Hiragana zu Romaji Quiz</string>
+    <string name="romaji_to_hiragana_title">Romaji zu Hiragana</string>
+    <string name="hiragana_to_romaji_typing_title">Hiragana zu Romaji Schreibung</string>
+    <string name="hiragana_drawing_title">Hiragana Schreibung</string>
+    <string name="katakana_to_romaji_title">Katakana zu Romaji</string>
+    <string name="romaji_to_katakana_title">Romaji zu Katakana</string>
+    <string name="katakana_to_romaji_typing_title">Katakana zu Romaji Schreibung</string>
+    <string name="katakana_drawing_title">Katakana Strichfolge</string>
+    <string name="kanji_to_reading_title">Kanji zu Lesung</string>
+    <string name="reading_to_kanji_title">Lesung zu Kanji</string>
+    <string name="kanji_to_meaning_title">Kanji zu Bedeutung</string>
+    <string name="meaning_to_kanji_title">Bedeutung zu Kanji</string>
+    <string name="kanji_drawing_title">Kanji Strichfolge</string>
+    <string name="word_to_reading_title">Vokabel zu Lesung</string>
+    <string name="reading_to_word_title">Lesung zu Vokabel</string>
+    <string name="word_to_meaning_title">Vokabel zu Bedeutung</string>
+    <string name="meaning_to_word_title">Bedeutung zu Vokabel</string>
+    <string name="sure">Sicher</string>
+    <string name="maybe">Möglich</string>
+    <string name="dont_know">Weiß nicht</string>
+    <string name="jlpt_search">Suche</string>
+    <string name="hint">Hinweis</string>
+    <string name="save_current_selection">Aktuelle Auswahl speichern</string>
+    <string name="load_selection">Auswahl laden</string>
+    <string name="changelog">Versionsänderungen</string>
+    <string name="title_stats">Fortschritt</string>
+    <string name="stats_no_data">Noch keine Daten verfügbar. Ihr Fortschritt erscheint hier, nachdem sie Tests absolviert haben.</string>
+    <string name="stats_items_answered">Fragen beantwortet</string>
+    <string name="title_about">Über Kakugo</string>
+    <string name="score_string">Lerneinheit Punkte: %1$d/%2$d</string>
+    <string name="search_kanji_hint">Suche Kanji&#8230;</string>
+    <string name="search_word_hint">Suche Vokabel&#8230;</string>
+    <string name="confirm_test_stop_title">Lerneinheit beenden</string>
+    <string name="initializing_kanji_db">Initialisiere Datenbank</string>
+    <string name="jlpt_level_n">JLPT Stufe %1$s</string>
+    <string name="answerDone">Fertig</string>
+    <string name="word_title">Vokabeln</string>
+    <string name="title_activity_main_settings">Einstellungen</string>
+    <string name="pref_cat_appearance">Erscheinungsbild</string>
+    <string name="pref_cat_behavior">Verhalten</string>
+    <string name="pref_cat_language">Sprache</string>
+    <string name="pref_cat_about">Über</string>
+    <string name="pref_cat_classification">Aufgliederung</string>
+    <string name="kanji_composition_title">Kanji Komposita</string>
+    <string name="confirm_test_stop_message">Sind sie sicher, dass sie die Lerneinheit beenden möchten?</string>
+    <string name="stats_correct_answers">Richtige Antworten</string>
+    <string name="stats_wrong_answers">Falsche Antworten</string>
+    <string name="show_answers">Antworten anzeigen</string>
+    <string name="hide_answers">Antworten verbergen</string>
+    <string name="hide_answers_on_summary">Sie müssen auf eine Schaltfläche klicken um die Antworten zu sehen</string>
+    <string name="hide_answers_off_summary">Die Antworten werden zeitgleich zur Frage angezeigt</string>
+    <string name="single_button_mode">Einzelknopf Modus</string>
+    <string name="failed_to_load_font">Fehler beim laden benutzerdefinierter Schriftart: %s</string>
+    <string name="failed_to_load_resource">Fehler beim Laden von Ressource: %s</string>
+    <string name="use_custom_font">Benutzerdefinierte Schriftart verwenden</string>
+    <string name="pick_custom_font">Wählen sie eine benutzerdefinierte japanische Schriftart</string>
+    <string name="single_button_off_summary">Zwei Schaltflächen \"sicher\" und \"möglich\" werden angezeigt</string>
+    <string name="single_button_on_summary">Langer Klick auf eine Antwort wird als \"möglich\" gewertet</string>
+    <string name="kanji_classification">Kanji Klassifizierung</string>
+    <string name="enable_dark_theme">Dunkles Erscheinungsbild aktivieren</string>
+    <string name="will_update_later">Wird beim Verlassen der Einstellungen aktualisiert</string>
+    <string name="dictionary_language">Wörterbuch Sprache</string>
+    <string name="lang_system_default">System Standard</string>
+    <string name="enable_a_few_items">Sie müssen mindestens 10 Objekte auswählen um eine Lerneinheit zu starten</string>
+    <string name="autoselecting_words">Wähle automatisch Vokabeln von den ausgewählten Kanji</string>
+    <string name="failed_to_init_db">Fehler beim Initialisieren der Datenbank: %1$s</string>
+    <string name="info_button">Zeige Details</string>
+    <string name="next">Weiter</string>
+    <string name="selection_presentation">%1$s (%2$d Objekte)</string>
+    <string name="delete">Löschen</string>
+    <string name="loaded_selection">Auswahl geladen \"%1$s\"</string>
+    <string name="deleted_selection">Auswahl gelöscht \"%1$s\"</string>
+    <string name="saved_selection">Aktuelle Auswahl gespeichert als \"%1$s\"</string>
+    <string name="enter_name_of_selection">Geben sie einen Namen für diese Auswahl ein</string>
+    <string name="override_selection_title">Wähle automatisch Vokabeln</string>
+    <string name="could_not_import_file">Kann folgende Datei nicht importieren: %1$s</string>
+    <string name="additional_kanji">Zusätzliche Kanji</string>
+    <string name="rtk_index_range">Indexe %1$s+</string>
+    <string name="rtk6_index_range">Indexe %1$s+</string>
+    <string name="changelog_contents"><![CDATA[
+        <h3>Was ist neu in 1.34?</h3>
+
+        <br/>- Fortschrittsbericht hinzugefügt
+        <br/>- Option um den Bildschirm während Tests aktiv zu lassen hinzugefügt
+        <!-- -->
+        <br/>- Quiz Antworten sind jetzt standardmäßig verdeckt und es gibt einen Knopf um sie anzuzeigen, (dies kann über die Einstellungen deaktiviert werden)
+    ]]></string>
+    <string name="about_text"><![CDATA[
+        <p>Kakugo ist eine Japanisch Lern-App. Version %1$s (%2$d).</p>
+
+        <p>Sie ist quelloffen und verfügbar über <a href="https://github.com/blastrock/kakugo/">github</a> unter der GPLv3 Lizenz.</p>
+
+        <p>Das Kanji Wörterbuch basiert auf <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
+        <p>Das Vokabel-Wörterbuch basiert auf <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
+        <p>Die Kanji Ähnlichkeits-Datenbank stammt von <a href="http://lars.yencken.org/datasets/phd/">einer Studie von Dr. Lars Yencken</a>.</p>
+        <p>Die Kanji Aufbau- und Strichfolge-Datenbank stammt von <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
+        <p>Die App Symbol-Schriftart ist <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
+        <p>Die App Titel-Schriftart ist <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
+
+        <p>Kakugo  Urheberrecht (Copyright) &#169; 2019  Philippe Daouadi</p>
+    ]]></string>
+    <string name="autoselect_from_kanji">Wähle automatisch Vokabeln von den ausgewählten Kanji</string>
+    <string name="keep_screen_on_summary">Bildschirm während der Tests aktiv lassen</string>
+    <string name="keep_screen_on">Bildschirm eingeschaltet lassen</string>
+    <string name="override_selection_msg">Möchten sie Vokabeln, basierend auf ihrer Kanji-Auswahl auswählen? Dies wird ihre aktuelle Vokabel-Auswahl überschreiben.</string>
+    <string name="import_kanji_help">Diese Funktion erlaubt den Import einer Kanji-Auswahl aus einer Datei. Die Datei muss alle Kanji die importiert werden sollen in einer einzigen Zeile, ohne Leerzeichen oder andere Trennzeichen beinhalten.</string>
+</resources>
