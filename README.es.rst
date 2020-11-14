@@ -38,10 +38,12 @@ Las características incluyen:
 Créditos
 ========
 
-- Los cuestionarios de kanji se basan en `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
-- Los cuestionarios de vocabulario se basan en `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
-- La base de datos de similitudes en kanji proviene de https://minerva-access.unimelb.edu.au/handle/11343/35336 y http://lars.yencken.org/datasets/phd/
-- La base de datos de composición y dibujo de kanji proviene de `KanjiVG <https://kanjivg.tagaini.net/>`_.
+- El diccionario de kanji se basa en `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
+- El diccionario de vocabulario se basa en `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
+- Los datos de similitud de kanji son a cortesía de `un estudio del Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
+- Los datos de composición y dibujo de los kanji provienen de `KanjiVG <https://kanjivg.tagaini.net/>`_.
+- La fuente del icono de la aplicación es `Nagayama Kai <https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/>`_.
+- La fuente del título de la aplicaión es `Fonters <https://www.dafont.com/fonters.font>`_.
 
 Licencias
 =========
