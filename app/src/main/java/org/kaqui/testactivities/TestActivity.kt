@@ -532,26 +532,44 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
     }
 
     private fun showItemInDict(kanji: Kanji) {
-        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-        intent.putExtra("kanjis", kanji.kanji)
-        intent.putExtra("search_in_kanjidic", true)
-        intent.putExtra("showEntryDetailOnSingleResult", true)
-        try {
-            startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
+        val dict = applicationContext.defaultSharedPreferences.getString("external_dictionary", "aedict3")
+        if (dict == "aedict3") {
+            val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+            intent.putExtra("kanjis", kanji.kanji)
+            intent.putExtra("search_in_kanjidic", true)
+            intent.putExtra("showEntryDetailOnSingleResult", true)
+            try {
+                startActivity(intent)
+                return
+            } catch (e: ActivityNotFoundException) {
+                // not available
+            }
+        }
+        if (dict == "jiten") {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jiten.obfusk.dev/kanji?query=${kanji.kanji}")))
+        } else {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${kanji.kanji}%20%23kanji")))
         }
     }
 
     private fun showItemInDict(word: Word) {
-        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-        intent.putExtra("kanjis", word.word)
-        intent.putExtra("showEntryDetailOnSingleResult", true)
-        intent.putExtra("match_jp", "Exact")
-        intent.putExtra("deinflect", false)
-        try {
-            startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
+        val dict = applicationContext.defaultSharedPreferences.getString("external_dictionary", "aedict3")
+        if (dict == "aedict3") {
+            val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+            intent.putExtra("kanjis", word.word)
+            intent.putExtra("showEntryDetailOnSingleResult", true)
+            intent.putExtra("match_jp", "Exact")
+            intent.putExtra("deinflect", false)
+            try {
+                startActivity(intent)
+                return
+            } catch (e: ActivityNotFoundException) {
+                // not available
+            }
+        }
+        if (dict == "jiten") {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jiten.obfusk.dev/jmdict?query=${word.word}&exact=yes")))
+        } else {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${word.word}")))
         }
     }

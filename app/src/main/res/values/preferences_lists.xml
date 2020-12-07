@@ -23,4 +23,15 @@
         <item>rtk</item>
         <item>rtk6</item>
     </string-array>
+
+    <string-array name="external_dictionary_strings">
+        <item>@string/ext_dict_aedict3</item>
+        <item>@string/ext_dict_jisho</item>
+        <item>@string/ext_dict_jiten</item>
+    </string-array>
+    <string-array name="external_dictionary_ids">
+        <item>aedict3</item>
+        <item>jisho</item>
+        <item>jiten</item>
+    </string-array>
 </resources>
