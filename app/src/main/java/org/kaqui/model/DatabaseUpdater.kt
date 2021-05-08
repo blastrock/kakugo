@@ -40,6 +40,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
                         + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "meanings_es TEXT NOT NULL DEFAULT '',"
+                        + "meanings_de TEXT NOT NULL DEFAULT '',"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "rtk_index INTEGER NOT NULL DEFAULT 0,"
                         + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
@@ -97,6 +98,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
                         + "meanings_fr TEXT NOT NULL DEFAULT '',"
                         + "meanings_es TEXT NOT NULL DEFAULT '',"
+                        + "meanings_de TEXT NOT NULL DEFAULT '',"
                         + "kana_alone INTEGER NOT NULL DEFAULT 0,"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "rtk_index INTEGER NOT NULL DEFAULT 0,"
@@ -225,8 +227,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.delete(Database.KANJIS_TABLE_NAME, null, null)
         database.execSQL(
                 "INSERT INTO ${Database.KANJIS_TABLE_NAME} "
-                        + "(id, on_readings, kun_readings, meanings_en, meanings_fr, meanings_es, jlpt_level, rtk_index, rtk6_index, part_count, radical, enabled) "
-                        + "SELECT id, on_readings, kun_readings, meanings_en, meanings_fr, meanings_es, jlpt_level, rtk_index, rtk6_index, part_count, radical, jlpt_level = 5 "
+                        + "(id, on_readings, kun_readings, meanings_en, meanings_fr, meanings_es, meanings_de, jlpt_level, rtk_index, rtk6_index, part_count, radical, enabled) "
+                        + "SELECT id, on_readings, kun_readings, meanings_en, meanings_fr, meanings_es, meanings_de, jlpt_level, rtk_index, rtk6_index, part_count, radical, jlpt_level = 5 "
                         + "FROM dict.kanjis"
         )
         database.execSQL(
@@ -251,8 +253,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         database.delete(Database.WORDS_TABLE_NAME, null, null)
         database.execSQL(
                 "INSERT INTO ${Database.WORDS_TABLE_NAME} "
-                        + "(id, item, reading, meanings_en, meanings_fr, meanings_es, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class) "
-                        + "SELECT id, item, reading, meanings_en, meanings_fr, meanings_es, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class "
+                        + "(id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class) "
+                        + "SELECT id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class "
                         + "FROM dict.words"
         )
     }
@@ -803,7 +805,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 23
+        const val DATABASE_VERSION = 24
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
