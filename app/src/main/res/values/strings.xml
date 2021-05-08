@@ -116,6 +116,7 @@
     <string name="lang_english" translatable="false">English</string>
     <string name="lang_french" translatable="false">Français</string>
     <string name="lang_spanish" translatable="false">Español</string>
+    <string name="lang_german" translatable="false">Deutsch</string>
     <string name="kanji_classification">Kanji classification</string>
     <string name="kanji_class_jlpt" translatable="false">JLPT</string>
     <string name="kanji_class_rtk" translatable="false">Remembering The Kanji</string>
