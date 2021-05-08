@@ -5,12 +5,14 @@
         <item>@string/lang_english</item>
         <item>@string/lang_spanish</item>
         <item>@string/lang_french</item>
+        <item>@string/lang_german</item>
     </string-array>
     <string-array name="language_ids">
         <item></item>
         <item>en</item>
         <item>es</item>
         <item>fr</item>
+        <item>de</item>
     </string-array>
 
     <string-array name="kanji_classification_strings">
