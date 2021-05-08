@@ -32,7 +32,7 @@ Features include:
 - Open source
 - No ads
 - No internet access required
-- Supported languages: English, French, Spanish
+- Supported languages: English, French, Spanish, German
 - More to come
 
 Credits

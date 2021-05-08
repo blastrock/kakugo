@@ -32,7 +32,7 @@ Las características incluyen:
 - Código abierto
 - Sin anuncios
 - No requiere acceso a Internet
-- Idiomas soportados: Inglés, Francés, Español
+- Idiomas soportados: Inglés, Francés, Español, Alemán
 - Más por venir
 
 Créditos
