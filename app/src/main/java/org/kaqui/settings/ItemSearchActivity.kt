@@ -5,10 +5,10 @@ import android.view.ContextThemeWrapper
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.databinding.ItemSelectionActivityBinding
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 
@@ -28,7 +28,8 @@ class ItemSearchActivity : BaseActivity() {
 
         mode = intent.getSerializableExtra("mode") as Mode
 
-        setContentView(R.layout.item_selection_activity)
+        val binding = ItemSelectionActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -44,8 +45,8 @@ class ItemSearchActivity : BaseActivity() {
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
-        item_list.adapter = listAdapter
-        item_list.layoutManager = LinearLayoutManager(this)
+        binding.itemList.adapter = listAdapter
+        binding.itemList.layoutManager = LinearLayoutManager(this)
 
         val searchView = SearchView(ContextThemeWrapper(this, R.style.ThemeOverlay_AppCompat_Dark))
         searchView.isSubmitButtonEnabled = false

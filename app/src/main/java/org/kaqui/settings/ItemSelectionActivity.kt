@@ -3,11 +3,11 @@ package org.kaqui.settings
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import kotlinx.android.synthetic.main.item_selection_activity.*
 import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
+import org.kaqui.databinding.ItemSelectionActivityBinding
 import org.kaqui.model.Classifier
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
@@ -35,7 +35,8 @@ class ItemSelectionActivity : BaseActivity() {
             classifier = intent.getParcelableExtra("classifier")
         }
 
-        setContentView(R.layout.item_selection_activity)
+        val binding = ItemSelectionActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -53,8 +54,8 @@ class ItemSelectionActivity : BaseActivity() {
         }
 
         listAdapter = ItemSelectionAdapter(dbView, this, statsFragment)
-        item_list.adapter = listAdapter
-        item_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        binding.itemList.adapter = listAdapter
+        binding.itemList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         listAdapter.setup()
     }
 

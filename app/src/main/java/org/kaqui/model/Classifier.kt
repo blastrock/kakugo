@@ -2,7 +2,7 @@ package org.kaqui.model
 
 import android.content.Context
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.kaqui.R
 
 sealed class Classifier : Parcelable
