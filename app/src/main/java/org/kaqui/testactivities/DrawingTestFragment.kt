@@ -114,9 +114,13 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
             finished = savedInstanceState.getBoolean("finished")
         }
 
-        drawCanvas.post { refreshQuestion() }
-
         return mainBlock
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        refreshQuestion()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

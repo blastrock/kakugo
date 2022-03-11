@@ -8,9 +8,8 @@
     <string name="word_selection">Selección de palabras</string>
     <string name="select_all">Seleccionar todo</string>
     <string name="select_none">Seleccionar ninguno</string>
-    <string name="autoselect_from_kanji">Seleccionar automáticamente palabras de los kanji seleccionados</string>
-    <string name="autoselect_from_kanji_short">Auto</string>
-    <string name="import_selection">Importar una selección de kanji</string>
+    <string name="autoselect_from_kanji">Seleccionar palabras automáticamente</string>
+    <string name="import_selection">Importar selección</string>
     <string name="database_error">Error de base de datos</string>
     <string name="custom_test">Prueba personalizada</string>
     <string name="select_test_types">Seleccione el tipo de preguntas deseadas:</string>
@@ -88,7 +87,8 @@
     <string name="override_selection_title">Seleccionar vocabulario automáticamente</string>
     <string name="override_selection_msg">¿Quieres seleccionar palabras basadas en tu selección de kanji?\nEsto va a sobreescribir tu selección actual de vocabulario.</string>
     <string name="could_not_import_file">No se puede importar el archivo: %1$s</string>
-    <string name="import_kanji_help">Esta característica permite importar una selección de kanji desde un archivo. El archivo debe contener todos los kanji a importar, en una sola línea, sin espacios ni separadores.</string>
+    <string name="import_kanji_help">Esta característica permite importar una selección de kanji desde un archivo. El archivo debe contener un kanji por línea. Los kanji serán añadidos a la selección actual.</string>
+    <string name="import_words_help">Esta característica permite importar una selección de palabras desde un archivo. El archivo debe contener una palabra por línea. Las palabras serán añadidas a la selección actual.</string>
     <string name="additional_kanji">Kanji adicionales</string>
     <string name="jlpt_level_n">JLPT nivel %1$s</string>
     <string name="rtk_index_range">Índices %1$s+</string>
@@ -131,8 +131,9 @@
         <p>El diccionario de vocabulario se basa en <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
         <p>Los datos de similitud de kanji son a cortesía de <a href="http://lars.yencken.org/datasets/phd/">un estudio del Dr. Lars Yencken</a>.</p>
         <p>Los datos de composición y dibujo de los kanji provienen de <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
-        <p>La fuente del icono de la aplicación es <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
-        <p>La fuente del título de la aplicaión es <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
+        <p>Los datos de clasificación JLPT vienen de <a href="https://www.tanos.co.uk/jlpt/">Jonathan Waller</a>.</p>
+        <p>La fuente del icono de la aplicación es <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai</a>.</p>
+        <p>La fuente del título de la aplicaión es <a href="https://www.dafont.com/fonters.font">Fonters</a>.</p>
 
         <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
     ]]></string>
@@ -140,6 +141,8 @@
     <string name="title_stats">Progreso</string>
     <string name="stats_no_data">No hay datos disponibles aún. Tu progreso va a aparecer aquí después de haber tomado pruebas.</string>
     <string name="stats_items_answered">Preguntas respondidas</string>
+    <string name="stats_correct_answers">Respuestas correctas</string>
+    <string name="stats_wrong_answers">Respuestas incorrectas</string>
 
     <string name="changelog">Lista de cambios</string>
 </resources>

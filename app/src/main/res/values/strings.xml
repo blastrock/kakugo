@@ -12,9 +12,8 @@
     <string name="word_selection">Word selection</string>
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>
-    <string name="autoselect_from_kanji">Automatically select words from selected kanji</string>
-    <string name="autoselect_from_kanji_short">Auto</string>
-    <string name="import_selection">Import kanji selection</string>
+    <string name="autoselect_from_kanji">Automatically select words</string>
+    <string name="import_selection">Import selection</string>
     <string name="database_error">Database error</string>
     <string name="custom_test">Custom test</string>
     <string name="select_test_types">Select the desired types of questions:</string>
@@ -93,7 +92,8 @@
     <string name="override_selection_title">Automatically select vocabulary</string>
     <string name="override_selection_msg">Do you want to select words based on your selected kanji?\nThis will override your current vocabulary selection.</string>
     <string name="could_not_import_file">Could not import file: %1$s</string>
-    <string name="import_kanji_help">This feature allows importing a kanji selection from a file. The file must contain all the kanji to be imported, on a single line, without space or any separator.</string>
+    <string name="import_kanji_help">This feature allows importing a kanji selection from a file. The file must contain one kanji per line. The kanji will be added to the current selection.</string>
+    <string name="import_words_help">This feature allows importing a word selection from a file. The file must contain one word per line. The words will be added to the current selection.</string>
     <string name="additional_kanji">Additional kanji</string>
     <string name="jlpt_level_n">JLPT level %1$s</string>
     <string name="rtk_index_range">Indexes %1$s+</string>
@@ -146,6 +146,7 @@
         <p>The vocabulary dictionary is based on <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
         <p>The kanji similarity data comes from <a href="http://lars.yencken.org/datasets/phd/">a study from Dr. Lars Yencken</a>.</p>
         <p>The kanji composition and drawing data comes from <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
+        <p>The JLPT classification data comes from <a href="https://www.tanos.co.uk/jlpt/">Jonathan Waller</a>.</p>
         <p>The app icon font is <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
         <p>The app title font is <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
 
@@ -160,11 +161,14 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.34?</h3>
+        <h3>What\'s new in 1.35?</h3>
 
+        <br/>- Reclassified word list per JLPT level using data from Jonathan Waller
+        <br/>- Words usually written in kana are now written in kana
+        <br/>- Word reading tests don\'t include words written in kana anymore
+        <br/>- Added import words from file feature
+        <!-- -->
         <br/>- Added progress report
         <br/>- Added an option to keep the screen on during tests
-        <!-- -->
-        <br/>- Quiz answers are now hidden by default and there\'s a button to show them (this can be disabled in Settings)
     ]]></string>
 </resources>

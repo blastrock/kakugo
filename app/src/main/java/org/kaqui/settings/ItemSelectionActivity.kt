@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.item_selection_activity.*
+import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
@@ -64,12 +65,45 @@ class ItemSelectionActivity : BaseActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.item_selection_menu, menu)
+        if (mode in arrayOf(Mode.KANJI, Mode.WORD)) {
+            menu.add(Menu.NONE, R.id.search, 1, R.string.jlpt_search)
+                    .setIcon(android.R.drawable.ic_menu_search)
+                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        }
+
+        if (mode == Mode.WORD) {
+            menu.add(Menu.NONE, R.id.autoselect, 2, R.string.autoselect_from_kanji)
+        }
+
+        menu.add(Menu.NONE, R.id.select_all, 3, R.string.select_all)
+        menu.add(Menu.NONE, R.id.select_none, 4, R.string.select_none)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.search -> {
+                startActivity<ItemSearchActivity>(
+                        "mode" to (when (mode) {
+                            Mode.KANJI -> ItemSearchActivity.Mode.KANJI
+                            Mode.WORD -> ItemSearchActivity.Mode.WORD
+                            else -> throw RuntimeException("Can't search on this item type!")
+                        }))
+                return true
+            }
+            R.id.autoselect -> {
+                alert {
+                    titleResource = R.string.override_selection_title
+                    messageResource = R.string.override_selection_msg
+                    positiveButton(android.R.string.yes) {
+                        Database.getInstance(this@ItemSelectionActivity).autoSelectWords(classifier!!)
+                        listAdapter.notifyDataSetChanged()
+                        statsFragment.updateStats(dbView)
+                    }
+                    negativeButton(android.R.string.no) {}
+                }.show()
+                return true
+            }
             R.id.select_all -> {
                 dbView.setAllEnabled(true)
                 listAdapter.notifyDataSetChanged()

@@ -32,7 +32,7 @@ Parmi les fonctionnalités :
 - Open source
 - Sans publicité
 - Pas d'accès internet requis
-- Langages supportés : Français, Anglais
+- Langages supportés : Français, Anglais, Espagnol
 - Et bien plus à venir...
 
 Crédit
@@ -40,8 +40,11 @@ Crédit
 
 - Les tests de kanji sont basés sur `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
 - Les tests de vocabulaire sont basés sur `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
-- La base de données de similarité des kanji vient de https://minerva-access.unimelb.edu.au/handle/11343/35336 and http://lars.yencken.org/datasets/phd/
+- Les données de similarité des kanji viennent d'`une étude du Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
 - La base de données de composition et de tracé des kanji vient de `KanjiVG <https://kanjivg.tagaini.net/>`_.
+- Les données de classification JLPT vient de `Jonathan Waller <https://www.tanos.co.uk/jlpt/>`_.
+- La police de caractères de l'icône de l'application est `Nagayama Kai <https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/>`_.
+- La police de caractères du titres de l'application est `Fonters <https://www.dafont.com/fonters.font>`_.
 
 Licence
 =======

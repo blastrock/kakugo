@@ -32,7 +32,7 @@ Features include:
 - Open source
 - No ads
 - No internet access required
-- Supported languages: English, French
+- Supported languages: English, French, Spanish
 - More to come
 
 Credits
@@ -40,8 +40,11 @@ Credits
 
 - The kanji quizzes are based on `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
 - The vocabulary quizzes are based on `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
-- The kanji similarity database comes from https://minerva-access.unimelb.edu.au/handle/11343/35336 and http://lars.yencken.org/datasets/phd/
+- The kanji similarity data comes from `a study from Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
 - The kanji composition and drawing database comes from `KanjiVG <https://kanjivg.tagaini.net/>`_.
+- The JLPT classification data comes from `Jonathan Waller <https://www.tanos.co.uk/jlpt/>`_.
+- The app icon font is `Nagayama Kai <https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/>`_.
+- The app title font is `Fonters <https://www.dafont.com/fonters.font>`_.
 
 License
 =======

@@ -89,10 +89,17 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(when (mode) {
-            SelectionMode.KANJI -> R.menu.kanji_jlpt_selection_menu
-            SelectionMode.WORD -> R.menu.word_jlpt_selection_menu
-        }, menu)
+        menu.add(Menu.NONE, R.id.search, 0, R.string.jlpt_search)
+                .setIcon(android.R.drawable.ic_menu_search)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
+
+        menu.add(Menu.NONE, R.id.save_selection, 1, R.string.save_current_selection)
+        menu.add(Menu.NONE, R.id.load_selection, 2, R.string.load_selection)
+        menu.add(Menu.NONE, R.id.select_none, 3, R.string.select_none)
+        if (mode == SelectionMode.WORD)
+            menu.add(Menu.NONE, R.id.autoselect, 4, R.string.autoselect_from_kanji)
+        menu.add(Menu.NONE, R.id.import_selection, 4, R.string.import_selection)
+
         return true
     }
 
@@ -128,8 +135,14 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                 startActivity<SavedSelectionsActivity>("mode" to mode as Serializable)
                 true
             }
-            R.id.import_kanji_selection -> {
-                importKanjis()
+            R.id.select_none -> {
+                dbView.setAllEnabled(false)
+                adapter.notifyDataSetChanged()
+                statsFragment.updateStats(dbView)
+                true
+            }
+            R.id.import_selection -> {
+                importItems()
                 true
             }
             R.id.autoselect -> {
@@ -180,13 +193,19 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
         toast(getString(R.string.saved_selection, name))
     }
 
-    private fun importKanjis() {
-        alert(getString(R.string.import_kanji_help)) {
-            okButton { doImportKanjis() }
+    private fun importItems() {
+        val msg =
+                if (mode == SelectionMode.KANJI)
+                    R.string.import_kanji_help
+                else
+                    R.string.import_words_help
+
+        alert(msg) {
+            okButton { showSelectFileForImport() }
         }.show()
     }
 
-    private fun doImportKanjis() {
+    private fun showSelectFileForImport() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
@@ -201,7 +220,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED })
-            importKanjis()
+            showSelectFileForImport()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -212,8 +231,11 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             return
 
         try {
-            val kanjis = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
-            Database.getInstance(this).setSelection(kanjis)
+            val items = contentResolver.openInputStream(data.data!!)!!.bufferedReader().readText()
+            if (mode == SelectionMode.KANJI)
+                Database.getInstance(this).setKanjiSelection(items)
+            else
+                Database.getInstance(this).setWordSelection(items)
         } catch (e: Exception) {
             Log.e(TAG, "Could not import file", e)
             Toast.makeText(this, getString(R.string.could_not_import_file, e.toString()), Toast.LENGTH_LONG).show()

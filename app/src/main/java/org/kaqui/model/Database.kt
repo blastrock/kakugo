@@ -31,8 +31,8 @@ class Database private constructor(context: Context, private val database: SQLit
     fun getKanjiView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
             LearningDbView(database, KANJIS_TABLE_NAME, knowledgeType, filter = "radical = 0", classifier = classifier, itemGetter = this::getKanji, itemSearcher = this::searchKanji)
 
-    fun getWordView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null): LearningDbView =
-            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord)
+    fun getWordView(knowledgeType: KnowledgeType? = null, classifier: Classifier? = null, withKanaAlone: Boolean = true): LearningDbView =
+            LearningDbView(database, WORDS_TABLE_NAME, knowledgeType, classifier = classifier, itemGetter = this::getWord, itemSearcher = this::searchWord, filter = if (!withKanaAlone) "kana_alone = 0" else "1")
 
     fun getOtherCompositionAnswerIds(kanjiId: Int): List<Int> {
         database.rawQuery("""
@@ -193,11 +193,11 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {
-        val contents = Word("", "", listOf(), listOf())
+        val contents = Word("", "", listOf(), listOf(), false)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         database.rawQuery("""
-            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en
+            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone
             FROM $WORDS_TABLE_NAME k
             LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
@@ -213,6 +213,7 @@ class Database private constructor(context: Context, private val database: SQLit
                 contents.meanings = localMeaning.split('_')
             else
                 contents.meanings = cursor.getString(8).split('_')
+            contents.kanaAlone = cursor.getInt(9) != 0
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
             item.lastAsked = cursor.getLong(5)
@@ -224,29 +225,35 @@ class Database private constructor(context: Context, private val database: SQLit
                 "similarity_class = ? AND id <> ?", arrayOf(similarityClass.toString(), id.toString()),
                 null, null, "RANDOM()", "20").use { cursor ->
             while (cursor.moveToNext())
-                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf()), 0.0, 0.0, 0, false))
+                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf(), false), 0.0, 0.0, 0, false))
         }
         contents.similarities = similarWords
         return item
     }
 
-    fun setSelection(kanjis: String) {
-        database.beginTransaction()
-        try {
+    fun setKanjiSelection(kanjis: String) {
+        database.transaction {
             val cv = ContentValues()
-            cv.put("enabled", false)
-            database.update(KANJIS_TABLE_NAME, cv, null, null)
             cv.put("enabled", true)
             for (i in 0 until kanjis.codePointCount(0, kanjis.length)) {
                 database.update(KANJIS_TABLE_NAME, cv, "id = ?", arrayOf(kanjis.codePointAt(i).toString()))
             }
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
-    fun autoSelectWords() {
+    fun setWordSelection(wordsString: String) {
+        val words = wordsString.split("\n")
+        database.transaction {
+            val cv = ContentValues()
+            cv.put("enabled", true)
+            for (word in words) {
+                val trimmedWord = word.trim()
+                database.update(WORDS_TABLE_NAME, cv, "item = ? OR (kana_alone = 1 AND reading = ?)", arrayOf(trimmedWord, trimmedWord))
+            }
+        }
+    }
+
+    fun autoSelectWords(classifier: Classifier? = null) {
         val enabledKanjis = HashSet<Char>()
         database.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->
             while (cursor.moveToNext()) {
@@ -254,7 +261,7 @@ class Database private constructor(context: Context, private val database: SQLit
             }
         }
         var allWords =
-                database.query(WORDS_TABLE_NAME, arrayOf("id, item"), null, null, null, null, null).use { cursor ->
+                database.query(WORDS_TABLE_NAME, arrayOf("id, item"), classifier?.whereClause(), classifier?.whereArguments(), null, null, null).use { cursor ->
                     val ret = mutableListOf<Pair<Long, String>>()
                     while (cursor.moveToNext()) {
                         ret.add(Pair(cursor.getLong(0), cursor.getString(1)))
@@ -264,18 +271,14 @@ class Database private constructor(context: Context, private val database: SQLit
         allWords = allWords.map { Pair(it.first, it.second.filter { isKanji(it) }) }
         allWords = allWords.filter { it.second.all { it in enabledKanjis } }
 
-        database.beginTransaction()
-        try {
+        database.transaction {
             val cv = ContentValues()
             cv.put("enabled", false)
-            database.update(WORDS_TABLE_NAME, cv, null, null)
+            database.update(WORDS_TABLE_NAME, cv, classifier?.whereClause(), classifier?.whereArguments())
             cv.put("enabled", true)
             for (word in allWords) {
                 database.update(WORDS_TABLE_NAME, cv, "id = ?", arrayOf(word.first.toString()))
             }
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
@@ -301,8 +304,7 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     fun saveKanjiSelectionTo(name: String) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             val idSelection = database.query(KANJIS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
                 if (cursor.count == 0) {
                     val cv = ContentValues()
@@ -318,15 +320,11 @@ class Database private constructor(context: Context, private val database: SQLit
             INSERT INTO $KANJIS_ITEM_SELECTION_TABLE_NAME (id_selection, id_kanji)
             SELECT ?, id FROM $KANJIS_TABLE_NAME WHERE enabled = 1
             """, arrayOf(idSelection.toString()))
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
     fun restoreKanjiSelectionFrom(idSelection: Long) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             database.execSQL("""
                 UPDATE $KANJIS_TABLE_NAME
                 SET enabled = 0
@@ -340,20 +338,13 @@ class Database private constructor(context: Context, private val database: SQLit
                     WHERE id_selection = ?
                 )
                 """, arrayOf(idSelection.toString()))
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
     fun deleteKanjiSelection(idSelection: Long) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             database.delete(KANJIS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
             database.delete(KANJIS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
@@ -373,8 +364,7 @@ class Database private constructor(context: Context, private val database: SQLit
     }
 
     fun saveWordSelectionTo(name: String) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             val idSelection = database.query(WORDS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
                 if (cursor.count == 0) {
                     val cv = ContentValues()
@@ -390,15 +380,11 @@ class Database private constructor(context: Context, private val database: SQLit
             INSERT INTO $WORDS_ITEM_SELECTION_TABLE_NAME (id_selection, id_word)
             SELECT ?, id FROM $WORDS_TABLE_NAME WHERE enabled = 1
             """, arrayOf(idSelection.toString()))
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
     fun restoreWordSelectionFrom(idSelection: Long) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             database.execSQL("""
                 UPDATE $WORDS_TABLE_NAME
                 SET enabled = 0
@@ -412,26 +398,18 @@ class Database private constructor(context: Context, private val database: SQLit
                     WHERE id_selection = ?
                 )
                 """, arrayOf(idSelection.toString()))
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
     fun deleteWordSelection(idSelection: Long) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             database.delete(WORDS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
             database.delete(WORDS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
     private fun takeLastSnapshot(testTypes: List<TestType>) {
-        database.beginTransaction()
-        try {
+        database.transaction {
             val byItemAndKnowledge = testTypes.map { Pair(getItemType(it), getKnowledgeType(it)) }
             byItemAndKnowledge.forEach { (itemType, knowledgeType) ->
                 val view = when (itemType) {
@@ -468,9 +446,6 @@ class Database private constructor(context: Context, private val database: SQLit
                 // If multiple snapshots were taken for the same day, the last one is the most up to date, so we replace
                 database.insertWithOnConflict(STATS_SNAPSHOT_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
             }
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
@@ -499,8 +474,7 @@ class Database private constructor(context: Context, private val database: SQLit
         database.delete(SESSIONS_TABLE_NAME, "id in (${emptySessions.joinToString(",")})", null)
 
         // Update end_time and item_count for all not committed sessions
-        database.beginTransaction()
-        try {
+        database.transaction {
             val openSessions = mutableListOf<Long>()
             database.query(SESSIONS_TABLE_NAME, arrayOf("id"), "end_time IS NULL", null, null, null, null).use { cursor ->
                 while (cursor.moveToNext())
@@ -527,9 +501,6 @@ class Database private constructor(context: Context, private val database: SQLit
                 cv.put("end_time", session.endTime)
                 database.update(SESSIONS_TABLE_NAME, cv, "id = ?", arrayOf(session.id.toString()))
             }
-            database.setTransactionSuccessful()
-        } finally {
-            database.endTransaction()
         }
     }
 
