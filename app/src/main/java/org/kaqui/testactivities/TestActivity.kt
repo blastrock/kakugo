@@ -532,10 +532,20 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
     }
 
     private fun showItemInDict(kanji: Kanji) {
-        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-        intent.putExtra("kanjis", kanji.kanji)
-        intent.putExtra("search_in_kanjidic", true)
-        intent.putExtra("showEntryDetailOnSingleResult", true)
+        val dict = applicationContext.defaultSharedPreferences.getString("dict_pref", "jisho")
+        var intent = Intent()
+        if (dict == "ae") {
+            intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+            intent.putExtra("kanjis", kanji.kanji)
+            intent.putExtra("search_in_kanjidic", true)
+            intent.putExtra("showEntryDetailOnSingleResult", true)
+        } else if (dict == "akebi"){
+            intent = Intent(Intent.ACTION_VIEW, Uri.parse("akebi://word?kanji=${kanji.kanji}"))
+        } else {
+            intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${kanji.kanji}%20%23kanji"))
+        }
+
+
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
@@ -544,11 +554,19 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
     }
 
     private fun showItemInDict(word: Word) {
-        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-        intent.putExtra("kanjis", word.word)
-        intent.putExtra("showEntryDetailOnSingleResult", true)
-        intent.putExtra("match_jp", "Exact")
-        intent.putExtra("deinflect", false)
+        val dict = applicationContext.defaultSharedPreferences.getString("dict_pref", "jisho")
+        var intent = Intent()
+        if (dict == "ae") {
+            intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+            intent.putExtra("kanjis", word.word)
+            intent.putExtra("showEntryDetailOnSingleResult", true)
+            intent.putExtra("match_jp", "Exact")
+            intent.putExtra("deinflect", false)
+        } else if (dict == "akebi"){
+            intent = Intent(Intent.ACTION_VIEW, Uri.parse("akebi://word?kanji=${word.word}"))
+        } else {
+            intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${word.word}"))
+        }
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {

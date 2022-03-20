@@ -133,6 +133,8 @@
     <string name="failed_to_load_resource">Failed to load resource: %s</string>
     <string name="keep_screen_on_summary">Keep screen lit during tests</string>
     <string name="keep_screen_on">Keep screen on</string>
+    <string name="dict_pref_summary">Kanji Search app</string>
+    <string name="dict_pref_title">Dictionary App</string>
 
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[

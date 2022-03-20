@@ -57,6 +57,14 @@
             app:summaryOn="@string/hide_answers_on_summary"
             app:title="@string/hide_answers"
             app:defaultValue="true" />
+
+        <ListPreference
+            app:key="dict_pref"
+            app:summary="@string/dict_pref_summary"
+            app:entries="@array/dict_list"
+            app:entryValues="@array/dict_pref_ids"
+            app:title="@string/dict_pref_title"
+            app:defaultValue="jisho_org"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_cat_about">
