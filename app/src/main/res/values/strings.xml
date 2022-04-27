@@ -161,14 +161,15 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.35?</h3>
+        <h3>What\'s new in 1.36?</h3>
 
+        <br/>- Added German kanji translations from Kanjidic
+        <br/>- Added German vocabulary translations from the Kanji Study app (many thanks to Chase Colburn)
+        <br/>- Added German app translations from contributor Moritz Bandemer
+        <!-- -->
         <br/>- Reclassified word list per JLPT level using data from Jonathan Waller
         <br/>- Words usually written in kana are now written in kana
         <br/>- Word reading tests don\'t include words written in kana anymore
         <br/>- Added import words from file feature
-        <!-- -->
-        <br/>- Added progress report
-        <br/>- Added an option to keep the screen on during tests
     ]]></string>
 </resources>

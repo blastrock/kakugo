@@ -146,14 +146,15 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.35</h3>
+        <h3>Nouveautés en 1.36</h3>
 
+        <br/>- Ajout des traductions allemandes de kanji de Kanjidic
+        <br/>- Ajout des traductions allemandes de vocabulaire de l\'app Kanji Study (un grand merci à Chase Colburn)
+        <br/>- Ajout des traductions allemandes de l\'application du contributeur Moritz Bandemer
+        <!-- -->
         <br/>- La liste de mots a été reclassifiée par niveau de JLPT en utilisant les données de Jonathan Waller
         <br/>- Les mots écrits habituellement en kana sont maintenant écrits en kana
         <br/>- Les tests de lecture de mots n\'incluent plus les mots écrits en kana
         <br/>- Ajout de l\'import de mots à partir d\'un fichier
-        <!-- -->
-        <br/>- Ajout du rapport de progrès
-        <br/>- Ajout d\'une option pour garder l\'écran allumé pendant les exercices
     ]]></string>
 </resources>
