@@ -45,8 +45,8 @@ class QuizTestFragment : Fragment(), TestFragment {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        singleButtonMode = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("single_button_mode", false)
-        hideAnswers = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hide_answers", true)
+        singleButtonMode = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("single_button_mode", false)
+        hideAnswers = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("hide_answers", true)
 
         val answerCount = getAnswerCount(testType)
         val answerTexts = mutableListOf<TextView>()
