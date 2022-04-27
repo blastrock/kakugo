@@ -547,7 +547,7 @@ class Database private constructor(context: Context, private val database: SQLit
 
         private fun isKanji(c: Char): Boolean {
             // This is the hiragana/katakana range
-            return c.toInt() !in 0x3040..0x3100
+            return c.code !in 0x3040..0x3100
         }
 
         fun getInstance(context: Context): Database {

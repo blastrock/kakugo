@@ -42,7 +42,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
     private lateinit var dontKnowButton: Button
     private lateinit var nextButton: Button
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val answerCount = getAnswerCount(testType)
         val answerButtons = mutableListOf<ToggleButton>()
 

@@ -15,11 +15,7 @@ class LocaleManager {
                         context.resources.configuration.locales.getFirstMatch(arrayOf("en", "fr", "es"))?.language
                     else
                         context.resources.configuration.locale.language
-            val finalLocale =
-                    if (forcedLocale.isNotEmpty())
-                        forcedLocale
-                    else
-                        systemLocale
+            val finalLocale = forcedLocale.ifEmpty { systemLocale }
 
             dictionaryLocale =
                     when (finalLocale) {

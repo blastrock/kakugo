@@ -47,7 +47,7 @@ class TextTestFragment : Fragment(), TestFragment {
 
     private val currentKana get() = testEngine.currentQuestion.contents as Kana
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreate(savedInstanceState)
 
         val questionMinSize = 30
@@ -197,7 +197,7 @@ class TextTestFragment : Fragment(), TestFragment {
                 if (certainty == Certainty.DONTKNOW) {
                     Certainty.DONTKNOW
                 } else {
-                    val answer = answerField.text.trim().toString().toLowerCase(Locale.ROOT)
+                    val answer = answerField.text.trim().toString().lowercase(Locale.ROOT)
 
                     if (answer.isBlank())
                         return true

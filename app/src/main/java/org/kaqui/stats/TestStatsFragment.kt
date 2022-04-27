@@ -1,7 +1,6 @@
 package org.kaqui.stats
 
 import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
@@ -48,7 +47,7 @@ class TestStatsFragment: Fragment() {
     private lateinit var testItemsChart: BarChart
     private lateinit var noDataLabel: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
 
         val config = resources.configuration
@@ -139,7 +138,7 @@ class TestStatsFragment: Fragment() {
             calendar.timeInMillis = it.timestamp * 1000
             calendar.roundToPreviousDay()
             calendar.timeInMillis / 1000
-        }.map { Database.DayStatistics(it.key, it.value.map { it.askedCount }.sum(), it.value.map { it.correctCount }.sum()) }
+        }.map { Database.DayStatistics(it.key, it.value.sumOf { it.askedCount }, it.value.sumOf { it.correctCount }) }
 
         val values = dayStats.map { stat ->
             // Save time relative to a point close to now to keep the maximum precision

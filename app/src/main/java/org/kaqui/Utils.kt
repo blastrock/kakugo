@@ -189,10 +189,12 @@ fun Context.getColorFromAttr(
 ): Int {
     val typedValue = TypedValue()
     theme.resolveAttribute(attrColor, typedValue, true)
-    if (typedValue.resourceId != 0)
-        return ContextCompat.getColor(this, typedValue.resourceId)
-    else
-        return typedValue.data
+    return (
+            if (typedValue.resourceId != 0)
+                ContextCompat.getColor(this, typedValue.resourceId)
+            else
+                typedValue.data
+            )
 }
 
 fun Int.asUnicodeCodePoint() = Character.toChars(this).joinToString("")

@@ -107,7 +107,7 @@ class TestEngine(
     private fun pickQuestion(ids: List<SrsCalculator.ProbabilityData>): PickedQuestion {
         val idsWithoutRecent = ids.filter { it.itemId !in lastQuestionsIds }
 
-        val totalWeight = idsWithoutRecent.map { it.finalProbability }.sum()
+        val totalWeight = idsWithoutRecent.sumOf { it.finalProbability }
         val questionPos = Math.random() * totalWeight
         Log.v(TAG, "Picking a question, questionPos: $questionPos, totalWeight: $totalWeight")
         var question = idsWithoutRecent.last() // take last, it is probably safer with float arithmetic

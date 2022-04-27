@@ -14,7 +14,7 @@ class StatsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        var frameLayoutId: Int = 0
+        var frameLayoutId = 0
         frameLayout {
             id = View.generateViewId()
             frameLayoutId = id

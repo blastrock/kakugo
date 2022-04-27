@@ -74,7 +74,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
         job = Job()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
             testQuestionLayout.makeMainBlock(requireActivity(), this, 10) {

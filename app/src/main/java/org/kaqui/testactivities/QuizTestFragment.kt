@@ -44,7 +44,7 @@ class QuizTestFragment : Fragment(), TestFragment {
     private var hideAnswers = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         singleButtonMode = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("single_button_mode", false)
         hideAnswers = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("hide_answers", true)
 
