@@ -163,8 +163,8 @@
     <string name="changelog_contents"><![CDATA[
         <h3>What\'s new in 1.36?</h3>
 
-        <br/>- Added German kanji translations from Kanjidic
-        <br/>- Added German vocabulary translations from the Kanji Study app (many thanks to Chase Colburn)
+        <br/>- Added German kanji translations from the Kanji Study app (many thanks to Chase Colburn)
+        <br/>- Added German vocabulary translations from JMdict
         <br/>- Added German app translations from contributor Moritz Bandemer
         <!-- -->
         <br/>- Reclassified word list per JLPT level using data from Jonathan Waller

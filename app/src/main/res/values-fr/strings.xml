@@ -148,8 +148,8 @@
     <string name="changelog_contents"><![CDATA[
         <h3>Nouveautés en 1.36</h3>
 
-        <br/>- Ajout des traductions allemandes de kanji de Kanjidic
-        <br/>- Ajout des traductions allemandes de vocabulaire de l\'app Kanji Study (un grand merci à Chase Colburn)
+        <br/>- Ajout des traductions allemandes de kanji de l\'app Kanji Study (un grand merci à Chase Colburn)
+        <br/>- Ajout des traductions allemandes de vocabulaire de Kanjidic
         <br/>- Ajout des traductions allemandes de l\'application du contributeur Moritz Bandemer
         <!-- -->
         <br/>- La liste de mots a été reclassifiée par niveau de JLPT en utilisant les données de Jonathan Waller
