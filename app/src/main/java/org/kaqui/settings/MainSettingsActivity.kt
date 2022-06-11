@@ -2,6 +2,7 @@ package org.kaqui.settings
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -15,6 +16,7 @@ import androidx.preference.SwitchPreferenceCompat
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.kaqui.*
+import java.io.File
 
 class MainSettingsActivity : BaseActivity() {
 
@@ -97,7 +99,12 @@ class MainSettingsActivity : BaseActivity() {
             if (resultCode != RESULT_OK || data == null)
                 return
 
-            setCustomFontPath(UriResolver.getFilePath(requireContext(), data.data!!))
+            requireContext().contentResolver.openInputStream(data.data!!).use { input ->
+                requireContext().openFileOutput(CUSTOM_FONT_NAME, Context.MODE_PRIVATE).use { output ->
+                    input?.copyTo(output)
+                }
+            }
+            setCustomFontPath(File(requireContext().filesDir, CUSTOM_FONT_NAME).absolutePath)
         }
 
         @SuppressLint("ApplySharedPref")
@@ -110,6 +117,7 @@ class MainSettingsActivity : BaseActivity() {
 
         companion object {
             const val PICK_CUSTOM_FONT = 1
+            const val CUSTOM_FONT_NAME = "custom-font.ttf"
         }
     }
 }
