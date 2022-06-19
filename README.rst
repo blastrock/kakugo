@@ -35,6 +35,13 @@ Features include:
 - Supported languages: English, French, Spanish, German
 - More to come
 
+Privacy
+=======
+
+This app does not collect any personal data, only your progression and settings
+is saved on your device. No data is ever uploaded on the Internet, this app does
+not use the Internet access.
+
 Credits
 =======
 
