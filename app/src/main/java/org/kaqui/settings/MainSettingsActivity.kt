@@ -87,11 +87,13 @@ class MainSettingsActivity : BaseActivity() {
             startActivityForResult(intent, PICK_CUSTOM_FONT)
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED })
                 pickCustomFont()
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (requestCode != PICK_CUSTOM_FONT)
                 return super.onActivityResult(requestCode, resultCode, data)

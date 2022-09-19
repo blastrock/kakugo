@@ -224,6 +224,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             showSelectFileForImport()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode != PICK_IMPORT_FILE)
             return super.onActivityResult(requestCode, resultCode, data)

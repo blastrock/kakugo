@@ -262,6 +262,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         updateSheetPeekHeight(shownLine)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             // smoothScrollTo doesn't work, it always scrolls at the end or does nothing
@@ -345,7 +346,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         ObjectAnimator.ofFloat(lastItem, "translationY", lastItem.height.toFloat()).apply {
             duration = 100
             addListener(object : Animator.AnimatorListener {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     lastItem.translationY = -lastItem.height.toFloat()
                     updateLastLine(correct, wrong, probabilityData)
 
@@ -355,9 +356,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                     }
                 }
 
-                override fun onAnimationRepeat(animation: Animator?) {}
-                override fun onAnimationCancel(animation: Animator?) {}
-                override fun onAnimationStart(animation: Animator?) {}
+                override fun onAnimationRepeat(animation: Animator) {}
+                override fun onAnimationCancel(animation: Animator) {}
+                override fun onAnimationStart(animation: Animator) {}
             })
             start()
         }
