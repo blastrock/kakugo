@@ -19,6 +19,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:disabledAlpha">0.75</item>
 
         <item name="itemGood">#9ccc65</item>
         <item name="itemMeh">#c5cae9</item>
@@ -47,6 +48,7 @@
         <item name="android:windowBackground">@color/darkBackground</item>
         <item name="android:colorBackground">@color/darkBackground</item>
         <item name="colorButtonNormal">#282828</item>
+        <item name="android:disabledAlpha">0.75</item>
 
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
