@@ -57,6 +57,14 @@
             app:summaryOn="@string/hide_answers_on_summary"
             app:title="@string/hide_answers"
             app:defaultValue="true" />
+
+        <ListPreference
+            app:defaultValue="aedict3"
+            app:entries="@array/external_dictionary_strings"
+            app:entryValues="@array/external_dictionary_ids"
+            app:key="external_dictionary"
+            app:summary="%s"
+            app:title="@string/external_dictionary" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_cat_about">

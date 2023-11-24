@@ -134,6 +134,10 @@
     <string name="failed_to_load_resource">Failed to load resource: %s</string>
     <string name="keep_screen_on_summary">Keep screen lit during tests</string>
     <string name="keep_screen_on">Keep screen on</string>
+    <string name="external_dictionary">External dictionary</string>
+    <string name="ext_dict_aedict3">aedict3 (non-free, requires app)</string>
+    <string name="ext_dict_jisho">jisho.org (opens in browser)</string>
+    <string name="ext_dict_jiten">jiten.obfusk.dev (open source, opens in app or browser)</string>
 
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[
