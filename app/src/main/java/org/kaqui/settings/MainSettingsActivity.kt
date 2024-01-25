@@ -69,7 +69,7 @@ class MainSettingsActivity : BaseActivity() {
             super.onStop()
         }
 
-        override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
             if (key == "dictionary_language")
                 LocaleManager.updateDictionaryLocale(requireContext())
         }
