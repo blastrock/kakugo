@@ -122,6 +122,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + "type INTEGER NOT NULL,"
                         + "short_score FLOAT NOT NULL,"
                         + "long_score FLOAT NOT NULL,"
+                        // last_correct is actually last_asked
                         + "last_correct INTEGER NOT NULL,"
                         + "PRIMARY KEY (id, type)"
                         + ")")

@@ -95,10 +95,9 @@ class LearningDbView(
         }
     }
 
-    fun getMinLastAsked(): Int = getLastAskedFrom(0)
+    fun getMinLastAsked(): Long = getLastAskedFrom(0)
 
-    private fun getLastAskedFrom(from: Int): Int {
-        // I couldn't find how sqlite handles null values in order by, so I use ifnull there too
+    private fun getLastAskedFrom(from: Int): Long {
         database.rawQuery("""
             SELECT s.last_correct
             FROM $tableName
@@ -108,7 +107,7 @@ class LearningDbView(
             LIMIT $from, 1
         """, null).use { cursor ->
             return if (cursor.moveToFirst())
-                cursor.getInt(0)
+                cursor.getLong(0)
             else
                 0
         }
