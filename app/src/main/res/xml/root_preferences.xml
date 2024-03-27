@@ -59,6 +59,17 @@
             app:defaultValue="true" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/pref_cat_backup">
+        <Preference
+            app:key="exportBackup"
+            app:title="@string/export_backup">
+        </Preference>
+        <Preference
+            app:key="importBackup"
+            app:title="@string/import_backup"
+            app:summary="@string/warning_import_backup"/>
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/pref_cat_about">
         <Preference
             app:key="about"

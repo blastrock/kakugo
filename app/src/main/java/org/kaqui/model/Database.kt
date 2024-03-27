@@ -12,7 +12,7 @@ import org.kaqui.roundToPreviousDay
 import java.util.*
 import kotlin.collections.HashSet
 
-class Database private constructor(context: Context, private val database: SQLiteDatabase) {
+class Database private constructor(context: Context, val database: SQLiteDatabase) {
     private val locale: String get() = LocaleManager.getDictionaryLocale()
 
     init {
@@ -550,9 +550,11 @@ class Database private constructor(context: Context, private val database: SQLit
             return c.code !in 0x3040..0x3100
         }
 
+        fun getDatabasePath(context: Context): String = context.getDatabasePath(DATABASE_NAME).absolutePath
+
         fun getInstance(context: Context): Database {
             if (singleton == null) {
-                val db = SQLiteDatabase.openDatabase(context.getDatabasePath(DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE)
+                val db = SQLiteDatabase.openDatabase(getDatabasePath(context), null, SQLiteDatabase.OPEN_READWRITE)
                 singleton = Database(context, db)
             }
             return singleton!!

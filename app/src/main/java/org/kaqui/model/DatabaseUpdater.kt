@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.database.sqlite.transaction
 
-class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: String) {
+class DatabaseUpdater(private val database: SQLiteDatabase) {
     data class Dump(
             val enabledKanas: List<Int>,
             val enabledKanjis: List<Int>,
@@ -163,23 +163,10 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + ")")
     }
 
-    private fun doUpgrade() {
+    private fun doUpgrade(dictDb: String) {
         database.execSQL("ATTACH DATABASE ? AS dict", arrayOf(dictDb))
         database.transaction {
-            val oldVersion = database.version
-
-            val dump =
-                    when {
-                        oldVersion == 0 -> null
-                        oldVersion < 10 -> dumpUserDataV9()
-                        oldVersion < 13 -> dumpUserDataV12()
-                        oldVersion < 17 -> dumpUserDataV16()
-                        oldVersion < 19 -> dumpUserDataV18()
-                        oldVersion < 21 -> dumpUserDataV20()
-                        oldVersion < 22 -> dumpUserDataV21()
-                        oldVersion > DATABASE_VERSION -> throw RuntimeException("reverting to an old version of the app is not supported")
-                        else -> dumpUserData()
-                    }
+            val dump = dumpUserData()
             database.execSQL("DROP TABLE IF EXISTS main.meanings")
             database.execSQL("DROP TABLE IF EXISTS main.readings")
             database.execSQL("DROP TABLE IF EXISTS main.similarities")
@@ -505,7 +492,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, listOf(), listOf())
     }
 
-    private fun dumpUserData(): Dump {
+    private fun dumpUserDataV25(): Dump {
         val enabledKanas = mutableListOf<Int>()
         database.query(Database.KANAS_TABLE_NAME, arrayOf("id", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -629,6 +616,21 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, snapshots, sessions)
     }
 
+    fun dumpUserData(): Dump? {
+        val oldVersion = database.version
+        return when {
+            oldVersion == 0 -> null
+            oldVersion < 10 -> dumpUserDataV9()
+            oldVersion < 13 -> dumpUserDataV12()
+            oldVersion < 17 -> dumpUserDataV16()
+            oldVersion < 19 -> dumpUserDataV18()
+            oldVersion < 21 -> dumpUserDataV20()
+            oldVersion < 22 -> dumpUserDataV21()
+            oldVersion < 26 -> dumpUserDataV25()
+            else -> throw RuntimeException("Unsupported future version $oldVersion")
+        }
+    }
+
     private fun enableOnly(tableName: String, toEnable: List<Int>) {
         run {
             val cv = ContentValues()
@@ -655,7 +657,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
         }
     }
 
-    private fun restoreUserData(data: Dump) {
+    fun restoreUserData(data: Dump) {
         database.transaction {
             database.delete(Database.ITEM_SCORES_TABLE_NAME, null, null)
             run {
@@ -826,7 +828,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             // the databases folder may not exist on older androids
             context.getDatabasePath(Database.DATABASE_NAME).parentFile!!.mkdirs()
             SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
-                DatabaseUpdater(db, dictDb).doUpgrade()
+                DatabaseUpdater(db).doUpgrade(dictDb)
             }
         }
     }
