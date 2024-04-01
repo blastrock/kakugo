@@ -626,7 +626,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             oldVersion < 19 -> dumpUserDataV17()
             oldVersion < 21 -> dumpUserDataV19()
             oldVersion < 22 -> dumpUserDataV21()
-            oldVersion < 26 -> dumpUserDataV22()
+            oldVersion < 32 -> dumpUserDataV22()
             else -> throw RuntimeException("Unsupported future version $oldVersion")
         }
     }
@@ -808,7 +808,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 25
+        const val DATABASE_VERSION = 31
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
