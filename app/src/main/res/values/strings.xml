@@ -76,7 +76,7 @@
     <string name="initializing_kanji_db">Initializing database</string>
     <string name="autoselecting_words">Automatically selecting words from selected kanji</string>
     <string name="failed_to_init_db">Failed to initialize database: %1$s</string>
-    <string name="debug_info" translatable="false">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nMin days since asked: %10$.1f\nNew short score: %11$.2f\nNew long score: %12$.2f</string>
+    <string name="debug_info" translatable="false">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nMin proba coeff: %13$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nMin days since asked: %10$.1f\nNew short score: %11$.2f\nNew long score: %12$.2f</string>
     <string name="info_button">Show details</string>
     <string name="next">Next</string>
     <string name="hint">Hint</string>

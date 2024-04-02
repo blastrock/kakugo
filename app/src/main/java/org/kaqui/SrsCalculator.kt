@@ -13,7 +13,7 @@ class SrsCalculator {
     data class ProbabilityData(@JvmField var itemId: Int, @JvmField var shortScore: Double, @JvmField var shortWeight: Double, @JvmField var longScore: Double, @JvmField var longWeight: Double, @JvmField var lastAsked: Long, @JvmField var daysSinceAsked: Double, @JvmField var finalProbability: Double)
 
     data class ProbaParamsStage1(@JvmField val daysEnd: Double)
-    data class ProbaParamsStage2(@JvmField val shortCoefficient: Double, @JvmField val longCoefficient: Double)
+    data class ProbaParamsStage2(@JvmField val minProbaShort: Double, @JvmField val shortCoefficient: Double, @JvmField val longCoefficient: Double)
 
     data class DebugParams(var probaParamsStage1: ProbaParamsStage1, var probaParamsStage2: ProbaParamsStage2)
 
@@ -27,6 +27,8 @@ class SrsCalculator {
         private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
+        private const val MIN_SHORT_RATIO_LERP = 1.0/4
+        private const val MAX_SHORT_RATIO_LERP = 1.0/3
         private const val MIN_LONG_WEIGHT = 0.2
         private const val MAX_LONG_SCORE_UPDATE_INCREMENT = 0.25
 
@@ -37,7 +39,7 @@ class SrsCalculator {
             Log.v(TAG, "probaParamsStage1: $probaParams, minLastAsked: $minLastAsked")
             val ret = items.map { getProbabilityDataStage1(now, probaParams, it) }
             val stage1Stats = getStage1Stats(ret)
-            val probaParams2 = getProbaParamsStage2(stage1Stats)
+            val probaParams2 = getProbaParamsStage2(stage1Stats, items.size)
             Log.v(TAG, "probaParamsStage2: $probaParams2, stage1Stats: $stage1Stats")
             return Pair(ret.map { getProbabilityDataStage2(probaParams2, it) }, DebugParams(probaParams, probaParams2))
         }
@@ -144,14 +146,16 @@ class SrsCalculator {
             return ProbaParamsStage1(daysEnd)
         }
 
-        private fun getProbaParamsStage2(stage1Stats: Stage1Stats): ProbaParamsStage2 {
+        private fun getProbaParamsStage2(stage1Stats: Stage1Stats, totalCount: Int): ProbaParamsStage2 {
             if (stage1Stats.totalShortWeight == 0.0 || stage1Stats.totalLongWeight == 0.0)
-                return ProbaParamsStage2(1.0, 1.0)
+                return ProbaParamsStage2(MIN_PROBA_SHORT_UNKNOWN, 1.0, 1.0)
 
-            val neededShortWeight = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, min(stage1Stats.countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
+            val minProbaCoeff = invLerp(MIN_SHORT_RATIO_LERP, MAX_SHORT_RATIO_LERP, stage1Stats.countUnknown.toDouble() / totalCount).coerceIn(0.0, 1.0)
+            val minProbaShort = lerp(MIN_PROBA_SHORT_UNKNOWN, MAX_PROBA_SHORT_UNKNOWN, minProbaCoeff)
+            val neededShortWeight = lerp(minProbaShort, MAX_PROBA_SHORT_UNKNOWN, min(stage1Stats.countUnknown.toDouble() / MAX_COUNT_SHORT_UNKNOWN, 1.0))
             val totalWeight = stage1Stats.totalShortWeight + stage1Stats.totalLongWeight
             val shortCoefficient = neededShortWeight * totalWeight / stage1Stats.totalShortWeight
-            return ProbaParamsStage2(shortCoefficient, 1.0)
+            return ProbaParamsStage2(minProbaShort, shortCoefficient, 1.0)
         }
     }
 }

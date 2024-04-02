@@ -54,6 +54,7 @@ fun unitStep(x: Double): Double =
             1.0
 
 fun lerp(a: Double, b: Double, r: Double): Double = a + (r * (b - a))
+fun invLerp(a: Double, b: Double, r: Double): Double = (r - a) / (b - a)
 
 fun secondsToDays(timestamp: Long) = timestamp / 3600.0 / 24.0
 fun daysToSeconds(days: Long) = days * 3600.0 * 24.0
@@ -218,7 +219,8 @@ fun showItemProbabilityData(context: Context, item: String, probabilityData: Tes
                             else
                                 null,
                             probabilityData.scoreUpdate?.shortScore,
-                            probabilityData.scoreUpdate?.longScore))
+                            probabilityData.scoreUpdate?.longScore,
+                            probabilityData.probaParamsStage2.minProbaShort))
             .setPositiveButton(android.R.string.ok, null)
             .show()
 }
