@@ -24,6 +24,7 @@ class SrsCalculator {
     companion object {
         private const val TAG = "SrsCalculator"
 
+        private const val SHORT_SCORE_UPDATE = 0.3
         private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
@@ -84,23 +85,20 @@ class SrsCalculator {
 
         fun getScoreUpdate(minLastAsked: Long, item: Item, certainty: Certainty): ScoreUpdate {
             val now = Calendar.getInstance().timeInMillis / 1000
-
             val probaParams = getProbaParamsStage1(now, minLastAsked)
-            val targetScore =
-                when (certainty) {
-                    Certainty.SURE -> 1.0
-                    Certainty.MAYBE -> 0.7
-                    Certainty.DONTKNOW -> min(item.longScore, 0.5)
-                }
 
             val previousShortScore = item.shortScore
             // short score reduces the distance by half to target score
-            var newShortScore = lerp(previousShortScore, targetScore, 0.5)
-            if (newShortScore !in 0f..1f) {
-                Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, targetScore = $targetScore, newShortScore = $newShortScore")
+            var newShortScore = when (certainty) {
+                Certainty.SURE -> previousShortScore + SHORT_SCORE_UPDATE
+                Certainty.MAYBE -> min(0.7, previousShortScore + SHORT_SCORE_UPDATE/2)
+                Certainty.DONTKNOW -> max(0.0, min(item.longScore, previousShortScore - SHORT_SCORE_UPDATE))
             }
             if (newShortScore >= GOOD_WEIGHT) {
                 newShortScore = 1.0
+            }
+            if (newShortScore !in 0f..1f) {
+                Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, certainty = $certainty, newShortScore = $newShortScore")
             }
 
             val previousLongScore = item.longScore
@@ -130,10 +128,10 @@ class SrsCalculator {
                             throw RuntimeException("Unknown certainty $certainty")
                     }
             if (newLongScore !in 0f..1f) {
-                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceAsked = $daysSinceAsked, targetScore = $targetScore, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
+                Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceAsked = $daysSinceAsked, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
             }
 
-            Log.v(TAG, "Score calculation: targetScore: $targetScore, daysSinceAsked: $daysSinceAsked, probaParamsStage1: $probaParams")
+            Log.v(TAG, "Score calculation: certainty: $certainty, daysSinceAsked: $daysSinceAsked, probaParamsStage1: $probaParams")
             Log.v(TAG, "Short score of $item going from $previousShortScore to $newShortScore")
             Log.v(TAG, "Long score of $item going from $previousLongScore to $newLongScore")
 
