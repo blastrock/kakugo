@@ -123,7 +123,7 @@ class SrsCalculator {
                             else
                                 max(previousLongScore, 0.01)
                         certainty == Certainty.SURE -> {
-                            val stepCompletion = min(daysSinceAsked / (probaParams.daysEnd * 0.99 * previousLongScore), 1.0)
+                            val stepCompletion = min(daysSinceAsked / (probaParams.daysEnd * 0.99 * previousLongScore), 2.0)
                             min(1.0, min(max(previousLongScore, 0.01) * lerp(1.0, 2.0, stepCompletion), previousLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
                         }
                         else ->
