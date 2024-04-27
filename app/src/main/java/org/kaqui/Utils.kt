@@ -26,7 +26,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
 import org.kaqui.model.BAD_WEIGHT
 import org.kaqui.model.Database
-import org.kaqui.model.GOOD_WEIGHT
 import org.kaqui.model.TestType
 import org.kaqui.testactivities.DrawView
 import org.kaqui.testactivities.TestActivity
@@ -35,9 +34,9 @@ import kotlin.math.pow
 
 fun getColorFromScore(score: Double) =
         when (score) {
-            in 0.0f..BAD_WEIGHT -> R.attr.itemBad
-            in BAD_WEIGHT..GOOD_WEIGHT -> R.attr.itemMeh
-            in GOOD_WEIGHT..1.0f -> R.attr.itemGood
+            in 0.0..BAD_WEIGHT -> R.attr.itemBad
+            in BAD_WEIGHT..<1.0 -> R.attr.itemMeh
+            1.0 -> R.attr.itemGood
             else -> R.attr.itemBad
         }
 

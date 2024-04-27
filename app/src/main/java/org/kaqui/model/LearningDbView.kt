@@ -147,15 +147,15 @@ class LearningDbView(
     fun getLongStats(knowledgeType: KnowledgeType): LongStats {
         database.rawQuery("""
             SELECT
-                SUM(case when short_score BETWEEN 0.0 AND $BAD_WEIGHT then 1 else 0 end),
-                SUM(case when short_score BETWEEN $BAD_WEIGHT AND $GOOD_WEIGHT then 1 else 0 end),
-                SUM(case when short_score BETWEEN $GOOD_WEIGHT AND 1.0 then 1 else 0 end),
+                SUM(case when short_score < $BAD_WEIGHT then 1 else 0 end),
+                SUM(case when short_score >= $BAD_WEIGHT AND short_score < 1.0 then 1 else 0 end),
+                SUM(case when short_score = 1.0 then 1 else 0 end),
                 SUM(long_score),
-                SUM(case when long_score BETWEEN 0.0 AND 0.2 then 1 else 0 end),
-                SUM(case when long_score BETWEEN 0.2 AND 0.4 then 1 else 0 end),
-                SUM(case when long_score BETWEEN 0.4 AND 0.6 then 1 else 0 end),
-                SUM(case when long_score BETWEEN 0.6 AND 0.8 then 1 else 0 end),
-                SUM(case when long_score BETWEEN 0.8 AND 1.0 then 1 else 0 end)
+                SUM(case when long_score >= 0.0 AND long_score < 0.2 then 1 else 0 end),
+                SUM(case when long_score >= 0.2 AND long_score < 0.4 then 1 else 0 end),
+                SUM(case when long_score >= 0.4 AND long_score < 0.6 then 1 else 0 end),
+                SUM(case when long_score >= 0.6 AND long_score < 0.8 then 1 else 0 end),
+                SUM(case when long_score >= 0.8 AND long_score <= 1.0 then 1 else 0 end)
             FROM (
                 SELECT
                     MAX(ifnull(s.short_score, 0.0)) as short_score,
@@ -207,9 +207,9 @@ class LearningDbView(
 
         database.rawQuery("""
             SELECT
-                SUM(case when stats_score BETWEEN 0.0 AND $BAD_WEIGHT then 1 else 0 end),
-                SUM(case when stats_score BETWEEN $BAD_WEIGHT AND $GOOD_WEIGHT then 1 else 0 end),
-                SUM(case when stats_score BETWEEN $GOOD_WEIGHT AND 1.0 then 1 else 0 end)
+                SUM(case when stats_score < $BAD_WEIGHT then 1 else 0 end),
+                SUM(case when stats_score >= $BAD_WEIGHT AND stats_score < 1.0 then 1 else 0 end),
+                SUM(case when stats_score = 1.0 then 1 else 0 end)
             FROM (
                 SELECT MAX(ifnull(s.short_score, 0.0)) as stats_score
                 FROM $tableName

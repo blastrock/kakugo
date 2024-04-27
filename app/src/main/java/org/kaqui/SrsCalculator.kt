@@ -2,7 +2,6 @@ package org.kaqui
 
 import android.util.Log
 import org.kaqui.model.Certainty
-import org.kaqui.model.GOOD_WEIGHT
 import org.kaqui.model.Item
 import java.util.*
 import kotlin.math.max
@@ -24,7 +23,7 @@ class SrsCalculator {
     companion object {
         private const val TAG = "SrsCalculator"
 
-        private const val SHORT_SCORE_UPDATE = 0.3
+        private const val SHORT_SCORE_UPDATE = 0.34
         private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
@@ -89,13 +88,10 @@ class SrsCalculator {
 
             val previousShortScore = item.shortScore
             // short score reduces the distance by half to target score
-            var newShortScore = when (certainty) {
-                Certainty.SURE -> previousShortScore + SHORT_SCORE_UPDATE
+            val newShortScore = when (certainty) {
+                Certainty.SURE -> min(1.0, previousShortScore + SHORT_SCORE_UPDATE)
                 Certainty.MAYBE -> min(0.7, previousShortScore + SHORT_SCORE_UPDATE/2)
-                Certainty.DONTKNOW -> max(0.0, min(item.longScore, previousShortScore - SHORT_SCORE_UPDATE))
-            }
-            if (newShortScore >= GOOD_WEIGHT) {
-                newShortScore = 1.0
+                Certainty.DONTKNOW -> max(0.0, min(item.longScore, previousShortScore - SHORT_SCORE_UPDATE * 0.99))
             }
             if (newShortScore !in 0f..1f) {
                 Log.wtf(TAG, "Score calculation error, previousShortScore = $previousShortScore, certainty = $certainty, newShortScore = $newShortScore")
@@ -115,8 +111,8 @@ class SrsCalculator {
                             previousLongScore / 2
                         certainty == Certainty.DONTKNOW ->
                             previousLongScore / lerp(4.0, 2.0, previousLongScore)
-                        previousShortScore < GOOD_WEIGHT ->
-                            if (newShortScore < GOOD_WEIGHT)
+                        previousShortScore < 1.0 ->
+                            if (newShortScore < 1.0)
                                 previousLongScore
                             else
                                 max(previousLongScore, 0.01)
