@@ -293,7 +293,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
     }
 
-    private fun dumpUserDataV9(): Dump {
+    private fun dumpUserDataV1(): Dump {
         val scores = mutableListOf<DumpScore>()
         val enabledKanas = mutableListOf<Int>()
         database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
@@ -309,7 +309,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         return Dump(enabledKanas, enabledKanjis, listOf(), scores, listOf(), mapOf(), mapOf(), listOf(), listOf())
     }
 
-    private fun dumpUserDataV12(): Dump {
+    private fun dumpUserDataV10(): Dump {
         val scores = mutableListOf<DumpScore>()
         val enabledKanas = mutableListOf<Int>()
         database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
@@ -330,7 +330,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, mapOf(), mapOf(), listOf(), listOf())
     }
 
-    private fun dumpUserDataV16(): Dump {
+    private fun dumpUserDataV13(): Dump {
         val scores = mutableListOf<DumpScore>()
         val enabledKanas = mutableListOf<Int>()
         database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
@@ -361,7 +361,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), listOf(), listOf())
     }
 
-    private fun dumpUserDataV18(): Dump {
+    private fun dumpUserDataV17(): Dump {
         val scores = mutableListOf<DumpScore>()
         val enabledKanas = mutableListOf<Int>()
         database.query("hiraganas", arrayOf("id", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
@@ -391,7 +391,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), listOf(), listOf())
     }
 
-    private fun dumpUserDataV20(): Dump {
+    private fun dumpUserDataV19(): Dump {
         val enabledKanas = mutableListOf<Int>()
         database.query(Database.KANAS_TABLE_NAME, arrayOf("id", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -492,7 +492,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, listOf(), listOf())
     }
 
-    private fun dumpUserDataV25(): Dump {
+    private fun dumpUserDataV22(): Dump {
         val enabledKanas = mutableListOf<Int>()
         database.query(Database.KANAS_TABLE_NAME, arrayOf("id", "enabled"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
@@ -620,13 +620,13 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         val oldVersion = database.version
         return when {
             oldVersion == 0 -> null
-            oldVersion < 10 -> dumpUserDataV9()
-            oldVersion < 13 -> dumpUserDataV12()
-            oldVersion < 17 -> dumpUserDataV16()
-            oldVersion < 19 -> dumpUserDataV18()
-            oldVersion < 21 -> dumpUserDataV20()
+            oldVersion < 10 -> dumpUserDataV1()
+            oldVersion < 13 -> dumpUserDataV10()
+            oldVersion < 17 -> dumpUserDataV13()
+            oldVersion < 19 -> dumpUserDataV17()
+            oldVersion < 21 -> dumpUserDataV19()
             oldVersion < 22 -> dumpUserDataV21()
-            oldVersion < 26 -> dumpUserDataV25()
+            oldVersion < 26 -> dumpUserDataV22()
             else -> throw RuntimeException("Unsupported future version $oldVersion")
         }
     }
