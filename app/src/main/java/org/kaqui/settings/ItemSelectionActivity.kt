@@ -72,10 +72,6 @@ class ItemSelectionActivity : BaseActivity() {
                     .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
 
-        if (mode == Mode.WORD) {
-            menu.add(Menu.NONE, R.id.autoselect, 2, R.string.autoselect_from_kanji)
-        }
-
         menu.add(Menu.NONE, R.id.select_all, 3, R.string.select_all)
         menu.add(Menu.NONE, R.id.select_none, 4, R.string.select_none)
         return true
@@ -90,19 +86,6 @@ class ItemSelectionActivity : BaseActivity() {
                             Mode.WORD -> ItemSearchActivity.Mode.WORD
                             else -> throw RuntimeException("Can't search on this item type!")
                         }))
-                return true
-            }
-            R.id.autoselect -> {
-                alert {
-                    titleResource = R.string.override_selection_title
-                    messageResource = R.string.override_selection_msg
-                    positiveButton(android.R.string.yes) {
-                        Database.getInstance(this@ItemSelectionActivity).autoSelectWords(classifier!!)
-                        listAdapter.notifyDataSetChanged()
-                        statsFragment.updateStats(dbView)
-                    }
-                    negativeButton(android.R.string.no) {}
-                }.show()
                 return true
             }
             R.id.select_all -> {

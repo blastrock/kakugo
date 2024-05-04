@@ -12,7 +12,6 @@
     <string name="word_selection">Word selection</string>
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>
-    <string name="autoselect_from_kanji">Automatically select words</string>
     <string name="import_selection">Import selection</string>
     <string name="database_error">Database error</string>
     <string name="custom_test">Custom test</string>
@@ -74,7 +73,6 @@
     <string name="confirm_test_stop_message">Are you sure you want to end this quiz session?</string>
     <string name="enable_a_few_items">You must enable at least 10 items to start a session</string>
     <string name="initializing_kanji_db">Initializing database</string>
-    <string name="autoselecting_words">Automatically selecting words from selected kanji</string>
     <string name="failed_to_init_db">Failed to initialize database: %1$s</string>
     <string name="debug_info" translatable="false">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nMin proba coeff: %13$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nMin days since asked: %10$.1f\nNew short score: %11$.2f\nNew long score: %12$.2f</string>
     <string name="info_button">Show details</string>
@@ -89,8 +87,6 @@
     <string name="saved_selection">Current selection saved as \"%1$s\"</string>
     <string name="answerDone">Done</string>
     <string name="enter_name_of_selection">Enter the name of this selection</string>
-    <string name="override_selection_title">Automatically select vocabulary</string>
-    <string name="override_selection_msg">Do you want to select words based on your selected kanji?\nThis will override your current vocabulary selection.</string>
     <string name="could_not_import_file">Could not import file: %1$s</string>
     <string name="import_kanji_help">This feature allows importing a kanji selection from a file. The file must contain one kanji per line. The kanji will be added to the current selection.</string>
     <string name="import_words_help">This feature allows importing a word selection from a file. The file must contain one word per line. The words will be added to the current selection.</string>

@@ -96,8 +96,6 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
         menu.add(Menu.NONE, R.id.save_selection, 1, R.string.save_current_selection)
         menu.add(Menu.NONE, R.id.load_selection, 2, R.string.load_selection)
         menu.add(Menu.NONE, R.id.select_none, 3, R.string.select_none)
-        if (mode == SelectionMode.WORD)
-            menu.add(Menu.NONE, R.id.autoselect, 4, R.string.autoselect_from_kanji)
         menu.add(Menu.NONE, R.id.import_selection, 4, R.string.import_selection)
 
         return true
@@ -144,29 +142,6 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
             R.id.import_selection -> {
                 importItems()
                 true
-            }
-            R.id.autoselect -> {
-                alert {
-                    title = getString(R.string.override_selection_title)
-                    message = getString(R.string.override_selection_msg)
-                    positiveButton(android.R.string.yes) {
-                        launch {
-                            val progressDialog = ProgressDialog(this@ClassSelectionActivity)
-                            progressDialog.setMessage(getString(R.string.autoselecting_words))
-                            progressDialog.setCancelable(false)
-                            progressDialog.show()
-
-                            withContext(Dispatchers.Default) { Database.getInstance(this@ClassSelectionActivity).autoSelectWords() }
-
-                            adapter.notifyDataSetChanged()
-                            statsFragment.updateStats(dbView)
-
-                            progressDialog.dismiss()
-                        }
-                    }
-                    negativeButton(android.R.string.no) {}
-                }.show()
-                return true
             }
             else ->
                 super.onOptionsItemSelected(item)

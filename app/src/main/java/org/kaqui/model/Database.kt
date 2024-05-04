@@ -253,35 +253,6 @@ class Database private constructor(context: Context, val database: SQLiteDatabas
         }
     }
 
-    fun autoSelectWords(classifier: Classifier? = null) {
-        val enabledKanjis = HashSet<Char>()
-        database.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->
-            while (cursor.moveToNext()) {
-                enabledKanjis.add(Character.toChars(cursor.getInt(0))[0])
-            }
-        }
-        var allWords =
-                database.query(WORDS_TABLE_NAME, arrayOf("id, item"), classifier?.whereClause(), classifier?.whereArguments(), null, null, null).use { cursor ->
-                    val ret = mutableListOf<Pair<Long, String>>()
-                    while (cursor.moveToNext()) {
-                        ret.add(Pair(cursor.getLong(0), cursor.getString(1)))
-                    }
-                    ret.toList()
-                }
-        allWords = allWords.map { Pair(it.first, it.second.filter { isKanji(it) }) }
-        allWords = allWords.filter { it.second.all { it in enabledKanjis } }
-
-        database.transaction {
-            val cv = ContentValues()
-            cv.put("enabled", false)
-            database.update(WORDS_TABLE_NAME, cv, classifier?.whereClause(), classifier?.whereArguments())
-            cv.put("enabled", true)
-            for (word in allWords) {
-                database.update(WORDS_TABLE_NAME, cv, "id = ?", arrayOf(word.first.toString()))
-            }
-        }
-    }
-
     data class SavedSelection(
             val id: Long,
             val name: String,

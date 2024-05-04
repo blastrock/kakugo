@@ -8,7 +8,6 @@
     <string name="word_selection">Sélection des mots</string>
     <string name="select_all">Tout sélectioner</string>
     <string name="select_none">Tout désélectionner</string>
-    <string name="autoselect_from_kanji">Sélectionner les mots automatiquement</string>
     <string name="import_selection">Importer une sélection</string>
     <string name="database_error">Erreur de base de données</string>
     <string name="custom_test">Test personalisé</string>
@@ -69,7 +68,6 @@
     <string name="confirm_test_stop_message">Étes-vous sûr de vouloir arrêter cette session ?</string>
     <string name="enable_a_few_items">Vous devez activer au moins 10 éléments pour lancer une session</string>
     <string name="initializing_kanji_db">Initialisation de la base de données</string>
-    <string name="autoselecting_words">Sélection automatique des mots à partir des kanji en cours</string>
     <string name="failed_to_init_db">Échec d\'initialisation de la base de données: %1$s</string>
     <string name="info_button">Afficher les détails</string>
     <string name="next">Suivant</string>
@@ -83,8 +81,6 @@
     <string name="saved_selection">Sélection courrante sauvegardée en \"%1$s\"</string>
     <string name="answerDone">Fini</string>
     <string name="enter_name_of_selection">Entrez le nom de cette sélection</string>
-    <string name="override_selection_title">Sélection automatique du vocabulaire</string>
-    <string name="override_selection_msg">Voulez-vous selectionner les mots correspondants aux kanji sélectionnés ?\nCeci écrasera votre sélection de vocabulaire actuelle.</string>
     <string name="could_not_import_file">Impossible d\'importer le fichier: %1$s</string>
     <string name="import_kanji_help">Cette fonctionalité permet d\'importer une sélection de kanji à partir d\'un fichier. Le fichier doit contenir un kanji par ligne. Les kanji seront ajoutés à la sélection courrante.</string>
     <string name="import_words_help">Cette fonctionalité permet d\'importer une sélection de mots à partir d\'un fichier. Le fichier doit contenir un mot par ligne. Les mots seront ajoutés à la sélection courrante.</string>
