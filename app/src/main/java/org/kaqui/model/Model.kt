@@ -128,7 +128,7 @@ fun itemAndKnowledgeTypeToTestType(itemType: ItemType, knowledgeType: KnowledgeT
             }
     }
 
-fun Item.getQuestionText(testType: TestType): String =
+fun Item.getQuestionText(testType: TestType, kanaWords: Boolean): String =
         when (testType) {
             TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT -> (contents as Kana).kana
             TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).romaji
@@ -144,14 +144,14 @@ fun Item.getQuestionText(testType: TestType): String =
             TestType.READING_TO_KANJI -> (contents as Kanji).readingsText
             TestType.MEANING_TO_KANJI -> (contents as Kanji).meaningsText
 
-            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING -> this.text
+            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING -> this.text(kanaWords)
             TestType.READING_TO_WORD -> (contents as Word).reading
             TestType.MEANING_TO_WORD -> (contents as Word).meaningsText
 
             TestType.KANJI_DRAWING, TestType.KANJI_COMPOSITION -> "${(contents as Kanji).readingsText}\n${(contents as Kanji).meaningsText}"
         }
 
-fun Item.getAnswerText(testType: TestType): String =
+fun Item.getAnswerText(testType: TestType, kanaWords: Boolean): String =
         when (testType) {
             TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT -> (contents as Kana).romaji
             TestType.ROMAJI_TO_HIRAGANA, TestType.ROMAJI_TO_KATAKANA -> (contents as Kana).kana
@@ -162,7 +162,7 @@ fun Item.getAnswerText(testType: TestType): String =
 
             TestType.WORD_TO_READING -> (contents as Word).reading
             TestType.WORD_TO_MEANING -> (contents as Word).meaningsText
-            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> this.text
+            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> this.text(kanaWords)
 
             TestType.KANJI_DRAWING, TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING -> throw RuntimeException("No answer text for writing test")
         }
@@ -177,8 +177,8 @@ val Kanji.meaningsText: String
 val Word.meaningsText: String
     get() = meanings.joinToString(", ")
 
-val Item.text: String
-    get() = when (contents) {
+fun Item.text(kanaWords: Boolean): String =
+    when (contents) {
         is Kana -> {
             val kana = contents as Kana
             kana.kana
@@ -189,10 +189,10 @@ val Item.text: String
         }
         is Word -> {
             val word = contents as Word
-            if (!word.kanaAlone)
-                word.word
-            else
+            if (word.kanaAlone && kanaWords)
                 word.reading
+            else
+                word.word
         }
     }
 

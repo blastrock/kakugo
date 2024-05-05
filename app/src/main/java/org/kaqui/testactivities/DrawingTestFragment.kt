@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -64,6 +65,8 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     private lateinit var dontKnowButton: Button
     private lateinit var nextButton: Button
 
+    private var kanaWords = false
+
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
@@ -75,6 +78,8 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        kanaWords = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("kana_words", true)
+
         testQuestionLayout = TestQuestionLayout()
         val mainBlock = UI {
             testQuestionLayout.makeMainBlock(requireActivity(), this, 10) {
@@ -104,7 +109,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text(kanaWords), testEngine.currentDebugData!!)
             true
         }
 
@@ -165,7 +170,7 @@ class DrawingTestFragment : Fragment(), CoroutineScope, TestFragment {
     override fun refreshQuestion() {
         currentStrokes = Database.getInstance(requireContext()).getStrokes(testEngine.currentQuestion.id)
 
-        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType, kanaWords)
 
         drawCanvas.clearCanvas()
 

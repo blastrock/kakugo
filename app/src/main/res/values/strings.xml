@@ -137,6 +137,13 @@
     <string name="warning_import_backup">Warning: this will erase the current state</string>
     <string name="import_backup_failure">Failed to import backup %1$s</string>
     <string name="backup_import_completed">Backup import completed</string>
+    <string name="kana_words">Show kana words in kana</string>
+    <string name="kana_words_off_summary">Words will be written with kanji whenever possible</string>
+    <string name="kana_words_on_summary">Words usually written in kana will be written in kana</string>
+
+    app:summaryOff="@string/kana_words_off_summary"
+    app:summaryOn="@string/kana_words_on_summary"
+    app:title="@string/kana_words"
 
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[

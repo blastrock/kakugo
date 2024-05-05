@@ -5,6 +5,7 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import org.jetbrains.anko.*
 import org.kaqui.*
@@ -77,11 +78,13 @@ class ItemSelectionAdapter(private val view: LearningDbView, private val context
     }
 
     override fun onBindViewHolder(holder: ItemSelectionViewHolder, position: Int) {
+        val kanaWords = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("kana_words", true)
+
         val item = view.getItem(ids[position])
         holder.itemId = item.id
         holder.enabled.isChecked = item.enabled
-        holder.itemText.text = item.text
-        if (item.text.length > 1)
+        holder.itemText.text = item.text(kanaWords)
+        if (holder.itemText.text.length > 1)
             (holder.itemText.layoutParams as LinearLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         holder.itemText.background = getColoredCircle(context, getColorFromScore(item.shortScore))
         holder.itemDescription.text = item.description

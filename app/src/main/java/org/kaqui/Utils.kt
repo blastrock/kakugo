@@ -133,7 +133,7 @@ fun ViewManager.appTitleImage(context: Context) =
 
 fun startTest(activity: Activity, types: List<TestType>) {
     val db = Database.getInstance(activity)
-    if (TestEngine.getItemView(db, types[0]).getEnabledCount() < 10) {
+    if (TestEngine.getItemView(activity, db, types[0]).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
         return
     }
@@ -169,7 +169,7 @@ fun startTest(activity: Activity, types: List<TestType>) {
 
 fun startTest(activity: Activity, type: TestType) {
     val db = Database.getInstance(activity)
-    if (TestEngine.getItemView(db, type).getEnabledCount() < 10) {
+    if (TestEngine.getItemView(activity, db, type).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
         return
     }

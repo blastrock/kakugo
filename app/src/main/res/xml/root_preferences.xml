@@ -57,6 +57,13 @@
             app:summaryOn="@string/hide_answers_on_summary"
             app:title="@string/hide_answers"
             app:defaultValue="true" />
+
+        <SwitchPreference
+            app:key="kana_words"
+            app:summaryOff="@string/kana_words_off_summary"
+            app:summaryOn="@string/kana_words_on_summary"
+            app:title="@string/kana_words"
+            app:defaultValue="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_cat_backup">

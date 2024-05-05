@@ -20,6 +20,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.*
@@ -67,6 +68,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         get() = intent.extras!!.getSerializable("test_types") as List<TestType>
     private var localTestType: TestType? = null
 
+    private var kanaWords = false
+
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
@@ -78,6 +81,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
 
         if (applicationContext.defaultSharedPreferences.getBoolean("keep_on", false))
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        kanaWords = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("kana_words", true)
 
         mainCoordLayout = coordinatorLayout {
             verticalLayout {
@@ -216,7 +221,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
             sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        testEngine = TestEngine(Database.getInstance(this), testTypes, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
+        testEngine = TestEngine(this, Database.getInstance(this), testTypes, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
 
         // handle view resize due to keyboard opening and closing
         val rootView = findViewById<View>(android.R.id.content)
@@ -366,7 +371,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
 
     private fun updateLastLine(correct: Item, wrong: Item?, probabilityData: TestEngine.DebugData?) {
         if (wrong != null) {
-            lastWrongItemText.text = wrong.text
+            lastWrongItemText.text = wrong.text(kanaWords)
             lastWrongItemBundle.visibility = View.VISIBLE
             if (correct.contents is Kanji) {
                 lastWrongInfo.visibility = View.VISIBLE
@@ -392,14 +397,14 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
             }
             lastWrongItemText.setOnLongClickListener {
                 if (probabilityData != null)
-                    showItemProbabilityData(this, wrong.text, probabilityData)
+                    showItemProbabilityData(this, wrong.text(kanaWords), probabilityData)
                 true
             }
         } else {
             lastWrongItemBundle.visibility = View.GONE
         }
         if (correct != wrong) {
-            lastItemText.text = correct.text
+            lastItemText.text = correct.text(kanaWords)
             lastItemBundle.visibility = View.VISIBLE
             if (correct.contents is Kanji) {
                 lastInfo.visibility = View.VISIBLE
@@ -425,7 +430,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
             }
             lastItemText.setOnLongClickListener {
                 if (probabilityData != null)
-                    showItemProbabilityData(this, correct.text, probabilityData)
+                    showItemProbabilityData(this, correct.text(kanaWords), probabilityData)
                 true
             }
         } else {
@@ -489,8 +494,8 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         checkbox.visibility = View.GONE
 
         val itemView = line.findViewById<Button>(R.id.item_text)
-        itemView.text = item.text
-        if (item.text.length > 1)
+        itemView.text = item.text(kanaWords)
+        if (itemView.text.length > 1)
             (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
         if (style != null) {
             itemView.background = getColoredCircle(this, style)
@@ -516,7 +521,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         }
         itemView.setOnLongClickListener {
             if (probabilityData != null)
-                showItemProbabilityData(this, item.text, probabilityData)
+                showItemProbabilityData(this, item.text(kanaWords), probabilityData)
             true
         }
 

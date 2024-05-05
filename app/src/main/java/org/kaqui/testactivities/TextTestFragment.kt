@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
@@ -38,6 +39,8 @@ class TextTestFragment : Fragment(), TestFragment {
 
     private lateinit var testQuestionLayout: TestQuestionLayout
 
+    private var kanaWords = false
+
     private val testFragmentHolder
         get() = (requireActivity() as TestFragmentHolder)
     private val testEngine
@@ -48,7 +51,7 @@ class TextTestFragment : Fragment(), TestFragment {
     private val currentKana get() = testEngine.currentQuestion.contents as Kana
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        super.onCreate(savedInstanceState)
+        kanaWords = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("kana_words", true)
 
         val questionMinSize = 30
 
@@ -121,7 +124,7 @@ class TextTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text(kanaWords), testEngine.currentDebugData!!)
             true
         }
 
@@ -177,7 +180,7 @@ class TextTestFragment : Fragment(), TestFragment {
     }
 
     override fun refreshQuestion() {
-        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType, kanaWords)
 
         refreshState()
 

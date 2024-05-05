@@ -1,12 +1,15 @@
 package org.kaqui
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcel
 import android.util.Log
+import androidx.preference.PreferenceManager
 import org.kaqui.model.*
 import java.util.*
 
 class TestEngine(
+        context: Context,
         private val db: Database,
         private val testTypes: List<TestType>,
         private val goodAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit,
@@ -23,14 +26,14 @@ class TestEngine(
         private const val LAST_QUESTIONS_TO_AVOID_COUNT = 6
         const val MAX_HISTORY_SIZE = 40
 
-        fun getItemView(db: Database, testType: TestType): LearningDbView =
+        fun getItemView(context: Context, db: Database, testType: TestType): LearningDbView =
                 when (testType) {
                     TestType.HIRAGANA_TO_ROMAJI, TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_HIRAGANA, TestType.HIRAGANA_DRAWING -> db.getHiraganaView(getKnowledgeType(testType))
                     TestType.KATAKANA_TO_ROMAJI, TestType.KATAKANA_TO_ROMAJI_TEXT, TestType.ROMAJI_TO_KATAKANA, TestType.KATAKANA_DRAWING -> db.getKatakanaView(getKnowledgeType(testType))
 
                     TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.KANJI_DRAWING, TestType.KANJI_COMPOSITION -> db.getKanjiView(getKnowledgeType(testType))
 
-                    TestType.WORD_TO_READING, TestType.READING_TO_WORD -> db.getWordView(getKnowledgeType(testType), withKanaAlone = false)
+                    TestType.WORD_TO_READING, TestType.READING_TO_WORD -> db.getWordView(getKnowledgeType(testType), withKanaAlone = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("kana_words", true) == false)
                     TestType.WORD_TO_MEANING, TestType.MEANING_TO_WORD -> db.getWordView(getKnowledgeType(testType))
                 }
     }
@@ -43,6 +46,15 @@ class TestEngine(
             var scoreUpdate: SrsCalculator.ScoreUpdate?)
 
     data class PickedQuestion(val item: Item, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
+
+    private fun getItem(id: Int): Item =
+        itemView.getItem(id)
+
+    val itemView: LearningDbView by lazy {
+        getItemView(context, db, testType).apply {
+            this.sessionId = this@TestEngine.sessionId
+        }
+    }
 
     lateinit var testType: TestType
     lateinit var currentQuestion: Item
@@ -295,14 +307,4 @@ class TestEngine(
 
         parcel.recycle()
     }
-
-    private fun getItem(id: Int): Item =
-            itemView.getItem(id)
-
-    val itemView: LearningDbView
-        get() {
-            val view = getItemView(db, testType)
-            view.sessionId = sessionId
-            return view
-        }
 }

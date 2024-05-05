@@ -42,11 +42,13 @@ class QuizTestFragment : Fragment(), TestFragment {
 
     private var singleButtonMode = false
     private var hideAnswers = false
+    private var kanaWords = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         singleButtonMode = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("single_button_mode", false)
         hideAnswers = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("hide_answers", true)
+        kanaWords = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("kana_words", true)
 
         val answerCount = getAnswerCount(testType)
         val answerTexts = mutableListOf<TextView>()
@@ -221,7 +223,7 @@ class QuizTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text(kanaWords), testEngine.currentDebugData!!)
             true
         }
 
@@ -302,10 +304,10 @@ class QuizTestFragment : Fragment(), TestFragment {
     }
 
     override fun refreshQuestion() {
-        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType, kanaWords)
 
         for (i in answerTexts.indices) {
-            answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType)
+            answerTexts[i].text = testEngine.currentAnswers[i].getAnswerText(testType, kanaWords)
         }
         scrollView.scrollTo(0, 0)
 
@@ -316,9 +318,9 @@ class QuizTestFragment : Fragment(), TestFragment {
         if (certainty != Certainty.DONTKNOW && (testEngine.currentAnswers[position] == testEngine.currentQuestion ||
                         // also compare answer texts because different answers can have the same readings
                         // like 副 and 福 and we don't want to penalize the user for that
-                        testEngine.currentAnswers[position].getAnswerText(testType) == testEngine.currentQuestion.getAnswerText(testType) ||
+                        testEngine.currentAnswers[position].getAnswerText(testType, kanaWords) == testEngine.currentQuestion.getAnswerText(testType, kanaWords) ||
                         // same for question text
-                        testEngine.currentAnswers[position].getQuestionText(testType) == testEngine.currentQuestion.getQuestionText(testType))) {
+                        testEngine.currentAnswers[position].getQuestionText(testType, kanaWords) == testEngine.currentQuestion.getQuestionText(testType, kanaWords))) {
             testFragmentHolder.onAnswer(button, certainty, null)
 
             testFragmentHolder.nextQuestion()

@@ -122,6 +122,9 @@
     <string name="warning_import_backup">Attention: ceci écrasera votre progression</string>
     <string name="import_backup_failure">Échec de l\'import de la sauvegarde: %1$s</string>
     <string name="backup_import_completed">Importation de la sauvegarde terminée</string>
+    <string name="kana_words">Afficher les mots kana en kana</string>
+    <string name="kana_words_off_summary">Les mots seront écrits en kanji autant que possible</string>
+    <string name="kana_words_on_summary">Les mots habituellement écrits en kana seront écrits en kana</string>
 
     <string name="title_about">À propos de Kakugo</string>
     <string name="about_text"><![CDATA[

@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.ToggleButton
 import androidx.annotation.AttrRes
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI
 import org.kaqui.*
@@ -42,7 +43,11 @@ class CompositionTestFragment : Fragment(), TestFragment {
     private lateinit var dontKnowButton: Button
     private lateinit var nextButton: Button
 
+    private var kanaWords = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        kanaWords = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("kana_words", true)
+
         val answerCount = getAnswerCount(testType)
         val answerButtons = mutableListOf<ToggleButton>()
 
@@ -92,7 +97,7 @@ class CompositionTestFragment : Fragment(), TestFragment {
 
         testQuestionLayout.questionText.setOnLongClickListener {
             if (testEngine.currentDebugData != null)
-                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text, testEngine.currentDebugData!!)
+                showItemProbabilityData(requireContext(), testEngine.currentQuestion.text(kanaWords), testEngine.currentDebugData!!)
             true
         }
 
@@ -170,12 +175,12 @@ class CompositionTestFragment : Fragment(), TestFragment {
     }
 
     override fun refreshQuestion() {
-        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType)
+        testQuestionLayout.questionText.text = testEngine.currentQuestion.getQuestionText(testType, kanaWords)
 
         for ((button, answer) in answerButtons.zip(testEngine.currentAnswers)) {
-            button.text = answer.getAnswerText(testType)
-            button.textOn = answer.getAnswerText(testType)
-            button.textOff = answer.getAnswerText(testType)
+            button.text = answer.getAnswerText(testType, kanaWords)
+            button.textOn = answer.getAnswerText(testType, kanaWords)
+            button.textOff = answer.getAnswerText(testType, kanaWords)
             colorCheckedButton(button)
         }
     }
