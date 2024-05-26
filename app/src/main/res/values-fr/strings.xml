@@ -152,15 +152,13 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.37</h3>
+        <h3>Nouveautés en 1.38</h3>
 
+        <br/>- Ajout d\'une option pour afficher les mots habituellement écrits en kana en kanji
+        <!-- -->
         <br/>- Amélioration du SRS pour demander moins souvent les éléments connus
         <br/>- Ajout de differentes traductions pour chaque mot
         <br/>- Ajout de plus de vocabulaire
         <br/>- Ajout de la fonctionalité d\'import/export de la base de données
-        <!-- -->
-        <br/>- Ajout des traductions allemandes de kanji de l\'app Kanji Study (un grand merci à Chase Colburn)
-        <br/>- Ajout des traductions allemandes de vocabulaire de Kanjidic
-        <br/>- Ajout des traductions allemandes de l\'application du contributeur Moritz Bandemer
     ]]></string>
 </resources>

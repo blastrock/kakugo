@@ -171,16 +171,13 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.37?</h3>
+        <h3>What\'s new in 1.38?</h3>
 
+        <br/>- Add option to show words usually written in kana in kanji
+        <!-- -->
         <br/>- Improved SRS to ask known items less often
         <br/>- Added multiple translations for each vocabulary word
         <br/>- Added more words
         <br/>- Added import/export feature for the database
-        <!-- -->
-        <br/>- Added German kanji translations from the Kanji Study app (many thanks to Chase Colburn)
-        <br/>- Added German vocabulary translations from JMdict
-        <br/>- Added German app translations from contributor Moritz Bandemer
-        <br/>- Added Android 13 themed icon from contributor Pratik Jindal
     ]]></string>
 </resources>
