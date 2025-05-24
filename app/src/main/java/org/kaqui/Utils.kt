@@ -18,10 +18,19 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.compose.foundation.Image
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
 import com.github.mikephil.charting.charts.BarChart
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
 import org.kaqui.model.BAD_WEIGHT
@@ -130,6 +139,29 @@ fun ViewManager.appTitleImage(context: Context) =
             drawable.applyTint(context.getColorFromAttr(android.R.attr.colorForeground))
             setImageDrawable(drawable)
         }
+
+@Composable
+fun AppTitleImage(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val drawable = remember {
+        AppCompatResources.getDrawable(context, R.drawable.kakugo)!!
+    }
+    val foregroundColor = MaterialTheme.colors.onSurface
+
+    val tintedDrawable = remember(foregroundColor) {
+        drawable.mutate().also {
+            DrawableCompat.setTint(it, foregroundColor.toArgb())
+            DrawableCompat.setTintMode(it, PorterDuff.Mode.SRC_IN)
+        }
+    }
+
+    Image(
+        painter = rememberDrawablePainter(tintedDrawable),
+        contentDescription = null,
+        modifier = modifier,
+        contentScale = ContentScale.Fit
+    )
+}
 
 fun startTest(activity: Activity, types: List<TestType>) {
     val db = Database.getInstance(activity)

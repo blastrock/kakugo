@@ -1,95 +1,43 @@
 package org.kaqui.mainmenu
 
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.material.Button
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.kaqui.*
+import org.kaqui.R
 import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
 import org.kaqui.stats.StatsActivity
 import java.io.File
 import java.util.zip.GZIPInputStream
-import kotlin.coroutines.CoroutineContext
 
-class MainActivity : BaseActivity(), CoroutineScope {
+class MainActivity : ComponentActivity() {
     companion object {
-        private const val TAG = "MainActivity"
+        const val TAG = "MainActivity"
     }
-
-    private var initProgress: ProgressDialog? = null
-
-    private lateinit var job: Job
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
 
     override fun onCreate(savedInstanceState: Bundle?) {
         LocaleManager.updateDictionaryLocale(this)
-
         super.onCreate(savedInstanceState)
-        job = Job()
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-
-        verticalLayout {
-            gravity = Gravity.CENTER
-
-            scrollView {
-                verticalLayout {
-                    padding = dip(8)
-
-                    appTitleImage(this@MainActivity).lparams(width = matchParent, height = dip(80)) {
-                        margin = dip(8)
-                    }
-
-                    verticalLayout {
-                        button(R.string.hiragana) {
-                            setOnClickListener { startActivity<HiraganaMenuActivity>() }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.katakana) {
-                            setOnClickListener { startActivity<KatakanaMenuActivity>() }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.kanji) {
-                            setOnClickListener { startActivity<KanjiMenuActivity>() }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.word) {
-                            setOnClickListener { startActivity<VocabularyMenuActivity>() }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.stats) {
-                            setOnClickListener { startActivity<StatsActivity>() }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.settings) {
-                            setOnClickListener { startActivity<MainSettingsActivity>() }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                    }
-                }
-            }.lparams(width = menuWidth)
-        }
-
-        if (DatabaseUpdater.databaseNeedsUpdate(this)) {
-            showDownloadProgressDialog()
-            launch(Dispatchers.Default) {
-                initDic()
-            }
-        }
 
         val lastVersionChangelog = defaultSharedPreferences.getInt("last_version_changelog", 0)
         if (lastVersionChangelog < BuildConfig.VERSION_CODE) {
@@ -101,18 +49,12 @@ class MainActivity : BaseActivity(), CoroutineScope {
                 }
             }.show()
         }
-    }
 
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
-    }
-
-    private fun showDownloadProgressDialog() {
-        initProgress = ProgressDialog(this)
-        initProgress!!.setMessage(getString(R.string.initializing_kanji_db))
-        initProgress!!.setCancelable(false)
-        initProgress!!.show()
+        setContent {
+            MainScreen(
+                onDatabaseInitRequired = { initDic() },
+            )
+        }
     }
 
     private fun initDic() {
@@ -126,20 +68,116 @@ class MainActivity : BaseActivity(), CoroutineScope {
                 }
             }
             DatabaseUpdater.upgradeDatabase(this, tmpFile.absolutePath)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize database", e)
-            launch(job) {
-                alert(getString(R.string.failed_to_init_db, e.message), getString(R.string.database_error)) {
-                    okButton {}
-                }.show()
-            }
         } finally {
             tmpFile.delete()
+        }
+    }
+}
 
-            launch(job) {
-                initProgress!!.dismiss()
-                initProgress = null
+@Composable
+fun MainScreen(
+    onDatabaseInitRequired: () -> Unit,
+) {
+    val context = LocalContext.current
+    var showProgress by remember { mutableStateOf(false) }
+    var errorTitle by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        if (DatabaseUpdater.databaseNeedsUpdate(context)) {
+            showProgress = true
+            try {
+                onDatabaseInitRequired()
+            } catch (e: Exception) {
+                Log.e(MainActivity.TAG, "Database initialization failed", e)
+                errorMessage = context.getString(R.string.failed_to_init_db, e.message)
+                errorTitle = context.getString(R.string.database_error)
+            } finally {
+                showProgress = false
             }
         }
     }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(500.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AppTitleImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .padding(8.dp)
+            )
+
+            MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
+            MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
+            MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
+            MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
+            MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
+            MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
+        }
+    }
+
+    if (showProgress) {
+        LoadingDialog()
+    }
+
+    if (errorMessage != null) {
+        ErrorDialog(
+            title = errorTitle!!,
+            message = errorMessage!!,
+            onDismiss = { errorMessage = null }
+        )
+    }
+}
+
+@Composable
+fun MenuButton(textRes: Int, onClick: () -> Unit) {
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp),
+        factory = { context ->
+            android.widget.Button(context).apply {
+                this.setText(textRes)
+                this.setOnClickListener { onClick() }
+            }
+        }
+    )
+}
+
+@Composable
+fun LoadingDialog() {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text(stringResource(R.string.initializing_kanji_db)) },
+        text = { CircularProgressIndicator() },
+        buttons = { }
+    )
+}
+
+@Composable
+fun ErrorDialog(
+    title: String,
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { Text(message) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(android.R.string.ok))
+            }
+        }
+    )
 }
