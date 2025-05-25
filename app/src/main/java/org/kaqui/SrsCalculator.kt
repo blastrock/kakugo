@@ -29,8 +29,8 @@ class SrsCalculator {
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
         private const val MIN_SHORT_RATIO_LERP = 1.0/4
         private const val MAX_SHORT_RATIO_LERP = 1.0/3
-        private const val MIN_LONG_WEIGHT = 0.2
-        private const val MAX_LONG_SCORE_UPDATE_INCREMENT = 0.25
+        private const val MIN_LONG_WEIGHT = 0.1
+        private const val MAX_LONG_SCORE_UPDATE_INCREMENT = 0.125
 
         fun fillProbalities(items: List<ProbabilityData>, minLastAsked: Long): Pair<List<ProbabilityData>, DebugParams> {
             val now = Calendar.getInstance().timeInMillis / 1000
