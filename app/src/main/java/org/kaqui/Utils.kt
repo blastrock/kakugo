@@ -13,32 +13,88 @@ import android.view.Gravity
 import android.view.ViewManager
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.material.Button
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ButtonColors
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ButtonElevation
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
 import com.github.mikephil.charting.charts.BarChart
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import org.jetbrains.anko.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.anko._LinearLayout
+import org.jetbrains.anko._ScrollView
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.custom.ankoView
+import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.dip
+import org.jetbrains.anko.imageView
+import org.jetbrains.anko.longToast
+import org.jetbrains.anko.matchParent
+import org.jetbrains.anko.scrollView
+import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.verticalLayout
+import org.jetbrains.anko.view
+import org.jetbrains.anko.wrapContent
 import org.kaqui.model.BAD_WEIGHT
 import org.kaqui.model.Database
 import org.kaqui.model.TestType
 import org.kaqui.testactivities.DrawView
 import org.kaqui.testactivities.TestActivity
-import java.util.*
+import java.util.Calendar
 import kotlin.math.pow
 
 fun getColorFromScore(score: Double) =
@@ -125,6 +181,18 @@ fun _LinearLayout.separator(context: Context) =
         view {
             backgroundColor = ContextCompat.getColor(context, R.color.separator)
         }.lparams(width = matchParent, height = dip(1))
+
+@Composable
+fun Separator(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier // Apply external modifier first
+            .fillMaxWidth()    // width = matchParent
+            .height(1.dp)      // height = dip(1)
+            .background(color = colorResource(id = R.color.separator)) // backgroundColor = ...
+    )
+}
 
 fun Drawable.applyTint(@ColorInt color: Int): Drawable {
     val mWrappedDrawable = DrawableCompat.wrap(this)
@@ -291,3 +359,50 @@ fun TestType.toName(): Int =
             TestType.READING_TO_WORD -> R.string.reading_to_word_title
             TestType.MEANING_TO_WORD -> R.string.meaning_to_word_title
         }
+
+// Button with long press support
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun BetterButton(
+    onClick: () -> Unit,
+    onLongPress: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val viewConfiguration = LocalViewConfiguration.current
+
+    LaunchedEffect(interactionSource) {
+        var isLongClick = false
+
+        interactionSource.interactions.collectLatest { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> {
+                    isLongClick = false
+                    delay(viewConfiguration.longPressTimeoutMillis)
+                    isLongClick = true
+                    onLongPress()
+                }
+
+                is PressInteraction.Release -> {
+                    if (isLongClick.not()) {
+                        onClick()
+                    }
+                }
+            }
+        }
+    }
+
+    Button(
+        onClick = {},
+        interactionSource = interactionSource,
+        modifier = modifier,
+        enabled = enabled,
+        content = content,
+        colors = colors,
+        contentPadding = contentPadding,
+    )
+}

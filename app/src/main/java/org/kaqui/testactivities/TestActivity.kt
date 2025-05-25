@@ -94,9 +94,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
                 }
                 mainView = frameLayout {
                     id = R.id.main_test_block
-                }.lparams(width = matchParent, height = matchParent, weight = 1f) {
-                    horizontalMargin = dip(16)
-                }
+                }.lparams(width = matchParent, height = matchParent, weight = 1f)
                 frameLayout {
                     backgroundColor = getColorFromAttr(R.attr.historyBackground)
                     lastItem = linearLayout {
@@ -322,7 +320,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
             localTestType = testType
             val testFragment: Fragment =
                     when (testType) {
-                        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragment.newInstance()
+                        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose.newInstance()
                         TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragment.newInstance()
                         TestType.KANJI_COMPOSITION -> CompositionTestFragment.newInstance()
                         TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragment.newInstance()
