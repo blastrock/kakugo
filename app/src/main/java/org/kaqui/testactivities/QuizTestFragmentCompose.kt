@@ -195,6 +195,10 @@ class QuizViewModel : ViewModel() {
     fun refreshQuestionViewFromExternal() {
         loadQuestionData()
     }
+
+    fun setTestEngine(testEngine: TestEngine) {
+        this.testEngine = testEngine
+    }
 }
 
 class QuizTestFragmentCompose : Fragment(), TestFragment {
@@ -220,7 +224,10 @@ class QuizTestFragmentCompose : Fragment(), TestFragment {
                 singleButtonModePref,
                 kanaWordsPref
             )
+        } else {
+            viewModel.setTestEngine(testFragmentHolderRef.testEngine)
         }
+
         // Collect events from ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -310,7 +317,7 @@ fun QuizTestScreenContent(
                             backgroundColor = Color(LocalContext.current.getColorFromAttr(R.attr.backgroundDontKnow)),
                         ),
                     ) {
-                        Text(stringResource(id = R.string.show_answers))
+                        Text(stringResource(id = R.string.show_answers).uppercase())
                     }
                 }
 

@@ -84,4 +84,5 @@ dependencies {
     implementation "org.jetbrains.anko:anko-design:$anko_version"
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'androidx.fragment:fragment-compose:1.8.8'
 }

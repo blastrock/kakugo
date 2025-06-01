@@ -1,537 +1,275 @@
 package org.kaqui.testactivities
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
-import android.animation.StateListAnimator
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.widget.*
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.AttrRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.NavUtils
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.*
-import org.jetbrains.anko.*
-import org.jetbrains.anko.design.coordinatorLayout
-import org.jetbrains.anko.design.floatingActionButton
-import org.jetbrains.anko.support.v4.nestedScrollView
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.kaqui.*
+import org.kaqui.R
 import org.kaqui.model.*
-import kotlin.coroutines.CoroutineContext
+import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
+import kotlinx.coroutines.flow.update
+import androidx.core.net.toUri
+import androidx.fragment.compose.AndroidFragment
 
-class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
-    companion object {
-        private const val TAG = "TestActivity"
+data class HistoryItem(
+    val item: Item,
+    val probabilityData: TestEngine.DebugData?,
+    @AttrRes val style: Int,
+    val prependSeparator: Boolean = false,
+)
+
+data class HistoryState(
+    val items: List<HistoryItem> = listOf(),
+    val lastCorrect: Item? = null,
+    val lastWrong: Item? = null,
+    val lastProbabilityData: TestEngine.DebugData? = null,
+)
+
+data class TestActivityUiState(
+    val fragment: Class<out Fragment>? = null,
+    val correctCount: Int = 0,
+    val questionCount: Int = 0,
+    val historyState: HistoryState = HistoryState(),
+    val sheetState: Int = BottomSheetBehavior.STATE_COLLAPSED,
+)
+//val kanaWords: Boolean = true)
+
+class TestViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(TestActivityUiState())
+    val uiState: StateFlow<TestActivityUiState> = _uiState.asStateFlow()
+
+    lateinit var testEngine: TestEngine
+
+    // Example of how you might initialize TestEngine if it needs application context
+    fun initialize(testEngine: TestEngine) {
+        this.testEngine = testEngine
+        // Update initial counts from testEngine
+        _uiState.update { currentState ->
+            currentState.copy(
+                correctCount = testEngine.correctCount,
+                questionCount = testEngine.questionCount
+            )
+        }
     }
 
+    fun addGoodAnswerToHistory(
+        correct: Item,
+        probabilityData: TestEngine.DebugData?,
+        refresh: Boolean,
+    ) {
+        if (refresh) {
+            _uiState.update { currentState ->
+                val newHistoryItems =
+                    listOf(HistoryItem(correct, probabilityData, R.attr.itemGood, true)) +
+                            currentState.historyState.items.take(49)
+                currentState.copy(
+                    historyState = currentState.historyState.copy(
+                        items = newHistoryItems,
+                        lastCorrect = correct,
+                        lastWrong = null,
+                        lastProbabilityData = probabilityData
+                    )
+                )
+            }
+        }
+        // Update counts if they change
+        // _uiState.update { it.copy(correctCount = testEngine.correctCount, questionCount = testEngine.questionCount) }
+    }
+
+    fun addWrongAnswerToHistory(
+        correct: Item,
+        probabilityData: TestEngine.DebugData?,
+        wrong: Item,
+        refresh: Boolean,
+    ) {
+        if (refresh) {
+            _uiState.update { currentState ->
+                val newHistoryItems = listOf(
+                    HistoryItem(correct, probabilityData, R.attr.itemBad, true),
+                    HistoryItem(wrong, null, R.attr.backgroundDontKnow),
+                ) + currentState.historyState.items.take(48)
+                currentState.copy(
+                    historyState = currentState.historyState.copy(
+                        items = newHistoryItems,
+                        lastCorrect = correct,
+                        lastWrong = wrong,
+                        lastProbabilityData = probabilityData
+                    )
+                )
+            }
+        }
+        // Update counts if they change
+        // _uiState.update { it.copy(correctCount = testEngine.correctCount, questionCount = testEngine.questionCount) }
+    }
+
+    fun addUnknownAnswerToHistory(
+        correct: Item,
+        probabilityData: TestEngine.DebugData?,
+        refresh: Boolean,
+    ) {
+        if (refresh) {
+            _uiState.update { currentState ->
+                val newHistoryItems =
+                    listOf(HistoryItem(correct, probabilityData, R.attr.itemBad, true)) +
+                            currentState.historyState.items.take(49)
+                currentState.copy(
+                    historyState = currentState.historyState.copy(
+                        items = newHistoryItems,
+                        lastCorrect = correct,
+                        lastWrong = correct,
+                        lastProbabilityData = probabilityData
+                    )
+                )
+            }
+        }
+        // Update counts if they change
+        // _uiState.update { it.copy(correctCount = testEngine.correctCount, questionCount = testEngine.questionCount) }
+    }
+
+    fun setSheetState(sheetState: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                sheetState = sheetState
+            )
+        }
+    }
+
+    fun updateScore(correctCount: Int, questionCount: Int) {
+        _uiState.update {
+            it.copy(correctCount = correctCount, questionCount = questionCount)
+        }
+    }
+
+    // Example:
+    fun onAnswer(certainty: Certainty, wrong: Item?) {
+        testEngine.markAnswer(certainty, wrong)
+        _uiState.update {
+            it.copy(
+                correctCount = testEngine.correctCount,
+                questionCount = testEngine.questionCount
+            )
+        }
+    }
+
+    fun nextQuestion() {
+        // This will likely involve communication back to the Activity/Fragment
+        // to handle UI changes like replacing fragments.
+        // You might use SingleLiveEvent or a SharedFlow for such events.
+        testEngine.prepareNewQuestion()
+        _uiState.update {
+            it.copy(questionCount = testEngine.questionCount)
+        }
+    }
+
+    fun setFragmentClass(testFragment: Class<out Fragment>) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                fragment = testFragment
+            )
+        }
+    }
+}
+
+class TestActivity : BaseActivity(), TestFragmentHolder {
     override lateinit var testEngine: TestEngine
 
     private lateinit var statsFragment: StatsFragment
-    private lateinit var sheetBehavior: BottomSheetBehavior<NestedScrollView>
-
     private lateinit var testFragment: TestFragment
 
-    private lateinit var historyScrollView: NestedScrollView
-    private lateinit var historyActionButton: FloatingActionButton
-    private lateinit var historyView: LinearLayout
-
-    private lateinit var lastItem: LinearLayout
-    private lateinit var lastWrongItemBundle: View
-    private lateinit var lastWrongItemText: TextView
-    private lateinit var lastWrongInfo: ImageView
-    private lateinit var lastItemBundle: View
-    private lateinit var lastItemText: TextView
-    private lateinit var lastInfo: ImageView
-    private lateinit var lastDescription: TextView
-
-    private lateinit var sessionScore: TextView
-    private lateinit var mainView: View
-    private lateinit var mainCoordLayout: androidx.coordinatorlayout.widget.CoordinatorLayout
-
-    private lateinit var lastWrongItemButtonAnimation: StateListAnimator
-    private lateinit var lastItemButtonAnimation: StateListAnimator
-
-    private val testTypes
-        get() = intent.extras!!.getSerializable("test_types") as List<TestType>
     private var localTestType: TestType? = null
-
     private var kanaWords = false
 
-    private lateinit var job: Job
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    private val viewModel: TestViewModel by viewModels()
+
+    @Suppress("DEPRECATION")
+    private val testTypes: List<TestType>
+        get() = (intent.extras?.getSerializable("test_types") as? List<*>)?.filterIsInstance<TestType>()
+            ?: emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        job = Job()
+        kanaWords =
+            PreferenceManager.getDefaultSharedPreferences(this).getBoolean("kana_words", true)
 
-        if (applicationContext.defaultSharedPreferences.getBoolean("keep_on", false))
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        kanaWords = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("kana_words", true)
-
-        mainCoordLayout = coordinatorLayout {
-            verticalLayout {
-                frameLayout {
-                    id = R.id.global_stats
-                }.lparams(width = matchParent, height = wrapContent)
-                sessionScore = textView {
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                }
-                mainView = frameLayout {
-                    id = R.id.main_test_block
-                }.lparams(width = matchParent, height = matchParent, weight = 1f)
-                frameLayout {
-                    backgroundColor = getColorFromAttr(R.attr.historyBackground)
-                    lastItem = linearLayout {
-                        lastWrongItemBundle = relativeLayout {
-                            visibility = View.GONE
-                            padding = dip(4)
-                            clipToPadding = false
-                            lastWrongItemText = button {
-                                id = View.generateViewId()
-                                typeface = TypefaceManager.getTypeface(context)
-                                textSize = 25f
-                                textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                                gravity = Gravity.CENTER
-                                background = getColoredCircle(context, R.attr.itemBad)
-                                minWidth = sp(35)
-                                minimumWidth = sp(35)
-                                verticalPadding = dip(0)
-                                horizontalPadding = sp(4)
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    lastWrongItemButtonAnimation = stateListAnimator
-                                }
-                            }.lparams(width = wrapContent, height = sp(35))
-                            lastWrongInfo = imageView {
-                                val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
-                                val mWrappedDrawable = DrawableCompat.wrap(drawable)
-                                DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
-                                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
-                                setImageDrawable(drawable)
-                                contentDescription = context.getString(R.string.info_button)
-                                visibility = View.INVISIBLE
-                            }.lparams(width = sp(10), height = sp(10)) {
-                                sameBottom(lastWrongItemText)
-                                sameEnd(lastWrongItemText)
-                            }
-                        }.lparams {
-                            margin = dip(4)
-                            gravity = Gravity.CENTER
-                        }
-                        lastItemBundle = relativeLayout {
-                            visibility = View.GONE
-                            padding = dip(4)
-                            clipToPadding = false
-                            lastItemText = button {
-                                id = View.generateViewId()
-                                typeface = TypefaceManager.getTypeface(context)
-                                textSize = 25f
-                                textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                                gravity = Gravity.CENTER
-                                background = getColoredCircle(context, R.attr.itemGood)
-                                minWidth = sp(35)
-                                minimumWidth = sp(35)
-                                verticalPadding = dip(0)
-                                horizontalPadding = sp(4)
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    lastItemButtonAnimation = stateListAnimator
-                                }
-                            }.lparams(width = wrapContent, height = sp(35))
-                            lastInfo = imageView {
-                                val drawable = AppCompatResources.getDrawable(context, android.R.drawable.ic_dialog_info)!!
-                                val mWrappedDrawable = DrawableCompat.wrap(drawable)
-                                DrawableCompat.setTint(mWrappedDrawable, ContextCompat.getColor(context, R.color.colorPrimary))
-                                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
-                                setImageDrawable(drawable)
-                                contentDescription = context.getString(R.string.info_button)
-                                visibility = View.INVISIBLE
-                            }.lparams(width = sp(10), height = sp(10)) {
-                                sameBottom(lastItemText)
-                                sameEnd(lastItemText)
-                            }
-                        }.lparams {
-                            margin = dip(4)
-                            gravity = Gravity.CENTER
-                        }
-                        lastDescription = textView {
-                            typeface = TypefaceManager.getTypeface(context)
-                            // disable line wrapping
-                            setHorizontallyScrolling(true)
-                            setLineSpacing(0f, .8f)
-                        }.lparams(height = wrapContent) {
-                            gravity = Gravity.CENTER
-                        }
-                    }
-                }.lparams(width = matchParent, height = sp(50))
-            }.lparams(width = matchParent, height = matchParent)
-            historyScrollView = nestedScrollView {
-                id = R.id.history_scroll_view
-                backgroundColor = getColorFromAttr(R.attr.historyBackground)
-                historyView = verticalLayout().lparams(width = matchParent, height = wrapContent)
-            }.lparams(width = matchParent, height = matchParent) {
-                val bottomSheetBehavior = BottomSheetBehavior<NestedScrollView>()
-                bottomSheetBehavior.peekHeight = 0
-                bottomSheetBehavior.isHideable = false
-                behavior = bottomSheetBehavior
-            }
-            historyActionButton = floatingActionButton {
-                size = FloatingActionButton.SIZE_MINI
-                scaleX = 0f
-                scaleY = 0f
-                setImageResource(R.drawable.ic_arrow_upward)
-            }.lparams(width = matchParent, height = wrapContent) {
-                anchorId = R.id.history_scroll_view
-                anchorGravity = Gravity.TOP or Gravity.END
-
-                marginEnd = dip(6)
-                bottomMargin = dip(6)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    elevation = 12.0f
-                }
-            }
-        }
-
-        statsFragment = StatsFragment.newInstance()
-
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
-        sheetBehavior = BottomSheetBehavior.from(historyScrollView)
-        sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-
-        historyActionButton.setOnClickListener {
-            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
-
-        testEngine = TestEngine(this, Database.getInstance(this), testTypes, this::addGoodAnswerToHistory, this::addWrongAnswerToHistory, this::addUnknownAnswerToHistory)
-
-        // handle view resize due to keyboard opening and closing
-        val rootView = findViewById<View>(android.R.id.content)
-        rootView.addOnLayoutChangeListener(this::onLayoutChange)
-
-        supportFragmentManager.commit {
-            replace(R.id.global_stats, statsFragment)
-        }
-
-        val previousFragment = supportFragmentManager.findFragmentById(R.id.main_test_block)
-        if (previousFragment != null)
-            testFragment = previousFragment as TestFragment
+        testEngine = TestEngine(
+            this,
+            Database.getInstance(this),
+            testTypes,
+            viewModel::addGoodAnswerToHistory,
+            viewModel::addWrongAnswerToHistory,
+            viewModel::addUnknownAnswerToHistory
+        )
 
         if (savedInstanceState == null) {
             nextQuestion()
-        } else
+        } else {
             testEngine.loadState(savedInstanceState)
-
-        updateSessionScore()
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        statsFragment.updateStats(testEngine.itemView)
-    }
-
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        testEngine.saveState(outState)
-        super.onSaveInstanceState(outState)
-    }
-
-    private fun onLayoutChange(v: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
-        if (left == oldLeft && top == oldTop && right == oldRight && bottom == oldBottom)
-            return
-
-        val shownLine = historyView.getChildAt(0) ?: return
-        updateSheetPeekHeight(shownLine)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-            // smoothScrollTo doesn't work, it always scrolls at the end or does nothing
-            historyScrollView.scrollTo(0, 0)
-            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else
-            confirmActivityClose(false)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                confirmActivityClose(true)
-                true
-            }
-            else ->
-                super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun confirmActivityClose(upNavigation: Boolean) {
-        AlertDialog.Builder(this)
-                .setTitle(R.string.confirm_test_stop_title)
-                .setMessage(R.string.confirm_test_stop_message)
-                .setPositiveButton(android.R.string.yes) { _, _ ->
-                    if (upNavigation)
-                        NavUtils.navigateUpFromSameTask(this)
-                    else
-                        finish()
-                }
-                .setNegativeButton(android.R.string.no, null)
-                .show()
-    }
-
-    override fun onAnswer(button: View?, certainty: Certainty, wrong: Item?) {
-        testEngine.markAnswer(certainty, wrong)
-        updateSessionScore()
-    }
-
-    override fun nextQuestion() {
-        testEngine.prepareNewQuestion()
-
-        if (localTestType == testType) {
-            testFragment.startNewQuestion()
-            testFragment.refreshQuestion()
-            testFragment.setSensible(false)
-            launch(job) {
-                delay(300)
-                testFragment.setSensible(true)
-            }
-        } else {
-            localTestType = testType
-            val testFragment: Fragment =
-                    when (testType) {
-                        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose.newInstance()
-                        TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragment.newInstance()
-                        TestType.KANJI_COMPOSITION -> CompositionTestFragment.newInstance()
-                        TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragment.newInstance()
-                    }
-            this@TestActivity.testFragment = testFragment as TestFragment
-
-            supportFragmentManager.commit {
-                replace(R.id.main_test_block, testFragment)
-            }
-
-            title = getString(testType.toName())
-
-            updateSessionScore()
-        }
-    }
-
-    private fun updateSessionScore() {
-        sessionScore.text = getString(R.string.score_string, testEngine.correctCount, testEngine.questionCount)
-
-        // when showNewQuestion is called in onCreate, statsFragment is not visible yet
-        if (statsFragment.isVisible)
-            statsFragment.updateStats(testEngine.itemView)
-    }
-
-    private fun setLastLine(correct: Item, wrong: Item?, probabilityData: TestEngine.DebugData?) {
-        ObjectAnimator.ofFloat(lastItem, "translationY", lastItem.height.toFloat()).apply {
-            duration = 100
-            addListener(object : Animator.AnimatorListener {
-                override fun onAnimationEnd(animation: Animator) {
-                    lastItem.translationY = -lastItem.height.toFloat()
-                    updateLastLine(correct, wrong, probabilityData)
-
-                    ObjectAnimator.ofFloat(lastItem, "translationY", 0f).apply {
-                        duration = 200
-                        start()
-                    }
-                }
-
-                override fun onAnimationRepeat(animation: Animator) {}
-                override fun onAnimationCancel(animation: Animator) {}
-                override fun onAnimationStart(animation: Animator) {}
-            })
-            start()
-        }
-    }
-
-    private fun updateLastLine(correct: Item, wrong: Item?, probabilityData: TestEngine.DebugData?) {
-        if (wrong != null) {
-            lastWrongItemText.text = wrong.text(kanaWords)
-            lastWrongItemBundle.visibility = View.VISIBLE
-            if (correct.contents is Kanji) {
-                lastWrongInfo.visibility = View.VISIBLE
-                lastWrongItemText.setOnClickListener {
-                    showItemInDict(wrong.contents as Kanji)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    lastWrongItemText.stateListAnimator = lastItemButtonAnimation
-                }
-            } else if (correct.contents is Word) {
-                lastWrongInfo.visibility = View.VISIBLE
-                lastWrongItemText.setOnClickListener {
-                    showItemInDict(wrong.contents as Word)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    lastWrongItemText.stateListAnimator = lastItemButtonAnimation
-                }
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    lastWrongItemText.stateListAnimator = null
-                    lastWrongItemText.elevation = 0.0f
-                }
-            }
-            lastWrongItemText.setOnLongClickListener {
-                if (probabilityData != null)
-                    showItemProbabilityData(this, wrong.text(kanaWords), probabilityData)
-                true
-            }
-        } else {
-            lastWrongItemBundle.visibility = View.GONE
-        }
-        if (correct != wrong) {
-            lastItemText.text = correct.text(kanaWords)
-            lastItemBundle.visibility = View.VISIBLE
-            if (correct.contents is Kanji) {
-                lastInfo.visibility = View.VISIBLE
-                lastItemText.setOnClickListener {
-                    showItemInDict(correct.contents as Kanji)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    lastItemText.stateListAnimator = lastItemButtonAnimation
-                }
-            } else if (correct.contents is Word) {
-                lastInfo.visibility = View.VISIBLE
-                lastItemText.setOnClickListener {
-                    showItemInDict(correct.contents as Word)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    lastItemText.stateListAnimator = lastItemButtonAnimation
-                }
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    lastItemText.stateListAnimator = null
-                    lastItemText.elevation = 0.0f
-                }
-            }
-            lastItemText.setOnLongClickListener {
-                if (probabilityData != null)
-                    showItemProbabilityData(this, correct.text(kanaWords), probabilityData)
-                true
-            }
-        } else {
-            lastItemBundle.visibility = View.GONE
+            localTestType = testEngine.testType
         }
 
-        if (lastItemBundle.visibility == View.VISIBLE && lastWrongItemBundle.visibility == View.VISIBLE) {
-            (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = 0
-            (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = 0
-            lastWrongItemBundle.rightPadding = 0
-            lastItemBundle.leftPadding = 0
-        } else {
-            (lastWrongItemBundle.layoutParams as LinearLayout.LayoutParams).rightMargin = dip(4)
-            (lastItemBundle.layoutParams as LinearLayout.LayoutParams).leftMargin = dip(4)
-            lastWrongItemBundle.rightPadding = dip(4)
-            lastItemBundle.leftPadding = dip(4)
+        //viewModel.setStats(testEngine.itemView.getStats())
+
+        viewModel.initialize(testEngine)
+
+        setContent {
+            val uiState by viewModel.uiState.collectAsState()
+
+            TestScreen(
+                testFragment = uiState.fragment,
+                onFragmentUpdated = { fragment -> testFragment = fragment as TestFragment },
+                //stats = uiState.stats,
+                correctCount = uiState.correctCount,
+                questionCount = uiState.questionCount,
+                historyState = uiState.historyState,
+                sheetState = uiState.sheetState,
+                onSheetStateChange = { viewModel.setSheetState(it) },
+                kanaWords = kanaWords,
+                onItemClick = this::openItemInDictionary
+            )
         }
 
-        lastDescription.text = correct.description
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
-    private fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
-        val layout = makeHistoryLine(correct, probabilityData, R.attr.itemGood)
-
-        historyView.addView(layout, 0)
-        if (refresh) {
-            updateSheetPeekHeight(layout)
-            discardOldHistory()
-            setLastLine(correct, null, probabilityData)
+    private fun openItemInDictionary(item: Item) {
+        when (val contents = item.contents) {
+            is Kanji -> showItemInDict(contents)
+            is Word -> showItemInDict(contents)
+            else -> { /* do nothing */ }
         }
-    }
-
-    private fun addWrongAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, wrong: Item, refresh: Boolean) {
-        val layoutGood = makeHistoryLine(correct, probabilityData, R.attr.itemBad, false)
-        val layoutBad = makeHistoryLine(wrong, null, null)
-
-        historyView.addView(layoutBad, 0)
-        historyView.addView(layoutGood, 0)
-        if (refresh) {
-            updateSheetPeekHeight(layoutGood)
-            discardOldHistory()
-            setLastLine(correct, wrong, probabilityData)
-        }
-    }
-
-    private fun addUnknownAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?, refresh: Boolean) {
-        val layout = makeHistoryLine(correct, probabilityData, R.attr.itemBad)
-
-        historyView.addView(layout, 0)
-        if (refresh) {
-            updateSheetPeekHeight(layout)
-            discardOldHistory()
-            setLastLine(correct, correct, probabilityData)
-        }
-    }
-
-    private fun makeHistoryLine(item: Item, probabilityData: TestEngine.DebugData?, @AttrRes style: Int?, withSeparator: Boolean = true): View {
-        val line = LayoutInflater.from(this).inflate(R.layout.selection_item, historyView, false)
-
-        val checkbox = line.findViewById<View>(R.id.item_checkbox)
-        checkbox.visibility = View.GONE
-
-        val itemView = line.findViewById<Button>(R.id.item_text)
-        itemView.text = item.text(kanaWords)
-        if (itemView.text.length > 1)
-            (itemView.layoutParams as RelativeLayout.LayoutParams).width = LinearLayout.LayoutParams.WRAP_CONTENT
-        if (style != null) {
-            itemView.background = getColoredCircle(this, style)
-        } else {
-            itemView.background = getColoredCircle(this, R.attr.historyBackground)
-            itemView.textColor = getColorFromAttr(android.R.attr.colorForeground)
-        }
-        if (item.contents is Kanji) {
-            line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
-            itemView.setOnClickListener {
-                showItemInDict(item.contents as Kanji)
-            }
-        } else if (item.contents is Word) {
-            line.findViewById<ImageView>(R.id.item_info).visibility = View.VISIBLE
-            itemView.setOnClickListener {
-                showItemInDict(item.contents as Word)
-            }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                itemView.stateListAnimator = null
-                itemView.elevation = 0.0f
-            }
-        }
-        itemView.setOnLongClickListener {
-            if (probabilityData != null)
-                showItemProbabilityData(this, item.text(kanaWords), probabilityData)
-            true
-        }
-
-        val detailView = line.findViewById<TextView>(R.id.item_description)
-        val detail = item.description
-        detailView.text = detail
-
-        if (!withSeparator) {
-            line.findViewById<View>(R.id.item_separator).visibility = View.GONE
-        }
-
-        return line
     }
 
     private fun showItemInDict(kanji: Kanji) {
@@ -542,7 +280,12 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${kanji.kanji}%20%23kanji")))
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    "https://jisho.org/search/${kanji.kanji}%20%23kanji".toUri()
+                )
+            )
         }
     }
 
@@ -555,17 +298,523 @@ class TestActivity : BaseActivity(), TestFragmentHolder, CoroutineScope {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://jisho.org/search/${word.word}")))
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    "https://jisho.org/search/${word.word}".toUri()
+                )
+            )
         }
     }
 
-    private fun updateSheetPeekHeight(v: View) {
-        if (sheetBehavior.peekHeight == 0)
-            historyActionButton.animate().scaleX(1.0f).scaleY(1.0f).setDuration(400).start()
+    override fun onAnswer(button: View?, certainty: Certainty, wrong: Item?) {
+        viewModel.onAnswer(certainty, wrong)
     }
 
-    private fun discardOldHistory() {
-        for (position in historyView.childCount - 1 downTo TestEngine.MAX_HISTORY_SIZE - 1)
-            historyView.removeViewAt(position)
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        testEngine.saveState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    @SuppressLint("MissingSuperCall")
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        val sheetState = viewModel.uiState.value.sheetState
+
+        if (sheetState == BottomSheetBehavior.STATE_EXPANDED) {
+            viewModel.setSheetState(BottomSheetBehavior.STATE_COLLAPSED)
+        } else {
+            confirmActivityClose(false)
+        }
+    }
+
+    private fun confirmActivityClose(upNavigation: Boolean) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirm_test_stop_title)
+            .setMessage(R.string.confirm_test_stop_message)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                if (upNavigation)
+                    NavUtils.navigateUpFromSameTask(this)
+                else
+                    finish()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                confirmActivityClose(true)
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun nextQuestion() {
+        testEngine.prepareNewQuestion()
+
+        if (localTestType == testType) {
+            testFragment.startNewQuestion()
+            testFragment.refreshQuestion()
+        } else {
+            localTestType = testType
+            val testFragment: Class<out Fragment> =
+                when (testType) {
+                    TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose::class.java
+                    TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragment::class.java
+                    TestType.KANJI_COMPOSITION -> CompositionTestFragment::class.java
+                    TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragment::class.java
+                }
+
+            viewModel.setFragmentClass(testFragment)
+
+            title = getString(testType.toName())
+        }
+    }
+}
+
+@Composable
+fun TestScreen(
+    testFragment: Class<out Fragment>?,
+    onFragmentUpdated: (Fragment) -> Unit,
+    correctCount: Int,
+    questionCount: Int,
+    historyState: HistoryState,
+    sheetState: Int,
+    onSheetStateChange: (Int) -> Unit,
+    kanaWords: Boolean,
+    onItemClick: (Item) -> Unit,
+) {
+    KakugoTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    AndroidView(
+                        factory = { context ->
+                            FrameLayout(context).apply {
+                                id = R.id.global_stats
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                    )
+
+                    Text(
+                        text = LocalContext.current.getString(
+                            R.string.score_string,
+                            correctCount,
+                            questionCount
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.body2,
+                        textAlign = TextAlign.Center
+                    )
+
+                    if (testFragment != null) {
+                        AndroidFragment(
+                            testFragment,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            onUpdate = onFragmentUpdated,
+                        )
+                    } else {
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        )
+                    }
+
+                    LastItemRow(
+                        lastCorrect = historyState.lastCorrect,
+                        lastWrong = historyState.lastWrong,
+                        lastProbabilityData = historyState.lastProbabilityData,
+                        kanaWords = kanaWords,
+                        onItemClick = onItemClick
+                    )
+                }
+
+                if (sheetState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    FloatingActionButton(
+                        onClick = { onSheetStateChange(BottomSheetBehavior.STATE_EXPANDED) },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(6.dp)
+                            .size(40.dp),
+                        backgroundColor = MaterialTheme.colors.primary
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_upward),
+                            contentDescription = "Show history",
+                            tint = MaterialTheme.colors.onPrimary
+                        )
+                    }
+                }
+
+                HistoryBottomSheet(
+                    items = historyState.items,
+                    sheetState = sheetState,
+                    onStateChange = onSheetStateChange,
+                    kanaWords = kanaWords,
+                    onItemClick = onItemClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LastItemRow(
+    lastCorrect: Item?,
+    lastWrong: Item?,
+    lastProbabilityData: TestEngine.DebugData?,
+    kanaWords: Boolean,
+    onItemClick: (Item) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .background(MaterialTheme.colors.surface),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = Modifier.width(8.dp))
+
+        if (lastWrong != null) {
+            ItemButton(
+                item = lastWrong,
+                probabilityData = null,
+                style = R.attr.itemBad,
+                showInfo = lastWrong.contents is Kanji || lastWrong.contents is Word,
+                kanaWords = kanaWords,
+                onClick = { onItemClick(lastWrong) }
+            )
+        }
+
+        if (lastCorrect != null && lastCorrect != lastWrong) {
+            ItemButton(
+                item = lastCorrect,
+                probabilityData = lastProbabilityData,
+                style = R.attr.itemGood,
+                showInfo = lastCorrect.contents is Kanji || lastCorrect.contents is Word,
+                kanaWords = kanaWords,
+                onClick = { onItemClick(lastCorrect) }
+            )
+        }
+
+        lastCorrect?.let { item ->
+            Text(
+                text = item.description,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .weight(1f),
+                style = MaterialTheme.typography.body1
+            )
+        }
+    }
+}
+
+@Composable
+private fun HistoryBottomSheet(
+    items: List<HistoryItem>,
+    sheetState: Int,
+    onStateChange: (Int) -> Unit,
+    kanaWords: Boolean,
+    onItemClick: (Item) -> Unit,
+) {
+    val themeAttrs = LocalThemeAttributes.current
+
+    ModalBottomSheetLayout(
+        sheetState = rememberModalBottomSheetState(
+            initialValue = if (sheetState == BottomSheetBehavior.STATE_EXPANDED)
+                ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+            confirmValueChange = {
+                onStateChange(
+                    if (it == ModalBottomSheetValue.Expanded)
+                        BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
+                )
+                true
+            }
+        ),
+        sheetContent = {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(themeAttrs.historyBackground)
+            ) {
+                items(items) { historyItem ->
+                    if (historyItem.prependSeparator)
+                        Separator()
+                    HistoryItemRow(
+                        historyItem = historyItem,
+                        kanaWords = kanaWords,
+                        onItemClick = onItemClick
+                    )
+                }
+            }
+        },
+        sheetBackgroundColor = themeAttrs.historyBackground
+    ) { }
+}
+
+@Composable
+private fun HistoryItemRow(
+    historyItem: HistoryItem,
+    kanaWords: Boolean,
+    onItemClick: (Item) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ItemButton(
+            item = historyItem.item,
+            probabilityData = historyItem.probabilityData,
+            style = historyItem.style,
+            showInfo = historyItem.item.contents is Kanji || historyItem.item.contents is Word,
+            kanaWords = kanaWords,
+            onClick = { onItemClick(historyItem.item) }
+        )
+
+        Text(
+            text = historyItem.item.description,
+            style = MaterialTheme.typography.body2,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ItemButton(
+    item: Item,
+    probabilityData: TestEngine.DebugData?,
+    @AttrRes style: Int,
+    showInfo: Boolean,
+    kanaWords: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val themeAttrs = LocalThemeAttributes.current
+    val backgroundColor = when (style) {
+        R.attr.itemGood -> themeAttrs.itemGood
+        R.attr.itemBad -> themeAttrs.itemBad
+        else -> MaterialTheme.colors.surface
+    }
+
+    Box(
+        modifier = modifier
+    ) {
+        if (showInfo) {
+            Icon(
+                painter = painterResource(id = android.R.drawable.ic_dialog_info),
+                contentDescription = "Info",
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.BottomEnd),
+                tint = MaterialTheme.colors.secondary
+            )
+        }
+
+        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+            Button(
+                onClick = { if (showInfo) onClick() },
+                shape = CircleShape,
+                modifier = Modifier
+                    .then(
+                        if (item.text(kanaWords).length > 1)
+                            Modifier.height(35.dp)
+                        else
+                            Modifier.size(35.dp),
+                    ),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = backgroundColor
+                ),
+                contentPadding = PaddingValues(0.dp),
+            ) {
+                Text(
+                    text = item.text(kanaWords),
+                    fontSize = 25.sp,
+                    color = MaterialTheme.colors.onBackground
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "TestScreen Preview - Collapsed")
+@Composable
+fun TestScreenPreviewCollapsed() {
+    val sampleHistoryState = HistoryState(
+        items = listOf(),
+        lastCorrect = null,
+        lastWrong = null,
+        lastProbabilityData = null,
+    )
+
+    KakugoTheme {
+        TestScreen(
+            testFragment = null,
+            onFragmentUpdated = {},
+            correctCount = 10,
+            questionCount = 15,
+            historyState = sampleHistoryState,
+            sheetState = BottomSheetBehavior.STATE_HIDDEN,
+            onSheetStateChange = {},
+            kanaWords = true,
+            onItemClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "TestScreen Preview - Wrong")
+@Composable
+fun TestScreenPreviewWrong() {
+    val good = Item(
+        0,
+        Kanji(
+            "好",
+            listOf("コウ"),
+            listOf("この.む", "す.く", "よ.い", "い.い"),
+            listOf("fond", "pleasing", "like something"),
+            listOf(),
+            listOf(),
+            1
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val bad = Item(
+        0,
+        Kanji(
+            "人",
+            listOf("ジン", "ニン"),
+            listOf("ひと", "-り", "-と"),
+            listOf("person"),
+            listOf(),
+            listOf(),
+            1
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val sampleHistoryState = HistoryState(
+        items = listOf(
+            HistoryItem(
+                item = good,
+                probabilityData = null,
+                style = R.attr.itemGood
+            ),
+            HistoryItem(
+                item = bad,
+                probabilityData = null,
+                style = R.attr.itemBad
+            ),
+        ),
+        lastCorrect = good,
+        lastWrong = bad,
+        lastProbabilityData = null,
+    )
+
+    KakugoTheme {
+        TestScreen(
+            testFragment = null,
+            onFragmentUpdated = {},
+            correctCount = 10,
+            questionCount = 15,
+            historyState = sampleHistoryState,
+            sheetState = BottomSheetBehavior.STATE_COLLAPSED,
+            onSheetStateChange = {},
+            kanaWords = true,
+            onItemClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "TestScreen Preview - Wrong History")
+@Composable
+fun TestScreenPreviewWrongHistory() {
+    val good = Item(
+        0,
+        Kanji(
+            "好き",
+            listOf("コウ"),
+            listOf("この.む", "す.く", "よ.い", "い.い"),
+            listOf("fond", "pleasing", "like something"),
+            listOf(),
+            listOf(),
+            1
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val bad = Item(
+        0,
+        Kanji(
+            "人",
+            listOf("ジン", "ニン"),
+            listOf("ひと", "-り", "-と"),
+            listOf("person"),
+            listOf(),
+            listOf(),
+            1
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val sampleHistoryState = HistoryState(
+        items = listOf(
+            HistoryItem(
+                item = good,
+                probabilityData = null,
+                style = R.attr.itemGood
+            ),
+            HistoryItem(
+                item = bad,
+                probabilityData = null,
+                style = R.attr.itemBad
+            ),
+        ),
+        lastCorrect = good,
+        lastWrong = bad,
+        lastProbabilityData = null,
+    )
+
+    KakugoTheme {
+        TestScreen(
+            testFragment = null,
+            onFragmentUpdated = {},
+            correctCount = 10,
+            questionCount = 15,
+            historyState = sampleHistoryState,
+            sheetState = BottomSheetBehavior.STATE_EXPANDED,
+            onSheetStateChange = {},
+            kanaWords = true,
+            onItemClick = {}
+        )
     }
 }

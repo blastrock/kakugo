@@ -82,7 +82,6 @@ class TestEngine(
         currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
         correctCount = savedInstanceState.getInt("correctCount")
         questionCount = savedInstanceState.getInt("questionCount")
-        unserializeHistory(savedInstanceState.getByteArray("history")!!)
     }
 
     fun saveState(outState: Bundle) {
@@ -92,7 +91,6 @@ class TestEngine(
         outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
         outState.putInt("correctCount", correctCount)
         outState.putInt("questionCount", questionCount)
-        outState.putByteArray("history", serializeHistory())
     }
 
     fun prepareNewQuestion() {
@@ -256,55 +254,5 @@ class TestEngine(
     private fun discardOldHistory() {
         while (history.size > MAX_HISTORY_SIZE)
             history.removeAt(0)
-    }
-
-    private fun serializeHistory(): ByteArray {
-        val parcel = Parcel.obtain()
-        parcel.writeInt(history.size)
-        for (line in history)
-            when (line) {
-                is HistoryLine.Correct -> {
-                    parcel.writeByte(0)
-                    parcel.writeInt(line.itemId)
-                }
-                is HistoryLine.Unknown -> {
-                    parcel.writeByte(1)
-                    parcel.writeInt(line.itemId)
-                }
-                is HistoryLine.Incorrect -> {
-                    parcel.writeByte(2)
-                    parcel.writeInt(line.correctItemId)
-                    parcel.writeInt(line.answerItemId)
-                }
-            }
-        val data = parcel.marshall()
-        parcel.recycle()
-        return data
-    }
-
-    private fun unserializeHistory(data: ByteArray) {
-        val parcel = Parcel.obtain()
-        parcel.unmarshall(data, 0, data.size)
-        parcel.setDataPosition(0)
-
-        history.clear()
-
-        val count = parcel.readInt()
-        repeat(count) { iteration ->
-            val type = parcel.readByte()
-            when (type.toInt()) {
-                0 -> {
-                    addGoodAnswerToHistory(getItem(parcel.readInt()), iteration == count - 1)
-                }
-                1 -> {
-                    addUnknownAnswerToHistory(getItem(parcel.readInt()), iteration == count - 1)
-                }
-                2 -> {
-                    addWrongAnswerToHistory(getItem(parcel.readInt()), getItem(parcel.readInt()), iteration == count - 1)
-                }
-            }
-        }
-
-        parcel.recycle()
     }
 }
