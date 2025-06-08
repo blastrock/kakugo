@@ -77,8 +77,8 @@ class DrawView(context: Context) : View(context) {
         boundingPath.close()
     }
 
-    fun addPath(path: Path) {
-        mPaths.add(path)
+    fun setStrokes(paths: List<Path>) {
+        mPaths = paths.toMutableList()
         invalidate()
     }
 
