@@ -3,7 +3,6 @@ package org.kaqui.testactivities
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.activity.compose.setContent
@@ -62,6 +61,12 @@ data class TestActivityUiState(
     val questionCount: Int = 0,
     val historyState: HistoryState = HistoryState(),
     val sheetState: Int = BottomSheetBehavior.STATE_COLLAPSED,
+    val stats: LearningDbView.Stats = LearningDbView.Stats(
+        good = 0,
+        meh = 0,
+        bad = 0,
+        disabled = 0
+    )
 )
 //val kanaWords: Boolean = true)
 
@@ -79,7 +84,7 @@ class TestViewModel : ViewModel() {
         _uiState.update { currentState ->
             currentState.copy(
                 correctCount = testEngine.correctCount,
-                questionCount = testEngine.questionCount
+                questionCount = testEngine.questionCount,
             )
         }
     }
@@ -104,8 +109,6 @@ class TestViewModel : ViewModel() {
                 )
             }
         }
-        // Update counts if they change
-        // _uiState.update { it.copy(correctCount = testEngine.correctCount, questionCount = testEngine.questionCount) }
     }
 
     fun addWrongAnswerToHistory(
@@ -130,8 +133,6 @@ class TestViewModel : ViewModel() {
                 )
             }
         }
-        // Update counts if they change
-        // _uiState.update { it.copy(correctCount = testEngine.correctCount, questionCount = testEngine.questionCount) }
     }
 
     fun addUnknownAnswerToHistory(
@@ -154,8 +155,6 @@ class TestViewModel : ViewModel() {
                 )
             }
         }
-        // Update counts if they change
-        // _uiState.update { it.copy(correctCount = testEngine.correctCount, questionCount = testEngine.questionCount) }
     }
 
     fun setSheetState(sheetState: Int) {
@@ -166,30 +165,22 @@ class TestViewModel : ViewModel() {
         }
     }
 
-    fun updateScore(correctCount: Int, questionCount: Int) {
-        _uiState.update {
-            it.copy(correctCount = correctCount, questionCount = questionCount)
-        }
-    }
-
-    // Example:
     fun onAnswer(certainty: Certainty, wrong: Item?) {
         testEngine.markAnswer(certainty, wrong)
         _uiState.update {
             it.copy(
                 correctCount = testEngine.correctCount,
-                questionCount = testEngine.questionCount
+                questionCount = testEngine.questionCount,
+                stats = testEngine.itemView.getStats(),
             )
         }
     }
 
-    fun nextQuestion() {
-        // This will likely involve communication back to the Activity/Fragment
-        // to handle UI changes like replacing fragments.
-        // You might use SingleLiveEvent or a SharedFlow for such events.
-        testEngine.prepareNewQuestion()
-        _uiState.update {
-            it.copy(questionCount = testEngine.questionCount)
+    fun setStats(stats: LearningDbView.Stats) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                stats = stats
+            )
         }
     }
 
@@ -205,7 +196,6 @@ class TestViewModel : ViewModel() {
 class TestActivity : BaseActivity(), TestFragmentHolder {
     override lateinit var testEngine: TestEngine
 
-    private lateinit var statsFragment: StatsFragment
     private lateinit var testFragment: TestFragment
 
     private var localTestType: TestType? = null
@@ -240,7 +230,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
             localTestType = testEngine.testType
         }
 
-        //viewModel.setStats(testEngine.itemView.getStats())
+        viewModel.setStats(testEngine.itemView.getStats())
 
         viewModel.initialize(testEngine)
 
@@ -250,7 +240,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
             TestScreen(
                 testFragment = uiState.fragment,
                 onFragmentUpdated = { fragment -> testFragment = fragment as TestFragment },
-                //stats = uiState.stats,
+                stats = uiState.stats,
                 correctCount = uiState.correctCount,
                 questionCount = uiState.questionCount,
                 historyState = uiState.historyState,
@@ -384,6 +374,7 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 fun TestScreen(
     testFragment: Class<out Fragment>?,
     onFragmentUpdated: (Fragment) -> Unit,
+    stats: LearningDbView.Stats,
     correctCount: Int,
     questionCount: Int,
     historyState: HistoryState,
@@ -399,16 +390,7 @@ fun TestScreen(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    AndroidView(
-                        factory = { context ->
-                            FrameLayout(context).apply {
-                                id = R.id.global_stats
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                    )
+                    StatsBar(itemsDontKnow = 0, itemsBad = stats.bad, itemsMeh = stats.meh, itemsGood = stats.good)
 
                     Text(
                         text = LocalContext.current.getString(
@@ -678,7 +660,13 @@ fun TestScreenPreviewCollapsed() {
             sheetState = BottomSheetBehavior.STATE_HIDDEN,
             onSheetStateChange = {},
             kanaWords = true,
-            onItemClick = {}
+            onItemClick = {},
+            stats = LearningDbView.Stats(
+                good = 5,
+                meh = 3,
+                bad = 2,
+                disabled = 0
+            ),
         )
     }
 }
@@ -746,7 +734,13 @@ fun TestScreenPreviewWrong() {
             sheetState = BottomSheetBehavior.STATE_COLLAPSED,
             onSheetStateChange = {},
             kanaWords = true,
-            onItemClick = {}
+            onItemClick = {},
+            stats = LearningDbView.Stats(
+                good = 5,
+                meh = 3,
+                bad = 2,
+                disabled = 0
+            ),
         )
     }
 }
@@ -814,7 +808,13 @@ fun TestScreenPreviewWrongHistory() {
             sheetState = BottomSheetBehavior.STATE_EXPANDED,
             onSheetStateChange = {},
             kanaWords = true,
-            onItemClick = {}
+            onItemClick = {},
+            stats = LearningDbView.Stats(
+                good = 5,
+                meh = 3,
+                bad = 2,
+                disabled = 0
+            ),
         )
     }
 }
