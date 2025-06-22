@@ -10,6 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.Button
 import androidx.compose.runtime.*
@@ -23,6 +26,8 @@ import androidx.core.text.HtmlCompat
 import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.R
+import org.kaqui.TopBar
+import org.kaqui.theme.KakugoTheme
 import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
 import org.kaqui.stats.StatsActivity
@@ -98,44 +103,55 @@ fun MainScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(
-            modifier = Modifier
-                .widthIn(500.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AppTitleImage(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .padding(8.dp)
-            )
+    KakugoTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            Scaffold(
+                topBar = {
+                    TopBar(title = "Kakugo")
+                }
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .widthIn(500.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AppTitleImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .padding(8.dp)
+                        )
 
-            MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
-            MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
-            MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
-            MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
-            MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
-            MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
+                        MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
+                        MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
+                        MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
+                        MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
+                        MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
+                        MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
+                    }
+                }
+
+                if (showProgress) {
+                    LoadingDialog()
+                }
+
+                if (errorMessage != null) {
+                    ErrorDialog(
+                        title = errorTitle!!,
+                        message = errorMessage!!,
+                        onDismiss = { errorMessage = null }
+                    )
+                }
+            }
         }
-    }
-
-    if (showProgress) {
-        LoadingDialog()
-    }
-
-    if (errorMessage != null) {
-        ErrorDialog(
-            title = errorTitle!!,
-            message = errorMessage!!,
-            onDismiss = { errorMessage = null }
-        )
     }
 }
 

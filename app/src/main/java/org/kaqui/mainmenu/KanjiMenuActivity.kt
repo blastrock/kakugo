@@ -1,74 +1,96 @@
 package org.kaqui.mainmenu
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
-import org.jetbrains.anko.*
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ClassSelectionActivity
 import org.kaqui.settings.SelectionMode
+import org.kaqui.TopBar
+import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
 
-class KanjiMenuActivity : BaseActivity() {
+class KanjiMenuActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        verticalLayout {
-            gravity = Gravity.CENTER
+        setContent {
+            KanjiMenuScreen(
+                onBackClick = { finish() }
+            )
+        }
+    }
+}
 
-            scrollView {
-                verticalLayout {
-                    padding = dip(8)
+@Composable
+fun KanjiMenuScreen(onBackClick: () -> Unit = {}) {
+    val context = LocalContext.current
 
-                    appTitleImage(this@KanjiMenuActivity).lparams(width = matchParent, height = dip(80)) {
-                        margin = dip(8)
-                    }
-
-                    verticalLayout {
-                        button(R.string.kanji_to_reading) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_TO_READING) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.reading_to_kanji) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.READING_TO_KANJI) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.kanji_to_meaning) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_TO_MEANING) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.meaning_to_kanji) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.MEANING_TO_KANJI) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.kanji_composition) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_COMPOSITION) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.kanji_drawing) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, TestType.KANJI_DRAWING) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        button(R.string.custom_test) {
-                            setOnClickListener { startTest(this@KanjiMenuActivity, listOf(TestType.KANJI_TO_READING, TestType.READING_TO_KANJI, TestType.KANJI_TO_MEANING, TestType.MEANING_TO_KANJI, TestType.KANJI_COMPOSITION, TestType.KANJI_DRAWING)) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                        separator(this@KanjiMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
-                        button(R.string.kanji_selection) {
-                            setOnClickListener { startActivity<ClassSelectionActivity>("mode" to SelectionMode.KANJI as Serializable) }
-                        }.lparams(width = matchParent, height = wrapContent) {
-                            margin = dip(4)
-                        }
-                    }.lparams(width = matchParent, height = matchParent)
+    KakugoTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            Scaffold(
+                topBar = {
+                    TopBar(
+                        title = stringResource(id = R.string.kanji_title),
+                        onBackClick = onBackClick
+                    )
                 }
-            }.lparams(width = menuWidth)
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .widthIn(500.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AppTitleImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .padding(8.dp)
+                        )
+                        MenuButton(R.string.kanji_to_reading) { startTest(context, TestType.KANJI_TO_READING) }
+                        MenuButton(R.string.reading_to_kanji) { startTest(context, TestType.READING_TO_KANJI) }
+                        MenuButton(R.string.kanji_to_meaning) { startTest(context,TestType.KANJI_TO_MEANING) }
+                        MenuButton(R.string.meaning_to_kanji) { startTest(context, TestType.MEANING_TO_KANJI) }
+                        MenuButton(R.string.kanji_composition) { startTest(context,TestType.KANJI_COMPOSITION) }
+                        MenuButton(R.string.kanji_drawing) { startTest(context,TestType.KANJI_DRAWING) }
+                        MenuButton(R.string.custom_test) { startTest(context, listOf(TestType.KANJI_TO_READING, TestType.READING_TO_KANJI, TestType.KANJI_TO_MEANING, TestType.MEANING_TO_KANJI, TestType.KANJI_COMPOSITION, TestType.KANJI_DRAWING)) }
+                        Separator(modifier = Modifier.height(1.dp).padding(8.dp))
+                        val intent = Intent(context, ClassSelectionActivity::class.java).putExtra("mode", SelectionMode.KANJI as Serializable)
+                        MenuButton(R.string.kanji_selection) { context.startActivity(intent) }
+                    }
+                }
+            }
         }
     }
 }

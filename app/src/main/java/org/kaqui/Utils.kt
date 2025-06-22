@@ -231,7 +231,7 @@ fun AppTitleImage(modifier: Modifier = Modifier) {
     )
 }
 
-fun startTest(activity: Activity, types: List<TestType>) {
+fun startTest(activity: Context, types: List<TestType>) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(activity, db, types[0]).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
@@ -267,7 +267,7 @@ fun startTest(activity: Activity, types: List<TestType>) {
             .show()
 }
 
-fun startTest(activity: Activity, type: TestType) {
+fun startTest(activity: Context, type: TestType) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(activity, db, type).getEnabledCount() < 10) {
         activity.longToast(R.string.enable_a_few_items)
