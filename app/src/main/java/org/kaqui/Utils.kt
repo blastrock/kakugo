@@ -242,7 +242,8 @@ fun AppTitleImage(modifier: Modifier = Modifier) {
 @Composable
 fun TopBar(
     title: String,
-    onBackClick: (() -> Unit)? = null
+    onBackClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -261,6 +262,7 @@ fun TopBar(
                 }
             }
         },
+        actions = actions,
         backgroundColor = MaterialTheme.colors.primary,
         contentColor = MaterialTheme.colors.onPrimary,
         elevation = 4.dp

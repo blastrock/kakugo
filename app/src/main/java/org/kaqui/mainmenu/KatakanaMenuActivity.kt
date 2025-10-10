@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
+import org.kaqui.settings.SelectionMode
 import org.kaqui.TopBar
 import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
@@ -83,7 +84,7 @@ fun KatakanaMenuScreen(onBackClick: () -> Unit = {}) {
                         MenuButton(R.string.katakana_to_romaji_typing) { startTest(context, TestType.KATAKANA_TO_ROMAJI_TEXT) }
                         MenuButton(R.string.katakana_drawing) { startTest(context, TestType.KATAKANA_DRAWING) }
                         Separator(modifier = Modifier.height(1.dp).padding(8.dp))
-                        val intent = Intent(context, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.KATAKANA as Serializable)
+                        val intent = Intent(context, ItemSelectionActivity::class.java).putExtra("mode", SelectionMode.KATAKANA as Serializable)
                         MenuButton(R.string.katakana_selection) { context.startActivity(intent) }
                     }
                 }

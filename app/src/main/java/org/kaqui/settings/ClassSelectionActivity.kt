@@ -82,6 +82,7 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
         dbView = when (mode) {
             SelectionMode.KANJI -> Database.getInstance(this).getKanjiView()
             SelectionMode.WORD -> Database.getInstance(this).getWordView()
+            else -> throw IllegalArgumentException("ClassSelectionActivity only supports KANJI and WORD modes")
         }
 
         classifiers = getClassifiers(classification)
@@ -127,9 +128,10 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(Menu.NONE, R.id.search, 0, R.string.jlpt_search)
-                .setIcon(android.R.drawable.ic_menu_search)
-                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        // TODO: Add search functionality back later
+        // menu.add(Menu.NONE, R.id.search, 0, R.string.jlpt_search)
+        //         .setIcon(android.R.drawable.ic_menu_search)
+        //         .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
 
         menu.add(Menu.NONE, R.id.save_selection, 1, R.string.save_current_selection)
         menu.add(Menu.NONE, R.id.load_selection, 2, R.string.load_selection)
@@ -141,14 +143,15 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.search -> {
-                startActivity(Intent(this, ItemSearchActivity::class.java)
-                        .putExtra("mode", when (mode) {
-                            SelectionMode.KANJI -> ItemSearchActivity.Mode.KANJI
-                            SelectionMode.WORD -> ItemSearchActivity.Mode.WORD
-                        }))
-                true
-            }
+            // TODO: Add search functionality back later
+            // R.id.search -> {
+            //     startActivity(Intent(this, ItemSearchActivity::class.java)
+            //             .putExtra("mode", when (mode) {
+            //                 SelectionMode.KANJI -> ItemSearchActivity.Mode.KANJI
+            //                 SelectionMode.WORD -> ItemSearchActivity.Mode.WORD
+            //             }))
+            //     true
+            // }
             R.id.save_selection -> {
                 alert {
                     title = getString(R.string.enter_name_of_selection)
@@ -186,10 +189,7 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
 
     private fun onClassifierClick(classifier: Classifier) {
         startActivity(Intent(this, ItemSelectionActivity::class.java)
-                .putExtra("mode", when (mode) {
-                    SelectionMode.KANJI -> ItemSelectionActivity.Mode.KANJI
-                    SelectionMode.WORD -> ItemSelectionActivity.Mode.WORD
-                } as Serializable)
+                .putExtra("mode", mode as Serializable)
                 .putExtra("classifier", classifier))
     }
 
@@ -197,6 +197,7 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
         when (mode) {
             SelectionMode.KANJI -> Database.getInstance(this).saveKanjiSelectionTo(name)
             SelectionMode.WORD -> Database.getInstance(this).saveWordSelectionTo(name)
+            else -> throw IllegalArgumentException("ClassSelectionActivity only supports KANJI and WORD modes")
         }
         toast(getString(R.string.saved_selection, name))
     }
@@ -273,6 +274,7 @@ fun ClassSelectionScreen(
                         title = when (uiState.mode) {
                             SelectionMode.KANJI -> stringResource(R.string.kanji_selection)
                             SelectionMode.WORD -> stringResource(R.string.word_selection)
+                            else -> stringResource(R.string.kanji_selection) // Shouldn't happen
                         },
                         onBackClick = onBackClick
                     )

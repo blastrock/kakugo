@@ -27,6 +27,7 @@ class SavedSelectionsActivity : BaseActivity() {
             adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, when (mode) {
                 SelectionMode.KANJI -> db.listKanjiSelections()
                 SelectionMode.WORD -> db.listWordSelections()
+                else -> throw IllegalArgumentException("SavedSelectionsActivity only supports KANJI and WORD modes")
             })
             onItemClickListener = AdapterView.OnItemClickListener(this@SavedSelectionsActivity::onListItemClick)
         }
@@ -41,6 +42,7 @@ class SavedSelectionsActivity : BaseActivity() {
         when (mode) {
             SelectionMode.KANJI -> db.restoreKanjiSelectionFrom(id)
             SelectionMode.WORD -> db.restoreWordSelectionFrom(id)
+            else -> throw IllegalArgumentException("SavedSelectionsActivity only supports KANJI and WORD modes")
         }
 
         toast(getString(R.string.loaded_selection, item.name))
@@ -65,11 +67,13 @@ class SavedSelectionsActivity : BaseActivity() {
                 when (mode) {
                     SelectionMode.KANJI -> db.deleteKanjiSelection(selectedItem!!.id)
                     SelectionMode.WORD -> db.deleteWordSelection(selectedItem!!.id)
+                    else -> throw IllegalArgumentException("SavedSelectionsActivity only supports KANJI and WORD modes")
                 }
                 val adapter = (listView.adapter as SavedSelectionsAdapter)
                 adapter.savedSelections = when (mode) {
                     SelectionMode.KANJI -> db.listKanjiSelections()
                     SelectionMode.WORD -> db.listWordSelections()
+                    else -> throw IllegalArgumentException("SavedSelectionsActivity only supports KANJI and WORD modes")
                 }
                 adapter.notifyDataSetChanged()
                 toast(getString(R.string.deleted_selection, selectedItem!!.name))

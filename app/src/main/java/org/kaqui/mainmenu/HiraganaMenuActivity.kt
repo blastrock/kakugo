@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
+import org.kaqui.settings.SelectionMode
 import org.kaqui.TopBar
 import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
@@ -82,7 +83,7 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
                         MenuButton(R.string.hiragana_to_romaji_typing) { startTest(context, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
                         MenuButton(R.string.hiragana_drawing) { startTest(context, TestType.HIRAGANA_DRAWING) }
                         Separator(modifier = Modifier.height(1.dp).padding(8.dp))
-                        val intent = Intent(context, ItemSelectionActivity::class.java).putExtra("mode", ItemSelectionActivity.Mode.HIRAGANA as Serializable)
+                        val intent = Intent(context, ItemSelectionActivity::class.java).putExtra("mode", SelectionMode.HIRAGANA as Serializable)
                         MenuButton(R.string.hiragana_selection) { context.startActivity(intent) }
                     }
                 }
