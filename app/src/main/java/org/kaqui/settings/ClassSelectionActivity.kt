@@ -19,6 +19,7 @@ import androidx.preference.PreferenceManager
 import kotlinx.coroutines.*
 import org.jetbrains.anko.*
 import org.kaqui.BaseActivity
+import org.kaqui.startActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment
 import org.kaqui.model.Classification

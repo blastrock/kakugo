@@ -28,6 +28,7 @@ import org.kaqui.*
 import org.kaqui.R
 import org.kaqui.TopBar
 import org.kaqui.theme.KakugoTheme
+import org.kaqui.startActivity
 import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
 import org.kaqui.stats.StatsActivity

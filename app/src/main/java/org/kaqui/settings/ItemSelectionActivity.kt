@@ -3,7 +3,7 @@ package org.kaqui.settings
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import org.jetbrains.anko.*
+import org.kaqui.startActivity
 import org.kaqui.BaseActivity
 import org.kaqui.R
 import org.kaqui.StatsFragment

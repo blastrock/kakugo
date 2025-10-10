@@ -2,6 +2,9 @@ package org.kaqui
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.os.Parcelable
+import java.io.Serializable
 import android.content.res.ColorStateList
 import android.graphics.PathMeasure
 import android.graphics.PointF
@@ -91,7 +94,6 @@ import org.jetbrains.anko.imageView
 import org.jetbrains.anko.longToast
 import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.scrollView
-import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.verticalLayout
 import org.jetbrains.anko.view
 import org.jetbrains.anko.wrapContent
@@ -332,6 +334,20 @@ fun Context.getColorFromAttr(
 }
 
 fun Int.asUnicodeCodePoint() = Character.toChars(this).joinToString("")
+
+inline fun <reified T : Activity> Context.startActivity(vararg params: Pair<String, Any?>) {
+    val intent = Intent(this, T::class.java)
+    params.forEach { (key, value) ->
+        when (value) {
+            is String -> intent.putExtra(key, value)
+            is Int -> intent.putExtra(key, value)
+            is Boolean -> intent.putExtra(key, value)
+            is Serializable -> intent.putExtra(key, value)
+            is Parcelable -> intent.putExtra(key, value)
+        }
+    }
+    startActivity(intent)
+}
 
 fun showItemProbabilityData(context: Context, item: String, probabilityData: TestEngine.DebugData) {
     AlertDialog.Builder(context)
