@@ -28,7 +28,7 @@ fun StatsBar(
 ) {
     val totalWeight = (itemsDontKnow + itemsBad + itemsMeh + itemsGood).toFloat()
     fun weightMin(weight: Float): Float {
-        return max(weight, 0.05f)
+        return max(weight, 0.1f)
     }
 
     Row(
@@ -83,11 +83,11 @@ fun StatsText(
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenPreview() {
-    StatsBar(0, 1, 2, 3)
+    StatsBar(1, 1, 2, 3)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenPreviewUnbalanced() {
-    StatsBar(0, 1, 2, 300)
+    StatsBar(100, 1, 2, 5000)
 }
