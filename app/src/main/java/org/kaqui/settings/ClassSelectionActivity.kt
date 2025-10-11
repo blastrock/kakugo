@@ -2,16 +2,11 @@ package org.kaqui.settings
 
 import android.Manifest
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,6 +59,9 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
     private lateinit var mode: SelectionMode
     private lateinit var classifiers: List<Classifier>
     private var refreshTrigger by mutableStateOf(0)
+    private var showMenu by mutableStateOf(false)
+    private var showSaveDialog by mutableStateOf(false)
+    private var saveDialogText by mutableStateOf("")
 
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext
@@ -95,8 +94,33 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
                 uiState = uiState,
                 onClassItemClick = { index -> onClassifierClick(classifiers[index]) },
                 onBackClick = { finish() },
-                onSearchClick = { onSearchClick() }
+                onSearchClick = { onSearchClick() },
+                showMenu = showMenu,
+                onMenuToggle = { showMenu = it },
+                onSaveSelection = { showSaveDialog = true },
+                onLoadSelection = { startActivity<SavedSelectionsActivity>("mode" to mode as Serializable) },
+                onSelectNone = {
+                    dbView.setAllEnabled(false)
+                    refreshTrigger++
+                },
+                onImportSelection = { importItems() }
             )
+
+            if (showSaveDialog) {
+                SaveSelectionDialog(
+                    text = saveDialogText,
+                    onTextChange = { saveDialogText = it },
+                    onConfirm = {
+                        saveSelection(saveDialogText)
+                        showSaveDialog = false
+                        saveDialogText = ""
+                    },
+                    onDismiss = {
+                        showSaveDialog = false
+                        saveDialogText = ""
+                    }
+                )
+            }
         }
     }
 
@@ -130,65 +154,6 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
         )
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // TODO: Add search functionality back later
-        // menu.add(Menu.NONE, R.id.search, 0, R.string.jlpt_search)
-        //         .setIcon(android.R.drawable.ic_menu_search)
-        //         .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-
-        menu.add(Menu.NONE, R.id.save_selection, 1, R.string.save_current_selection)
-        menu.add(Menu.NONE, R.id.load_selection, 2, R.string.load_selection)
-        menu.add(Menu.NONE, R.id.select_none, 3, R.string.select_none)
-        menu.add(Menu.NONE, R.id.import_selection, 4, R.string.import_selection)
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            // TODO: Add search functionality back later
-            // R.id.search -> {
-            //     startActivity(Intent(this, ItemSearchActivity::class.java)
-            //             .putExtra("mode", when (mode) {
-            //                 SelectionMode.KANJI -> ItemSearchActivity.Mode.KANJI
-            //                 SelectionMode.WORD -> ItemSearchActivity.Mode.WORD
-            //             }))
-            //     true
-            // }
-            R.id.save_selection -> {
-                alert {
-                    title = getString(R.string.enter_name_of_selection)
-                    var name: EditText? = null
-                    customView = UI {
-                        linearLayout {
-                            name = editText {
-                                inputType = InputType.TYPE_CLASS_TEXT
-                            }.lparams(width = matchParent, height = wrapContent) {
-                                horizontalMargin = dip(16)
-                            }
-                        }
-                    }.view
-                    positiveButton(android.R.string.ok) { saveSelection(name!!.text.toString()) }
-                    negativeButton(android.R.string.cancel) {}
-                }.show()
-                true
-            }
-            R.id.load_selection -> {
-                startActivity<SavedSelectionsActivity>("mode" to mode as Serializable)
-                true
-            }
-            R.id.select_none -> {
-                dbView.setAllEnabled(false)
-                true
-            }
-            R.id.import_selection -> {
-                importItems()
-                true
-            }
-            else ->
-                super.onOptionsItemSelected(item)
-        }
-    }
 
     private fun onClassifierClick(classifier: Classifier) {
         startActivity(Intent(this, ItemSelectionActivity::class.java)
@@ -273,7 +238,13 @@ fun ClassSelectionScreen(
     uiState: ClassSelectionUiState,
     onClassItemClick: (Int) -> Unit,
     onBackClick: () -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    showMenu: Boolean,
+    onMenuToggle: (Boolean) -> Unit,
+    onSaveSelection: () -> Unit,
+    onLoadSelection: () -> Unit,
+    onSelectNone: () -> Unit,
+    onImportSelection: () -> Unit
 ) {
     KakugoTheme {
         Surface(color = MaterialTheme.colors.background) {
@@ -292,6 +263,41 @@ fun ClassSelectionScreen(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Search"
                                 )
+                            }
+                            IconButton(onClick = { onMenuToggle(true) }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "More options"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { onMenuToggle(false) }
+                            ) {
+                                DropdownMenuItem(onClick = {
+                                    onMenuToggle(false)
+                                    onSaveSelection()
+                                }) {
+                                    Text(stringResource(R.string.save_current_selection))
+                                }
+                                DropdownMenuItem(onClick = {
+                                    onMenuToggle(false)
+                                    onLoadSelection()
+                                }) {
+                                    Text(stringResource(R.string.load_selection))
+                                }
+                                DropdownMenuItem(onClick = {
+                                    onMenuToggle(false)
+                                    onSelectNone()
+                                }) {
+                                    Text(stringResource(R.string.select_none))
+                                }
+                                DropdownMenuItem(onClick = {
+                                    onMenuToggle(false)
+                                    onImportSelection()
+                                }) {
+                                    Text(stringResource(R.string.import_selection))
+                                }
                             }
                         }
                     )
@@ -383,7 +389,13 @@ fun ClassSelectionScreenPreviewKanji() {
             uiState = sampleUiState,
             onClassItemClick = {},
             onBackClick = {},
-            onSearchClick = {}
+            onSearchClick = {},
+            showMenu = false,
+            onMenuToggle = {},
+            onSaveSelection = {},
+            onLoadSelection = {},
+            onSelectNone = {},
+            onImportSelection = {}
         )
     }
 }
@@ -409,8 +421,51 @@ fun ClassSelectionScreenPreviewWord() {
             uiState = sampleUiState,
             onClassItemClick = {},
             onBackClick = {},
-            onSearchClick = {}
+            onSearchClick = {},
+            showMenu = false,
+            onMenuToggle = {},
+            onSaveSelection = {},
+            onLoadSelection = {},
+            onSelectNone = {},
+            onImportSelection = {}
         )
     }
+}
+
+@Composable
+fun SaveSelectionDialog(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(R.string.enter_name_of_selection))
+        },
+        text = {
+            TextField(
+                value = text,
+                onValueChange = onTextChange,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("Selection name") }
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = text.isNotBlank()
+            ) {
+                Text(stringResource(android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        }
+    )
 }
 

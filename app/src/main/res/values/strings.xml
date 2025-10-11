@@ -85,6 +85,9 @@
     <string name="loaded_selection">Loaded selection \"%1$s\"</string>
     <string name="deleted_selection">Deleted selection \"%1$s\"</string>
     <string name="saved_selection">Current selection saved as \"%1$s\"</string>
+    <string name="saved_selections">Saved selections</string>
+    <string name="confirm_delete">Confirm deletion</string>
+    <string name="confirm_delete_selection">Are you sure you want to delete the selection \"%1$s\"?</string>
     <string name="answerDone">Done</string>
     <string name="enter_name_of_selection">Enter the name of this selection</string>
     <string name="could_not_import_file">Could not import file: %1$s</string>
