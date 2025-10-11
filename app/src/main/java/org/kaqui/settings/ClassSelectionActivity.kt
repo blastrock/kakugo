@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,7 +94,8 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
             ClassSelectionScreen(
                 uiState = uiState,
                 onClassItemClick = { index -> onClassifierClick(classifiers[index]) },
-                onBackClick = { finish() }
+                onBackClick = { finish() },
+                onSearchClick = { onSearchClick() }
             )
         }
     }
@@ -193,6 +196,11 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
                 .putExtra("classifier", classifier))
     }
 
+    private fun onSearchClick() {
+        startActivity(Intent(this, ItemSearchActivity::class.java)
+                .putExtra("mode", mode as Serializable))
+    }
+
     private fun saveSelection(name: String) {
         when (mode) {
             SelectionMode.KANJI -> Database.getInstance(this).saveKanjiSelectionTo(name)
@@ -264,7 +272,8 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
 fun ClassSelectionScreen(
     uiState: ClassSelectionUiState,
     onClassItemClick: (Int) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onSearchClick: () -> Unit
 ) {
     KakugoTheme {
         Surface(color = MaterialTheme.colors.background) {
@@ -276,7 +285,15 @@ fun ClassSelectionScreen(
                             SelectionMode.WORD -> stringResource(R.string.word_selection)
                             else -> stringResource(R.string.kanji_selection) // Shouldn't happen
                         },
-                        onBackClick = onBackClick
+                        onBackClick = onBackClick,
+                        actions = {
+                            IconButton(onClick = onSearchClick) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            }
+                        }
                     )
                 }
             ) { paddingValues ->
@@ -365,7 +382,8 @@ fun ClassSelectionScreenPreviewKanji() {
         ClassSelectionScreen(
             uiState = sampleUiState,
             onClassItemClick = {},
-            onBackClick = {}
+            onBackClick = {},
+            onSearchClick = {}
         )
     }
 }
@@ -390,7 +408,8 @@ fun ClassSelectionScreenPreviewWord() {
         ClassSelectionScreen(
             uiState = sampleUiState,
             onClassItemClick = {},
-            onBackClick = {}
+            onBackClick = {},
+            onSearchClick = {}
         )
     }
 }

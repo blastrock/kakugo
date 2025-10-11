@@ -231,36 +231,55 @@ fun ItemSelectionScreen(
                     )
                 }
             ) { paddingValues ->
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    // Stats bar
-                    StatsBar(
-                        itemsDontKnow = uiState.stats.disabled,
-                        itemsBad = uiState.stats.bad,
-                        itemsMeh = uiState.stats.meh,
-                        itemsGood = uiState.stats.good
+                    ItemListWithStats(
+                        items = uiState.items,
+                        stats = uiState.stats,
+                        kanaWords = uiState.kanaWords,
+                        onItemEnabledChange = onItemEnabledChange
                     )
-
-                    // Items list
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(
-                            items = uiState.items,
-                            key = { it.id }  // Stable keys for performance
-                        ) { itemData ->
-                            ItemRow(
-                                itemData = itemData,
-                                kanaWords = uiState.kanaWords,
-                                onEnabledChange = onItemEnabledChange
-                            )
-                            Separator()
-                        }
-                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ItemListWithStats(
+    items: List<ItemData>,
+    stats: LearningDbView.Stats,
+    kanaWords: Boolean,
+    onItemEnabledChange: (Int, Boolean) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Stats bar
+        StatsBar(
+            itemsDontKnow = stats.disabled,
+            itemsBad = stats.bad,
+            itemsMeh = stats.meh,
+            itemsGood = stats.good
+        )
+
+        // Items list
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(
+                items = items,
+                key = { it.id }  // Stable keys for performance
+            ) { itemData ->
+                ItemRow(
+                    itemData = itemData,
+                    kanaWords = kanaWords,
+                    onEnabledChange = onItemEnabledChange
+                )
+                Separator()
             }
         }
     }
@@ -295,7 +314,7 @@ fun ItemRow(
 
         Box(
             modifier = Modifier
-                .size(if (itemData.text.length > 1) 50.dp else 35.dp, 35.dp)
+                .defaultMinSize(if (itemData.text.length > 1) 50.dp else 35.dp, 35.dp)
                 .clip(CircleShape)
                 .background(backgroundColor)
                 .padding(0.dp),
@@ -333,7 +352,7 @@ fun PreviewItemSelectionScreenKanji() {
         ItemData(7, "七", "seven", false, 0.0),
         ItemData(8, "八", "eight", false, 0.0),
         ItemData(9, "九", "nine", false, 0.0),
-        ItemData(10, "十", "ten", false, 0.0),
+        ItemData(10, "十九八", "ten", false, 0.0),
     )
 
     val sampleUiState = ItemSelectionUiState(
