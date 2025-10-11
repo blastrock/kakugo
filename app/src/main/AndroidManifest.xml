@@ -50,7 +50,8 @@
             android:parentActivityName=".mainmenu.MainActivity" />
         <activity
             android:name=".testactivities.TestActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:parentActivityName=".mainmenu.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".settings.SavedSelectionsActivity"
             android:parentActivityName=".mainmenu.MainActivity" />

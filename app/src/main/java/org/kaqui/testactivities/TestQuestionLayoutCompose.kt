@@ -30,7 +30,7 @@ fun TestQuestionLayoutCompose(
         ) {
             AndroidView(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(0.4f)
                     .fillMaxHeight()
                     .padding(bottom = 8.dp),
                 factory = { context ->
@@ -61,7 +61,7 @@ fun TestQuestionLayoutCompose(
 
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(0.6f)
                     .fillMaxHeight()
                     .let(answerHeightMod),
                 horizontalAlignment = Alignment.CenterHorizontally,
