@@ -16,9 +16,6 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
-import org.jetbrains.anko.support.v4.longToast
 import org.kaqui.*
 import org.kaqui.model.Database
 import org.kaqui.model.DatabaseUpdater
@@ -31,11 +28,10 @@ class MainSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        linearLayout {
-            frameLayout {
-                id = R.id.settings_main_view
-            }.lparams(width = matchParent, height = matchParent)
+        val frameLayout = android.widget.FrameLayout(this).apply {
+            id = R.id.settings_main_view
         }
+        setContentView(frameLayout)
 
         supportFragmentManager
                 .beginTransaction()
@@ -68,9 +64,10 @@ class MainSettingsActivity : BaseActivity() {
                 }
             }
             findPreference<Preference>("showChangelog")!!.setOnPreferenceClickListener {
-                requireContext().alert(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT)) {
-                    okButton { }
-                }.show()
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setMessage(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT))
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .show()
                 true
             }
         }
@@ -176,9 +173,9 @@ class MainSettingsActivity : BaseActivity() {
                 }
 
                 DatabaseUpdater(Database.getInstance(requireContext()).database).restoreUserData(dataDump)
-                longToast(R.string.backup_import_completed)
+                android.widget.Toast.makeText(requireContext(), R.string.backup_import_completed, android.widget.Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                longToast(getString(R.string.import_backup_failure, e.message))
+                android.widget.Toast.makeText(requireContext(), getString(R.string.import_backup_failure, e.message), android.widget.Toast.LENGTH_LONG).show()
             }
         }
 
@@ -195,7 +192,8 @@ class MainSettingsActivity : BaseActivity() {
         }
 
         private fun setCustomFontPath(path: String?) {
-            defaultSharedPreferences.edit()
+            androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
+                    .edit()
                     .putString("custom_font", path)
                     .commit()
             TypefaceManager.updateTypeface(requireContext())
