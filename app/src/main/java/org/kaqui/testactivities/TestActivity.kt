@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.AttrRes
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -41,10 +40,14 @@ import kotlinx.coroutines.flow.update
 import androidx.core.net.toUri
 import androidx.fragment.compose.AndroidFragment
 
+enum class HistoryItemStyle {
+    GOOD, BAD, DONT_KNOW
+}
+
 data class HistoryItem(
     val item: Item,
     val probabilityData: TestEngine.DebugData?,
-    @AttrRes val style: Int,
+    val style: HistoryItemStyle,
     val prependSeparator: Boolean = false,
 )
 
@@ -97,7 +100,7 @@ class TestViewModel : ViewModel() {
         if (refresh) {
             _uiState.update { currentState ->
                 val newHistoryItems =
-                    listOf(HistoryItem(correct, probabilityData, R.attr.itemGood, true)) +
+                    listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.GOOD, true)) +
                             currentState.historyState.items.take(49)
                 currentState.copy(
                     historyState = currentState.historyState.copy(
@@ -120,8 +123,8 @@ class TestViewModel : ViewModel() {
         if (refresh) {
             _uiState.update { currentState ->
                 val newHistoryItems = listOf(
-                    HistoryItem(correct, probabilityData, R.attr.itemBad, true),
-                    HistoryItem(wrong, null, R.attr.backgroundDontKnow),
+                    HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true),
+                    HistoryItem(wrong, null, HistoryItemStyle.DONT_KNOW),
                 ) + currentState.historyState.items.take(48)
                 currentState.copy(
                     historyState = currentState.historyState.copy(
@@ -143,7 +146,7 @@ class TestViewModel : ViewModel() {
         if (refresh) {
             _uiState.update { currentState ->
                 val newHistoryItems =
-                    listOf(HistoryItem(correct, probabilityData, R.attr.itemBad, true)) +
+                    listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true)) +
                             currentState.historyState.items.take(49)
                 currentState.copy(
                     historyState = currentState.historyState.copy(
@@ -479,7 +482,7 @@ private fun LastItemRow(
             ItemButton(
                 item = lastWrong,
                 probabilityData = null,
-                style = R.attr.itemBad,
+                style = HistoryItemStyle.BAD,
                 showInfo = lastWrong.contents is Kanji || lastWrong.contents is Word,
                 kanaWords = kanaWords,
                 onClick = { onItemClick(lastWrong) }
@@ -490,7 +493,7 @@ private fun LastItemRow(
             ItemButton(
                 item = lastCorrect,
                 probabilityData = lastProbabilityData,
-                style = R.attr.itemGood,
+                style = HistoryItemStyle.GOOD,
                 showInfo = lastCorrect.contents is Kanji || lastCorrect.contents is Word,
                 kanaWords = kanaWords,
                 onClick = { onItemClick(lastCorrect) }
@@ -587,7 +590,7 @@ private fun HistoryItemRow(
 private fun ItemButton(
     item: Item,
     probabilityData: TestEngine.DebugData?,
-    @AttrRes style: Int,
+    style: HistoryItemStyle,
     showInfo: Boolean,
     kanaWords: Boolean,
     modifier: Modifier = Modifier,
@@ -595,9 +598,9 @@ private fun ItemButton(
 ) {
     val themeAttrs = LocalThemeAttributes.current
     val backgroundColor = when (style) {
-        R.attr.itemGood -> themeAttrs.itemGood
-        R.attr.itemBad -> themeAttrs.itemBad
-        else -> MaterialTheme.colors.surface
+        HistoryItemStyle.GOOD -> themeAttrs.itemGood
+        HistoryItemStyle.BAD -> themeAttrs.itemBad
+        HistoryItemStyle.DONT_KNOW -> themeAttrs.backgroundDontKnow
     }
 
     Box(
@@ -711,12 +714,12 @@ fun TestScreenPreviewWrong() {
             HistoryItem(
                 item = good,
                 probabilityData = null,
-                style = R.attr.itemGood
+                style = HistoryItemStyle.GOOD
             ),
             HistoryItem(
                 item = bad,
                 probabilityData = null,
-                style = R.attr.itemBad
+                style = HistoryItemStyle.BAD
             ),
         ),
         lastCorrect = good,
@@ -785,12 +788,12 @@ fun TestScreenPreviewWrongHistory() {
             HistoryItem(
                 item = good,
                 probabilityData = null,
-                style = R.attr.itemGood
+                style = HistoryItemStyle.GOOD
             ),
             HistoryItem(
                 item = bad,
                 probabilityData = null,
-                style = R.attr.itemBad
+                style = HistoryItemStyle.BAD
             ),
         ),
         lastCorrect = good,

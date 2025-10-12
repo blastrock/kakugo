@@ -33,9 +33,8 @@ import org.kaqui.R
 import org.kaqui.TopBar
 import org.kaqui.Separator
 import org.kaqui.StatsBar
-import org.kaqui.getColorFromScore
-import org.kaqui.getColorFromAttr
 import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.model.Classifier
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
@@ -285,7 +284,7 @@ fun ItemRow(
     itemData: ItemData,
     onEnabledChange: (Int, Boolean) -> Unit
 ) {
-    val context = LocalContext.current
+    val themeColors = LocalThemeAttributes.current
 
     Row(
         modifier = Modifier
@@ -303,8 +302,7 @@ fun ItemRow(
         )
 
         // Item text with colored background
-        val colorAttr = getColorFromScore(itemData.shortScore)
-        val backgroundColor = Color(context.getColorFromAttr(colorAttr))
+        val backgroundColor = themeColors.getColorFromScore(itemData.shortScore)
 
         Box(
             modifier = Modifier

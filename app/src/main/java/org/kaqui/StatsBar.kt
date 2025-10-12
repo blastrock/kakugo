@@ -8,9 +8,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
 import kotlin.math.max
 
 @Composable
@@ -20,6 +21,7 @@ fun StatsBar(
     itemsMeh: Int,
     itemsGood: Int,
 ) {
+    val themeColors = LocalThemeAttributes.current
     val totalWeight = (itemsDontKnow + itemsBad + itemsMeh + itemsGood).toFloat()
     fun weightMin(weight: Float): Float {
         return max(weight, 0.1f)
@@ -32,27 +34,25 @@ fun StatsBar(
         if (itemsDontKnow > 0)
             StatsText(
                 text = "$itemsDontKnow",
-                backgroundColor = Color(LocalContext.current.getColorFromAttr(R.attr.backgroundDontKnow)),
+                backgroundColor = themeColors.backgroundDontKnow,
                 modifier = Modifier.weight(weightMin(itemsDontKnow / totalWeight))
             )
         if (itemsBad > 0)
             StatsText(
                 text = "$itemsBad",
-                backgroundColor = Color(LocalContext.current.getColorFromAttr(R.attr.itemBad)),
+                backgroundColor = themeColors.itemBad,
                 modifier = Modifier.weight(weightMin(itemsBad / totalWeight))
             )
         if (itemsMeh > 0)
             StatsText(
                 text = "$itemsMeh",
-                backgroundColor = Color(LocalContext.current.getColorFromAttr(R.attr.itemMeh)),
+                backgroundColor = themeColors.itemMeh,
                 modifier = Modifier.weight(weightMin(itemsMeh / totalWeight))
             )
         if (itemsGood > 0)
             StatsText(
                 text = "$itemsGood",
-                backgroundColor = Color(
-                    LocalContext.current.getColorFromAttr(R.attr.itemGood)
-                ),
+                backgroundColor = themeColors.itemGood,
                 modifier = Modifier.weight(weightMin(itemsGood / totalWeight))
             )
     }
@@ -77,11 +77,15 @@ fun StatsText(
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenPreview() {
-    StatsBar(1, 1, 2, 3)
+    KakugoTheme {
+        StatsBar(1, 1, 2, 3)
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenPreviewUnbalanced() {
-    StatsBar(100, 1, 2, 5000)
+    KakugoTheme {
+        StatsBar(100, 1, 2, 5000)
+    }
 }

@@ -24,6 +24,8 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
+import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
 import kotlin.math.pow
 import android.app.Application
 import android.graphics.Matrix
@@ -363,7 +365,8 @@ class DrawingTestFragmentCompose : Fragment(), TestFragment {
             setContent {
                 val uiState by viewModel.uiState.collectAsState()
 
-                DrawingTestScreen(
+                KakugoTheme {
+                    DrawingTestScreen(
                     questionText = uiState.questionText,
                     isFinished = uiState.isFinished,
                     onSizeChanged = { w, h ->
@@ -395,6 +398,7 @@ class DrawingTestFragmentCompose : Fragment(), TestFragment {
                     pathsToDraw = uiState.pathsToDraw, // Use new field
                     pathsForAnswer = uiState.pathsForAnswer,
                 )
+                }
             }
         }
     }
@@ -426,6 +430,8 @@ fun DrawingTestScreen(
     pathsToDraw: List<Path>,
     pathsForAnswer: List<Path>,
 ) {
+    val themeColors = LocalThemeAttributes.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -464,11 +470,7 @@ fun DrawingTestScreen(
                     Button(
                         onClick = onHintClick,
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(
-                                LocalContext.current.getColorFromAttr(
-                                    R.attr.backgroundMaybe,
-                                )
-                            ),
+                            backgroundColor = themeColors.backgroundMaybe
                         ),
                         contentPadding = PaddingValues(0.dp),
                         modifier = Modifier.weight(1f),
@@ -481,11 +483,7 @@ fun DrawingTestScreen(
                     Button(
                         onClick = onDontKnowClick,
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(
-                                LocalContext.current.getColorFromAttr(
-                                    R.attr.backgroundDontKnow,
-                                )
-                            ),
+                            backgroundColor = themeColors.backgroundDontKnow
                         ),
                         contentPadding = PaddingValues(0.dp),
                         modifier = Modifier.weight(1f),
@@ -513,35 +511,39 @@ fun DrawingTestScreen(
 @Preview(showBackground = true, widthDp = 400, heightDp = 500)
 @Composable
 fun PreviewDrawingTestScreen() {
-    DrawingTestScreen(
-        questionText = "漢",
-        isFinished = false,
-        onSizeChanged = { _, _ -> },
-        onHintClick = {},
-        onDontKnowClick = {},
-        onNextClick = {},
-        onQuestionLongClick = {},
-        onStrokeFinished = {},
-        hintPathForDrawView = null,
-        pathsToDraw = emptyList(),
-        pathsForAnswer = emptyList(),
-    )
+    KakugoTheme {
+        DrawingTestScreen(
+            questionText = "漢",
+            isFinished = false,
+            onSizeChanged = { _, _ -> },
+            onHintClick = {},
+            onDontKnowClick = {},
+            onNextClick = {},
+            onQuestionLongClick = {},
+            onStrokeFinished = {},
+            hintPathForDrawView = null,
+            pathsToDraw = emptyList(),
+            pathsForAnswer = emptyList(),
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewDrawingTestScreenTall() {
-    DrawingTestScreen(
-        questionText = "漢",
-        isFinished = false,
-        onSizeChanged = { _, _ -> },
-        onHintClick = {},
-        onDontKnowClick = {},
-        onNextClick = {},
-        onQuestionLongClick = {},
-        onStrokeFinished = {},
-        hintPathForDrawView = null,
-        pathsToDraw = emptyList(),
-        pathsForAnswer = emptyList(),
-    )
+    KakugoTheme {
+        DrawingTestScreen(
+            questionText = "漢",
+            isFinished = false,
+            onSizeChanged = { _, _ -> },
+            onHintClick = {},
+            onDontKnowClick = {},
+            onNextClick = {},
+            onQuestionLongClick = {},
+            onStrokeFinished = {},
+            hintPathForDrawView = null,
+            pathsToDraw = emptyList(),
+            pathsForAnswer = emptyList(),
+        )
+    }
 }

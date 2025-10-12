@@ -32,7 +32,6 @@ import org.kaqui.startActivity
 import org.kaqui.R
 import org.kaqui.StatsBar
 import org.kaqui.TopBar
-import org.kaqui.getColorFromAttr
 import org.kaqui.model.Classification
 import org.kaqui.model.Classifier
 import org.kaqui.model.Database

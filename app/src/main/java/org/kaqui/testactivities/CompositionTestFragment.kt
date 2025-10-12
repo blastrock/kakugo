@@ -53,12 +53,13 @@ import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
-import org.kaqui.getColorFromAttr
 import org.kaqui.model.Certainty
 import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerText
 import org.kaqui.model.getQuestionText
+import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
 
 enum class ButtonValidationState {
     NONE,           // Not validated yet
@@ -277,8 +278,9 @@ fun CompositionTestScreenContent(
     onNextClicked: () -> Unit
 ) {
     val questionMinSize = 10
+    val themeColors = LocalThemeAttributes.current
 
-    MaterialTheme {
+    KakugoTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -334,11 +336,7 @@ fun CompositionTestScreenContent(
                                 onClick = onDoneClicked,
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = Color(
-                                        LocalContext.current.getColorFromAttr(
-                                            R.attr.backgroundSure
-                                        )
-                                    )
+                                    backgroundColor = themeColors.backgroundSure
                                 )
                             ) {
                                 Text(stringResource(id = R.string.answerDone).toUpperCase(Locale.current))
@@ -348,11 +346,7 @@ fun CompositionTestScreenContent(
                                 onClick = onDontKnowClicked,
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = Color(
-                                        LocalContext.current.getColorFromAttr(
-                                            R.attr.backgroundDontKnow
-                                        )
-                                    )
+                                    backgroundColor = themeColors.backgroundDontKnow
                                 )
                             ) {
                                 Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
@@ -388,16 +382,17 @@ fun CompositionToggleButton(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val themeColors = LocalThemeAttributes.current
 
     val backgroundColor = when (validationState) {
-        ButtonValidationState.CORRECT -> Color(context.getColorFromAttr(R.attr.compositionGood))
-        ButtonValidationState.WRONG_SELECTED -> Color(context.getColorFromAttr(R.attr.compositionBadSelected))
-        ButtonValidationState.WRONG_NOT_SELECTED -> Color(context.getColorFromAttr(R.attr.compositionBadNotSelected))
+        ButtonValidationState.CORRECT -> themeColors.compositionGood
+        ButtonValidationState.WRONG_SELECTED -> themeColors.compositionBadSelected
+        ButtonValidationState.WRONG_NOT_SELECTED -> themeColors.compositionBadNotSelected
         ButtonValidationState.NONE -> {
             if (isSelected) {
-                Color(context.getColorFromAttr(R.attr.compositionGood))
+                themeColors.compositionGood
             } else {
-                Color(context.getColorFromAttr(R.attr.backgroundDontKnow))
+                themeColors.backgroundDontKnow
             }
         }
     }
@@ -437,15 +432,13 @@ fun PreviewCompositionTestInitialState() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    MaterialTheme {
-        CompositionTestScreenContent(
-            uiState = sampleUiState,
-            onToggleAnswer = {},
-            onDoneClicked = {},
-            onDontKnowClicked = {},
-            onNextClicked = {}
-        )
-    }
+    CompositionTestScreenContent(
+        uiState = sampleUiState,
+        onToggleAnswer = {},
+        onDoneClicked = {},
+        onDontKnowClicked = {},
+        onNextClicked = {}
+    )
 }
 
 @Preview(showBackground = true, name = "Composition Test - Some Selected")
@@ -460,15 +453,13 @@ fun PreviewCompositionTestSomeSelected() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    MaterialTheme {
-        CompositionTestScreenContent(
-            uiState = sampleUiState,
-            onToggleAnswer = {},
-            onDoneClicked = {},
-            onDontKnowClicked = {},
-            onNextClicked = {}
-        )
-    }
+    CompositionTestScreenContent(
+        uiState = sampleUiState,
+        onToggleAnswer = {},
+        onDoneClicked = {},
+        onDontKnowClicked = {},
+        onNextClicked = {}
+    )
 }
 
 @Preview(showBackground = true, name = "Composition Test - Validated Correct")
@@ -485,15 +476,13 @@ fun PreviewCompositionTestValidatedCorrect() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    MaterialTheme {
-        CompositionTestScreenContent(
-            uiState = sampleUiState,
-            onToggleAnswer = {},
-            onDoneClicked = {},
-            onDontKnowClicked = {},
-            onNextClicked = {}
-        )
-    }
+    CompositionTestScreenContent(
+        uiState = sampleUiState,
+        onToggleAnswer = {},
+        onDoneClicked = {},
+        onDontKnowClicked = {},
+        onNextClicked = {}
+    )
 }
 
 @Preview(showBackground = true, name = "Composition Test - Validated With Errors")
@@ -513,13 +502,11 @@ fun PreviewCompositionTestValidatedWithErrors() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    MaterialTheme {
-        CompositionTestScreenContent(
-            uiState = sampleUiState,
-            onToggleAnswer = {},
-            onDoneClicked = {},
-            onDontKnowClicked = {},
-            onNextClicked = {}
-        )
-    }
+    CompositionTestScreenContent(
+        uiState = sampleUiState,
+        onToggleAnswer = {},
+        onDoneClicked = {},
+        onDontKnowClicked = {},
+        onNextClicked = {}
+    )
 }

@@ -89,7 +89,21 @@ data class ThemeAttributes(
     val statsItemsGood: Color,
     val statsItemsBad: Color,
     val drawingDontKnow: Color
-)
+) {
+    /**
+     * Get color based on score value
+     * Maps score ranges to item colors (bad, meh, good)
+     */
+    fun getColorFromScore(score: Double): Color {
+        // BAD_WEIGHT = 0.3
+        return when (score) {
+            in 0.0..0.3 -> itemBad
+            in 0.3..<1.0 -> itemMeh
+            1.0 -> itemGood
+            else -> itemBad
+        }
+    }
+}
 
 @Composable
 fun KakugoTheme(

@@ -56,11 +56,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
-import org.kaqui.getColorFromAttr
 import org.kaqui.model.Certainty
 import org.kaqui.model.Kana
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
+import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
 import java.util.Locale as JavaLocale
 
 data class TextTestUiState(
@@ -261,6 +262,7 @@ fun TextTestScreenContent(
     val questionMinSize = 30
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val themeColors = LocalThemeAttributes.current
 
     // Auto-focus the text field and keep keyboard open
     LaunchedEffect(uiState.isAnswered, uiState.questionText) {
@@ -271,7 +273,7 @@ fun TextTestScreenContent(
         }
     }
 
-    MaterialTheme {
+    KakugoTheme {
         TestQuestionLayoutCompose(
             question = uiState.questionText,
             questionMinSizeSp = questionMinSize,
@@ -305,11 +307,7 @@ fun TextTestScreenContent(
                     ),
                     colors = if (uiState.isAnswered) {
                         TextFieldDefaults.outlinedTextFieldColors(
-                            backgroundColor = Color(
-                                LocalContext.current.getColorFromAttr(
-                                    R.attr.wrongAnswerBackground
-                                )
-                            )
+                            backgroundColor = themeColors.wrongAnswerBackground
                         )
                     } else {
                         TextFieldDefaults.outlinedTextFieldColors()
@@ -323,13 +321,7 @@ fun TextTestScreenContent(
                         text = uiState.correctAnswer,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                Color(
-                                    LocalContext.current.getColorFromAttr(
-                                        R.attr.correctAnswerBackground
-                                    )
-                                )
-                            )
+                            .background(themeColors.correctAnswerBackground)
                             .padding(8.dp),
                         textAlign = TextAlign.Center,
                         fontSize = 18.sp
@@ -347,11 +339,7 @@ fun TextTestScreenContent(
                             onClick = { onAnswerSubmitted(Certainty.MAYBE) },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color(
-                                    LocalContext.current.getColorFromAttr(
-                                        R.attr.backgroundMaybe
-                                    )
-                                )
+                                backgroundColor = themeColors.backgroundMaybe
                             )
                         ) {
                             Text(stringResource(id = R.string.maybe).toUpperCase(Locale.current))
@@ -363,11 +351,7 @@ fun TextTestScreenContent(
                                 .weight(1f)
                                 .padding(start = 8.dp),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color(
-                                    LocalContext.current.getColorFromAttr(
-                                        R.attr.backgroundSure
-                                    )
-                                )
+                                backgroundColor = themeColors.backgroundSure
                             )
                         ) {
                             Text(stringResource(id = R.string.sure).toUpperCase(Locale.current))
@@ -379,11 +363,7 @@ fun TextTestScreenContent(
                         onClick = { onAnswerSubmitted(Certainty.DONTKNOW) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(
-                                LocalContext.current.getColorFromAttr(
-                                    R.attr.backgroundDontKnow
-                                )
-                            )
+                            backgroundColor = themeColors.backgroundDontKnow
                         )
                     ) {
                         Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
@@ -417,14 +397,12 @@ fun PreviewTextTestScreenContentNotAnswered() {
         currentTestType = TestType.HIRAGANA_TO_ROMAJI_TEXT
     )
 
-    MaterialTheme {
-        TextTestScreenContent(
-            uiState = sampleUiState,
-            onUserInputChanged = {},
-            onAnswerSubmitted = {},
-            onNextClicked = {}
-        )
-    }
+    TextTestScreenContent(
+        uiState = sampleUiState,
+        onUserInputChanged = {},
+        onAnswerSubmitted = {},
+        onNextClicked = {}
+    )
 }
 
 @Preview(showBackground = true, name = "Text Test Screen - Wrong Answer")
@@ -439,14 +417,12 @@ fun PreviewTextTestScreenContentWrongAnswer() {
         currentTestType = TestType.HIRAGANA_TO_ROMAJI_TEXT
     )
 
-    MaterialTheme {
-        TextTestScreenContent(
-            uiState = sampleUiState,
-            onUserInputChanged = {},
-            onAnswerSubmitted = {},
-            onNextClicked = {}
-        )
-    }
+    TextTestScreenContent(
+        uiState = sampleUiState,
+        onUserInputChanged = {},
+        onAnswerSubmitted = {},
+        onNextClicked = {}
+    )
 }
 
 @Preview(showBackground = true, name = "Text Test Screen - With Input")
@@ -461,12 +437,10 @@ fun PreviewTextTestScreenContentWithInput() {
         currentTestType = TestType.HIRAGANA_TO_ROMAJI_TEXT
     )
 
-    MaterialTheme {
-        TextTestScreenContent(
-            uiState = sampleUiState,
-            onUserInputChanged = {},
-            onAnswerSubmitted = {},
-            onNextClicked = {}
-        )
-    }
+    TextTestScreenContent(
+        uiState = sampleUiState,
+        onUserInputChanged = {},
+        onAnswerSubmitted = {},
+        onNextClicked = {}
+    )
 }

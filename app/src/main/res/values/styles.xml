@@ -1,18 +1,4 @@
 <resources>
-    <attr name="itemGood" format="color" />
-    <attr name="itemMeh" format="color" />
-    <attr name="itemBad" format="color" />
-    <attr name="historyBackground" format="color" />
-    <attr name="wrongAnswerBackground" format="color" />
-    <attr name="correctAnswerBackground" format="color" />
-    <attr name="backgroundSure" format="color" />
-    <attr name="backgroundMaybe" format="color" />
-    <attr name="backgroundDontKnow" format="color" />
-    <attr name="compositionGood" format="color" />
-    <attr name="compositionBadSelected" format="color" />
-    <attr name="compositionBadNotSelected" format="color" />
-    <attr name="statsItemsGood" format="color" />
-    <attr name="statsItemsBad" format="color" />
     <attr name="drawingDontKnow" format="color" />
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -21,27 +7,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:disabledAlpha">0.75</item>
 
-        <item name="itemGood">#9ccc65</item>
-        <item name="itemMeh">#c5cae9</item>
-        <item name="itemBad">#fce4ec</item>
-
-        <item name="backgroundSure">#9ccc65</item>
-        <item name="backgroundMaybe">#dcedc8</item>
-        <item name="backgroundDontKnow">#e0e0e0</item>
-
-        <item name="wrongAnswerBackground">#ffdddd</item>
-        <item name="correctAnswerBackground">#deffd3</item>
-
-        <item name="compositionGood">#9ccc65</item>
-        <item name="compositionBadSelected">#ef9a9a</item>
-        <item name="compositionBadNotSelected">#ffcdd2</item>
-
-        <item name="statsItemsGood">#9ccc65</item>
-        <item name="statsItemsBad">#ef9a9a</item>
-
         <item name="drawingDontKnow">#FF7F7F</item>
-
-        <item name="historyBackground">#dddddd</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat">
@@ -54,27 +20,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="backgroundSure">#085300</item>
-        <item name="backgroundMaybe">#303F30</item>
-        <item name="backgroundDontKnow">#282828</item>
-
-        <item name="itemGood">#085300</item>
-        <item name="itemMeh">#313F4D</item>
-        <item name="itemBad">#500000</item>
-
-        <item name="wrongAnswerBackground">#350000</item>
-        <item name="correctAnswerBackground">#092600</item>
-
-        <item name="compositionGood">#085300</item>
-        <item name="compositionBadSelected">#350000</item>
-        <item name="compositionBadNotSelected">#650000</item>
-
-        <item name="statsItemsGood">#085300</item>
-        <item name="statsItemsBad">#650000</item>
-
         <item name="drawingDontKnow">#FF7F7F</item>
-
-        <item name="historyBackground">#222222</item>
     </style>
 
     <style name="Separator">

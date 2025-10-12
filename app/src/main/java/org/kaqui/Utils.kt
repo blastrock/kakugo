@@ -105,20 +105,6 @@ import org.kaqui.testactivities.TestActivity
 import java.util.Calendar
 import kotlin.math.pow
 
-fun getColorFromScore(score: Double) =
-        when (score) {
-            in 0.0..BAD_WEIGHT -> R.attr.itemBad
-            in BAD_WEIGHT..<1.0 -> R.attr.itemMeh
-            1.0 -> R.attr.itemGood
-            else -> R.attr.itemBad
-        }
-
-fun getColoredCircle(context: Context, @AttrRes color: Int): Drawable {
-    val drawable = ContextCompat.getDrawable(context, R.drawable.round)!!
-    drawable.applyTint(context.getColorFromAttr(color))
-    return drawable
-}
-
 fun unitStep(x: Double): Double =
         if (x < 0)
             0.0
@@ -142,38 +128,6 @@ fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T>
             chosen.add(r)
     }
     return chosen.toList()
-}
-
-fun PointF.squaredDistanceTo(o: PointF): Float = (this.x - o.x).pow(2) + (this.y - o.y).pow(2)
-
-fun PathMeasure.getPoint(position: Float): PointF {
-    val out = floatArrayOf(0f, 0f)
-    getPosTan(position, out, null)
-    return PointF(out[0], out[1])
-}
-
-fun Button.setExtTint(@AttrRes attrColor: Int?) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        if (attrColor != null) {
-            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            backgroundTintList = ColorStateList.valueOf(context.getColorFromAttr(attrColor))
-        } else {
-            backgroundTintMode = PorterDuff.Mode.MULTIPLY
-            backgroundTintList = ColorStateList.valueOf(context.getColorFromAttr(R.attr.backgroundDontKnow))
-        }
-    }
-}
-
-inline fun ViewManager.appCompatTextView(init: AppCompatTextView.() -> Unit = {}): AppCompatTextView {
-    return ankoView({ AppCompatTextView(it) }, theme = 0, init = init)
-}
-
-inline fun ViewManager.drawView(init: DrawView.() -> Unit = {}): DrawView {
-    return ankoView({ DrawView(it) }, theme = 0, init = init)
-}
-
-inline fun ViewManager.barChart(init: BarChart.() -> Unit = {}): BarChart {
-    return ankoView({ BarChart(it) }, theme = 0, init = init)
 }
 
 fun Calendar.roundToPreviousDay() {
@@ -208,13 +162,6 @@ fun Drawable.applyTint(@ColorInt color: Int): Drawable {
     DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
     return this
 }
-
-fun ViewManager.appTitleImage(context: Context) =
-        imageView {
-            val drawable = AppCompatResources.getDrawable(context, R.drawable.kakugo)!!
-            drawable.applyTint(context.getColorFromAttr(android.R.attr.colorForeground))
-            setImageDrawable(drawable)
-        }
 
 @Composable
 fun AppTitleImage(modifier: Modifier = Modifier) {
@@ -374,18 +321,6 @@ fun showItemProbabilityData(context: Context, item: String, probabilityData: Tes
                             probabilityData.probaParamsStage2.minProbaShort))
             .setPositiveButton(android.R.string.ok, null)
             .show()
-}
-
-fun wrapInScrollView(subLayout: _LinearLayout, block: _ScrollView.() -> Unit): LinearLayout {
-    with(subLayout) {
-        return verticalLayout {
-            gravity = Gravity.CENTER
-
-            scrollView {
-                block()
-            }.lparams(width = matchParent, height = wrapContent, weight = 0f)
-        }.lparams(width = matchParent, height = matchParent)
-    }
 }
 
 fun TestType.toName(): Int =
