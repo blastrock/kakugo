@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.*
-import org.jetbrains.anko.*
 import org.kaqui.startActivity
 import org.kaqui.R
 import org.kaqui.StatsBar
@@ -171,7 +171,7 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
             SelectionMode.WORD -> Database.getInstance(this).saveWordSelectionTo(name)
             else -> throw IllegalArgumentException("ClassSelectionActivity only supports KANJI and WORD modes")
         }
-        toast(getString(R.string.saved_selection, name))
+        Toast.makeText(this, getString(R.string.saved_selection, name), Toast.LENGTH_SHORT).show()
     }
 
     private fun importItems() {
@@ -181,9 +181,10 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
                 else
                     R.string.import_words_help
 
-        alert(msg) {
-            okButton { showSelectFileForImport() }
-        }.show()
+        AlertDialog.Builder(this)
+            .setMessage(msg)
+            .setPositiveButton(android.R.string.ok) { _, _ -> showSelectFileForImport() }
+            .show()
     }
 
     private fun showSelectFileForImport() {

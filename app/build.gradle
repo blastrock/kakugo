@@ -81,10 +81,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0'
     implementation "com.google.accompanist:accompanist-drawablepainter:0.32.0"
 
-    implementation "org.jetbrains.anko:anko-sdk27:$anko_version"
-    implementation "org.jetbrains.anko:anko-support-v4:$anko_version"
-    implementation "org.jetbrains.anko:anko-design:$anko_version"
-
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'androidx.fragment:fragment-compose:1.8.8'
 }

@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.ViewGroup
 import android.view.ViewManager
 import android.widget.Button
 import android.widget.LinearLayout
@@ -79,24 +80,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.preference.PreferenceManager
 import com.github.mikephil.charting.charts.BarChart
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import org.jetbrains.anko._LinearLayout
-import org.jetbrains.anko._ScrollView
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.backgroundColor
-import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.defaultSharedPreferences
-import org.jetbrains.anko.dip
-import org.jetbrains.anko.imageView
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.matchParent
-import org.jetbrains.anko.scrollView
-import org.jetbrains.anko.verticalLayout
-import org.jetbrains.anko.view
-import org.jetbrains.anko.wrapContent
 import org.kaqui.model.BAD_WEIGHT
 import org.kaqui.model.Database
 import org.kaqui.model.TestType
@@ -138,11 +126,6 @@ fun Calendar.roundToPreviousDay() {
     this.clear(Calendar.MILLISECOND)
     this.clear(Calendar.AM_PM)
 }
-
-fun _LinearLayout.separator(context: Context) =
-        view {
-            backgroundColor = ContextCompat.getColor(context, R.color.separator)
-        }.lparams(width = matchParent, height = dip(1))
 
 @Composable
 fun Separator(
@@ -219,11 +202,11 @@ fun TopBar(
 fun startTest(activity: Context, types: List<TestType>) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(activity, db, types[0]).getEnabledCount() < 10) {
-        activity.longToast(R.string.enable_a_few_items)
+        Toast.makeText(activity, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
         return
     }
 
-    val sharedPrefs = activity.defaultSharedPreferences
+    val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
     val defaultTypes = sharedPrefs.getStringSet("custom_test_types", setOf())!!
 
     val selected = types.filter { it.name in defaultTypes }.toMutableList()
@@ -238,9 +221,10 @@ fun startTest(activity: Context, types: List<TestType>) {
             }
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 if (selected.isEmpty())
-                    activity.alert(R.string.select_at_least_one_type) {
-                        positiveButton(android.R.string.ok) {}
-                    }.show()
+                    AlertDialog.Builder(activity)
+                        .setMessage(R.string.select_at_least_one_type)
+                        .setPositiveButton(android.R.string.ok) { _, _ -> }
+                        .show()
                 else {
                     sharedPrefs.edit(true) {
                         putStringSet("custom_test_types", selected.map { it.name }.toSet())
@@ -255,7 +239,7 @@ fun startTest(activity: Context, types: List<TestType>) {
 fun startTest(activity: Context, type: TestType) {
     val db = Database.getInstance(activity)
     if (TestEngine.getItemView(activity, db, type).getEnabledCount() < 10) {
-        activity.longToast(R.string.enable_a_few_items)
+        Toast.makeText(activity, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
         return
     }
     activity.startActivity<TestActivity>("test_types" to listOf(type))
@@ -264,9 +248,9 @@ fun startTest(activity: Context, type: TestType) {
 val Activity.menuWidth
     get() =
         if (resources.configuration.screenWidthDp >= 500)
-            dip(500)
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 500f, resources.displayMetrics).toInt()
         else
-            matchParent
+            ViewGroup.LayoutParams.MATCH_PARENT
 
 @ColorInt
 fun Context.getColorFromAttr(

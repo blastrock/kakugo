@@ -22,7 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import org.jetbrains.anko.toast
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.TopBar
@@ -117,7 +116,7 @@ class SavedSelectionsActivity : ComponentActivity() {
                 onBackClick = { finish() },
                 onItemClick = { selection ->
                     viewModel.restoreSelection(selection)
-                    toast(getString(R.string.loaded_selection, selection.name))
+                    Toast.makeText(this, getString(R.string.loaded_selection, selection.name), Toast.LENGTH_SHORT).show()
                     finish()
                 },
                 onDeleteClick = viewModel::showDeleteDialog,
@@ -125,7 +124,7 @@ class SavedSelectionsActivity : ComponentActivity() {
                     val deletedName = viewModel.uiState.selectionToDelete?.name
                     viewModel.deleteSelection()
                     if (deletedName != null) {
-                        toast(getString(R.string.deleted_selection, deletedName))
+                        Toast.makeText(this, getString(R.string.deleted_selection, deletedName), Toast.LENGTH_SHORT).show()
                     }
                 },
                 onDeleteDismiss = viewModel::dismissDeleteDialog

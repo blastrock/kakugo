@@ -22,8 +22,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.text.HtmlCompat
-import org.jetbrains.anko.*
+import androidx.preference.PreferenceManager
 import org.kaqui.*
 import org.kaqui.R
 import org.kaqui.TopBar
@@ -45,15 +46,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
-        val lastVersionChangelog = defaultSharedPreferences.getInt("last_version_changelog", 0)
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val lastVersionChangelog = sharedPrefs.getInt("last_version_changelog", 0)
         if (lastVersionChangelog < BuildConfig.VERSION_CODE) {
-            alert(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT)) {
-                okButton {
-                    defaultSharedPreferences.edit()
-                            .putInt("last_version_changelog", BuildConfig.VERSION_CODE)
-                            .apply()
+            AlertDialog.Builder(this)
+                .setMessage(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT))
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    sharedPrefs.edit()
+                        .putInt("last_version_changelog", BuildConfig.VERSION_CODE)
+                        .apply()
                 }
-            }.show()
+                .show()
         }
 
         setContent {

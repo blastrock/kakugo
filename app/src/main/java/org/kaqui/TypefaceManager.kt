@@ -2,8 +2,8 @@ package org.kaqui
 
 import android.content.Context
 import android.graphics.Typeface
+import android.widget.Toast
 import androidx.preference.PreferenceManager
-import org.jetbrains.anko.longToast
 
 class TypefaceManager {
     companion object {
@@ -16,7 +16,7 @@ class TypefaceManager {
                 try {
                     font = Typeface.createFromFile(customFont)
                 } catch (e: Exception) {
-                    context.longToast(context.getString(R.string.failed_to_load_font, e.message))
+                    Toast.makeText(context, context.getString(R.string.failed_to_load_font, e.message), Toast.LENGTH_LONG).show()
                     return
                 }
             } else {
