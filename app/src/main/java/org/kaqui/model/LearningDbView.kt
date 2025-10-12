@@ -3,7 +3,7 @@ package org.kaqui.model
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import org.kaqui.SrsCalculator
-import java.util.*
+import java.util.Calendar
 
 class LearningDbView(
         private val database: SQLiteDatabase,

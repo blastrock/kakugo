@@ -25,11 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.kaqui.*
+import org.kaqui.AppTitleImage
+import org.kaqui.R
+import org.kaqui.Separator
+import org.kaqui.TopBar
 import org.kaqui.model.TestType
 import org.kaqui.settings.ClassSelectionActivity
 import org.kaqui.settings.SelectionMode
-import org.kaqui.TopBar
+import org.kaqui.startTest
 import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
 

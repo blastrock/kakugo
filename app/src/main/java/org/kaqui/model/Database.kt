@@ -9,8 +9,8 @@ import androidx.core.database.sqlite.transaction
 import org.kaqui.LocaleManager
 import org.kaqui.asUnicodeCodePoint
 import org.kaqui.roundToPreviousDay
-import java.util.*
-import kotlin.collections.HashSet
+import java.util.Calendar
+import java.util.TimeZone
 
 class Database private constructor(context: Context, val database: SQLiteDatabase) {
     private val locale: String get() = LocaleManager.getDictionaryLocale()

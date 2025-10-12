@@ -2,11 +2,20 @@ package org.kaqui
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcel
 import android.util.Log
 import androidx.preference.PreferenceManager
-import org.kaqui.model.*
-import java.util.*
+import org.kaqui.model.Certainty
+import org.kaqui.model.Database
+import org.kaqui.model.Item
+import org.kaqui.model.Kanji
+import org.kaqui.model.LearningDbView
+import org.kaqui.model.TestType
+import org.kaqui.model.getAnswerCount
+import org.kaqui.model.getItemType
+import org.kaqui.model.getKnowledgeType
+import org.kaqui.model.similarities
+import java.util.ArrayDeque
+import java.util.Random
 
 class TestEngine(
         context: Context,

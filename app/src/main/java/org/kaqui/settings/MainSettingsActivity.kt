@@ -16,7 +16,10 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import org.kaqui.*
+import org.kaqui.BaseActivity
+import org.kaqui.LocaleManager
+import org.kaqui.R
+import org.kaqui.TypefaceManager
 import org.kaqui.model.Database
 import org.kaqui.model.DatabaseUpdater
 import java.io.File
