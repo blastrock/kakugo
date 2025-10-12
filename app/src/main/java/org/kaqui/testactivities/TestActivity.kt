@@ -5,8 +5,10 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.fragment.app.FragmentActivity
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,6 +34,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.kaqui.*
 import org.kaqui.R
 import org.kaqui.model.*
@@ -63,15 +67,15 @@ data class TestActivityUiState(
     val correctCount: Int = 0,
     val questionCount: Int = 0,
     val historyState: HistoryState = HistoryState(),
-    val sheetState: Int = BottomSheetBehavior.STATE_COLLAPSED,
+    val sheetExpanded: Boolean = false,
     val stats: LearningDbView.Stats = LearningDbView.Stats(
         good = 0,
         meh = 0,
         bad = 0,
         disabled = 0
-    )
+    ),
+    val title: String = ""
 )
-//val kanaWords: Boolean = true)
 
 class TestViewModel : ViewModel() {
 
@@ -160,10 +164,10 @@ class TestViewModel : ViewModel() {
         }
     }
 
-    fun setSheetState(sheetState: Int) {
+    fun setSheetExpanded(expanded: Boolean) {
         _uiState.update { currentState ->
             currentState.copy(
-                sheetState = sheetState
+                sheetExpanded = expanded
             )
         }
     }
@@ -194,9 +198,17 @@ class TestViewModel : ViewModel() {
             )
         }
     }
+
+    fun setTitle(title: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                title = title
+            )
+        }
+    }
 }
 
-class TestActivity : BaseActivity(), TestFragmentHolder {
+class TestActivity : FragmentActivity(), TestFragmentHolder {
     override lateinit var testEngine: TestEngine
 
     private lateinit var testFragment: TestFragment
@@ -214,8 +226,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        kanaWords =
-            PreferenceManager.getDefaultSharedPreferences(this).getBoolean("kana_words", true)
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+        kanaWords = sharedPrefs.getBoolean("kana_words", true)
+        val darkTheme = sharedPrefs.getBoolean("dark_theme", false)
 
         testEngine = TestEngine(
             this,
@@ -237,24 +250,47 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
         viewModel.initialize(testEngine)
 
+        // Setup back navigation handler
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val sheetExpanded = viewModel.uiState.value.sheetExpanded
+
+                if (sheetExpanded) {
+                    viewModel.setSheetExpanded(false)
+                } else {
+                    confirmActivityClose(false)
+                }
+            }
+        })
+
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
-            TestScreen(
-                testFragment = uiState.fragment,
-                onFragmentUpdated = { fragment -> testFragment = fragment as TestFragment },
-                stats = uiState.stats,
-                correctCount = uiState.correctCount,
-                questionCount = uiState.questionCount,
-                historyState = uiState.historyState,
-                sheetState = uiState.sheetState,
-                onSheetStateChange = { viewModel.setSheetState(it) },
-                kanaWords = kanaWords,
-                onItemClick = this::openItemInDictionary
-            )
+            KakugoTheme(darkTheme = darkTheme) {
+                Scaffold(
+                    topBar = {
+                        TopBar(
+                            title = uiState.title,
+                            onBackClick = { confirmActivityClose(true) }
+                        )
+                    }
+                ) { paddingValues ->
+                    TestScreen(
+                        testFragment = uiState.fragment,
+                        onFragmentUpdated = { fragment -> testFragment = fragment as TestFragment },
+                        stats = uiState.stats,
+                        correctCount = uiState.correctCount,
+                        questionCount = uiState.questionCount,
+                        historyState = uiState.historyState,
+                        sheetExpanded = uiState.sheetExpanded,
+                        onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
+                        kanaWords = kanaWords,
+                        onItemClick = this::openItemInDictionary,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+            }
         }
-
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun openItemInDictionary(item: Item) {
@@ -304,25 +340,9 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
         viewModel.onAnswer(certainty, wrong)
     }
 
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         testEngine.saveState(outState)
         super.onSaveInstanceState(outState)
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val sheetState = viewModel.uiState.value.sheetState
-
-        if (sheetState == BottomSheetBehavior.STATE_EXPANDED) {
-            viewModel.setSheetState(BottomSheetBehavior.STATE_COLLAPSED)
-        } else {
-            confirmActivityClose(false)
-        }
     }
 
     private fun confirmActivityClose(upNavigation: Boolean) {
@@ -337,17 +357,6 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                confirmActivityClose(true)
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     override fun nextQuestion() {
@@ -368,11 +377,12 @@ class TestActivity : BaseActivity(), TestFragmentHolder {
 
             viewModel.setFragmentClass(testFragment)
 
-            title = getString(testType.toName())
+            viewModel.setTitle(getString(testType.toName()))
         }
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TestScreen(
     testFragment: Class<out Fragment>?,
@@ -381,78 +391,102 @@ fun TestScreen(
     correctCount: Int,
     questionCount: Int,
     historyState: HistoryState,
-    sheetState: Int,
-    onSheetStateChange: (Int) -> Unit,
+    sheetExpanded: Boolean,
+    onSheetExpandedChange: (Boolean) -> Unit,
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(
+    val themeAttrs = LocalThemeAttributes.current
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    // Synchronize sheet state with UI state
+    LaunchedEffect(sheetExpanded) {
+        if (sheetExpanded && scaffoldState.bottomSheetState.isCollapsed) {
+            scaffoldState.bottomSheetState.expand()
+        } else if (!sheetExpanded && scaffoldState.bottomSheetState.isExpanded) {
+            scaffoldState.bottomSheetState.collapse()
+        }
+    }
+
+    // Listen to sheet state changes from user gestures
+    LaunchedEffect(scaffoldState.bottomSheetState.isExpanded) {
+        onSheetExpandedChange(scaffoldState.bottomSheetState.isExpanded)
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetContent = {
+            HistoryBottomSheet(
+                items = historyState.items,
+                kanaWords = kanaWords,
+                onItemClick = onItemClick
+            )
+        },
+        sheetPeekHeight = 0.dp,
+        sheetBackgroundColor = themeAttrs.historyBackground,
+        floatingActionButton = {
+            if (!sheetExpanded && historyState.items.isNotEmpty()) {
+                FloatingActionButton(
+                    onClick = { onSheetExpandedChange(true) },
                     modifier = Modifier
-                        .fillMaxSize()
+                        .offset(x = 10.dp, y = 10.dp)
+                        .size(40.dp),
                 ) {
-                    StatsBar(itemsDontKnow = 0, itemsBad = stats.bad, itemsMeh = stats.meh, itemsGood = stats.good)
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_upward),
+                        contentDescription = "Show history",
+                        tint = MaterialTheme.colors.onPrimary
+                    )
+                }
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End,
+        modifier = modifier
+    ) {
+        Surface(
+            color = MaterialTheme.colors.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                StatsBar(itemsDontKnow = 0, itemsBad = stats.bad, itemsMeh = stats.meh, itemsGood = stats.good)
 
-                    Text(
-                        text = LocalContext.current.getString(
-                            R.string.score_string,
-                            correctCount,
-                            questionCount
-                        ),
+                Text(
+                    text = LocalContext.current.getString(
+                        R.string.score_string,
+                        correctCount,
+                        questionCount
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.body2,
+                    textAlign = TextAlign.Center
+                )
+
+                if (testFragment != null) {
+                    AndroidFragment(
+                        testFragment,
                         modifier = Modifier
+                            .weight(1f)
                             .fillMaxWidth(),
-                        style = MaterialTheme.typography.body2,
-                        textAlign = TextAlign.Center
+                        onUpdate = onFragmentUpdated,
                     )
-
-                    if (testFragment != null) {
-                        AndroidFragment(
-                            testFragment,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            onUpdate = onFragmentUpdated,
-                        )
-                    } else {
-                        Spacer(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                        )
-                    }
-
-                    LastItemRow(
-                        lastCorrect = historyState.lastCorrect,
-                        lastWrong = historyState.lastWrong,
-                        lastProbabilityData = historyState.lastProbabilityData,
-                        kanaWords = kanaWords,
-                        onItemClick = onItemClick
-                    )
-                }
-
-                if (sheetState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    FloatingActionButton(
-                        onClick = { onSheetStateChange(BottomSheetBehavior.STATE_EXPANDED) },
+                } else {
+                    Spacer(
                         modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(6.dp)
-                            .size(40.dp),
-                        backgroundColor = MaterialTheme.colors.primary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_arrow_upward),
-                            contentDescription = "Show history",
-                            tint = MaterialTheme.colors.onPrimary
-                        )
-                    }
+                            .weight(1f)
+                            .fillMaxWidth()
+                    )
                 }
 
-                HistoryBottomSheet(
-                    items = historyState.items,
-                    sheetState = sheetState,
-                    onStateChange = onSheetStateChange,
+                LastItemRow(
+                    lastCorrect = historyState.lastCorrect,
+                    lastWrong = historyState.lastWrong,
+                    lastProbabilityData = historyState.lastProbabilityData,
                     kanaWords = kanaWords,
                     onItemClick = onItemClick
                 )
@@ -515,44 +549,26 @@ private fun LastItemRow(
 @Composable
 private fun HistoryBottomSheet(
     items: List<HistoryItem>,
-    sheetState: Int,
-    onStateChange: (Int) -> Unit,
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
 ) {
     val themeAttrs = LocalThemeAttributes.current
 
-    ModalBottomSheetLayout(
-        sheetState = rememberModalBottomSheetState(
-            initialValue = if (sheetState == BottomSheetBehavior.STATE_EXPANDED)
-                ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
-            confirmValueChange = {
-                onStateChange(
-                    if (it == ModalBottomSheetValue.Expanded)
-                        BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
-                )
-                true
-            }
-        ),
-        sheetContent = {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(themeAttrs.historyBackground)
-            ) {
-                items(items) { historyItem ->
-                    if (historyItem.prependSeparator)
-                        Separator()
-                    HistoryItemRow(
-                        historyItem = historyItem,
-                        kanaWords = kanaWords,
-                        onItemClick = onItemClick
-                    )
-                }
-            }
-        },
-        sheetBackgroundColor = themeAttrs.historyBackground
-    ) { }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(themeAttrs.historyBackground)
+    ) {
+        items(items) { historyItem ->
+            if (historyItem.prependSeparator)
+                Separator()
+            HistoryItemRow(
+                historyItem = historyItem,
+                kanaWords = kanaWords,
+                onItemClick = onItemClick
+            )
+        }
+    }
 }
 
 @Composable
@@ -613,7 +629,7 @@ private fun ItemButton(
                 modifier = Modifier
                     .size(10.dp)
                     .align(Alignment.BottomEnd),
-                tint = MaterialTheme.colors.secondary
+                tint = MaterialTheme.colors.primary
             )
         }
 
@@ -660,8 +676,8 @@ fun TestScreenPreviewCollapsed() {
             correctCount = 10,
             questionCount = 15,
             historyState = sampleHistoryState,
-            sheetState = BottomSheetBehavior.STATE_HIDDEN,
-            onSheetStateChange = {},
+            sheetExpanded = false,
+            onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
             stats = LearningDbView.Stats(
@@ -734,8 +750,8 @@ fun TestScreenPreviewWrong() {
             correctCount = 10,
             questionCount = 15,
             historyState = sampleHistoryState,
-            sheetState = BottomSheetBehavior.STATE_COLLAPSED,
-            onSheetStateChange = {},
+            sheetExpanded = false,
+            onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
             stats = LearningDbView.Stats(
@@ -808,8 +824,8 @@ fun TestScreenPreviewWrongHistory() {
             correctCount = 10,
             questionCount = 15,
             historyState = sampleHistoryState,
-            sheetState = BottomSheetBehavior.STATE_EXPANDED,
-            onSheetStateChange = {},
+            sheetExpanded = true,
+            onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
             stats = LearningDbView.Stats(
