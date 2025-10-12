@@ -61,8 +61,6 @@ import org.kaqui.model.Certainty
 import org.kaqui.model.Kana
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
-import org.kaqui.model.text
-import org.kaqui.showItemProbabilityData
 import java.util.Locale as JavaLocale
 
 data class TextTestUiState(

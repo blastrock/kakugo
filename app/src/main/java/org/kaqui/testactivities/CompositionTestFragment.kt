@@ -4,10 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -58,7 +55,6 @@ import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
 import org.kaqui.getColorFromAttr
 import org.kaqui.model.Certainty
-import org.kaqui.model.Item
 import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerText

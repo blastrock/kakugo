@@ -56,7 +56,6 @@ data class ItemSelectionUiState(
     val title: String = "",
     val items: List<ItemData> = emptyList(),
     val stats: LearningDbView.Stats = LearningDbView.Stats(0, 0, 0, 0),
-    val kanaWords: Boolean = true
 )
 
 class ItemSelectionViewModel : ViewModel() {
@@ -71,7 +70,6 @@ class ItemSelectionViewModel : ViewModel() {
         this.kanaWords = kanaWords
         uiState = uiState.copy(
             mode = mode,
-            kanaWords = kanaWords
         )
         loadItems()
     }
@@ -239,7 +237,6 @@ fun ItemSelectionScreen(
                     ItemListWithStats(
                         items = uiState.items,
                         stats = uiState.stats,
-                        kanaWords = uiState.kanaWords,
                         onItemEnabledChange = onItemEnabledChange
                     )
                 }
@@ -252,7 +249,6 @@ fun ItemSelectionScreen(
 fun ItemListWithStats(
     items: List<ItemData>,
     stats: LearningDbView.Stats,
-    kanaWords: Boolean,
     onItemEnabledChange: (Int, Boolean) -> Unit
 ) {
     Column(
@@ -276,7 +272,6 @@ fun ItemListWithStats(
             ) { itemData ->
                 ItemRow(
                     itemData = itemData,
-                    kanaWords = kanaWords,
                     onEnabledChange = onItemEnabledChange
                 )
                 Separator()
@@ -288,7 +283,6 @@ fun ItemListWithStats(
 @Composable
 fun ItemRow(
     itemData: ItemData,
-    kanaWords: Boolean,
     onEnabledChange: (Int, Boolean) -> Unit
 ) {
     val context = LocalContext.current
@@ -364,7 +358,6 @@ fun PreviewItemSelectionScreenKanji() {
             good = 2,
             disabled = 6
         ),
-        kanaWords = true
     )
 
     KakugoTheme {

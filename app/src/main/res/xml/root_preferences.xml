@@ -45,20 +45,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_cat_behavior">
-        <SwitchPreference
+        <SwitchPreferenceCompat
             app:key="single_button_mode"
             app:summaryOff="@string/single_button_off_summary"
             app:summaryOn="@string/single_button_on_summary"
             app:title="@string/single_button_mode" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             app:key="hide_answers"
             app:summaryOff="@string/hide_answers_off_summary"
             app:summaryOn="@string/hide_answers_on_summary"
             app:title="@string/hide_answers"
             app:defaultValue="true" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             app:key="kana_words"
             app:summaryOff="@string/kana_words_off_summary"
             app:summaryOn="@string/kana_words_on_summary"

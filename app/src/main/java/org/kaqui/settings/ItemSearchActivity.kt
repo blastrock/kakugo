@@ -27,7 +27,6 @@ import org.kaqui.model.text
 import org.kaqui.model.description
 
 data class ItemSearchUiState(
-    val mode: SelectionMode = SelectionMode.HIRAGANA,
     val searchQuery: String = "",
     val items: List<ItemData> = emptyList(),
     val stats: LearningDbView.Stats = LearningDbView.Stats(0, 0, 0, 0),
@@ -40,14 +39,12 @@ class ItemSearchViewModel : ViewModel() {
 
     private lateinit var dbView: LearningDbView
     private var kanaWords: Boolean = true
+    private lateinit var mode: SelectionMode
 
     fun initialize(dbView: LearningDbView, mode: SelectionMode, kanaWords: Boolean) {
         this.dbView = dbView
         this.kanaWords = kanaWords
-        uiState = uiState.copy(
-            mode = mode,
-            kanaWords = kanaWords
-        )
+        this.mode = mode
     }
 
     fun onSearchQueryChange(query: String) {
@@ -128,6 +125,7 @@ class ItemSearchActivity : ComponentActivity() {
 
             ItemSearchScreen(
                 uiState = uiState,
+                mode = mode,
                 onBackClick = { finish() },
                 onSearchQueryChange = viewModel::onSearchQueryChange,
                 onItemEnabledChange = viewModel::onItemEnabledChange
@@ -139,6 +137,7 @@ class ItemSearchActivity : ComponentActivity() {
 @Composable
 fun ItemSearchScreen(
     uiState: ItemSearchUiState,
+    mode: SelectionMode,
     onBackClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onItemEnabledChange: (Int, Boolean) -> Unit
@@ -168,7 +167,7 @@ fun ItemSearchScreen(
                                 onValueChange = onSearchQueryChange,
                                 placeholder = {
                                     Text(
-                                        text = when (uiState.mode) {
+                                        text = when (mode) {
                                             SelectionMode.KANJI -> "Search kanji"
                                             SelectionMode.WORD -> "Search words"
                                             else -> "Search"
@@ -214,7 +213,6 @@ fun ItemSearchScreen(
                     ItemListWithStats(
                         items = uiState.items,
                         stats = uiState.stats,
-                        kanaWords = uiState.kanaWords,
                         onItemEnabledChange = onItemEnabledChange
                     )
                 }
@@ -227,7 +225,6 @@ fun ItemSearchScreen(
 @Composable
 fun PreviewItemSearchEmpty() {
     val emptyUiState = ItemSearchUiState(
-        mode = SelectionMode.KANJI,
         searchQuery = "",
         items = emptyList(),
         stats = LearningDbView.Stats(1, 2, 3, 4),
@@ -237,6 +234,7 @@ fun PreviewItemSearchEmpty() {
     KakugoTheme {
         ItemSearchScreen(
             uiState = emptyUiState,
+            mode = SelectionMode.KANJI,
             onBackClick = { },
             onSearchQueryChange = { },
             onItemEnabledChange = { _, _ -> }
@@ -256,7 +254,6 @@ fun PreviewItemSearchKanjiResults() {
     )
 
     val searchUiState = ItemSearchUiState(
-        mode = SelectionMode.KANJI,
         searchQuery = "五行",
         items = sampleItems,
         stats = LearningDbView.Stats(
@@ -271,6 +268,7 @@ fun PreviewItemSearchKanjiResults() {
     KakugoTheme {
         ItemSearchScreen(
             uiState = searchUiState,
+            mode = SelectionMode.KANJI,
             onBackClick = { },
             onSearchQueryChange = { },
             onItemEnabledChange = { _, _ -> }
@@ -290,7 +288,6 @@ fun PreviewItemSearchWordResults() {
     )
 
     val searchUiState = ItemSearchUiState(
-        mode = SelectionMode.WORD,
         searchQuery = "greeting",
         items = sampleWords,
         stats = LearningDbView.Stats(
@@ -305,6 +302,7 @@ fun PreviewItemSearchWordResults() {
     KakugoTheme {
         ItemSearchScreen(
             uiState = searchUiState,
+            mode = SelectionMode.WORD,
             onBackClick = { },
             onSearchQueryChange = { },
             onItemEnabledChange = { _, _ -> }
