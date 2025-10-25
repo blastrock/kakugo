@@ -52,6 +52,7 @@ import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
+import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Certainty
 import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
@@ -246,7 +247,20 @@ class CompositionTestFragmentCompose : Fragment(), TestFragment {
                     onToggleAnswer = viewModel::onToggleAnswer,
                     onDoneClicked = viewModel::onDoneClicked,
                     onDontKnowClicked = viewModel::onDontKnowClicked,
-                    onNextClicked = viewModel::onNextClicked
+                    onNextClicked = viewModel::onNextClicked,
+                    onQuestionLongClick = {
+                        testFragmentHolderRef.testEngine.currentDebugData?.let { data ->
+                            showItemProbabilityData(
+                                requireContext(),
+                                testFragmentHolderRef.testEngine.currentQuestion.getQuestionText(
+                                    testFragmentHolderRef.testType,
+                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
+                                        .getBoolean("kana_words", true)
+                                ),
+                                data
+                            )
+                        }
+                    }
                 )
             }
         }
@@ -274,7 +288,8 @@ fun CompositionTestScreenContent(
     onToggleAnswer: (Int) -> Unit,
     onDoneClicked: () -> Unit,
     onDontKnowClicked: () -> Unit,
-    onNextClicked: () -> Unit
+    onNextClicked: () -> Unit,
+    onQuestionLongClick: (() -> Unit)? = null
 ) {
     val questionMinSize = 10
     val themeColors = LocalThemeAttributes.current
@@ -288,7 +303,8 @@ fun CompositionTestScreenContent(
         ) {
             TestQuestionLayoutCompose(
                 question = uiState.questionText,
-                questionMinSizeSp = questionMinSize
+                questionMinSizeSp = questionMinSize,
+                onQuestionLongClick = onQuestionLongClick
             ) {
                 Column(
                     modifier = Modifier

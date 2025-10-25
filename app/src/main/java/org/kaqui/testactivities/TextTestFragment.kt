@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.model.Certainty
+import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Kana
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
@@ -230,7 +231,20 @@ class TextTestFragmentCompose : Fragment(), TestFragment {
                     uiState = uiState,
                     onUserInputChanged = viewModel::onUserInputChanged,
                     onAnswerSubmitted = viewModel::onAnswerSubmitted,
-                    onNextClicked = viewModel::onNextClicked
+                    onNextClicked = viewModel::onNextClicked,
+                    onQuestionLongClick = {
+                        testFragmentHolderRef.testEngine.currentDebugData?.let { data ->
+                            showItemProbabilityData(
+                                requireContext(),
+                                testFragmentHolderRef.testEngine.currentQuestion.getQuestionText(
+                                    testFragmentHolderRef.testType,
+                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
+                                        .getBoolean("kana_words", true)
+                                ),
+                                data
+                            )
+                        }
+                    }
                 )
             }
         }
@@ -255,7 +269,8 @@ fun TextTestScreenContent(
     uiState: TextTestUiState,
     onUserInputChanged: (String) -> Unit,
     onAnswerSubmitted: (Certainty) -> Unit,
-    onNextClicked: () -> Unit
+    onNextClicked: () -> Unit,
+    onQuestionLongClick: (() -> Unit)? = null
 ) {
     val questionMinSize = 30
     val focusRequester = remember { FocusRequester() }
@@ -275,7 +290,8 @@ fun TextTestScreenContent(
         TestQuestionLayoutCompose(
             question = uiState.questionText,
             questionMinSizeSp = questionMinSize,
-            forceLandscape = true
+            forceLandscape = true,
+            onQuestionLongClick = onQuestionLongClick
         ) {
             Column(
                 modifier = Modifier

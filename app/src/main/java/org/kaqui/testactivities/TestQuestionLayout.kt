@@ -27,6 +27,7 @@ fun TestQuestionLayoutCompose(
     question: String,
     questionMinSizeSp: Int,
     forceLandscape: Boolean = false,
+    onQuestionLongClick: (() -> Unit)? = null,
     answersBlock: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = LocalConfiguration.current
@@ -54,6 +55,12 @@ fun TestQuestionLayoutCompose(
                         )
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                         gravity = Gravity.CENTER
+                        onQuestionLongClick?.let { callback ->
+                            setOnLongClickListener {
+                                callback()
+                                true
+                            }
+                        }
                     }
                 },
                 update = { view ->
@@ -109,6 +116,12 @@ fun TestQuestionLayoutCompose(
                         )
                         textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                         gravity = Gravity.CENTER
+                        onQuestionLongClick?.let { callback ->
+                            setOnLongClickListener {
+                                callback()
+                                true
+                            }
+                        }
                     }
                 },
                 update = { view ->

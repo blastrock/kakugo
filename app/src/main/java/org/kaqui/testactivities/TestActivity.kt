@@ -65,11 +65,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.kaqui.BetterButton
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
 import org.kaqui.TestEngine
 import org.kaqui.TopBar
+import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.Item
@@ -657,6 +659,7 @@ private fun ItemButton(
         HistoryItemStyle.BAD -> themeAttrs.itemBad
         HistoryItemStyle.DONT_KNOW -> themeAttrs.backgroundDontKnow
     }
+    val context = LocalContext.current
 
     Box(
         modifier = modifier
@@ -673,9 +676,13 @@ private fun ItemButton(
         }
 
         CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-            Button(
+            BetterButton(
                 onClick = { if (showInfo) onClick() },
-                shape = CircleShape,
+                onLongPress = {
+                    probabilityData?.let {
+                        showItemProbabilityData(context, item.text(kanaWords), it)
+                    }
+                },
                 modifier = Modifier
                     .then(
                         if (item.text(kanaWords).length > 1)
@@ -687,6 +694,7 @@ private fun ItemButton(
                     backgroundColor = backgroundColor
                 ),
                 contentPadding = PaddingValues(0.dp),
+                shape = CircleShape,
             ) {
                 Text(
                     text = item.text(kanaWords),

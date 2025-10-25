@@ -35,8 +35,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -304,10 +307,13 @@ fun BetterButton(
     enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    shape: Shape = MaterialTheme.shapes.small,
     content: @Composable RowScope.() -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val viewConfiguration = LocalViewConfiguration.current
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
 
     LaunchedEffect(interactionSource) {
         var isLongClick = false
@@ -318,12 +324,12 @@ fun BetterButton(
                     isLongClick = false
                     delay(viewConfiguration.longPressTimeoutMillis)
                     isLongClick = true
-                    onLongPress()
+                    currentOnLongPress()
                 }
 
                 is PressInteraction.Release -> {
                     if (isLongClick.not()) {
-                        onClick()
+                        currentOnClick()
                     }
                 }
             }
@@ -338,5 +344,6 @@ fun BetterButton(
         content = content,
         colors = colors,
         contentPadding = contentPadding,
+        shape = shape,
     )
 }

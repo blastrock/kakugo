@@ -450,6 +450,7 @@ fun DrawingTestScreen(
         TestQuestionLayoutCompose(
             question = questionText,
             questionMinSizeSp = 10,
+            onQuestionLongClick = onQuestionLongClick,
         ) {
                 AndroidView(
                     factory = { context -> DrawView(context) },

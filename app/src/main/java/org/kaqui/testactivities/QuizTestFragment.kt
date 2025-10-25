@@ -58,6 +58,7 @@ import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
+import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Certainty
 import org.kaqui.model.Item
 import org.kaqui.model.TestType
@@ -254,6 +255,19 @@ class QuizTestFragmentCompose : Fragment(), TestFragment {
                     onNextClicked = viewModel::onNextClicked,
                     onAnswerSelected = viewModel::onAnswerSelected,
                     onShowAnswersClicked = viewModel::onShowAnswersClicked,
+                    onQuestionLongClick = {
+                        testFragmentHolderRef.testEngine.currentDebugData?.let { data ->
+                            showItemProbabilityData(
+                                requireContext(),
+                                testFragmentHolderRef.testEngine.currentQuestion.getQuestionText(
+                                    testFragmentHolderRef.testType,
+                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
+                                        .getBoolean("kana_words", true)
+                                ),
+                                data
+                            )
+                        }
+                    }
                 )
             }
         }
@@ -280,7 +294,8 @@ fun QuizTestScreenContent(
     uiState: QuizScreenUiState,
     onNextClicked: () -> Unit,
     onAnswerSelected: (answerIndex: Int, certainty: Certainty) -> Unit,
-    onShowAnswersClicked: () -> Unit
+    onShowAnswersClicked: () -> Unit,
+    onQuestionLongClick: (() -> Unit)? = null
 ) {
     val singleButtonMode = uiState.singleButtonMode
     val initialHideAnswers = uiState.initialHideAnswers
@@ -304,7 +319,8 @@ fun QuizTestScreenContent(
         ) {
             TestQuestionLayoutCompose(
                 question = uiState.questionText,
-                questionMinSizeSp = questionMinSize
+                questionMinSizeSp = questionMinSize,
+                onQuestionLongClick = onQuestionLongClick
             ) {
                 if (initialHideAnswers && !answersCurrentlyVisible && !uiState.isAnswerGiven) {
                     Button(
