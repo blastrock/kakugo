@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
@@ -71,7 +70,6 @@ import org.kaqui.Separator
 import org.kaqui.StatsBar
 import org.kaqui.TestEngine
 import org.kaqui.TopBar
-import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.Item
@@ -81,6 +79,7 @@ import org.kaqui.model.TestType
 import org.kaqui.model.Word
 import org.kaqui.model.description
 import org.kaqui.model.text
+import org.kaqui.showItemProbabilityData
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.toName

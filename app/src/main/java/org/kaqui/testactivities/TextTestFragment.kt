@@ -55,10 +55,10 @@ import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.model.Certainty
-import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Kana
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
+import org.kaqui.showItemProbabilityData
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import java.util.Locale as JavaLocale

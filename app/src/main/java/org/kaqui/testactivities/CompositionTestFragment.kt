@@ -52,12 +52,12 @@ import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
-import org.kaqui.showItemProbabilityData
 import org.kaqui.model.Certainty
 import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerText
 import org.kaqui.model.getQuestionText
+import org.kaqui.showItemProbabilityData
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 
