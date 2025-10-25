@@ -65,8 +65,9 @@ data class ItemData(
 data class ItemSelectionUiState(
     val mode: SelectionMode = SelectionMode.HIRAGANA,
     val title: String = "",
-    val items: List<ItemData> = emptyList(),
+    val itemIds: List<Int> = emptyList(),
     val stats: LearningDbView.Stats = LearningDbView.Stats(0, 0, 0, 0),
+    val cacheVersion: Int = 0,
 )
 
 class ItemSelectionViewModel : ViewModel() {
@@ -75,6 +76,20 @@ class ItemSelectionViewModel : ViewModel() {
 
     private lateinit var dbView: LearningDbView
     private var kanaWords: Boolean = true
+    private val itemCache = mutableMapOf<Int, ItemData>()
+
+    fun getItemData(id: Int): ItemData {
+        return itemCache.getOrPut(id) {
+            val item = dbView.getItem(id)
+            ItemData(
+                id = item.id,
+                text = item.text(kanaWords),
+                description = item.description,
+                enabled = item.enabled,
+                shortScore = item.shortScore
+            )
+        }
+    }
 
     fun initialize(dbView: LearningDbView, mode: SelectionMode, kanaWords: Boolean) {
         this.dbView = dbView
@@ -87,48 +102,42 @@ class ItemSelectionViewModel : ViewModel() {
 
     private fun loadItems() {
         val itemIds = dbView.getAllItems()
-        val items = itemIds.map { id ->
-            val item = dbView.getItem(id)
-            ItemData(
-                id = item.id,
-                text = item.text(kanaWords),
-                description = item.description,
-                enabled = item.enabled,
-                shortScore = item.shortScore
-            )
-        }
         val stats = dbView.getStats()
 
         uiState = uiState.copy(
-            items = items,
+            itemIds = itemIds,
             stats = stats
         )
     }
 
     fun onItemEnabledChange(itemId: Int, enabled: Boolean) {
         dbView.setItemEnabled(itemId, enabled)
-        // Update local state
+        // Invalidate cache for this item
+        itemCache.remove(itemId)
+        // Update stats
         uiState = uiState.copy(
-            items = uiState.items.map {
-                if (it.id == itemId) it.copy(enabled = enabled) else it
-            },
-            stats = dbView.getStats()
+            stats = dbView.getStats(),
+            cacheVersion = uiState.cacheVersion + 1
         )
     }
 
     fun selectAll() {
         dbView.setAllEnabled(true)
+        // Clear cache since all items changed
+        itemCache.clear()
         uiState = uiState.copy(
-            items = uiState.items.map { it.copy(enabled = true) },
-            stats = dbView.getStats()
+            stats = dbView.getStats(),
+            cacheVersion = uiState.cacheVersion + 1
         )
     }
 
     fun selectNone() {
         dbView.setAllEnabled(false)
+        // Clear cache since all items changed
+        itemCache.clear()
         uiState = uiState.copy(
-            items = uiState.items.map { it.copy(enabled = false) },
-            stats = dbView.getStats()
+            stats = dbView.getStats(),
+            cacheVersion = uiState.cacheVersion + 1
         )
     }
 }
@@ -174,6 +183,7 @@ class ItemSelectionActivity : ComponentActivity() {
 
             ItemSelectionScreen(
                 uiState = uiState,
+                getItemData = viewModel::getItemData,
                 onBackClick = { finish() },
                 onItemEnabledChange = viewModel::onItemEnabledChange,
                 onSelectAll = viewModel::selectAll,
@@ -190,6 +200,7 @@ class ItemSelectionActivity : ComponentActivity() {
 @Composable
 fun ItemSelectionScreen(
     uiState: ItemSelectionUiState,
+    getItemData: (Int) -> ItemData,
     onBackClick: () -> Unit,
     onItemEnabledChange: (Int, Boolean) -> Unit,
     onSelectAll: () -> Unit,
@@ -246,8 +257,10 @@ fun ItemSelectionScreen(
                         .padding(paddingValues)
                 ) {
                     ItemListWithStats(
-                        items = uiState.items,
+                        itemIds = uiState.itemIds,
                         stats = uiState.stats,
+                        cacheVersion = uiState.cacheVersion,
+                        getItemData = getItemData,
                         onItemEnabledChange = onItemEnabledChange
                     )
                 }
@@ -258,14 +271,15 @@ fun ItemSelectionScreen(
 
 @Composable
 fun ItemListWithStats(
-    items: List<ItemData>,
+    itemIds: List<Int>,
     stats: LearningDbView.Stats,
+    cacheVersion: Int,
+    getItemData: (Int) -> ItemData,
     onItemEnabledChange: (Int, Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Stats bar
         StatsBar(
             itemsDontKnow = stats.disabled,
             itemsBad = stats.bad,
@@ -273,14 +287,14 @@ fun ItemListWithStats(
             itemsGood = stats.good
         )
 
-        // Items list
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
             items(
-                items = items,
-                key = { it.id }  // Stable keys for performance
-            ) { itemData ->
+                items = itemIds,
+                key = { it }  // Stable keys for performance
+            ) { id ->
+                val itemData = remember(id, cacheVersion) { getItemData(id) }
                 ItemRow(
                     itemData = itemData,
                     onEnabledChange = onItemEnabledChange
@@ -304,7 +318,6 @@ fun ItemRow(
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Checkbox
         Checkbox(
             checked = itemData.enabled,
             onCheckedChange = { checked ->
@@ -361,18 +374,22 @@ fun PreviewItemSelectionScreenKanji() {
 
     val sampleUiState = ItemSelectionUiState(
         mode = SelectionMode.KANJI,
-        items = sampleItems,
+        itemIds = sampleItems.map { it.id },
         stats = LearningDbView.Stats(
             bad = 1,
             meh = 1,
             good = 2,
             disabled = 6
         ),
+        cacheVersion = 0
     )
+
+    val sampleItemsMap = sampleItems.associateBy { it.id }
 
     KakugoTheme {
         ItemSelectionScreen(
             uiState = sampleUiState,
+            getItemData = { id -> sampleItemsMap[id]!! },
             onBackClick = { },
             onItemEnabledChange = { _, _ -> },
             onSelectAll = { },

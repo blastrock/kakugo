@@ -42,9 +42,10 @@ import org.kaqui.theme.KakugoTheme
 
 data class ItemSearchUiState(
     val searchQuery: String = "",
-    val items: List<ItemData> = emptyList(),
+    val itemIds: List<Int> = emptyList(),
     val stats: LearningDbView.Stats = LearningDbView.Stats(0, 0, 0, 0),
-    val kanaWords: Boolean = true
+    val kanaWords: Boolean = true,
+    val cacheVersion: Int = 0
 )
 
 class ItemSearchViewModel : ViewModel() {
@@ -54,11 +55,27 @@ class ItemSearchViewModel : ViewModel() {
     private lateinit var dbView: LearningDbView
     private var kanaWords: Boolean = true
     private lateinit var mode: SelectionMode
+    private val itemCache = mutableMapOf<Int, ItemData>()
+
+    fun getItemData(id: Int): ItemData {
+        return itemCache.getOrPut(id) {
+            val item = dbView.getItem(id)
+            ItemData(
+                id = item.id,
+                text = item.text(kanaWords),
+                description = item.description,
+                enabled = item.enabled,
+                shortScore = item.shortScore
+            )
+        }
+    }
 
     fun initialize(dbView: LearningDbView, mode: SelectionMode, kanaWords: Boolean) {
         this.dbView = dbView
         this.kanaWords = kanaWords
         this.mode = mode
+
+        uiState = uiState.copy(stats = dbView.getStats())
     }
 
     fun onSearchQueryChange(query: String) {
@@ -70,40 +87,27 @@ class ItemSearchViewModel : ViewModel() {
         } else {
             // Clear results when query is empty
             uiState = uiState.copy(
-                items = emptyList(),
-                stats = LearningDbView.Stats(0, 0, 0, 0)
+                itemIds = emptyList(),
             )
         }
     }
 
     private fun searchItems(query: String) {
         val itemIds = dbView.search(query)
-        val items = itemIds.map { id ->
-            val item = dbView.getItem(id)
-            ItemData(
-                id = item.id,
-                text = item.text(kanaWords),
-                description = item.description,
-                enabled = item.enabled,
-                shortScore = item.shortScore
-            )
-        }
-        val stats = dbView.getStats()
 
         uiState = uiState.copy(
-            items = items,
-            stats = stats
+            itemIds = itemIds,
         )
     }
 
     fun onItemEnabledChange(itemId: Int, enabled: Boolean) {
         dbView.setItemEnabled(itemId, enabled)
-        // Update local state
+        // Invalidate cache for this item
+        itemCache.remove(itemId)
+        // Update stats
         uiState = uiState.copy(
-            items = uiState.items.map {
-                if (it.id == itemId) it.copy(enabled = enabled) else it
-            },
-            stats = dbView.getStats()
+            stats = dbView.getStats(),
+            cacheVersion = uiState.cacheVersion + 1
         )
     }
 }
@@ -140,6 +144,7 @@ class ItemSearchActivity : ComponentActivity() {
             ItemSearchScreen(
                 uiState = uiState,
                 mode = mode,
+                getItemData = viewModel::getItemData,
                 onBackClick = { finish() },
                 onSearchQueryChange = viewModel::onSearchQueryChange,
                 onItemEnabledChange = viewModel::onItemEnabledChange
@@ -152,6 +157,7 @@ class ItemSearchActivity : ComponentActivity() {
 fun ItemSearchScreen(
     uiState: ItemSearchUiState,
     mode: SelectionMode,
+    getItemData: (Int) -> ItemData,
     onBackClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onItemEnabledChange: (Int, Boolean) -> Unit
@@ -225,8 +231,10 @@ fun ItemSearchScreen(
                         .padding(paddingValues)
                 ) {
                     ItemListWithStats(
-                        items = uiState.items,
+                        itemIds = uiState.itemIds,
                         stats = uiState.stats,
+                        cacheVersion = uiState.cacheVersion,
+                        getItemData = getItemData,
                         onItemEnabledChange = onItemEnabledChange
                     )
                 }
@@ -240,15 +248,17 @@ fun ItemSearchScreen(
 fun PreviewItemSearchEmpty() {
     val emptyUiState = ItemSearchUiState(
         searchQuery = "",
-        items = emptyList(),
+        itemIds = emptyList(),
         stats = LearningDbView.Stats(1, 2, 3, 4),
-        kanaWords = true
+        kanaWords = true,
+        cacheVersion = 0
     )
 
     KakugoTheme {
         ItemSearchScreen(
             uiState = emptyUiState,
             mode = SelectionMode.KANJI,
+            getItemData = { ItemData(it, "", "", false, 0.0) },
             onBackClick = { },
             onSearchQueryChange = { },
             onItemEnabledChange = { _, _ -> }
@@ -267,22 +277,26 @@ fun PreviewItemSearchKanjiResults() {
         ItemData(5, "土", "earth, soil", false, 0.3),
     )
 
+    val sampleItemsMap = sampleItems.associateBy { it.id }
+
     val searchUiState = ItemSearchUiState(
         searchQuery = "五行",
-        items = sampleItems,
+        itemIds = sampleItems.map { it.id },
         stats = LearningDbView.Stats(
             bad = 1,
             meh = 1,
             good = 3,
             disabled = 0
         ),
-        kanaWords = true
+        kanaWords = true,
+        cacheVersion = 0
     )
 
     KakugoTheme {
         ItemSearchScreen(
             uiState = searchUiState,
             mode = SelectionMode.KANJI,
+            getItemData = { id -> sampleItemsMap[id]!! },
             onBackClick = { },
             onSearchQueryChange = { },
             onItemEnabledChange = { _, _ -> }
@@ -301,22 +315,26 @@ fun PreviewItemSearchWordResults() {
         ItemData(5, "おはよう", "good morning", false, 0.2),
     )
 
+    val sampleWordsMap = sampleWords.associateBy { it.id }
+
     val searchUiState = ItemSearchUiState(
         searchQuery = "greeting",
-        items = sampleWords,
+        itemIds = sampleWords.map { it.id },
         stats = LearningDbView.Stats(
             bad = 1,
             meh = 1,
             good = 3,
             disabled = 0
         ),
-        kanaWords = true
+        kanaWords = true,
+        cacheVersion = 0
     )
 
     KakugoTheme {
         ItemSearchScreen(
             uiState = searchUiState,
             mode = SelectionMode.WORD,
+            getItemData = { id -> sampleWordsMap[id]!! },
             onBackClick = { },
             onSearchQueryChange = { },
             onItemEnabledChange = { _, _ -> }
