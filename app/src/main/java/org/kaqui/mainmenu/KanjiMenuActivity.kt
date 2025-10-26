@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,7 +67,8 @@ fun KanjiMenuScreen(onBackClick: () -> Unit = {}) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Column(
                         modifier = Modifier
@@ -88,7 +90,7 @@ fun KanjiMenuScreen(onBackClick: () -> Unit = {}) {
                         MenuButton(R.string.kanji_composition) { startTest(context,TestType.KANJI_COMPOSITION) }
                         MenuButton(R.string.kanji_drawing) { startTest(context,TestType.KANJI_DRAWING) }
                         MenuButton(R.string.custom_test) { startTest(context, listOf(TestType.KANJI_TO_READING, TestType.READING_TO_KANJI, TestType.KANJI_TO_MEANING, TestType.MEANING_TO_KANJI, TestType.KANJI_COMPOSITION, TestType.KANJI_DRAWING)) }
-                        Separator(modifier = Modifier.height(1.dp).padding(8.dp))
+                        Separator(modifier = Modifier.padding(4.dp))
                         val intent = Intent(context, ClassSelectionActivity::class.java).putExtra("mode", SelectionMode.KANJI as Serializable)
                         MenuButton(R.string.kanji_selection) { context.startActivity(intent) }
                     }

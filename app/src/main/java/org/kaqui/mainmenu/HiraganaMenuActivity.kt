@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.kaqui.AppTitleImage
 import org.kaqui.R
@@ -66,7 +68,8 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Column(
                         modifier = Modifier
@@ -85,7 +88,7 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
                         MenuButton(R.string.romaji_to_hiragana) { startTest(context, TestType.ROMAJI_TO_HIRAGANA) }
                         MenuButton(R.string.hiragana_to_romaji_typing) { startTest(context, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
                         MenuButton(R.string.hiragana_drawing) { startTest(context, TestType.HIRAGANA_DRAWING) }
-                        Separator(modifier = Modifier.height(1.dp).padding(8.dp))
+                        Separator(modifier = Modifier.padding(4.dp))
                         val intent = Intent(context, ItemSelectionActivity::class.java).putExtra("mode", SelectionMode.HIRAGANA as Serializable)
                         MenuButton(R.string.hiragana_selection) { context.startActivity(intent) }
                     }
@@ -93,4 +96,10 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewHiraganaMenuScreen() {
+    HiraganaMenuScreen()
 }

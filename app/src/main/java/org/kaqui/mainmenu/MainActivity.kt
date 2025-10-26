@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
@@ -130,7 +133,8 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Column(
                         modifier = Modifier
@@ -173,13 +177,17 @@ fun MainScreen(
 
 @Composable
 fun MenuButton(textRes: Int, onClick: () -> Unit) {
+    val surfaceColor = MaterialTheme.colors.surface.toArgb()
+    val onSurfaceColor = MaterialTheme.colors.onSurface.toArgb()
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
+            .padding(8.dp),
         factory = { context ->
             android.widget.Button(context).apply {
                 this.setText(textRes)
+                this.setBackgroundColor(surfaceColor)
+                this.setTextColor(onSurfaceColor)
                 this.setOnClickListener { onClick() }
             }
         }
@@ -212,4 +220,32 @@ fun ErrorDialog(
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    MainScreen(
+        onDatabaseInitRequired = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoadingDialogPreview() {
+    KakugoTheme {
+        LoadingDialog()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ErrorDialogPreview() {
+    KakugoTheme {
+        ErrorDialog(
+            title = "Error",
+            message = "An error occurred while processing your request",
+            onDismiss = {}
+        )
+    }
 }

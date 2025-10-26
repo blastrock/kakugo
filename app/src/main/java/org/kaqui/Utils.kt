@@ -98,10 +98,10 @@ fun Separator(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier // Apply external modifier first
-            .fillMaxWidth()    // width = matchParent
-            .height(1.dp)      // height = dip(1)
-            .background(color = colorResource(id = R.color.separator)) // backgroundColor = ...
+        modifier = modifier
+            .height(1.dp)
+            .fillMaxWidth()
+            .background(color = colorResource(id = R.color.separator))
     )
 }
 

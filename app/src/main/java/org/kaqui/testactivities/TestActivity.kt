@@ -268,7 +268,6 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         kanaWords = sharedPrefs.getBoolean("kana_words", true)
-        val darkTheme = sharedPrefs.getBoolean("dark_theme", false)
 
         testEngine = TestEngine(
             this,
@@ -306,7 +305,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
-            KakugoTheme(darkTheme = darkTheme) {
+            KakugoTheme {
                 Scaffold(
                     topBar = {
                         TopBar(

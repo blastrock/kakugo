@@ -1,6 +1,7 @@
 package org.kaqui.testactivities
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.TextView
@@ -13,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -31,6 +34,7 @@ fun TestQuestionLayoutCompose(
     answersBlock: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = LocalConfiguration.current
+    val onBackgroundColor = MaterialTheme.colors.onBackground.toArgb()
 
     if (forceLandscape || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         Row(
@@ -61,6 +65,7 @@ fun TestQuestionLayoutCompose(
                                 true
                             }
                         }
+                        setTextColor(onBackgroundColor)
                     }
                 },
                 update = { view ->
@@ -122,6 +127,7 @@ fun TestQuestionLayoutCompose(
                                 true
                             }
                         }
+                        setTextColor(onBackgroundColor)
                     }
                 },
                 update = { view ->

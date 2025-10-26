@@ -20,13 +20,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -440,6 +441,7 @@ fun DrawingTestScreen(
     pathsForAnswer: List<Path>,
 ) {
     val themeColors = LocalThemeAttributes.current
+    val paintColor = MaterialTheme.colors.onBackground.toArgb()
 
     Column(
         modifier = Modifier
@@ -467,6 +469,8 @@ fun DrawingTestScreen(
                             view.setHint(hintPathForDrawView)
                         view.setStrokes(pathsToDraw)
                         view.setAnswerPaths(pathsForAnswer)
+                        view.paintColor = paintColor
+                        view.answerPaintColor = themeColors.drawingDontKnow.toArgb()
                     }
                 )
 
@@ -507,7 +511,7 @@ fun DrawingTestScreen(
                         onClick = onNextClick,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xd6, 0xd7, 0xd7),
+                            backgroundColor = themeColors.backgroundDontKnow,
                         ),
                     ) {
                         Text(stringResource(id = R.string.next).toUpperCase(Locale.current))

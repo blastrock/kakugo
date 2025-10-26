@@ -44,6 +44,20 @@ class DrawView(context: Context) : View(context) {
     var strokeCallback: ((Path) -> Unit)? = null
     var sizeChangedCallback: ((w: Int, h: Int) -> Unit)? = null
 
+    var paintColor: Int
+        get() = mPaint.color
+        set(value) {
+            mPaint.color = value
+            invalidate()
+        }
+
+    var answerPaintColor: Int
+        get() = mAnswerPaint.color
+        set(value) {
+            mAnswerPaint.color = value
+            invalidate()
+        }
+
     init {
         mPaint.apply {
             color = context.getColorFromAttr(android.R.attr.colorForeground)

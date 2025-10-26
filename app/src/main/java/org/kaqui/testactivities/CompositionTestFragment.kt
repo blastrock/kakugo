@@ -374,8 +374,8 @@ fun CompositionTestScreenContent(
                                 .fillMaxWidth()
                                 .padding(top = 8.dp),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color(0xd6, 0xd7, 0xd7)
-                            )
+                                backgroundColor = themeColors.backgroundDontKnow,
+                            ),
                         ) {
                             Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
                         }

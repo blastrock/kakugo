@@ -388,8 +388,8 @@ fun TextTestScreenContent(
                         onClick = onNextClicked,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xd6, 0xd7, 0xd7)
-                        )
+                            backgroundColor = themeColors.backgroundDontKnow,
+                        ),
                     ) {
                         Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
                     }
