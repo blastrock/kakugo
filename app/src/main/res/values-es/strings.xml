@@ -141,4 +141,11 @@
     <string name="stats_wrong_answers">Respuestas incorrectas</string>
 
     <string name="changelog">Lista de cambios</string>
+
+    <string name="search">Buscar</string>
+    <string name="more_options">Más opciones</string>
+    <string name="back">Atrás</string>
+    <string name="clear_search">Borrar búsqueda</string>
+    <string name="show_history">Mostrar historial</string>
+    <string name="info">Información</string>
 </resources>

@@ -278,13 +278,13 @@ fun ClassSelectionScreen(
                             IconButton(onClick = onSearchClick) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
-                                    contentDescription = "Search"
+                                    contentDescription = stringResource(R.string.search)
                                 )
                             }
                             IconButton(onClick = { onMenuToggle(true) }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More options"
+                                    contentDescription = stringResource(R.string.more_options)
                                 )
                             }
                             DropdownMenu(

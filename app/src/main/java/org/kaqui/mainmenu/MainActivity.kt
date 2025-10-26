@@ -126,7 +126,7 @@ fun MainScreen(
         Surface(color = MaterialTheme.colors.background) {
             Scaffold(
                 topBar = {
-                    TopBar(title = "Kakugo")
+                    TopBar(title = stringResource(R.string.app_name))
                 }
             ) { paddingValues ->
                 Column(

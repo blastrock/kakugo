@@ -30,10 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
+import org.kaqui.R
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
@@ -177,7 +179,7 @@ fun ItemSearchScreen(
                             IconButton(onClick = onBackClick) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
+                                    contentDescription = stringResource(R.string.back)
                                 )
                             }
                         },
@@ -187,11 +189,7 @@ fun ItemSearchScreen(
                                 onValueChange = onSearchQueryChange,
                                 placeholder = {
                                     Text(
-                                        text = when (mode) {
-                                            SelectionMode.KANJI -> "Search kanji"
-                                            SelectionMode.WORD -> "Search words"
-                                            else -> "Search"
-                                        }
+                                        text = stringResource(R.string.search)
                                     )
                                 },
                                 trailingIcon = {
@@ -199,7 +197,7 @@ fun ItemSearchScreen(
                                         IconButton(onClick = { onSearchQueryChange("") }) {
                                             Icon(
                                                 imageVector = Icons.Default.Clear,
-                                                contentDescription = "Clear search",
+                                                contentDescription = stringResource(R.string.clear_search),
                                                 tint = MaterialTheme.colors.onPrimary
                                             )
                                         }

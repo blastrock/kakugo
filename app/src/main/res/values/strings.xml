@@ -101,6 +101,12 @@
     <string name="katakana_title" translatable="false">Katakana</string>
     <string name="kanji_title" translatable="false">Kanji</string>
     <string name="word_title">Vocabulary</string>
+    <string name="search">Search</string>
+    <string name="more_options">More options</string>
+    <string name="back">Back</string>
+    <string name="clear_search">Clear search</string>
+    <string name="show_history">Show history</string>
+    <string name="info">Info</string>
 
     <string name="title_activity_main_settings">Settings</string>
     <string name="pref_cat_appearance">Appearance</string>

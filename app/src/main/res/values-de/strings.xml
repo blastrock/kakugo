@@ -114,4 +114,11 @@
     <string name="import_kanji_help">Diese Funktion erlaubt den Import einer Kanji-Auswahl aus einer Datei. Die Datei muss jeweils ein Kanji pro Zeile beinhalten. Die Kanji werden der aktuellen Auswahl hinzugefügt.</string>
     <string name="import_words_help">Diese Funktion erlaubt den Import einer Vokabel-Auswahl aus einer Datei. Die Datei muss jeweils eine Vokabel pro Zeile beinhalten. Die Vokabeln werden der aktuellen Auswahl hinzugefügt.</string>
     <string name="about_text"><![CDATA[         <p>Kakugo ist eine Japanisch Lern-App. Version %1$s (%2$d).</p>          <p>Sie ist quelloffen und verfügbar über <a href="https://github.com/blastrock/kakugo/">github</a> unter der GPLv3 Lizenz.</p>          <p>Das Kanji Wörterbuch basiert auf <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>         <p>Die deutsche Übersetzung der Kanji stammt von der <a href="https://www.kanjistudyapp.com/">Kanji Study App</a> von Chase Colburn.</p>         <p>Das Vokabel-Wörterbuch basiert auf <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>         <p>Die Kanji Ähnlichkeits-Datenbank stammt von <a href="http://lars.yencken.org/datasets/phd/">einer Studie von Dr. Lars Yencken</a>.</p>         <p>Die Kanji Aufbau- und Strichfolge-Datenbank stammt von <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>         <p>Die Daten für die JLPT Einteilung stammen von <a href="https://www.tanos.co.uk/jlpt/">Jonathan Waller</a>.</p>         <p>Die App Symbol-Schriftart ist <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>         <p>Die App Titel-Schriftart ist <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>          <p>Kakugo  Urheberrecht (Copyright) &#169; 2019  Philippe Daouadi</p>     ]]></string>
+
+    <string name="search">Suche</string>
+    <string name="more_options">Weitere Optionen</string>
+    <string name="back">Zurück</string>
+    <string name="clear_search">Suche löschen</string>
+    <string name="show_history">Verlauf anzeigen</string>
+    <string name="info">Info</string>
 </resources>

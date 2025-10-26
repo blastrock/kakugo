@@ -161,4 +161,10 @@
         <br/>- Ajout de plus de vocabulaire
         <br/>- Ajout de la fonctionalité d\'import/export de la base de données
     ]]></string>
+    <string name="search">Recherche</string>
+    <string name="more_options">Plus d\'options</string>
+    <string name="back">Retour</string>
+    <string name="clear_search">Effacer la recherche</string>
+    <string name="show_history">Afficher l\'historique</string>
+    <string name="info">Info</string>
 </resources>

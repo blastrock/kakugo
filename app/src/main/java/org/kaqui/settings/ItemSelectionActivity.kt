@@ -227,7 +227,7 @@ fun ItemSelectionScreen(
                             IconButton(onClick = { showMenu = true }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More options"
+                                    contentDescription = stringResource(R.string.more_options)
                                 )
                             }
                             DropdownMenu(
