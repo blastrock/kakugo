@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -269,6 +270,10 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         kanaWords = sharedPrefs.getBoolean("kana_words", true)
+
+        if (sharedPrefs.getBoolean("keep_on", false)) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
 
         testEngine = TestEngine(
             this,
