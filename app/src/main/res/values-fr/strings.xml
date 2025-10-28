@@ -141,7 +141,7 @@
         <p>La police de caractères de l\'icône de l\'application est <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
         <p>La police de caractères du titres de l\'application est <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
 
-        <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
+        <p>Kakugo  Copyright &#169; 2025  Philippe Daouadi</p>
     ]]></string>
 
     <string name="title_stats">Progrès</string>
@@ -152,14 +152,10 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.38</h3>
+        <h3>Nouveautés en 1.39</h3>
 
-        <br/>- Ajout d\'une option pour afficher les mots habituellement écrits en kana en kanji
-        <!-- -->
-        <br/>- Amélioration du SRS pour demander moins souvent les éléments connus
-        <br/>- Ajout de differentes traductions pour chaque mot
-        <br/>- Ajout de plus de vocabulaire
-        <br/>- Ajout de la fonctionalité d\'import/export de la base de données
+        <br/>Cette version n\'apporte pas de nouvelles fonctionnalités. C\'est une réécriture majeure de l\'application car la version précédente utilisait des composants Android dépréciés qui rendaient les mises à jour impossibles.
+        <br/>Je prévois d\'ajouter de nouvelles fonctionnalités maintenant que l\'application peut de nouveau être mise à jour. Reportez toute régression ou problème que vous rencontrerez avec cette version.
     ]]></string>
     <string name="search">Recherche</string>
     <string name="more_options">Plus d\'options</string>

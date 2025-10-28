@@ -169,7 +169,7 @@
         <p>The app icon font is <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
         <p>The app title font is <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
 
-        <p>Kakugo  Copyright &#169; 2019  Philippe Daouadi</p>
+        <p>Kakugo  Copyright &#169; 2025  Philippe Daouadi</p>
     ]]></string>
 
     <string name="title_stats">Progress</string>
@@ -180,13 +180,9 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.38?</h3>
+        <h3>What\'s new in 1.39?</h3>
 
-        <br/>- Add option to show words usually written in kana in kanji
-        <!-- -->
-        <br/>- Improved SRS to ask known items less often
-        <br/>- Added multiple translations for each vocabulary word
-        <br/>- Added more words
-        <br/>- Added import/export feature for the database
+        <br/>This version doesn\'t bring any new feature. It\'s a major rewrite of the UI because the previous implementation was using deprecated Android components which made new updates to the app impossible.
+        <br/>I\'m planning on adding new features now that the app can be updated again. Please report any regression or issue you may find with this version.
     ]]></string>
 </resources>
