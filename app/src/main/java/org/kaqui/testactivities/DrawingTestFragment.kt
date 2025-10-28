@@ -20,9 +20,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -376,38 +379,42 @@ class DrawingTestFragmentCompose : Fragment(), TestFragment {
                 val uiState by viewModel.uiState.collectAsState()
 
                 KakugoTheme {
-                    DrawingTestScreen(
-                    questionText = uiState.questionText,
-                    isFinished = uiState.isFinished,
-                    onSizeChanged = { w, h ->
-                        viewModel.setDrawViewWidth(w)
-                    },
-                    onHintClick = viewModel::onHintClicked,
-                    onDontKnowClick = {
-                        viewModel.onDontKnowClicked { /* No-op, handled by event */ }
-                    },
-                    onNextClick = {
-                        testFragmentHolder.nextQuestion()
-                    },
-                    onQuestionLongClick = {
-                        testFragmentHolder.testEngine.currentDebugData?.let { data ->
-                            showItemProbabilityData(
-                                requireContext(),
-                                testFragmentHolder.testEngine.currentQuestion.text(
-                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
-                                        .getBoolean("kana_words", true)
-                                ),
-                                data
-                            )
-                        }
-                    },
-                    onStrokeFinished = { path ->
-                        viewModel.onStrokeFinishedFromDrawView(path)
-                    },
-                    hintPathForDrawView = uiState.hintPathForDrawView,
-                    pathsToDraw = uiState.pathsToDraw, // Use new field
-                    pathsForAnswer = uiState.pathsForAnswer,
-                )
+                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                        DrawingTestScreen(
+                            questionText = uiState.questionText,
+                            isFinished = uiState.isFinished,
+                            onSizeChanged = { w, h ->
+                                viewModel.setDrawViewWidth(w)
+                            },
+                            onHintClick = viewModel::onHintClicked,
+                            onDontKnowClick = {
+                                viewModel.onDontKnowClicked { /* No-op, handled by event */ }
+                            },
+                            onNextClick = {
+                                testFragmentHolder.nextQuestion()
+                            },
+                            onQuestionLongClick = {
+                                testFragmentHolder.testEngine.currentDebugData?.let { data ->
+                                    showItemProbabilityData(
+                                        requireContext(),
+                                        testFragmentHolder.testEngine.currentQuestion.text(
+                                            PreferenceManager.getDefaultSharedPreferences(
+                                                requireContext()
+                                            )
+                                                .getBoolean("kana_words", true)
+                                        ),
+                                        data
+                                    )
+                                }
+                            },
+                            onStrokeFinished = { path ->
+                                viewModel.onStrokeFinishedFromDrawView(path)
+                            },
+                            hintPathForDrawView = uiState.hintPathForDrawView,
+                            pathsToDraw = uiState.pathsToDraw, // Use new field
+                            pathsForAnswer = uiState.pathsForAnswer,
+                        )
+                    }
                 }
             }
         }

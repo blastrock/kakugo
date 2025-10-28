@@ -15,7 +15,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -295,89 +297,92 @@ fun CompositionTestScreenContent(
     val themeColors = LocalThemeAttributes.current
 
     KakugoTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TestQuestionLayoutCompose(
-                question = uiState.questionText,
-                questionMinSizeSp = questionMinSize,
-                onQuestionLongClick = onQuestionLongClick
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                TestQuestionLayoutCompose(
+                    question = uiState.questionText,
+                    questionMinSizeSp = questionMinSize,
+                    onQuestionLongClick = onQuestionLongClick
                 ) {
-                    // Grid of toggle buttons (3x3)
-                    uiState.answerOptions.chunked(COMPOSITION_COLUMNS)
-                        .forEachIndexed { rowIndex, rowItems ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Grid of toggle buttons (3x3)
+                        uiState.answerOptions.chunked(COMPOSITION_COLUMNS)
+                            .forEachIndexed { rowIndex, rowItems ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    rowItems.forEachIndexed { columnIndex, answerText ->
+                                        val index = rowIndex * COMPOSITION_COLUMNS + columnIndex
+                                        val isSelected = index in uiState.selectedIndices
+                                        val validationState =
+                                            uiState.validationResults[index]
+                                                ?: ButtonValidationState.NONE
+
+                                        CompositionToggleButton(
+                                            text = answerText,
+                                            isSelected = isSelected,
+                                            validationState = validationState,
+                                            enabled = !uiState.isValidated,
+                                            onClick = { onToggleAnswer(index) },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                            }
+
+                        // Bottom buttons
+                        if (!uiState.showNextButton) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
+                                    .padding(top = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                rowItems.forEachIndexed { columnIndex, answerText ->
-                                    val index = rowIndex * COMPOSITION_COLUMNS + columnIndex
-                                    val isSelected = index in uiState.selectedIndices
-                                    val validationState =
-                                        uiState.validationResults[index] ?: ButtonValidationState.NONE
-
-                                    CompositionToggleButton(
-                                        text = answerText,
-                                        isSelected = isSelected,
-                                        validationState = validationState,
-                                        enabled = !uiState.isValidated,
-                                        onClick = { onToggleAnswer(index) },
-                                        modifier = Modifier.weight(1f)
+                                Button(
+                                    onClick = onDoneClicked,
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = themeColors.backgroundSure
                                     )
+                                ) {
+                                    Text(stringResource(id = R.string.answerDone).toUpperCase(Locale.current))
+                                }
+
+                                Button(
+                                    onClick = onDontKnowClicked,
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = themeColors.backgroundDontKnow
+                                    )
+                                ) {
+                                    Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
                                 }
                             }
-                        }
-
-                    // Bottom buttons
-                    if (!uiState.showNextButton) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
+                        } else {
                             Button(
-                                onClick = onDoneClicked,
-                                modifier = Modifier.weight(1f),
+                                onClick = onNextClicked,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = themeColors.backgroundSure
-                                )
+                                    backgroundColor = themeColors.backgroundDontKnow,
+                                ),
                             ) {
-                                Text(stringResource(id = R.string.answerDone).toUpperCase(Locale.current))
+                                Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
                             }
-
-                            Button(
-                                onClick = onDontKnowClicked,
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = themeColors.backgroundDontKnow
-                                )
-                            ) {
-                                Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
-                            }
-                        }
-                    } else {
-                        Button(
-                            onClick = onNextClicked,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = themeColors.backgroundDontKnow,
-                            ),
-                        ) {
-                            Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
                         }
                     }
                 }

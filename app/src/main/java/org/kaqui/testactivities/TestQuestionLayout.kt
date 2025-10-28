@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,7 +36,7 @@ fun TestQuestionLayoutCompose(
     answersBlock: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = LocalConfiguration.current
-    val onBackgroundColor = MaterialTheme.colors.onBackground.toArgb()
+    val onBackgroundColor = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current).toArgb()
 
     if (forceLandscape || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         Row(
@@ -43,7 +45,7 @@ fun TestQuestionLayoutCompose(
         ) {
             AndroidView(
                 modifier = Modifier
-                    .weight(0.4f)
+                    .weight(0.5f)
                     .fillMaxHeight()
                     .padding(bottom = 8.dp),
                 factory = { context ->
@@ -81,7 +83,7 @@ fun TestQuestionLayoutCompose(
 
             Column(
                 modifier = Modifier
-                    .weight(0.6f)
+                    .weight(0.5f)
                     .fillMaxHeight()
                     .let(answerHeightMod),
                 horizontalAlignment = Alignment.CenterHorizontally,

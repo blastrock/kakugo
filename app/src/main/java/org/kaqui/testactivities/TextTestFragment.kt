@@ -15,10 +15,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -287,111 +290,113 @@ fun TextTestScreenContent(
     }
 
     KakugoTheme {
-        TestQuestionLayoutCompose(
-            question = uiState.questionText,
-            questionMinSizeSp = questionMinSize,
-            forceLandscape = true,
-            onQuestionLongClick = onQuestionLongClick
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState())
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            TestQuestionLayoutCompose(
+                question = uiState.questionText,
+                questionMinSizeSp = questionMinSize,
+                forceLandscape = true,
+                onQuestionLongClick = onQuestionLongClick
             ) {
-                // Answer input field (always shown to keep keyboard open)
-                OutlinedTextField(
-                    value = uiState.userInputText,
-                    onValueChange = onUserInputChanged,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .focusRequester(focusRequester),
-                    textStyle = androidx.compose.ui.text.TextStyle(
-                        textAlign = TextAlign.Center
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Ascii,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            onAnswerSubmitted(Certainty.SURE)
-                        }
-                    ),
-                    colors = if (uiState.isAnswered) {
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            backgroundColor = themeColors.wrongAnswerBackground
-                        )
-                    } else {
-                        TextFieldDefaults.outlinedTextFieldColors()
-                    },
-                    singleLine = false
-                )
-
-                // Correct answer display (shown when wrong)
-                if (uiState.showCorrectAnswer) {
-                    Text(
-                        text = uiState.correctAnswer,
+                        .padding(horizontal = 16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    // Answer input field (always shown to keep keyboard open)
+                    OutlinedTextField(
+                        value = uiState.userInputText,
+                        onValueChange = onUserInputChanged,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(themeColors.correctAnswerBackground)
-                            .padding(8.dp),
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp
-                    )
-                }
-
-                if (!uiState.isAnswered) {
-                    // Maybe and Sure buttons
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            //.padding(vertical = 4.dp)
-                    ) {
-                        Button(
-                            onClick = { onAnswerSubmitted(Certainty.MAYBE) },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = themeColors.backgroundMaybe
-                            )
-                        ) {
-                            Text(stringResource(id = R.string.maybe).toUpperCase(Locale.current))
-                        }
-
-                        Button(
-                            onClick = { onAnswerSubmitted(Certainty.SURE) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = themeColors.backgroundSure
-                            )
-                        ) {
-                            Text(stringResource(id = R.string.sure).toUpperCase(Locale.current))
-                        }
-                    }
-
-                    // Don't Know button
-                    Button(
-                        onClick = { onAnswerSubmitted(Certainty.DONTKNOW) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = themeColors.backgroundDontKnow
-                        )
-                    ) {
-                        Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
-                    }
-                } else {
-                    // Next button (shown when answered)
-                    Button(
-                        onClick = onNextClicked,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = themeColors.backgroundDontKnow,
+                            .padding(vertical = 4.dp)
+                            .focusRequester(focusRequester),
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            textAlign = TextAlign.Center
                         ),
-                    ) {
-                        Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Ascii,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                onAnswerSubmitted(Certainty.SURE)
+                            }
+                        ),
+                        colors = if (uiState.isAnswered) {
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                backgroundColor = themeColors.wrongAnswerBackground
+                            )
+                        } else {
+                            TextFieldDefaults.outlinedTextFieldColors()
+                        },
+                        singleLine = false
+                    )
+
+                    // Correct answer display (shown when wrong)
+                    if (uiState.showCorrectAnswer) {
+                        Text(
+                            text = uiState.correctAnswer,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(themeColors.correctAnswerBackground)
+                                .padding(8.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp
+                        )
+                    }
+
+                    if (!uiState.isAnswered) {
+                        // Maybe and Sure buttons
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                            //.padding(vertical = 4.dp)
+                        ) {
+                            Button(
+                                onClick = { onAnswerSubmitted(Certainty.MAYBE) },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = themeColors.backgroundMaybe
+                                )
+                            ) {
+                                Text(stringResource(id = R.string.maybe).toUpperCase(Locale.current))
+                            }
+
+                            Button(
+                                onClick = { onAnswerSubmitted(Certainty.SURE) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 8.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = themeColors.backgroundSure
+                                )
+                            ) {
+                                Text(stringResource(id = R.string.sure).toUpperCase(Locale.current))
+                            }
+                        }
+
+                        // Don't Know button
+                        Button(
+                            onClick = { onAnswerSubmitted(Certainty.DONTKNOW) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = themeColors.backgroundDontKnow
+                            )
+                        ) {
+                            Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
+                        }
+                    } else {
+                        // Next button (shown when answered)
+                        Button(
+                            onClick = onNextClicked,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = themeColors.backgroundDontKnow,
+                            ),
+                        ) {
+                            Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
+                        }
                     }
                 }
             }

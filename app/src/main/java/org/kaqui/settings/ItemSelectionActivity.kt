@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
@@ -326,7 +327,6 @@ fun ItemRow(
             modifier = Modifier.padding(8.dp)
         )
 
-        // Item text with colored background
         val backgroundColor = themeColors.getColorFromScore(itemData.shortScore)
 
         Box(
@@ -336,7 +336,6 @@ fun ItemRow(
                 .background(backgroundColor)
                 .padding(0.dp),
             contentAlignment = Alignment.Center,
-            //contentPadding = PaddingValues(0.dp),
         ) {
             Text(
                 text = itemData.text,
@@ -345,13 +344,14 @@ fun ItemRow(
             )
         }
 
-        // Description text
         Text(
             text = itemData.description,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            fontSize = 16.sp
+            fontSize = 16.sp,
+            style = MaterialTheme.typography.body2,
+            lineHeight = 1.1.em,
         )
     }
 }

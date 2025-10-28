@@ -18,7 +18,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -313,129 +315,137 @@ fun QuizTestScreenContent(
         }
 
     KakugoTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TestQuestionLayoutCompose(
-                question = uiState.questionText,
-                questionMinSizeSp = questionMinSize,
-                onQuestionLongClick = onQuestionLongClick
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (initialHideAnswers && !answersCurrentlyVisible && !uiState.isAnswerGiven) {
-                    Button(
-                        onClick = onShowAnswersClicked,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = themeColors.backgroundDontKnow,
-                        ),
-                    ) {
-                        Text(stringResource(id = R.string.show_answers).uppercase())
+                TestQuestionLayoutCompose(
+                    question = uiState.questionText,
+                    questionMinSizeSp = questionMinSize,
+                    onQuestionLongClick = onQuestionLongClick
+                ) {
+                    if (initialHideAnswers && !answersCurrentlyVisible && !uiState.isAnswerGiven) {
+                        Button(
+                            onClick = onShowAnswersClicked,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = themeColors.backgroundDontKnow,
+                            ),
+                        ) {
+                            Text(stringResource(id = R.string.show_answers).uppercase())
+                        }
                     }
-                }
 
-                if (answersCurrentlyVisible) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState()),
-                    ) {
-                        val testType = uiState.currentTestType
-                        when (testType) {
-                            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
-                                uiState.answerOptions.forEachIndexed { index, answerText ->
-                                    val backgroundColor = getButtonBackgroundColor(uiState, index, themeColors)
+                    if (answersCurrentlyVisible) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState()),
+                        ) {
+                            val testType = uiState.currentTestType
+                            when (testType) {
+                                TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
+                                    uiState.answerOptions.forEachIndexed { index, answerText ->
+                                        val backgroundColor =
+                                            getButtonBackgroundColor(uiState, index, themeColors)
 
-                                    if (!singleButtonMode) {
-                                        Separator()
-                                    }
-
-                                    AnswerRow(
-                                        answerText = answerText,
-                                        singleButtonMode = singleButtonMode,
-                                        enabled = !uiState.isAnswerGiven,
-                                        highlight = backgroundColor,
-                                        onClick = { certainty ->
-                                            onAnswerSelected(index, certainty)
-                                        }
-                                    )
-                                }
-                            }
-
-                            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI,
-                            TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> {
-                                uiState.answerOptions.chunked(COLUMNS)
-                                    .forEachIndexed { rowIndex, rowItems ->
-                                        if (!singleButtonMode)
+                                        if (!singleButtonMode) {
                                             Separator()
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth(),
-                                        ) {
-                                            rowItems.forEachIndexed { columnIndex, answerText ->
-                                                val originalIndex =
-                                                    uiState.answerOptions.indexOf(answerText)
-                                                val fontSize = when (testType) {
-                                                    TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30.sp
-                                                    else -> 50.sp
-                                                }
-                                                val index = rowIndex * COLUMNS + columnIndex
-                                                val backgroundColor =
-                                                    getButtonBackgroundColor(uiState, index, themeColors)
-                                                AnswerGridItem(
-                                                    answerText = answerText,
-                                                    singleButtonMode = singleButtonMode,
-                                                    fontSize = fontSize,
-                                                    enabled = !uiState.isAnswerGiven,
-                                                    modifier = Modifier.weight(1f),
-                                                    highlight = backgroundColor,
-                                                    onClick = { certainty ->
-                                                        if (!uiState.isAnswerGiven) {
-                                                            onAnswerSelected(
-                                                                originalIndex,
-                                                                certainty
-                                                            )
-                                                        }
+                                        }
+
+                                        AnswerRow(
+                                            answerText = answerText,
+                                            singleButtonMode = singleButtonMode,
+                                            enabled = !uiState.isAnswerGiven,
+                                            highlight = backgroundColor,
+                                            onClick = { certainty ->
+                                                onAnswerSelected(index, certainty)
+                                            }
+                                        )
+                                    }
+                                }
+
+                                TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI,
+                                TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA
+                                    -> {
+                                    uiState.answerOptions.chunked(COLUMNS)
+                                        .forEachIndexed { rowIndex, rowItems ->
+                                            if (!singleButtonMode)
+                                                Separator()
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                            ) {
+                                                rowItems.forEachIndexed { columnIndex, answerText ->
+                                                    val originalIndex =
+                                                        uiState.answerOptions.indexOf(answerText)
+                                                    val fontSize = when (testType) {
+                                                        TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30.sp
+                                                        else -> 50.sp
                                                     }
-                                                )
+                                                    val index = rowIndex * COLUMNS + columnIndex
+                                                    val backgroundColor =
+                                                        getButtonBackgroundColor(
+                                                            uiState,
+                                                            index,
+                                                            themeColors
+                                                        )
+                                                    AnswerGridItem(
+                                                        answerText = answerText,
+                                                        singleButtonMode = singleButtonMode,
+                                                        fontSize = fontSize,
+                                                        enabled = !uiState.isAnswerGiven,
+                                                        modifier = Modifier.weight(1f),
+                                                        highlight = backgroundColor,
+                                                        onClick = { certainty ->
+                                                            if (!uiState.isAnswerGiven) {
+                                                                onAnswerSelected(
+                                                                    originalIndex,
+                                                                    certainty
+                                                                )
+                                                            }
+                                                        }
+                                                    )
+                                                }
                                             }
                                         }
-                                    }
+                                }
+
+                                else -> throw RuntimeException("unsupported test type $testType for QuizTest")
                             }
 
-                            else -> throw RuntimeException("unsupported test type $testType for QuizTest")
+                            Separator()
+
+                            if (!uiState.isAnswerGiven)
+                                Button(
+                                    onClick = {
+                                        onAnswerSelected(
+                                            QuizViewModel.NO_ANSWER,
+                                            Certainty.DONTKNOW
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = themeColors.backgroundDontKnow,
+                                    ),
+                                ) {
+                                    Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
+                                }
+                            else
+                                Button(
+                                    onClick = onNextClicked,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = themeColors.backgroundDontKnow,
+                                    ),
+                                ) {
+                                    Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
+                                }
                         }
-
-                        Separator()
-
-                        if (!uiState.isAnswerGiven)
-                            Button(
-                                onClick = {
-                                    onAnswerSelected(
-                                        QuizViewModel.NO_ANSWER,
-                                        Certainty.DONTKNOW
-                                    )
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = themeColors.backgroundDontKnow,
-                                ),
-                            ) {
-                                Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
-                            }
-                        else
-                            Button(
-                                onClick = onNextClicked,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = themeColors.backgroundDontKnow,
-                                ),
-                            ) {
-                                Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
-                            }
                     }
                 }
             }

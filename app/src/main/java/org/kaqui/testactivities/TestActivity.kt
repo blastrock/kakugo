@@ -29,10 +29,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -54,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NavUtils
 import androidx.core.net.toUri
@@ -320,19 +323,23 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                         )
                     }
                 ) { paddingValues ->
-                    TestScreen(
-                        testFragment = uiState.fragment,
-                        onFragmentUpdated = { fragment -> testFragment = fragment as TestFragment },
-                        stats = uiState.stats,
-                        correctCount = uiState.correctCount,
-                        questionCount = uiState.questionCount,
-                        historyState = uiState.historyState,
-                        sheetExpanded = uiState.sheetExpanded,
-                        onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
-                        kanaWords = kanaWords,
-                        onItemClick = this::openItemInDictionary,
-                        modifier = Modifier.padding(paddingValues)
-                    )
+                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                        TestScreen(
+                            testFragment = uiState.fragment,
+                            onFragmentUpdated = { fragment ->
+                                testFragment = fragment as TestFragment
+                            },
+                            stats = uiState.stats,
+                            correctCount = uiState.correctCount,
+                            questionCount = uiState.questionCount,
+                            historyState = uiState.historyState,
+                            sheetExpanded = uiState.sheetExpanded,
+                            onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
+                            kanaWords = kanaWords,
+                            onItemClick = this::openItemInDictionary,
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
                 }
             }
         }
@@ -533,7 +540,7 @@ fun TestScreen(
                     lastWrong = historyState.lastWrong,
                     lastProbabilityData = historyState.lastProbabilityData,
                     kanaWords = kanaWords,
-                    onItemClick = onItemClick
+                    onItemClick = onItemClick,
                 )
             }
         }
@@ -585,7 +592,8 @@ private fun LastItemRow(
                 modifier = Modifier
                     .padding(start = 8.dp)
                     .weight(1f),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.body2,
+                lineHeight = 1.1.em,
             )
         }
     }
@@ -641,7 +649,8 @@ private fun HistoryItemRow(
         Text(
             text = historyItem.item.description,
             style = MaterialTheme.typography.body2,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            lineHeight = 1.1.em,
         )
     }
 }
@@ -815,19 +824,68 @@ fun TestScreenPreviewWrong() {
     }
 }
 
+@Preview(showBackground = true, name = "TestScreen Preview - Long text")
+@Composable
+fun TestScreenPreviewLongText() {
+    val good = Item(
+        0,
+        Word(
+            "好き",
+            "すき",
+            listOf("fond", "pleasing", "like something", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah"),
+            listOf(),
+            false,
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val sampleHistoryState = HistoryState(
+        items = listOf(
+            HistoryItem(
+                item = good,
+                probabilityData = null,
+                style = HistoryItemStyle.GOOD
+            ),
+        ),
+        lastCorrect = good,
+        lastWrong = null,
+        lastProbabilityData = null,
+    )
+
+    KakugoTheme {
+        TestScreen(
+            testFragment = null,
+            onFragmentUpdated = {},
+            correctCount = 10,
+            questionCount = 15,
+            historyState = sampleHistoryState,
+            sheetExpanded = false,
+            onSheetExpandedChange = {},
+            kanaWords = true,
+            onItemClick = {},
+            stats = LearningDbView.Stats(
+                good = 5,
+                meh = 3,
+                bad = 2,
+                disabled = 0
+            ),
+        )
+    }
+}
+
 @Preview(showBackground = true, name = "TestScreen Preview - Wrong History")
 @Composable
 fun TestScreenPreviewWrongHistory() {
     val good = Item(
         0,
-        Kanji(
+        Word(
             "好き",
-            listOf("コウ"),
-            listOf("この.む", "す.く", "よ.い", "い.い"),
+            "すき",
             listOf("fond", "pleasing", "like something"),
             listOf(),
-            listOf(),
-            1
+            false
         ),
         0.0,
         0.0,
@@ -836,14 +894,12 @@ fun TestScreenPreviewWrongHistory() {
     )
     val bad = Item(
         0,
-        Kanji(
+        Word(
             "人",
-            listOf("ジン", "ニン"),
-            listOf("ひと", "-り", "-と"),
+            "ひと",
             listOf("person"),
             listOf(),
-            listOf(),
-            1
+            false
         ),
         0.0,
         0.0,
