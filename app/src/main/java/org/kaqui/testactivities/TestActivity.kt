@@ -26,6 +26,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ButtonDefaults
@@ -562,39 +567,55 @@ private fun LastItemRow(
             .background(MaterialTheme.colors.surface),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.width(8.dp))
+        AnimatedContent(
+            targetState = lastCorrect to lastWrong,
+            transitionSpec = {
+                slideInVertically(
+                    animationSpec = tween(100),
+                    initialOffsetY = { -it }
+                ) togetherWith ExitTransition.None
+            },
+            label = "LastItemAnimation"
+        ) { (animatedCorrect, animatedWrong) ->
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(8.dp))
 
-        if (lastWrong != null) {
-            ItemButton(
-                item = lastWrong,
-                probabilityData = null,
-                style = HistoryItemStyle.BAD,
-                showInfo = lastWrong.contents is Kanji || lastWrong.contents is Word,
-                kanaWords = kanaWords,
-                onClick = { onItemClick(lastWrong) }
-            )
-        }
+                if (animatedWrong != null) {
+                    ItemButton(
+                        item = animatedWrong,
+                        probabilityData = null,
+                        style = HistoryItemStyle.BAD,
+                        showInfo = animatedWrong.contents is Kanji || animatedWrong.contents is Word,
+                        kanaWords = kanaWords,
+                        onClick = { onItemClick(animatedWrong) }
+                    )
+                }
 
-        if (lastCorrect != null && lastCorrect != lastWrong) {
-            ItemButton(
-                item = lastCorrect,
-                probabilityData = lastProbabilityData,
-                style = HistoryItemStyle.GOOD,
-                showInfo = lastCorrect.contents is Kanji || lastCorrect.contents is Word,
-                kanaWords = kanaWords,
-                onClick = { onItemClick(lastCorrect) }
-            )
-        }
+                if (animatedCorrect != null && animatedCorrect != animatedWrong) {
+                    ItemButton(
+                        item = animatedCorrect,
+                        probabilityData = lastProbabilityData,
+                        style = HistoryItemStyle.GOOD,
+                        showInfo = animatedCorrect.contents is Kanji || animatedCorrect.contents is Word,
+                        kanaWords = kanaWords,
+                        onClick = { onItemClick(animatedCorrect) }
+                    )
+                }
 
-        lastCorrect?.let { item ->
-            Text(
-                text = item.description,
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .weight(1f),
-                style = MaterialTheme.typography.body2,
-                lineHeight = 1.1.em,
-            )
+                animatedCorrect?.let { item ->
+                    Text(
+                        text = item.description,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .weight(1f),
+                        style = MaterialTheme.typography.body2,
+                        lineHeight = 1.1.em,
+                    )
+                }
+            }
         }
     }
 }
