@@ -7,6 +7,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.util.TypedValue
+import android.view.HapticFeedbackConstants
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.AttrRes
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -313,6 +315,7 @@ fun BetterButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val viewConfiguration = LocalViewConfiguration.current
+    val view = LocalView.current
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongPress by rememberUpdatedState(onLongPress)
 
@@ -325,6 +328,7 @@ fun BetterButton(
                     isLongClick = false
                     delay(viewConfiguration.longPressTimeoutMillis)
                     isLongClick = true
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     currentOnLongPress()
                 }
 
