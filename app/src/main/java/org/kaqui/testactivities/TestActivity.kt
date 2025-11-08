@@ -3,6 +3,7 @@ package org.kaqui.testactivities
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
@@ -149,22 +150,19 @@ class TestViewModel : ViewModel() {
     fun addGoodAnswerToHistory(
         correct: Item,
         probabilityData: TestEngine.DebugData?,
-        refresh: Boolean,
     ) {
-        if (refresh) {
-            _uiState.update { currentState ->
-                val newHistoryItems =
-                    listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.GOOD, true)) +
-                            currentState.historyState.items.take(49)
-                currentState.copy(
-                    historyState = currentState.historyState.copy(
-                        items = newHistoryItems,
-                        lastCorrect = correct,
-                        lastWrong = null,
-                        lastProbabilityData = probabilityData
-                    )
+        _uiState.update { currentState ->
+            val newHistoryItems =
+                listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.GOOD, true)) +
+                        currentState.historyState.items.take(49)
+            currentState.copy(
+                historyState = currentState.historyState.copy(
+                    items = newHistoryItems,
+                    lastCorrect = correct,
+                    lastWrong = null,
+                    lastProbabilityData = probabilityData
                 )
-            }
+            )
         }
     }
 
@@ -172,45 +170,47 @@ class TestViewModel : ViewModel() {
         correct: Item,
         probabilityData: TestEngine.DebugData?,
         wrong: Item,
-        refresh: Boolean,
     ) {
-        if (refresh) {
-            _uiState.update { currentState ->
-                val newHistoryItems = listOf(
-                    HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true),
-                    HistoryItem(wrong, null, HistoryItemStyle.DONT_KNOW),
-                ) + currentState.historyState.items.take(48)
-                currentState.copy(
-                    historyState = currentState.historyState.copy(
-                        items = newHistoryItems,
-                        lastCorrect = correct,
-                        lastWrong = wrong,
-                        lastProbabilityData = probabilityData
-                    )
+        _uiState.update { currentState ->
+            val newHistoryItems = listOf(
+                HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true),
+                HistoryItem(wrong, null, HistoryItemStyle.DONT_KNOW),
+            ) + currentState.historyState.items.take(48)
+            currentState.copy(
+                historyState = currentState.historyState.copy(
+                    items = newHistoryItems,
+                    lastCorrect = correct,
+                    lastWrong = wrong,
+                    lastProbabilityData = probabilityData
                 )
-            }
+            )
         }
     }
 
     fun addUnknownAnswerToHistory(
         correct: Item,
         probabilityData: TestEngine.DebugData?,
-        refresh: Boolean,
     ) {
-        if (refresh) {
-            _uiState.update { currentState ->
-                val newHistoryItems =
-                    listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true)) +
-                            currentState.historyState.items.take(49)
-                currentState.copy(
-                    historyState = currentState.historyState.copy(
-                        items = newHistoryItems,
-                        lastCorrect = correct,
-                        lastWrong = correct,
-                        lastProbabilityData = probabilityData
-                    )
+        _uiState.update { currentState ->
+            val newHistoryItems =
+                listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true)) +
+                        currentState.historyState.items.take(49)
+            currentState.copy(
+                historyState = currentState.historyState.copy(
+                    items = newHistoryItems,
+                    lastCorrect = correct,
+                    lastWrong = correct,
+                    lastProbabilityData = probabilityData
                 )
-            }
+            )
+        }
+    }
+
+    fun resetHistory() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                historyState = HistoryState()
+            )
         }
     }
 
@@ -292,11 +292,14 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
             viewModel::addUnknownAnswerToHistory
         )
 
+        viewModel.resetHistory()
+
         if (savedInstanceState == null) {
             nextQuestion()
         } else {
             testEngine.loadState(savedInstanceState)
             localTestType = testEngine.testType
+            refreshFragment()
         }
 
         viewModel.setStats(testEngine.itemView.getStats())
@@ -424,18 +427,22 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
             testFragment.refreshQuestion()
         } else {
             localTestType = testType
-            val testFragment: Class<out Fragment> =
-                when (testType) {
-                    TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose::class.java
-                    TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragmentCompose::class.java
-                    TestType.KANJI_COMPOSITION -> CompositionTestFragmentCompose::class.java
-                    TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragmentCompose::class.java
-                }
-
-            viewModel.setFragmentClass(testFragment)
-
-            viewModel.setTitle(getString(testType.toName()))
+            refreshFragment()
         }
+    }
+
+    private fun refreshFragment() {
+        val testFragment: Class<out Fragment> =
+            when (testType) {
+                TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose::class.java
+                TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragmentCompose::class.java
+                TestType.KANJI_COMPOSITION -> CompositionTestFragmentCompose::class.java
+                TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragmentCompose::class.java
+            }
+
+        viewModel.setFragmentClass(testFragment)
+
+        viewModel.setTitle(getString(testType.toName()))
     }
 }
 
@@ -458,7 +465,6 @@ fun TestScreen(
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
     )
-    val coroutineScope = rememberCoroutineScope()
 
     // Synchronize sheet state with UI state
     LaunchedEffect(sheetExpanded) {

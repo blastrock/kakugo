@@ -2,6 +2,7 @@ package org.kaqui
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcel
 import android.util.Log
 import androidx.preference.PreferenceManager
 import org.kaqui.model.Certainty
@@ -21,9 +22,9 @@ class TestEngine(
         context: Context,
         private val db: Database,
         private val testTypes: List<TestType>,
-        private val goodAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit,
-        private val wrongAnswerCallback: (correct: Item, probabilityData: DebugData?, wrong: Item, refresh: Boolean) -> Unit,
-        private val unknownAnswerCallback: (correct: Item, probabilityData: DebugData?, refresh: Boolean) -> Unit) {
+        private val goodAnswerCallback: (correct: Item, probabilityData: DebugData?) -> Unit,
+        private val wrongAnswerCallback: (correct: Item, probabilityData: DebugData?, wrong: Item) -> Unit,
+        private val unknownAnswerCallback: (correct: Item, probabilityData: DebugData?) -> Unit) {
     private sealed class HistoryLine {
         data class Correct(val itemId: Int) : HistoryLine()
         data class Unknown(val itemId: Int) : HistoryLine()
@@ -91,6 +92,7 @@ class TestEngine(
         currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
         correctCount = savedInstanceState.getInt("correctCount")
         questionCount = savedInstanceState.getInt("questionCount")
+        unserializeHistory(savedInstanceState.getByteArray("history")!!)
     }
 
     fun saveState(outState: Bundle) {
@@ -100,6 +102,57 @@ class TestEngine(
         outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
         outState.putInt("correctCount", correctCount)
         outState.putInt("questionCount", questionCount)
+        outState.putByteArray("history", serializeHistory())
+    }
+
+    private fun serializeHistory(): ByteArray {
+        val parcel = Parcel.obtain()
+        parcel.writeInt(history.size)
+        for (line in history)
+            when (line) {
+                is HistoryLine.Correct -> {
+                    parcel.writeByte(0)
+                    parcel.writeInt(line.itemId)
+                }
+                is HistoryLine.Unknown -> {
+                    parcel.writeByte(1)
+                    parcel.writeInt(line.itemId)
+                }
+                is HistoryLine.Incorrect -> {
+                    parcel.writeByte(2)
+                    parcel.writeInt(line.correctItemId)
+                    parcel.writeInt(line.answerItemId)
+                }
+            }
+        val data = parcel.marshall()
+        parcel.recycle()
+        return data
+    }
+
+    private fun unserializeHistory(data: ByteArray) {
+        val parcel = Parcel.obtain()
+        parcel.unmarshall(data, 0, data.size)
+        parcel.setDataPosition(0)
+
+        history.clear()
+
+        val count = parcel.readInt()
+        repeat(count) { iteration ->
+            val type = parcel.readByte()
+            when (type.toInt()) {
+                0 -> {
+                    addGoodAnswerToHistory(getItem(parcel.readInt()))
+                }
+                1 -> {
+                    addUnknownAnswerToHistory(getItem(parcel.readInt()))
+                }
+                2 -> {
+                    addWrongAnswerToHistory(getItem(parcel.readInt()), getItem(parcel.readInt()))
+                }
+            }
+        }
+
+        parcel.recycle()
     }
 
     fun prepareNewQuestion() {
@@ -239,25 +292,25 @@ class TestEngine(
         questionCount += 1
     }
 
-    private fun addGoodAnswerToHistory(correct: Item, refresh: Boolean = true) {
+    private fun addGoodAnswerToHistory(correct: Item) {
         history.add(HistoryLine.Correct(correct.id))
         discardOldHistory()
 
-        goodAnswerCallback(correct, currentDebugData, refresh)
+        goodAnswerCallback(correct, currentDebugData)
     }
 
-    private fun addWrongAnswerToHistory(correct: Item, wrong: Item, refresh: Boolean = true) {
+    private fun addWrongAnswerToHistory(correct: Item, wrong: Item) {
         history.add(HistoryLine.Incorrect(correct.id, wrong.id))
         discardOldHistory()
 
-        wrongAnswerCallback(correct, currentDebugData, wrong, refresh)
+        wrongAnswerCallback(correct, currentDebugData, wrong)
     }
 
-    private fun addUnknownAnswerToHistory(correct: Item, refresh: Boolean = true) {
+    private fun addUnknownAnswerToHistory(correct: Item) {
         history.add(HistoryLine.Unknown(correct.id))
         discardOldHistory()
 
-        unknownAnswerCallback(correct, currentDebugData, refresh)
+        unknownAnswerCallback(correct, currentDebugData)
     }
 
     private fun discardOldHistory() {
