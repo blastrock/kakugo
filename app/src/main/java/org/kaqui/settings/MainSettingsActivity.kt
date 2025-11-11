@@ -104,7 +104,8 @@ class MainSettingsActivity : BaseActivity() {
         }
 
         private fun pickCustomFont() {
-            if (Build.VERSION.SDK_INT >= 23) {
+            // READ_EXTERNAL_STORAGE permission is not needed on API 33+ when using SAF
+            if (Build.VERSION.SDK_INT >= 23 && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
                     return

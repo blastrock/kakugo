@@ -12,8 +12,8 @@ android {
     defaultConfig {
         applicationId = "org.kaqui"
         minSdk = 21
-        targetSdk = 34
-        versionCode = 87
+        targetSdk = 35
+        versionCode = 89
         versionName = "1.39.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -94,7 +94,12 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
             else -> throw RuntimeException("unknown kanji classification: $classificationStr")
         }
 
-        mode = intent.getSerializableExtra("mode") as SelectionMode
+        mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("mode", SelectionMode::class.java)!!
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra("mode") as SelectionMode
+        }
 
         dbView = when (mode) {
             SelectionMode.KANJI -> Database.getInstance(this).getKanjiView()
@@ -205,7 +210,8 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
     }
 
     private fun showSelectFileForImport() {
-        if (Build.VERSION.SDK_INT >= 23) {
+        // READ_EXTERNAL_STORAGE permission is not needed on API 33+ when using SAF
+        if (Build.VERSION.SDK_INT >= 23 && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
                 return

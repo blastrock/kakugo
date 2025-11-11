@@ -1,6 +1,7 @@
 package org.kaqui
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
 import android.util.Log
@@ -87,7 +88,11 @@ class TestEngine(
 
     fun loadState(savedInstanceState: Bundle) {
         sessionId = savedInstanceState.getLong("sessionId")
-        testType = savedInstanceState.getSerializable("testType") as TestType
+        testType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            savedInstanceState.getSerializable("testType", TestType::class.java)!!
+        } else {
+            savedInstanceState.getSerializable("testType") as TestType
+        }
         currentQuestion = getItem(savedInstanceState.getInt("question"))
         currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
         correctCount = savedInstanceState.getInt("correctCount")
