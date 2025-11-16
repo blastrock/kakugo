@@ -3,7 +3,6 @@ package org.kaqui.testactivities
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
@@ -53,7 +52,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -115,6 +114,7 @@ data class HistoryState(
 
 data class TestActivityUiState(
     val fragment: Class<out Fragment>? = null,
+    val forceFragmentRefresh: Int = 0,
     val correctCount: Int = 0,
     val questionCount: Int = 0,
     val historyState: HistoryState = HistoryState(),
@@ -244,7 +244,8 @@ class TestViewModel : ViewModel() {
     fun setFragmentClass(testFragment: Class<out Fragment>) {
         _uiState.update { currentState ->
             currentState.copy(
-                fragment = testFragment
+                fragment = testFragment,
+                forceFragmentRefresh = _uiState.value.forceFragmentRefresh+1
             )
         }
     }
@@ -334,6 +335,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                         TestScreen(
                             testFragment = uiState.fragment,
+                            forceFragmentRefresh = uiState.forceFragmentRefresh,
                             onFragmentUpdated = { fragment ->
                                 testFragment = fragment as TestFragment
                             },
@@ -428,11 +430,12 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         } else {
             localTestType = testType
             refreshFragment()
+            viewModel.setStats(testEngine.itemView.getStats())
         }
     }
 
     private fun refreshFragment() {
-        val testFragment: Class<out Fragment> =
+        val testFragmentClass: Class<out Fragment> =
             when (testType) {
                 TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose::class.java
                 TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragmentCompose::class.java
@@ -440,9 +443,8 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                 TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragmentCompose::class.java
             }
 
-        viewModel.setFragmentClass(testFragment)
-
         viewModel.setTitle(getString(testType.toName()))
+        viewModel.setFragmentClass(testFragmentClass)
     }
 }
 
@@ -450,6 +452,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 @Composable
 fun TestScreen(
     testFragment: Class<out Fragment>?,
+    forceFragmentRefresh: Int,
     onFragmentUpdated: (Fragment) -> Unit,
     stats: LearningDbView.Stats,
     correctCount: Int,
@@ -531,13 +534,15 @@ fun TestScreen(
                 )
 
                 if (testFragment != null) {
-                    AndroidFragment(
-                        testFragment,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        onUpdate = onFragmentUpdated,
-                    )
+                    key(forceFragmentRefresh) {
+                        AndroidFragment(
+                            testFragment,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            onUpdate = onFragmentUpdated,
+                        )
+                    }
                 } else {
                     Spacer(
                         modifier = Modifier
@@ -759,6 +764,7 @@ fun TestScreenPreviewCollapsed() {
     KakugoTheme {
         TestScreen(
             testFragment = null,
+            forceFragmentRefresh = 0,
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
@@ -833,6 +839,7 @@ fun TestScreenPreviewWrong() {
     KakugoTheme {
         TestScreen(
             testFragment = null,
+            forceFragmentRefresh = 0,
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
@@ -884,6 +891,7 @@ fun TestScreenPreviewLongText() {
     KakugoTheme {
         TestScreen(
             testFragment = null,
+            forceFragmentRefresh = 0,
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
@@ -954,6 +962,7 @@ fun TestScreenPreviewWrongHistory() {
     KakugoTheme {
         TestScreen(
             testFragment = null,
+            forceFragmentRefresh = 0,
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
