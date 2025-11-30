@@ -12,6 +12,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -33,6 +35,17 @@ class MainSettingsActivity : BaseActivity() {
 
         val frameLayout = android.widget.FrameLayout(this).apply {
             id = R.id.settings_main_view
+            // Apply window insets for edge-to-edge
+            ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                view.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+                )
+                insets
+            }
         }
         setContentView(frameLayout)
 

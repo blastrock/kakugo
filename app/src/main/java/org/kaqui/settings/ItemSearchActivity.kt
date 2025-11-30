@@ -4,11 +4,13 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -123,6 +125,8 @@ class ItemSearchActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("mode", SelectionMode::class.java)!!
         } else {
@@ -173,6 +177,7 @@ fun ItemSearchScreen(
     KakugoTheme {
         Surface(color = MaterialTheme.colors.background) {
             Scaffold(
+                modifier = Modifier.safeDrawingPadding(),
                 topBar = {
                     TopAppBar(
                         navigationIcon = {

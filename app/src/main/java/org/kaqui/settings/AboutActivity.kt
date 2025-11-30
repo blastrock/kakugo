@@ -5,11 +5,13 @@ import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -33,6 +35,8 @@ import org.kaqui.theme.KakugoTheme
 class AboutActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
 
         setContent {
             AboutScreen(
@@ -58,6 +62,7 @@ fun AboutScreen(onBackClick: () -> Unit = {}) {
                         onBackClick = onBackClick
                     )
                 },
+                modifier = Modifier.safeDrawingPadding(),
                 content = { paddingValues ->
                     Column(
                         modifier = Modifier

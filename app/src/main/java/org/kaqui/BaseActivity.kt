@@ -1,7 +1,10 @@
 package org.kaqui
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.preference.PreferenceManager
 
 abstract class BaseActivity : AppCompatActivity() {

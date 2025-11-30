@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -60,6 +62,8 @@ class MainActivity : ComponentActivity() {
         LocaleManager.updateDictionaryLocale(this)
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+
+        enableEdgeToEdge()
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         val lastVersionChangelog = sharedPrefs.getInt("last_version_changelog", 0)
@@ -127,7 +131,8 @@ fun MainScreen(
             Scaffold(
                 topBar = {
                     TopBar(title = stringResource(R.string.app_name))
-                }
+                },
+                modifier = Modifier.safeDrawingPadding(),
             ) { paddingValues ->
                 Column(
                     modifier = Modifier

@@ -10,12 +10,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
@@ -86,6 +88,8 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         job = Job()
+
+        enableEdgeToEdge()
 
         val classification = when (val classificationStr = PreferenceManager.getDefaultSharedPreferences(this).getString("item_classification", "jlpt")) {
             "jlpt" -> Classification.JlptLevel
@@ -324,7 +328,8 @@ fun ClassSelectionScreen(
                             }
                         }
                     )
-                }
+                },
+                modifier = Modifier.safeDrawingPadding(),
             ) { paddingValues ->
                 Column(
                     modifier = Modifier
