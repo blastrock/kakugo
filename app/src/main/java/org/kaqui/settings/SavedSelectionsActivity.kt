@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.TopBar
@@ -166,16 +167,10 @@ fun SavedSelectionsScreen(
 ) {
     val title = stringResource(R.string.saved_selections)
 
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = title,
-                        onBackClick = onBackClick
-                    )
-                },
-            ) { paddingValues ->
+    AppScaffold(
+        title = title,
+        onBackClick = onBackClick
+    ) { paddingValues ->
                 SavedSelectionsList(
                     selections = uiState.selections,
                     onItemClick = onItemClick,
@@ -194,8 +189,6 @@ fun SavedSelectionsScreen(
                 )
             }
         }
-    }
-}
 
 @Composable
 fun SavedSelectionsList(

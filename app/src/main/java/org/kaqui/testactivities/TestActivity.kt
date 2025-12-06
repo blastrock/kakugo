@@ -86,6 +86,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.kaqui.AppScaffold
 import org.kaqui.BetterButton
 import org.kaqui.R
 import org.kaqui.Separator
@@ -341,15 +342,10 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
-            KakugoTheme {
-                Scaffold(
-                    topBar = {
-                        TopBar(
-                            title = uiState.title,
-                            onBackClick = { confirmActivityClose(true) }
-                        )
-                    },
-                ) { paddingValues ->
+            AppScaffold(
+                title = uiState.title,
+                onBackClick = { confirmActivityClose(true) }
+            ) { paddingValues ->
                     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                         TestScreen(
                             testFragment = uiState.fragment,
@@ -369,7 +365,6 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                         )
                     }
                 }
-            }
         }
     }
 

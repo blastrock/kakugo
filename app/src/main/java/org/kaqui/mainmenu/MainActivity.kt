@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.preference.PreferenceManager
+import org.kaqui.AppScaffold
 import org.kaqui.AppTitleImage
 import org.kaqui.BuildConfig
 import org.kaqui.LocaleManager
@@ -96,7 +97,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MainScreen(
-                onDatabaseInitRequired = { initDic() },
+                onDatabaseInitRequired = { initDic() }
             )
         }
     }
@@ -120,7 +121,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(
-    onDatabaseInitRequired: () -> Unit,
+    onDatabaseInitRequired: () -> Unit
 ) {
     val context = LocalContext.current
     var showProgress by remember { mutableStateOf(false) }
@@ -142,12 +143,9 @@ fun MainScreen(
         }
     }
 
-    KakugoTheme {
-        Scaffold(
-            topBar = {
-                TopBar(title = stringResource(R.string.app_name))
-            },
-        ) { paddingValues ->
+    AppScaffold(
+        title = stringResource(R.string.app_name)
+    ) { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -191,7 +189,6 @@ fun MainScreen(
             }
         }
     }
-}
 
 @Composable
 fun MenuButton(textRes: Int, onClick: () -> Unit) {

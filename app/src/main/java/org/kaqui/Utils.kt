@@ -40,6 +40,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -71,6 +72,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.kaqui.model.Database
 import org.kaqui.model.TestType
 import org.kaqui.testactivities.TestActivity
+import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
 import java.util.Calendar
 
@@ -188,6 +190,29 @@ fun TopBar(
                 backgroundColor = MaterialTheme.colors.primary,
                 contentColor = MaterialTheme.colors.onPrimary,
                 elevation = 4.dp,
+            )
+        }
+    }
+}
+
+@Composable
+fun AppScaffold(
+    title: String,
+    onBackClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    content: @Composable (PaddingValues) -> Unit
+) {
+    KakugoTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            Scaffold(
+                topBar = {
+                    TopBar(
+                        title = title,
+                        onBackClick = onBackClick,
+                        actions = actions
+                    )
+                },
+                content = content
             )
         }
     }

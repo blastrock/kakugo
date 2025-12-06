@@ -41,6 +41,7 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
+import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.TopBar
 import org.kaqui.model.Database
@@ -134,16 +135,10 @@ fun StatsScreen(
         StatsData(values, nextDay)
     }
 
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = stringResource(R.string.title_stats),
-                        onBackClick = onBackClick
-                    )
-                },
-            ) { paddingValues ->
+    AppScaffold(
+        title = stringResource(R.string.title_stats),
+        onBackClick = onBackClick
+    ) { paddingValues ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -186,8 +181,6 @@ fun StatsScreen(
                 }
             }
         }
-    }
-}
 
 @Composable
 fun StatsChart(

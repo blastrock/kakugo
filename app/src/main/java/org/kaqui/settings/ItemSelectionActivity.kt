@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
+import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
@@ -226,41 +227,35 @@ fun ItemSelectionScreen(
 
     var showMenu by remember { mutableStateOf(false) }
 
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = title,
-                        onBackClick = onBackClick,
-                        actions = {
-                            IconButton(onClick = { showMenu = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = stringResource(R.string.more_options)
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = showMenu,
-                                onDismissRequest = { showMenu = false }
-                            ) {
-                                DropdownMenuItem(onClick = {
-                                    showMenu = false
-                                    onSelectAll()
-                                }) {
-                                    Text(stringResource(R.string.select_all))
-                                }
-                                DropdownMenuItem(onClick = {
-                                    showMenu = false
-                                    onSelectNone()
-                                }) {
-                                    Text(stringResource(R.string.select_none))
-                                }
-                            }
-                        }
-                    )
+    AppScaffold(
+        title = title,
+        onBackClick = onBackClick,
+        actions = {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.more_options)
+                )
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(onClick = {
+                    showMenu = false
+                    onSelectAll()
+                }) {
+                    Text(stringResource(R.string.select_all))
                 }
-            ) { paddingValues ->
+                DropdownMenuItem(onClick = {
+                    showMenu = false
+                    onSelectNone()
+                }) {
+                    Text(stringResource(R.string.select_none))
+                }
+            }
+        }
+    ) { paddingValues ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -276,8 +271,6 @@ fun ItemSelectionScreen(
                 }
             }
         }
-    }
-}
 
 @Composable
 fun ItemListWithStats(

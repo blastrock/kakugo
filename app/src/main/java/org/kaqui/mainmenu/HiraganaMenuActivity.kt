@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.kaqui.AppScaffold
 import org.kaqui.AppTitleImage
 import org.kaqui.R
 import org.kaqui.Separator
@@ -63,16 +64,10 @@ class HiraganaMenuActivity : ComponentActivity() {
 fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
     val context = LocalContext.current
 
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = stringResource(id = R.string.hiragana_title),
-                        onBackClick = onBackClick
-                    )
-                },
-            ) { paddingValues ->
+    AppScaffold(
+        title = stringResource(id = R.string.hiragana_title),
+        onBackClick = onBackClick
+    ) { paddingValues ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -104,8 +99,6 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
                 }
             }
         }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

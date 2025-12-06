@@ -48,6 +48,7 @@ import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.StatsBar
 import org.kaqui.TopBar
@@ -278,63 +279,57 @@ fun ClassSelectionScreen(
     onSelectNone: () -> Unit,
     onImportSelection: () -> Unit
 ) {
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = when (uiState.mode) {
-                            SelectionMode.KANJI -> stringResource(R.string.kanji_selection)
-                            SelectionMode.WORD -> stringResource(R.string.word_selection)
-                            else -> stringResource(R.string.kanji_selection) // Shouldn't happen
-                        },
-                        onBackClick = onBackClick,
-                        actions = {
-                            IconButton(onClick = onSearchClick) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = stringResource(R.string.search)
-                                )
-                            }
-                            IconButton(onClick = { onMenuToggle(true) }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = stringResource(R.string.more_options)
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = showMenu,
-                                onDismissRequest = { onMenuToggle(false) }
-                            ) {
-                                DropdownMenuItem(onClick = {
-                                    onMenuToggle(false)
-                                    onSaveSelection()
-                                }) {
-                                    Text(stringResource(R.string.save_current_selection))
-                                }
-                                DropdownMenuItem(onClick = {
-                                    onMenuToggle(false)
-                                    onLoadSelection()
-                                }) {
-                                    Text(stringResource(R.string.load_selection))
-                                }
-                                DropdownMenuItem(onClick = {
-                                    onMenuToggle(false)
-                                    onSelectNone()
-                                }) {
-                                    Text(stringResource(R.string.select_none))
-                                }
-                                DropdownMenuItem(onClick = {
-                                    onMenuToggle(false)
-                                    onImportSelection()
-                                }) {
-                                    Text(stringResource(R.string.import_selection))
-                                }
-                            }
-                        }
-                    )
-                },
-            ) { paddingValues ->
+    AppScaffold(
+        title = when (uiState.mode) {
+            SelectionMode.KANJI -> stringResource(R.string.kanji_selection)
+            SelectionMode.WORD -> stringResource(R.string.word_selection)
+            else -> stringResource(R.string.kanji_selection) // Shouldn't happen
+        },
+        onBackClick = onBackClick,
+        actions = {
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search)
+                )
+            }
+            IconButton(onClick = { onMenuToggle(true) }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.more_options)
+                )
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { onMenuToggle(false) }
+            ) {
+                DropdownMenuItem(onClick = {
+                    onMenuToggle(false)
+                    onSaveSelection()
+                }) {
+                    Text(stringResource(R.string.save_current_selection))
+                }
+                DropdownMenuItem(onClick = {
+                    onMenuToggle(false)
+                    onLoadSelection()
+                }) {
+                    Text(stringResource(R.string.load_selection))
+                }
+                DropdownMenuItem(onClick = {
+                    onMenuToggle(false)
+                    onSelectNone()
+                }) {
+                    Text(stringResource(R.string.select_none))
+                }
+                DropdownMenuItem(onClick = {
+                    onMenuToggle(false)
+                    onImportSelection()
+                }) {
+                    Text(stringResource(R.string.import_selection))
+                }
+            }
+        }
+    ) { paddingValues ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -363,8 +358,6 @@ fun ClassSelectionScreen(
                 }
             }
         }
-    }
-}
 
 @Composable
 fun ClassListItem(

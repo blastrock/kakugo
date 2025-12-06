@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
+import org.kaqui.AppScaffold
 import org.kaqui.AppTitleImage
 import org.kaqui.BuildConfig
 import org.kaqui.R
@@ -58,16 +59,10 @@ fun AboutScreen(onBackClick: () -> Unit = {}) {
         R.string.about_text, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE
     )
 
-    KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = stringResource(id = R.string.title_about),
-                        onBackClick = onBackClick
-                    )
-                },
-                content = { paddingValues ->
+    AppScaffold(
+        title = stringResource(id = R.string.title_about),
+        onBackClick = onBackClick
+    ) { paddingValues ->
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -99,10 +94,7 @@ fun AboutScreen(onBackClick: () -> Unit = {}) {
                         )
                     }
                 }
-            )
-        }
-    }
-}
+            }
 
 @Preview(showBackground = true)
 @Composable
