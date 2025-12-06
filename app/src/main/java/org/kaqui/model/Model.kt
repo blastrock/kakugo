@@ -54,7 +54,7 @@ enum class ItemType(val value: Int) {
     Word(4);
 
     companion object {
-        private val map = values().associateBy(ItemType::value)
+        private val map = entries.associateBy(ItemType::value)
         fun fromInt(type: Int) = map.getValue(type)
     }
 }
@@ -82,7 +82,7 @@ enum class KnowledgeType(val value: Int) {
     Strokes(3);
 
     companion object {
-        private val map = values().associateBy(KnowledgeType::value)
+        private val map = entries.associateBy(KnowledgeType::value)
         fun fromInt(type: Int) = map.getValue(type)
     }
 }

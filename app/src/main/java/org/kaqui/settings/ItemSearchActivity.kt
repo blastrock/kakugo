@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -154,7 +153,6 @@ class ItemSearchActivity : ComponentActivity() {
 
             ItemSearchScreen(
                 uiState = uiState,
-                mode = mode,
                 getItemData = viewModel::getItemData,
                 onBackClick = { finish() },
                 onSearchQueryChange = viewModel::onSearchQueryChange,
@@ -167,7 +165,6 @@ class ItemSearchActivity : ComponentActivity() {
 @Composable
 fun ItemSearchScreen(
     uiState: ItemSearchUiState,
-    mode: SelectionMode,
     getItemData: (Int) -> ItemData,
     onBackClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
@@ -264,7 +261,6 @@ fun PreviewItemSearchEmpty() {
     KakugoTheme {
         ItemSearchScreen(
             uiState = emptyUiState,
-            mode = SelectionMode.KANJI,
             getItemData = { ItemData(it, "", "", false, 0.0) },
             onBackClick = { },
             onSearchQueryChange = { },
@@ -302,7 +298,6 @@ fun PreviewItemSearchKanjiResults() {
     KakugoTheme {
         ItemSearchScreen(
             uiState = searchUiState,
-            mode = SelectionMode.KANJI,
             getItemData = { id -> sampleItemsMap[id]!! },
             onBackClick = { },
             onSearchQueryChange = { },
@@ -340,7 +335,6 @@ fun PreviewItemSearchWordResults() {
     KakugoTheme {
         ItemSearchScreen(
             uiState = searchUiState,
-            mode = SelectionMode.WORD,
             getItemData = { id -> sampleWordsMap[id]!! },
             onBackClick = { },
             onSearchQueryChange = { },

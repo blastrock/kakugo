@@ -46,7 +46,7 @@ class SrsCalculator {
 
         private fun getProbabilityDataStage1(now: Long, probaParams: ProbaParamsStage1, stage0: ProbabilityData): ProbabilityData {
             stage0.shortWeight = 1 - stage0.shortScore
-            if (stage0.shortWeight < 0 || stage0.shortWeight > 1)
+            if (stage0.shortWeight !in 0.0..1.0)
                 Log.wtf(TAG, "Invalid shortWeight: ${stage0.shortWeight}, shortScore: ${stage0.shortScore}")
 
             stage0.daysSinceAsked = (now - stage0.lastAsked) / 3600.0 / 24.0
@@ -56,7 +56,7 @@ class SrsCalculator {
                     unitStep(stage0.daysSinceAsked - (probaParams.daysEnd * 0.99) * stage0.longScore) * lerp(MIN_LONG_WEIGHT, 1.0, (1 - stage0.longScore))
                 else
                     0.0
-            if (stage0.longWeight < 0 || stage0.longWeight > 1)
+            if (stage0.longWeight !in 0.0..1.0)
                 Log.wtf(TAG, "Invalid longWeight: ${stage0.longWeight}, lastAsked: ${stage0.lastAsked}, now: $now, longScore: ${stage0.longScore}, probaParamsStage1: $probaParams")
 
             return stage0

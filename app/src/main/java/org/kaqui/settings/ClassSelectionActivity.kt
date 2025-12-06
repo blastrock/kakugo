@@ -1,7 +1,6 @@
 package org.kaqui.settings
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
@@ -27,8 +25,6 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -37,6 +33,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,13 +42,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.preference.PreferenceManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.StatsBar
-import org.kaqui.TopBar
 import org.kaqui.model.Classification
 import org.kaqui.model.Classifier
 import org.kaqui.model.Database
@@ -61,7 +54,6 @@ import org.kaqui.model.name
 import org.kaqui.startActivity
 import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
-import kotlin.coroutines.CoroutineContext
 
 data class ClassItem(
     val name: String,
@@ -74,22 +66,17 @@ data class ClassSelectionUiState(
     val classItems: List<ClassItem>
 )
 
-class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
+class ClassSelectionActivity : ComponentActivity() {
     private lateinit var dbView: LearningDbView
     private lateinit var mode: SelectionMode
     private lateinit var classifiers: List<Classifier>
-    private var refreshTrigger by mutableStateOf(0)
+    private var refreshTrigger by mutableIntStateOf(0)
     private var showMenu by mutableStateOf(false)
     private var showSaveDialog by mutableStateOf(false)
     private var saveDialogText by mutableStateOf("")
 
-    private lateinit var job: Job
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        job = Job()
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(
@@ -153,15 +140,6 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
                 )
             }
         }
-    }
-
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 
     override fun onResume() {
@@ -244,7 +222,7 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
         if (requestCode != PICK_IMPORT_FILE)
             return super.onActivityResult(requestCode, resultCode, data)
 
-        if (resultCode != Activity.RESULT_OK || data == null)
+        if (resultCode != RESULT_OK || data == null)
             return
 
         try {

@@ -813,10 +813,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
                 SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READONLY).use { db ->
-                    if (db.version != DATABASE_VERSION)
-                        return true
-
-                    return false
+                    return db.version != DATABASE_VERSION
                 }
             } catch (e: SQLiteException) {
                 Log.i(TAG, "Failed to open database", e)

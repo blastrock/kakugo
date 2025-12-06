@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -259,11 +258,6 @@ class TextTestFragmentCompose : Fragment(), TestFragment {
 
     override fun setSensible(e: Boolean) {
         // TODO: Implement if needed
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = TextTestFragmentCompose()
     }
 }
 

@@ -62,14 +62,11 @@
     <string name="maybe">Pas sûr</string>
     <string name="dont_know">Ne sait pas</string>
     <string name="score_string">Score de session: %1$d/%2$d</string>
-    <string name="jlpt_search">Recherche</string>
-    <string name="search_kanji_hint">Rechercher un kanji&#8230;</string>
     <string name="confirm_test_stop_title">Mettre fin à la session</string>
     <string name="confirm_test_stop_message">Étes-vous sûr de vouloir arrêter cette session ?</string>
     <string name="enable_a_few_items">Vous devez activer au moins 10 éléments pour lancer une session</string>
     <string name="initializing_kanji_db">Initialisation de la base de données</string>
     <string name="failed_to_init_db">Échec d\'initialisation de la base de données: %1$s</string>
-    <string name="info_button">Afficher les détails</string>
     <string name="next">Suivant</string>
     <string name="hint">Indice</string>
     <string name="save_current_selection">Sauvegarder la sélection courrante</string>
@@ -88,7 +85,6 @@
     <string name="jlpt_level_n">JLPT niveau %1$s</string>
     <string name="rtk_index_range">Index %1$s+</string>
     <string name="rtk6_index_range">Index %1$s+</string>
-    <string name="search_word_hint">Rechercher un mot&#8230;</string>
     <string name="word_title">Vocabulaire</string>
     <string name="enable_dark_theme">Activer le thème sombre</string>
     <string name="settings"><font size="30">設定</font>\nPARAMÈTRES</string>
@@ -113,7 +109,6 @@
     <string name="hide_answers">Cacher les réponses</string>
     <string name="show_answers">Afficher les réponses</string>
     <string name="failed_to_load_font">Impossible de charger la police: %s</string>
-    <string name="failed_to_load_resource">Impossible de charger la ressource: %s</string>
     <string name="keep_screen_on_summary">Garder l\'écran éclairé pendant les exercices</string>
     <string name="keep_screen_on">Garder l\'écran allumé</string>
     <string name="export_backup">Exporter une sauvegarde</string>

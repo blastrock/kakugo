@@ -153,12 +153,6 @@ class DrawView(context: Context) : View(context) {
         canvas.drawPath(mPath, mPaint)
     }
 
-    fun clearCanvas() {
-        mPath.reset()
-        mPaths.clear()
-        invalidate()
-    }
-
     private fun actionDown(x: Float, y: Float) {
         mPath.reset()
         mPath.moveTo(x, y)

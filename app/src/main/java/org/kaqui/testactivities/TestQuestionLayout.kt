@@ -1,7 +1,6 @@
 package org.kaqui.testactivities
 
 import android.content.res.Configuration
-import android.graphics.Color
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.TextView
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -22,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.widget.TextViewCompat
@@ -36,6 +36,11 @@ fun TestQuestionLayoutCompose(
     answersBlock: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
+
+    val density = LocalDensity.current
+    val screenWidthDp = with(density) { (windowInfo.containerSize.width / this.density).toInt() }
+    val screenHeightDp = with(density) { (windowInfo.containerSize.height / this.density).toInt() }
     val onBackgroundColor = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current).toArgb()
 
     if (forceLandscape || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -75,7 +80,7 @@ fun TestQuestionLayoutCompose(
                 })
 
             val answerHeightMod = { modifier: Modifier ->
-                if (configuration.screenWidthDp >= 1000)
+                if (screenWidthDp >= 1000)
                     modifier.width(500.dp - 16.dp)
                 else
                     modifier.fillMaxHeight()
@@ -95,8 +100,8 @@ fun TestQuestionLayoutCompose(
     } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         val (weightQuestion, weightAnswers) =
             when {
-                configuration.screenHeightDp < 800 -> Pair(.25f, .75f)
-                configuration.screenHeightDp < 1000 -> Pair(.4f, .6f)
+                screenHeightDp < 800 -> Pair(.25f, .75f)
+                screenHeightDp < 1000 -> Pair(.4f, .6f)
                 else -> Pair(.5f, .5f)
             }
 
@@ -137,7 +142,7 @@ fun TestQuestionLayoutCompose(
                 })
 
             val answerWidthMod = { modifier: Modifier ->
-                if (configuration.screenWidthDp >= 500)
+                if (screenWidthDp >= 500)
                     modifier.width(500.dp - 32.dp)
                 else
                     modifier.fillMaxWidth()

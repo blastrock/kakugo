@@ -9,6 +9,7 @@ import android.os.Parcelable
 import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
@@ -24,15 +25,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
@@ -87,7 +83,6 @@ fun lerp(a: Double, b: Double, r: Double): Double = a + (r * (b - a))
 fun invLerp(a: Double, b: Double, r: Double): Double = (r - a) / (b - a)
 
 fun secondsToDays(timestamp: Long) = timestamp / 3600.0 / 24.0
-fun daysToSeconds(days: Long) = days * 3600.0 * 24.0
 
 fun <T> pickRandom(list: List<T>, sample: Int, avoid: Set<T> = setOf()): List<T> {
     if (sample > list.size - avoid.size)
@@ -121,13 +116,6 @@ fun Separator(
             .fillMaxWidth()
             .background(color = colorResource(id = R.color.separator))
     )
-}
-
-fun Drawable.applyTint(@ColorInt color: Int): Drawable {
-    val mWrappedDrawable = DrawableCompat.wrap(this)
-    DrawableCompat.setTint(mWrappedDrawable, color)
-    DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN)
-    return this
 }
 
 @Composable
@@ -268,13 +256,6 @@ fun startTest(activity: Context, type: TestType) {
     }
     activity.startActivity<TestActivity>("test_types" to listOf(type))
 }
-
-val Activity.menuWidth
-    get() =
-        if (resources.configuration.screenWidthDp >= 500)
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 500f, resources.displayMetrics).toInt()
-        else
-            ViewGroup.LayoutParams.MATCH_PARENT
 
 @ColorInt
 fun Context.getColorFromAttr(

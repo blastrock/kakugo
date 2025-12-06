@@ -2,7 +2,6 @@ package org.kaqui.settings
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -26,6 +25,7 @@ import org.kaqui.model.Database
 import org.kaqui.model.DatabaseUpdater
 import java.io.File
 import java.util.Date
+import androidx.core.content.edit
 
 
 class MainSettingsActivity : BaseActivity() {
@@ -104,14 +104,14 @@ class MainSettingsActivity : BaseActivity() {
         }
 
         private fun pickBackupFolder() {
-            val i = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            i.addCategory(Intent.CATEGORY_DEFAULT);
-            startActivityForResult(Intent.createChooser(i, getString(R.string.choose_backup_idr)), PICK_BACKUP_FOLDER);
+            val i = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            i.addCategory(Intent.CATEGORY_DEFAULT)
+            startActivityForResult(Intent.createChooser(i, getString(R.string.choose_backup_idr)), PICK_BACKUP_FOLDER)
         }
 
         private fun pickBackup() {
             var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
-            chooseFile.setType("*/*")
+            chooseFile.type = "*/*"
             chooseFile = Intent.createChooser(chooseFile, "Choose a file")
             startActivityForResult(chooseFile, PICK_BACKUP)
         }
@@ -199,7 +199,7 @@ class MainSettingsActivity : BaseActivity() {
         @SuppressLint("ApplySharedPref")
         private fun importFont(path: Uri) {
             requireContext().contentResolver.openInputStream(path).use { input ->
-                requireContext().openFileOutput(CUSTOM_FONT_NAME, Context.MODE_PRIVATE)
+                requireContext().openFileOutput(CUSTOM_FONT_NAME, MODE_PRIVATE)
                     .use { output ->
                         input?.copyTo(output)
                     }
@@ -210,9 +210,9 @@ class MainSettingsActivity : BaseActivity() {
 
         private fun setCustomFontPath(path: String?) {
             androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
-                    .edit()
-                    .putString("custom_font", path)
-                    .commit()
+                    .edit(commit = true) {
+                        putString("custom_font", path)
+                    }
             TypefaceManager.updateTypeface(requireContext())
         }
 

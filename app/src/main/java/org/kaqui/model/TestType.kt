@@ -28,7 +28,7 @@ enum class TestType(val value: Int) {
     KANJI_COMPOSITION(18);
 
     companion object {
-        private val map = values().associateBy(TestType::value)
+        private val map = entries.associateBy(TestType::value)
         fun fromInt(type: Int) = map.getValue(type)
     }
 }

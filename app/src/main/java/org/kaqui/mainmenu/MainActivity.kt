@@ -8,27 +8,19 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,7 +43,6 @@ import org.kaqui.AppTitleImage
 import org.kaqui.BuildConfig
 import org.kaqui.LocaleManager
 import org.kaqui.R
-import org.kaqui.TopBar
 import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
 import org.kaqui.startActivity
@@ -60,6 +50,7 @@ import org.kaqui.stats.StatsActivity
 import org.kaqui.theme.KakugoTheme
 import java.io.File
 import java.util.zip.GZIPInputStream
+import androidx.core.content.edit
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -88,9 +79,9 @@ class MainActivity : ComponentActivity() {
                     )
                 )
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    sharedPrefs.edit()
-                        .putInt("last_version_changelog", BuildConfig.VERSION_CODE)
-                        .apply()
+                    sharedPrefs.edit {
+                        putInt("last_version_changelog", BuildConfig.VERSION_CODE)
+                    }
                 }
                 .show()
         }

@@ -66,16 +66,12 @@
     <string name="maybe">Maybe</string>
     <string name="dont_know">Don\'t know</string>
     <string name="score_string">Session score: %1$d/%2$d</string>
-    <string name="jlpt_search">Search</string>
-    <string name="search_kanji_hint">Search kanji&#8230;</string>
-    <string name="search_word_hint">Search word&#8230;</string>
     <string name="confirm_test_stop_title">Terminate session</string>
     <string name="confirm_test_stop_message">Are you sure you want to end this quiz session?</string>
     <string name="enable_a_few_items">You must enable at least 10 items to start a session</string>
     <string name="initializing_kanji_db">Initializing database</string>
     <string name="failed_to_init_db">Failed to initialize database: %1$s</string>
     <string name="debug_info" translatable="false">Days since known: %1$.1f\nLong score: %2$.2f\nLong weight: %3$.2f\nShort score: %4$.2f\nShort weight: %5$.2f\nMin proba coeff: %13$.2f\nShort coefficient: %6$.2f\nLong coefficient: %7$.2f\nFinal weight: %8$.2f\nTotal weight: %9$.2f\nMin days since asked: %10$.1f\nNew short score: %11$.2f\nNew long score: %12$.2f</string>
-    <string name="info_button">Show details</string>
     <string name="next">Next</string>
     <string name="hint">Hint</string>
     <string name="save_current_selection">Save current selection</string>
@@ -137,7 +133,6 @@
     <string name="hide_answers">Hide answers</string>
     <string name="show_answers">Show answers</string>
     <string name="failed_to_load_font">Failed to load custom font: %s</string>
-    <string name="failed_to_load_resource">Failed to load resource: %s</string>
     <string name="keep_screen_on_summary">Keep screen lit during tests</string>
     <string name="keep_screen_on">Keep screen on</string>
     <string name="export_backup">Export backup</string>

@@ -27,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -78,8 +77,6 @@ data class CompositionTestUiState(
     val validationResults: Map<Int, ButtonValidationState> = emptyMap(),
     val currentTestType: TestType? = null,
 ) {
-    val isAnySelected
-        get() = selectedIndices.isNotEmpty()
     val showNextButton
         get() = isValidated
 }
@@ -274,11 +271,6 @@ class CompositionTestFragmentCompose : Fragment(), TestFragment {
 
     override fun setSensible(e: Boolean) {
         // Button state is handled by Compose UI state
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = CompositionTestFragmentCompose()
     }
 }
 

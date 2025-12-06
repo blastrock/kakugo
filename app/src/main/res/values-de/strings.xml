@@ -52,7 +52,6 @@
     <string name="sure">Sicher</string>
     <string name="maybe">Möglich</string>
     <string name="dont_know">Weiß nicht</string>
-    <string name="jlpt_search">Suche</string>
     <string name="hint">Hinweis</string>
     <string name="save_current_selection">Aktuelle Auswahl speichern</string>
     <string name="load_selection">Auswahl laden</string>
@@ -62,8 +61,6 @@
     <string name="stats_items_answered">Fragen beantwortet</string>
     <string name="title_about">Über Kakugo</string>
     <string name="score_string">Lerneinheit Punkte: %1$d/%2$d</string>
-    <string name="search_kanji_hint">Suche Kanji&#8230;</string>
-    <string name="search_word_hint">Suche Vokabel&#8230;</string>
     <string name="confirm_test_stop_title">Lerneinheit beenden</string>
     <string name="initializing_kanji_db">Initialisiere Datenbank</string>
     <string name="jlpt_level_n">JLPT Stufe %1$s</string>
@@ -85,7 +82,6 @@
     <string name="hide_answers_off_summary">Die Antworten werden zeitgleich zur Frage angezeigt</string>
     <string name="single_button_mode">Einzelknopf Modus</string>
     <string name="failed_to_load_font">Fehler beim laden benutzerdefinierter Schriftart: %s</string>
-    <string name="failed_to_load_resource">Fehler beim Laden von Ressource: %s</string>
     <string name="use_custom_font">Benutzerdefinierte Schriftart verwenden</string>
     <string name="pick_custom_font">Wählen sie eine benutzerdefinierte japanische Schriftart</string>
     <string name="single_button_off_summary">Zwei Schaltflächen \"sicher\" und \"möglich\" werden angezeigt</string>
@@ -97,7 +93,6 @@
     <string name="lang_system_default">System Standard</string>
     <string name="enable_a_few_items">Sie müssen mindestens 10 Objekte auswählen um eine Lerneinheit zu starten</string>
     <string name="failed_to_init_db">Fehler beim Initialisieren der Datenbank: %1$s</string>
-    <string name="info_button">Zeige Details</string>
     <string name="next">Weiter</string>
     <string name="selection_presentation">%1$s (%2$d Objekte)</string>
     <string name="delete">Löschen</string>

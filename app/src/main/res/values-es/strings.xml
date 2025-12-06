@@ -62,15 +62,11 @@
     <string name="maybe">Tal vez</string>
     <string name="dont_know">No lo sé</string>
     <string name="score_string">Puntuación de la sesión: %1$d/%2$d</string>
-    <string name="jlpt_search">Buscar</string>
-    <string name="search_kanji_hint">Buscar kanji&#8230;</string>
-    <string name="search_word_hint">Buscar palabra&#8230;</string>
     <string name="confirm_test_stop_title">Terminar sesión</string>
     <string name="confirm_test_stop_message">¿Estás seguro de que quieres terminar la sesión?</string>
     <string name="enable_a_few_items">Debes habilitar al menos 10 elementos para iniciar una sesión</string>
     <string name="initializing_kanji_db">Iniciando la base de datos</string>
     <string name="failed_to_init_db">Falló al inicializar la base de datos: %1$s</string>
-    <string name="info_button">Ver detalles</string>
     <string name="next">Siguiente</string>
     <string name="hint">Pista</string>
     <string name="save_current_selection">Guardar selección actual</string>
@@ -113,7 +109,6 @@
     <string name="hide_answers">Ocultar respuestas</string>
     <string name="show_answers">Mostrar respuestas</string>
     <string name="failed_to_load_font">Error al cargar fuente: %s</string>
-    <string name="failed_to_load_resource">Error al cargar recurso: %s</string>
     <string name="keep_screen_on_summary">Mantener pantalla encendida durante las pruebas</string>
     <string name="keep_screen_on">Mantener pantalla encendida</string>
 

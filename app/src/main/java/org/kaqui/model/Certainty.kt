@@ -6,7 +6,7 @@ enum class Certainty(val value: Int) {
     SURE(2);
 
     companion object {
-        private val map = values().associateBy(Certainty::value)
+        private val map = entries.associateBy(Certainty::value)
         fun fromInt(type: Int) = map.getValue(type)
     }
 }

@@ -313,7 +313,7 @@ class DrawingViewModel(application: Application) : AndroidViewModel(application)
             it.copy(
                 isFinished = isFinishedInternal,
                 currentStrokeIndex = currentStrokeInternal,
-                pathsToDraw = if (matched) it.pathsToDraw + newPathsToDraw else it.pathsToDraw,
+                pathsToDraw = it.pathsToDraw + newPathsToDraw,
                 showAnswerSignal = isFinishedInternal,
                 hintPathForDrawView = null
             )

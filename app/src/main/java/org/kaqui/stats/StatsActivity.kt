@@ -13,13 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,10 +42,8 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import org.kaqui.AppScaffold
 import org.kaqui.R
-import org.kaqui.TopBar
 import org.kaqui.model.Database
 import org.kaqui.roundToPreviousDay
-import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import java.text.DateFormat
 import java.util.Calendar
@@ -83,15 +80,20 @@ fun StatsScreen(
     val context = LocalContext.current
     val themeAttributes = LocalThemeAttributes.current
     val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
+
+    val density = LocalDensity.current
+    val screenWidthDp = with(density) { (windowInfo.containerSize.width / this.density).toInt() }
+    val screenHeightDp = with(density) { (windowInfo.containerSize.height / this.density).toInt() }
 
     // Calculate chart dimensions based on orientation
-    val (chartWidth, chartHeight) = remember(configuration.orientation, configuration.screenWidthDp, configuration.screenHeightDp) {
+    val (chartWidth, chartHeight) = remember(configuration.orientation, screenWidthDp, screenHeightDp) {
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            val height = configuration.screenHeightDp - AppBarOverhead
-            val width = min(configuration.screenWidthDp, height * 16 / 9)
+            val height = screenHeightDp - AppBarOverhead
+            val width = min(screenWidthDp, height * 16 / 9)
             Pair(width.dp, height.dp)
         } else {
-            val height = min(configuration.screenHeightDp - AppBarOverhead, configuration.screenWidthDp)
+            val height = min(screenHeightDp - AppBarOverhead, screenWidthDp)
             Pair(-1.dp, height.dp) // -1 means match parent
         }
     }

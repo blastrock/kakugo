@@ -284,11 +284,6 @@ class QuizTestFragmentCompose : Fragment(), TestFragment {
     override fun setSensible(e: Boolean) {
         // TODO
     }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = QuizTestFragmentCompose()
-    }
 }
 
 const val COLUMNS = 2
@@ -346,8 +341,7 @@ fun QuizTestScreenContent(
                                 .fillMaxWidth()
                                 .verticalScroll(rememberScrollState()),
                         ) {
-                            val testType = uiState.currentTestType
-                            when (testType) {
+                            when (val testType = uiState.currentTestType) {
                                 TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
                                     uiState.answerOptions.forEachIndexed { index, answerText ->
                                         val backgroundColor =
