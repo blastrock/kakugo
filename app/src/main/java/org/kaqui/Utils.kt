@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -212,7 +213,11 @@ fun AppScaffold(
                         actions = actions
                     )
                 },
-                content = content
+                content = { paddingValues ->
+                    Column(modifier = Modifier.consumeWindowInsets(WindowInsets.statusBars)) {
+                        content(paddingValues)
+                    }
+                },
             )
         }
     }

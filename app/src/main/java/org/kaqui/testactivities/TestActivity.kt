@@ -41,8 +41,16 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsEndWidth
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ButtonDefaults
@@ -68,6 +76,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -258,7 +267,7 @@ class TestViewModel : ViewModel() {
         _uiState.update { currentState ->
             currentState.copy(
                 fragment = testFragment,
-                forceFragmentRefresh = _uiState.value.forceFragmentRefresh+1
+                forceFragmentRefresh = _uiState.value.forceFragmentRefresh + 1
             )
         }
     }
@@ -346,25 +355,25 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                 title = uiState.title,
                 onBackClick = { confirmActivityClose(true) }
             ) { paddingValues ->
-                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                        TestScreen(
-                            testFragment = uiState.fragment,
-                            forceFragmentRefresh = uiState.forceFragmentRefresh,
-                            onFragmentUpdated = { fragment ->
-                                testFragment = fragment as TestFragment
-                            },
-                            stats = uiState.stats,
-                            correctCount = uiState.correctCount,
-                            questionCount = uiState.questionCount,
-                            historyState = uiState.historyState,
-                            sheetExpanded = uiState.sheetExpanded,
-                            onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
-                            kanaWords = kanaWords,
-                            onItemClick = this::openItemInDictionary,
-                            modifier = Modifier.padding(paddingValues)
-                        )
-                    }
+                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                    TestScreen(
+                        testFragment = uiState.fragment,
+                        forceFragmentRefresh = uiState.forceFragmentRefresh,
+                        onFragmentUpdated = { fragment ->
+                            testFragment = fragment as TestFragment
+                        },
+                        stats = uiState.stats,
+                        correctCount = uiState.correctCount,
+                        questionCount = uiState.questionCount,
+                        historyState = uiState.historyState,
+                        sheetExpanded = uiState.sheetExpanded,
+                        onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
+                        kanaWords = kanaWords,
+                        onItemClick = this::openItemInDictionary,
+                        modifier = Modifier.padding(paddingValues)
+                    )
                 }
+            }
         }
     }
 
@@ -372,7 +381,8 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         when (val contents = item.contents) {
             is Kanji -> showItemInDict(contents)
             is Word -> showItemInDict(contents)
-            else -> { /* do nothing */ }
+            else -> { /* do nothing */
+            }
         }
     }
 
@@ -509,11 +519,18 @@ fun TestScreen(
         sheetBackgroundColor = themeAttrs.historyBackground,
         floatingActionButton = {
             if (!sheetExpanded && historyState.items.isNotEmpty()) {
+                val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+                val layoutDirection = LocalLayoutDirection.current
+
                 FloatingActionButton(
                     onClick = { onSheetExpandedChange(true) },
-                    modifier = Modifier
-                        .offset(x = 10.dp, y = 10.dp)
-                        .size(40.dp),
+                    modifier =
+                        Modifier
+                            .offset(
+                                x = 10.dp - safeDrawing.calculateEndPadding(layoutDirection),
+                                y = 10.dp - safeDrawing.calculateBottomPadding()
+                            )
+                            .size(40.dp),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_arrow_upward),
@@ -526,52 +543,63 @@ fun TestScreen(
         floatingActionButtonPosition = FabPosition.End,
         modifier = modifier
     ) {
-        Surface(
-            color = MaterialTheme.colors.background,
+        Column(
             modifier = Modifier.fillMaxSize()
         ) {
+            StatsBar(
+                itemsDontKnow = 0,
+                itemsBad = stats.bad,
+                itemsMeh = stats.meh,
+                itemsGood = stats.good
+            )
+
+            Text(
+                text = LocalContext.current.getString(
+                    R.string.score_string,
+                    correctCount,
+                    questionCount
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.body2,
+                textAlign = TextAlign.Center
+            )
+
+            val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+            val layoutDirection = LocalLayoutDirection.current
+
             Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                StatsBar(itemsDontKnow = 0, itemsBad = stats.bad, itemsMeh = stats.meh, itemsGood = stats.good)
-
-                Text(
-                    text = LocalContext.current.getString(
-                        R.string.score_string,
-                        correctCount,
-                        questionCount
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.body2,
-                    textAlign = TextAlign.Center
-                )
-
+                modifier = Modifier
+                    .padding(
+                        start = safeDrawing.calculateStartPadding(layoutDirection),
+                        end = safeDrawing.calculateEndPadding(layoutDirection),
+                    )
+                    .weight(1f),
+            )
+            {
                 if (testFragment != null) {
                     key(forceFragmentRefresh) {
                         AndroidFragment(
                             testFragment,
                             modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
+                                .fillMaxSize(),
                             onUpdate = onFragmentUpdated,
                         )
                     }
                 } else {
                     Spacer(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                            .fillMaxSize()
                     )
                 }
-
-                LastItemRow(
-                    lastCorrect = historyState.lastCorrect,
-                    lastWrong = historyState.lastWrong,
-                    lastProbabilityData = historyState.lastProbabilityData,
-                    kanaWords = kanaWords,
-                    onItemClick = onItemClick,
-                )
             }
+
+            LastItemRow(
+                lastCorrect = historyState.lastCorrect,
+                lastWrong = historyState.lastWrong,
+                lastProbabilityData = historyState.lastProbabilityData,
+                kanaWords = kanaWords,
+                onItemClick = onItemClick,
+            )
         }
     }
 }
@@ -584,11 +612,14 @@ private fun LastItemRow(
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
 ) {
+    val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .background(MaterialTheme.colors.surface),
+            .height(50.dp + safeDrawing.calculateBottomPadding())
+            .background(MaterialTheme.colors.surface)
+            .padding(bottom = safeDrawing.calculateBottomPadding()),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AnimatedContent(
@@ -879,7 +910,28 @@ fun TestScreenPreviewLongText() {
         Word(
             "好き",
             "すき",
-            listOf("fond", "pleasing", "like something", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah", "blah"),
+            listOf(
+                "fond",
+                "pleasing",
+                "like something",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah",
+                "blah"
+            ),
             listOf(),
             false,
         ),
