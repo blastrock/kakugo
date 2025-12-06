@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -89,7 +90,11 @@ class ClassSelectionActivity : ComponentActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         job = Job()
 
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            )
+        )
 
         val classification = when (val classificationStr = PreferenceManager.getDefaultSharedPreferences(this).getString("item_classification", "jlpt")) {
             "jlpt" -> Classification.JlptLevel
@@ -329,7 +334,6 @@ fun ClassSelectionScreen(
                         }
                     )
                 },
-                modifier = Modifier.safeDrawingPadding(),
             ) { paddingValues ->
                 Column(
                     modifier = Modifier

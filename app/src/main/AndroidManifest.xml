@@ -11,8 +11,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/AppThemeLight"
-        android:windowOptOutEdgeToEdgeEnforcement="true">
+        android:theme="@style/AppThemeLight">
         <activity
             android:name=".mainmenu.MainActivity"
             android:exported="true">

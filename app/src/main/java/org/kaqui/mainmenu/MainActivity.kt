@@ -3,18 +3,24 @@ package org.kaqui.mainmenu
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
@@ -32,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -63,13 +70,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            )
+        )
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         val lastVersionChangelog = sharedPrefs.getInt("last_version_changelog", 0)
         if (lastVersionChangelog < BuildConfig.VERSION_CODE) {
             AlertDialog.Builder(this)
-                .setMessage(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT))
+                .setMessage(
+                    HtmlCompat.fromHtml(
+                        getString(R.string.changelog_contents),
+                        HtmlCompat.FROM_HTML_MODE_COMPACT
+                    )
+                )
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     sharedPrefs.edit()
                         .putInt("last_version_changelog", BuildConfig.VERSION_CODE)
@@ -127,54 +143,51 @@ fun MainScreen(
     }
 
     KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(title = stringResource(R.string.app_name))
-                },
-                modifier = Modifier.safeDrawingPadding(),
-            ) { paddingValues ->
+        Scaffold(
+            topBar = {
+                TopBar(title = stringResource(R.string.app_name))
+            },
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                        .widthIn(500.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
+                    AppTitleImage(
                         modifier = Modifier
-                            .widthIn(500.dp)
-                            .verticalScroll(rememberScrollState())
-                            .padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AppTitleImage(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-                                .padding(8.dp)
-                        )
-
-                        MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
-                        MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
-                        MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
-                        MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
-                        MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
-                        MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
-                    }
-                }
-
-                if (showProgress) {
-                    LoadingDialog()
-                }
-
-                if (errorMessage != null) {
-                    ErrorDialog(
-                        title = errorTitle!!,
-                        message = errorMessage!!,
-                        onDismiss = { errorMessage = null }
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .padding(8.dp)
                     )
+
+                    MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
+                    MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
+                    MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
+                    MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
+                    MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
+                    MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
                 }
+            }
+
+            if (showProgress) {
+                LoadingDialog()
+            }
+
+            if (errorMessage != null) {
+                ErrorDialog(
+                    title = errorTitle!!,
+                    message = errorMessage!!,
+                    onDismiss = { errorMessage = null }
+                )
             }
         }
     }
@@ -213,7 +226,7 @@ fun LoadingDialog() {
 fun ErrorDialog(
     title: String,
     message: String,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

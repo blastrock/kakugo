@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -114,7 +115,11 @@ class SavedSelectionsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            )
+        )
 
         val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("mode", SelectionMode::class.java)!!
@@ -170,7 +175,6 @@ fun SavedSelectionsScreen(
                         onBackClick = onBackClick
                     )
                 },
-                modifier = Modifier.safeDrawingPadding(),
             ) { paddingValues ->
                 SavedSelectionsList(
                     selections = uiState.selections,

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -288,7 +289,11 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            )
+        )
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         kanaWords = sharedPrefs.getBoolean("kana_words", true)
@@ -344,7 +349,6 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                             onBackClick = { confirmActivityClose(true) }
                         )
                     },
-                    modifier = Modifier.safeDrawingPadding()
                 ) { paddingValues ->
                     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                         TestScreen(
