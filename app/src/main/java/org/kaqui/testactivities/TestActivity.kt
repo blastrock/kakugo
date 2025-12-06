@@ -355,7 +355,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                         onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
                         kanaWords = kanaWords,
                         onItemClick = this::openItemInDictionary,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier
                     )
                 }
             }

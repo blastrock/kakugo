@@ -57,34 +57,57 @@ fun VocabularyMenuScreen(onBackClick: () -> Unit = {}) {
         title = stringResource(id = R.string.word_title),
         onBackClick = onBackClick
     ) { paddingValues ->
-                Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .widthIn(500.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AppTitleImage(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .widthIn(500.dp)
-                            .verticalScroll(rememberScrollState())
-                            .padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AppTitleImage(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-                                .padding(8.dp)
-                        )
-                        MenuButton(R.string.word_to_reading) { startTest(context, TestType.WORD_TO_READING) }
-                        MenuButton(R.string.reading_to_word) { startTest(context, TestType.READING_TO_WORD) }
-                        MenuButton(R.string.word_to_meaning) { startTest(context, TestType.WORD_TO_MEANING) }
-                        MenuButton(R.string.meaning_to_word) { startTest(context, TestType.MEANING_TO_WORD) }
-                        Separator(modifier = Modifier.padding(4.dp))
-                        val intent = Intent(context, ClassSelectionActivity::class.java).putExtra("mode", SelectionMode.WORD as Serializable)
-                        MenuButton(R.string.word_selection) { context.startActivity(intent) }
-                    }
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(8.dp)
+                )
+                MenuButton(R.string.word_to_reading) {
+                    startTest(
+                        context,
+                        TestType.WORD_TO_READING
+                    )
                 }
+                MenuButton(R.string.reading_to_word) {
+                    startTest(
+                        context,
+                        TestType.READING_TO_WORD
+                    )
+                }
+                MenuButton(R.string.word_to_meaning) {
+                    startTest(
+                        context,
+                        TestType.WORD_TO_MEANING
+                    )
+                }
+                MenuButton(R.string.meaning_to_word) {
+                    startTest(
+                        context,
+                        TestType.MEANING_TO_WORD
+                    )
+                }
+                Separator(modifier = Modifier.padding(4.dp))
+                val intent = Intent(context, ClassSelectionActivity::class.java).putExtra(
+                    "mode",
+                    SelectionMode.WORD as Serializable
+                )
+                MenuButton(R.string.word_selection) { context.startActivity(intent) }
             }
         }
+    }
+}

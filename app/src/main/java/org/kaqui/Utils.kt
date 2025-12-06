@@ -4,12 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.util.TypedValue
 import android.view.HapticFeedbackConstants
-import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
@@ -25,9 +22,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material.Button
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.colorResource
@@ -202,8 +204,22 @@ fun AppScaffold(
                     )
                 },
                 content = { paddingValues ->
-                    Column(modifier = Modifier.consumeWindowInsets(WindowInsets.statusBars)) {
-                        content(paddingValues)
+                    val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
+                    val layoutDirection = LocalLayoutDirection.current
+
+                    val combinedPadding = PaddingValues(
+                        start = paddingValues.calculateStartPadding(layoutDirection),
+                        top = paddingValues.calculateTopPadding(),
+                        end = paddingValues.calculateEndPadding(layoutDirection),
+                        bottom = paddingValues.calculateBottomPadding() + navigationBarInsets.calculateBottomPadding()
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .consumeWindowInsets(WindowInsets.statusBars)
+                            .consumeWindowInsets(WindowInsets.navigationBars)
+                    ) {
+                        content(combinedPadding)
                     }
                 },
             )

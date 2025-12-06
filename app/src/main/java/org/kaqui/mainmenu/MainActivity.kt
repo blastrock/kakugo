@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.edit
 import androidx.core.text.HtmlCompat
 import androidx.preference.PreferenceManager
 import org.kaqui.AppScaffold
@@ -50,7 +51,6 @@ import org.kaqui.stats.StatsActivity
 import org.kaqui.theme.KakugoTheme
 import java.io.File
 import java.util.zip.GZIPInputStream
-import androidx.core.content.edit
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -137,34 +137,33 @@ fun MainScreen(
     AppScaffold(
         title = stringResource(R.string.app_name)
     ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .widthIn(500.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
+                AppTitleImage(
                     modifier = Modifier
-                        .widthIn(500.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AppTitleImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp)
-                            .padding(8.dp)
-                    )
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(8.dp)
+                )
 
-                    MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
-                    MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
-                    MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
-                    MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
-                    MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
-                    MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
-                }
+                MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
+                MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
+                MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
+                MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
+                MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
+                MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
             }
 
             if (showProgress) {
@@ -180,6 +179,7 @@ fun MainScreen(
             }
         }
     }
+}
 
 @Composable
 fun MenuButton(textRes: Int, onClick: () -> Unit) {

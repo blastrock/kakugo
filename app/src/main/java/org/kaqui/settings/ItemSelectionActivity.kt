@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -253,16 +254,15 @@ fun ItemSelectionScreen(
         }
     ) { paddingValues ->
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
+                    modifier = Modifier .fillMaxSize()
                 ) {
                     ItemListWithStats(
                         itemIds = uiState.itemIds,
                         stats = uiState.stats,
                         cacheVersion = uiState.cacheVersion,
                         getItemData = getItemData,
-                        onItemEnabledChange = onItemEnabledChange
+                        onItemEnabledChange = onItemEnabledChange,
+                        contentPadding = paddingValues,
                     )
                 }
             }
@@ -274,7 +274,8 @@ fun ItemListWithStats(
     stats: LearningDbView.Stats,
     cacheVersion: Int,
     getItemData: (Int) -> ItemData,
-    onItemEnabledChange: (Int, Boolean) -> Unit
+    onItemEnabledChange: (Int, Boolean) -> Unit,
+    contentPadding: PaddingValues,
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -287,7 +288,8 @@ fun ItemListWithStats(
         )
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding,
         ) {
             items(
                 items = itemIds,

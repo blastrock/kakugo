@@ -14,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -308,34 +309,35 @@ fun ClassSelectionScreen(
             }
         }
     ) { paddingValues ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    // Global stats section
-                    StatsBar(
-                        itemsDontKnow = uiState.globalStats.disabled,
-                        itemsBad = uiState.globalStats.bad,
-                        itemsMeh = uiState.globalStats.meh,
-                        itemsGood = uiState.globalStats.good
-                    )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+        ) {
+            // Global stats section
+            StatsBar(
+                itemsDontKnow = uiState.globalStats.disabled,
+                itemsBad = uiState.globalStats.bad,
+                itemsMeh = uiState.globalStats.meh,
+                itemsGood = uiState.globalStats.good
+            )
 
-                    // Class list
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(uiState.classItems.size) { index ->
-                            ClassListItem(
-                                classItem = uiState.classItems[index],
-                                onClick = { onClassItemClick(index) }
-                            )
-                            Divider()
-                        }
-                    }
+            // Class list
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding())
+            ) {
+                items(uiState.classItems.size) { index ->
+                    ClassListItem(
+                        classItem = uiState.classItems[index],
+                        onClick = { onClassItemClick(index) }
+                    )
+                    Divider()
                 }
             }
         }
+    }
+}
 
 @Composable
 fun ClassListItem(

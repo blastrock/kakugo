@@ -58,37 +58,60 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
         title = stringResource(id = R.string.hiragana_title),
         onBackClick = onBackClick
     ) { paddingValues ->
-                Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .widthIn(500.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AppTitleImage(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .widthIn(500.dp)
-                            .verticalScroll(rememberScrollState())
-                            .padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AppTitleImage(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-                                .padding(8.dp)
-                        )
-                        MenuButton(R.string.hiragana_to_romaji) { startTest(context, TestType.HIRAGANA_TO_ROMAJI) }
-                        MenuButton(R.string.romaji_to_hiragana) { startTest(context, TestType.ROMAJI_TO_HIRAGANA) }
-                        MenuButton(R.string.hiragana_to_romaji_typing) { startTest(context, TestType.HIRAGANA_TO_ROMAJI_TEXT) }
-                        MenuButton(R.string.hiragana_drawing) { startTest(context, TestType.HIRAGANA_DRAWING) }
-                        Separator(modifier = Modifier.padding(4.dp))
-                        val intent = Intent(context, ItemSelectionActivity::class.java).putExtra("mode", SelectionMode.HIRAGANA as Serializable)
-                        MenuButton(R.string.hiragana_selection) { context.startActivity(intent) }
-                    }
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(8.dp)
+                )
+                MenuButton(R.string.hiragana_to_romaji) {
+                    startTest(
+                        context,
+                        TestType.HIRAGANA_TO_ROMAJI
+                    )
                 }
+                MenuButton(R.string.romaji_to_hiragana) {
+                    startTest(
+                        context,
+                        TestType.ROMAJI_TO_HIRAGANA
+                    )
+                }
+                MenuButton(R.string.hiragana_to_romaji_typing) {
+                    startTest(
+                        context,
+                        TestType.HIRAGANA_TO_ROMAJI_TEXT
+                    )
+                }
+                MenuButton(R.string.hiragana_drawing) {
+                    startTest(
+                        context,
+                        TestType.HIRAGANA_DRAWING
+                    )
+                }
+                Separator(modifier = Modifier.padding(4.dp))
+                val intent = Intent(context, ItemSelectionActivity::class.java).putExtra(
+                    "mode",
+                    SelectionMode.HIRAGANA as Serializable
+                )
+                MenuButton(R.string.hiragana_selection) { context.startActivity(intent) }
             }
         }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

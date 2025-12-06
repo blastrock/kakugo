@@ -8,9 +8,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -32,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -229,17 +235,27 @@ fun ItemSearchScreen(
                     )
                 }
             ) { paddingValues ->
+                val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
+                val layoutDirection = LocalLayoutDirection.current
+
+                val combinedPadding = PaddingValues(
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                    bottom = paddingValues.calculateBottomPadding() + navigationBarInsets.calculateBottomPadding()
+                )
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
                 ) {
                     ItemListWithStats(
                         itemIds = uiState.itemIds,
                         stats = uiState.stats,
                         cacheVersion = uiState.cacheVersion,
                         getItemData = getItemData,
-                        onItemEnabledChange = onItemEnabledChange
+                        onItemEnabledChange = onItemEnabledChange,
+                        contentPadding = combinedPadding,
                     )
                 }
             }

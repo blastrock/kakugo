@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,7 +26,6 @@ import org.kaqui.model.Database
 import org.kaqui.model.DatabaseUpdater
 import java.io.File
 import java.util.Date
-import androidx.core.content.edit
 
 
 class MainSettingsActivity : BaseActivity() {

@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -173,7 +174,8 @@ fun SavedSelectionsScreen(
                     onDeleteClick = onDeleteClick,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(top = paddingValues.calculateTopPadding()),
+                    contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding())
                 )
             }
 
@@ -191,10 +193,12 @@ fun SavedSelectionsList(
     selections: List<Database.SavedSelection>,
     onItemClick: (Database.SavedSelection) -> Unit,
     onDeleteClick: (Database.SavedSelection) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues()
 ) {
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
+        contentPadding = contentPadding
     ) {
         items(
             items = selections,
