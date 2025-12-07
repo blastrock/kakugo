@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.text.HtmlCompat
@@ -33,9 +35,36 @@ class MainSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val frameLayout = android.widget.FrameLayout(this).apply {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            )
+        )
+
+        val typedValue = android.util.TypedValue()
+        theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
+        val primaryColor = typedValue.data
+
+        val darkenFactor = 0.7f
+        val darkerPrimary = android.graphics.Color.rgb(
+            (android.graphics.Color.red(primaryColor) * darkenFactor).toInt(),
+            (android.graphics.Color.green(primaryColor) * darkenFactor).toInt(),
+            (android.graphics.Color.blue(primaryColor) * darkenFactor).toInt()
+        )
+
+        val frameLayout = object : android.widget.FrameLayout(this) {
+            val paint = android.graphics.Paint().apply {
+                color = darkerPrimary
+                style = android.graphics.Paint.Style.FILL
+            }
+
+            override fun dispatchDraw(canvas: android.graphics.Canvas) {
+                super.dispatchDraw(canvas)
+                canvas.drawRect(0f, 0f, width.toFloat(), paddingTop.toFloat(), paint)
+            }
+        }.apply {
             id = R.id.settings_main_view
-            // Apply window insets for edge-to-edge
+
             ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
                 val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
                 view.setPadding(
