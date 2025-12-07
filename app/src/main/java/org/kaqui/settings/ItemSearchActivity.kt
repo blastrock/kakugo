@@ -7,8 +7,11 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -16,6 +19,8 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -37,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -186,53 +192,70 @@ fun ItemSearchScreen(
         Surface(color = MaterialTheme.colors.background) {
             Scaffold(
                 topBar = {
-                    TopAppBar(
-                        navigationIcon = {
-                            IconButton(onClick = onBackClick) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.back)
-                                )
-                            }
-                        },
-                        title = {
-                            TextField(
-                                value = uiState.searchQuery,
-                                onValueChange = onSearchQueryChange,
-                                placeholder = {
-                                    Text(
-                                        text = stringResource(R.string.search)
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (uiState.searchQuery.isNotEmpty()) {
-                                        IconButton(onClick = { onSearchQueryChange("") }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Clear,
-                                                contentDescription = stringResource(R.string.clear_search),
-                                                tint = MaterialTheme.colors.onPrimary
-                                            )
-                                        }
+                    Surface(
+                        color = MaterialTheme.colors.primary,
+                        elevation = 4.dp
+                    ) {
+                        Column {
+                            Spacer(
+                                Modifier
+                                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                                    .fillMaxWidth()
+                                    .background(Color.Black.copy(alpha = 0.3f))
+                            )
+                            TopAppBar(
+                                navigationIcon = {
+                                    IconButton(onClick = onBackClick) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = stringResource(R.string.back)
+                                        )
                                     }
                                 },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(focusRequester),
-                                singleLine = true,
-                                colors = TextFieldDefaults.textFieldColors(
-                                    backgroundColor = MaterialTheme.colors.primary,
-                                    textColor = MaterialTheme.colors.onPrimary,
-                                    placeholderColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.6f),
-                                    focusedIndicatorColor = MaterialTheme.colors.onPrimary,
-                                    unfocusedIndicatorColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.4f),
-                                    cursorColor = MaterialTheme.colors.onPrimary
-                                )
+                                title = {
+                                    TextField(
+                                        value = uiState.searchQuery,
+                                        onValueChange = onSearchQueryChange,
+                                        placeholder = {
+                                            Text(
+                                                text = stringResource(R.string.search)
+                                            )
+                                        },
+                                        trailingIcon = {
+                                            if (uiState.searchQuery.isNotEmpty()) {
+                                                IconButton(onClick = { onSearchQueryChange("") }) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Clear,
+                                                        contentDescription = stringResource(R.string.clear_search),
+                                                        tint = MaterialTheme.colors.onPrimary
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .focusRequester(focusRequester),
+                                        singleLine = true,
+                                        colors = TextFieldDefaults.textFieldColors(
+                                            backgroundColor = MaterialTheme.colors.primary,
+                                            textColor = MaterialTheme.colors.onPrimary,
+                                            placeholderColor = MaterialTheme.colors.onPrimary.copy(
+                                                alpha = 0.6f
+                                            ),
+                                            focusedIndicatorColor = MaterialTheme.colors.onPrimary,
+                                            unfocusedIndicatorColor = MaterialTheme.colors.onPrimary.copy(
+                                                alpha = 0.4f
+                                            ),
+                                            cursorColor = MaterialTheme.colors.onPrimary
+                                        )
+                                    )
+                                },
+                                backgroundColor = MaterialTheme.colors.primary,
+                                contentColor = MaterialTheme.colors.onPrimary,
+                                elevation = 4.dp
                             )
-                        },
-                        backgroundColor = MaterialTheme.colors.primary,
-                        contentColor = MaterialTheme.colors.onPrimary,
-                        elevation = 4.dp
-                    )
+                        }
+                    }
                 }
             ) { paddingValues ->
                 val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
