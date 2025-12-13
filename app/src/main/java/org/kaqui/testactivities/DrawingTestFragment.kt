@@ -221,19 +221,20 @@ class DrawingViewModel(application: Application) : AndroidViewModel(application)
 
     fun onStrokeFinishedFromDrawView(drawnPath: Path) {
         if (isFinishedInternal || currentStrokeInternal >= currentQuestionStrokesInternal.size || drawViewWidth == 0) {
-            _uiState.update { it.copy(hintPathForDrawView = null) } // Clear hint if any
+            _uiState.update { it.copy(hintPathForDrawView = null) }
             return
         }
+
+        // All the math is done in native kanji size coordinates
 
         val scaleToKanji = DrawingConstants.KANJI_SIZE / drawViewWidth.toFloat()
         val matrixToKanji = Matrix()
         matrixToKanji.postScale(scaleToKanji, scaleToKanji)
-        val scaledDrawnPathNative =
-            Path(drawnPath).apply { transform(matrixToKanji) } // Work on a copy
+        val scaledDrawnPathNative = Path(drawnPath).apply { transform(matrixToKanji) }
 
         val squaredTolerance = (DrawingConstants.KANJI_SIZE / DrawingConstants.RESOLUTION).pow(2)
-        val originalCompareStrokeNative = currentQuestionStrokesInternal[currentStrokeInternal]
 
+        val originalCompareStrokeNative = currentQuestionStrokesInternal[currentStrokeInternal]
         val originalPoints = toPoints(
             originalCompareStrokeNative,
             DrawingConstants.KANJI_SIZE / DrawingConstants.RESOLUTION
@@ -245,53 +246,31 @@ class DrawingViewModel(application: Application) : AndroidViewModel(application)
 
         var currentPointIndexReachedAt = 0
         var currentOriginalPointIndex = 0
-        var matched = false
 
-        if (originalPoints.isNotEmpty() && drawnPoints.isNotEmpty()) {
-            var allDrawnPointsMatch = true
-            for ((drawnPointIndex, drawnPoint) in drawnPoints.withIndex()) {
-                if (currentOriginalPointIndex >= originalPoints.size) {
-                    allDrawnPointsMatch = false
-                    break
-                }
-                val squaredDistance =
-                    originalPoints[currentOriginalPointIndex].squaredDistanceTo(drawnPoint)
-                if (squaredDistance > squaredTolerance) {
-                    allDrawnPointsMatch = false
-                    break
-                }
-                if (currentOriginalPointIndex < originalPoints.size - 1 && originalPoints[currentOriginalPointIndex + 1].squaredDistanceTo(
-                        drawnPoint
-                    ) < squaredDistance
-                ) {
-                    currentPointIndexReachedAt = drawnPointIndex
-                    currentOriginalPointIndex++
-                }
+        for ((drawnPointIndex, drawnPoint) in drawnPoints.withIndex()) {
+            val squaredDistance =
+                originalPoints[currentOriginalPointIndex].squaredDistanceTo(drawnPoint)
+            if (squaredDistance > squaredTolerance)
+                return
+
+            if (currentOriginalPointIndex < originalPoints.size - 1 &&
+                originalPoints[currentOriginalPointIndex + 1].squaredDistanceTo(drawnPoint) < squaredDistance
+            ) {
+                currentPointIndexReachedAt = drawnPointIndex
+                ++currentOriginalPointIndex
             }
-            if (allDrawnPointsMatch && currentOriginalPointIndex >= originalPoints.size - 1) {
-                for (drawnPoint in drawnPoints.slice(currentPointIndexReachedAt until drawnPoints.size)) {
-                    if (originalPoints.drop(currentOriginalPointIndex)
-                            .any { it.squaredDistanceTo(drawnPoint) > squaredTolerance }
-                    ) {
-                        allDrawnPointsMatch = false
-                        break
-                    }
-                }
-                if (allDrawnPointsMatch && originalPoints.drop(currentOriginalPointIndex)
-                        .all { point ->
-                            drawnPoints.slice(currentPointIndexReachedAt until drawnPoints.size)
-                                .any { it.squaredDistanceTo(point) <= squaredTolerance }
-                        }
-                ) {
-                    matched = true
-                }
-            }
+        }
+
+        for (drawnPoint in drawnPoints.slice(currentPointIndexReachedAt until drawnPoints.size)) {
+            if (originalPoints
+                    .drop(currentOriginalPointIndex)
+                    .any { it.squaredDistanceTo(drawnPoint) > squaredTolerance }
+            )
+            // stroke finished too early
+                return
         }
 
         val newPathsToDraw = mutableListOf<Path>()
-        if (!matched) {
-            return
-        }
 
         val scaleForDisplay = drawViewWidth.toFloat() / DrawingConstants.KANJI_SIZE
         val displayMatrix = Matrix()

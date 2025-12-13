@@ -104,11 +104,13 @@ class DrawView(context: Context) : View(context) {
     fun setHint(path: Path) {
         mHintPath = path
         val animator = ValueAnimator()
-        animator.setIntValues(0, 255, 0)
+        animator.setIntValues(1, 255, 0)
         animator.duration = 1000
         animator.addUpdateListener {
             val color = ContextCompat.getColor(context, R.color.drawingHintColor)
             mHintPaint.color = (it.animatedValue as Int shl 24) or (color and 0xffffff)
+            if (it.animatedValue as Int == 0)
+                mHintPath = Path()
             invalidate()
         }
         animator.start()
