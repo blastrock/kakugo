@@ -36,9 +36,11 @@ private val DarkColors = darkColors(
 
 // Light theme colors from XML
 private val LightThemeColors = ThemeAttributes(
-    itemGood = Color(0xFF9CCC65),
-    itemMeh = Color(0xFFC5CAE9),
-    itemBad = Color(0xFFFCE4EC),
+    itemBad = Color(0xFFFFC9C9),
+    itemMeh = Color(0xFFFFE8C4),
+    itemLearn = Color(0xFFF9FFC4),
+    itemGood = Color(0xFFB5DA8F),
+    itemPerfect = Color(0xFFB3E5FC),
     historyBackground = Color(0xFFDDDDDD),
     wrongAnswerBackground = Color(0xFFFFDDDD),
     correctAnswerBackground = Color(0xFFDEFFD3),
@@ -55,9 +57,11 @@ private val LightThemeColors = ThemeAttributes(
 
 // Dark theme colors from XML
 private val DarkThemeColors = ThemeAttributes(
-    itemGood = Color(0xFF085300),
-    itemMeh = Color(0xFF313F4D),
     itemBad = Color(0xFF500000),
+    itemMeh = Color(0xFF894E16),
+    itemLearn = Color(0xFF937F1B),
+    itemGood = Color(0xFF085300),
+    itemPerfect = Color(0xFF01579B),
     historyBackground = Color(0xFF222222),
     wrongAnswerBackground = Color(0xFF350000),
     correctAnswerBackground = Color(0xFF092600),
@@ -78,6 +82,8 @@ data class ThemeAttributes(
     val itemGood: Color,
     val itemMeh: Color,
     val itemBad: Color,
+    val itemLearn: Color,
+    val itemPerfect: Color,
     val historyBackground: Color,
     val wrongAnswerBackground: Color,
     val correctAnswerBackground: Color,
