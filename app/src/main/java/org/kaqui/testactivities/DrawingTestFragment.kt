@@ -302,26 +302,20 @@ class DrawingViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun toPoints(path: Path, step: Float): List<PointF> {
-        if (path.isEmpty) return emptyList()
-        val pathMeasure = PathMeasure(path, false)
-        if (pathMeasure.length == 0f) return emptyList()
+    fun PathMeasure.getPoint(position: Float): PointF {
+        val out = floatArrayOf(0f, 0f)
+        getPosTan(position, out, null)
+        return PointF(out[0], out[1])
+    }
 
-        val points = mutableListOf<PointF>()
-        var distance = 0f
-        while (distance <= pathMeasure.length) {
-            val pos = floatArrayOf(0f, 0f)
-            pathMeasure.getPosTan(distance, pos, null)
-            points.add(PointF(pos[0], pos[1]))
-            if (step == 0f) break // Avoid infinite loop
-            distance += step
-        }
-        // Add the last point explicitly
-        val lastPos = floatArrayOf(0f, 0f)
-        pathMeasure.getPosTan(pathMeasure.length, lastPos, null)
-        if (points.isEmpty() || points.last().x != lastPos[0] || points.last().y != lastPos[1]) {
-            points.add(PointF(lastPos[0], lastPos[1]))
-        }
+    private fun toPoints(path: Path, step: Float): List<PointF> {
+        val scale = 64
+
+        val pathMeasure = PathMeasure(path, false)
+        val points = (0..(pathMeasure.length.toInt() * scale) step (step * scale).toInt())
+            .map { pathMeasure.getPoint(it.toFloat() / scale) }
+            .toMutableList()
+        points.add(pathMeasure.getPoint(pathMeasure.length))
         return points
     }
 
