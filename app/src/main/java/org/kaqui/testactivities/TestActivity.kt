@@ -1,7 +1,5 @@
 package org.kaqui.testactivities
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
@@ -71,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NavUtils
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.compose.AndroidFragment
@@ -97,6 +94,8 @@ import org.kaqui.model.Word
 import org.kaqui.model.description
 import org.kaqui.model.text
 import org.kaqui.showItemProbabilityData
+import org.kaqui.showKanjiInDict
+import org.kaqui.startActivity
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.toName
@@ -364,45 +363,10 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 
     private fun openItemInDictionary(item: Item) {
         when (val contents = item.contents) {
-            is Kanji -> showItemInDict(contents)
-            is Word -> showItemInDict(contents)
+            is Kanji -> showKanjiInDict(this, contents)
+            is Word -> startActivity<org.kaqui.itemdetails.WordDisplayActivity>("word_id" to item.id)
             else -> { /* do nothing */
             }
-        }
-    }
-
-    private fun showItemInDict(kanji: Kanji) {
-        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-        intent.putExtra("kanjis", kanji.kanji)
-        intent.putExtra("search_in_kanjidic", true)
-        intent.putExtra("showEntryDetailOnSingleResult", true)
-        try {
-            startActivity(intent)
-        } catch (_: ActivityNotFoundException) {
-            startActivity(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    "https://jisho.org/search/${kanji.kanji}%20%23kanji".toUri()
-                )
-            )
-        }
-    }
-
-    private fun showItemInDict(word: Word) {
-        val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
-        intent.putExtra("kanjis", word.word)
-        intent.putExtra("showEntryDetailOnSingleResult", true)
-        intent.putExtra("match_jp", "Exact")
-        intent.putExtra("deinflect", false)
-        try {
-            startActivity(intent)
-        } catch (_: ActivityNotFoundException) {
-            startActivity(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    "https://jisho.org/search/${word.word}".toUri()
-                )
-            )
         }
     }
 

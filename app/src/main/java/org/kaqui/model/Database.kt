@@ -192,6 +192,15 @@ class Database private constructor(context: Context, val database: SQLiteDatabas
         return item
     }
 
+    fun getKanjiByCharacter(character: String, knowledgeType: KnowledgeType? = null): Item? {
+        return try {
+            val codePoint = character.codePointAt(0)
+            getKanji(codePoint, knowledgeType)
+        } catch (e: RuntimeException) {
+            null // Kanji not in database
+        }
+    }
+
     fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {
         val contents = Word("", "", listOf(), listOf(), false)
         val item = Item(id, contents, 0.0, 0.0, 0, false)

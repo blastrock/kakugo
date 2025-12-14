@@ -413,3 +413,38 @@ fun BetterButton(
         shape = shape,
     )
 }
+
+fun showKanjiInDict(context: Context, kanji: Kanji) {
+    val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+    intent.putExtra("kanjis", kanji.kanji)
+    intent.putExtra("search_in_kanjidic", true)
+    intent.putExtra("showEntryDetailOnSingleResult", true)
+    try {
+        context.startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                "https://jisho.org/search/${kanji.kanji}%20%23kanji".toUri()
+            )
+        )
+    }
+}
+
+fun showWordInDict(context: Context, word: Word) {
+    val intent = Intent("sk.baka.aedict3.action.ACTION_SEARCH_JMDICT")
+    intent.putExtra("kanjis", word.word)
+    intent.putExtra("showEntryDetailOnSingleResult", true)
+    intent.putExtra("match_jp", "Exact")
+    intent.putExtra("deinflect", false)
+    try {
+        context.startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                "https://jisho.org/search/${word.word}".toUri()
+            )
+        )
+    }
+}
