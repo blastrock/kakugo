@@ -1,6 +1,7 @@
 package org.kaqui
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
@@ -12,6 +13,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.net.toUri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,6 +33,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
@@ -69,7 +72,9 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.kaqui.model.Database
+import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
+import org.kaqui.model.Word
 import org.kaqui.testactivities.TestActivity
 import org.kaqui.theme.KakugoTheme
 import java.io.Serializable
@@ -147,11 +152,13 @@ fun AppTitleImage(modifier: Modifier = Modifier) {
 fun TopBar(
     title: String,
     onBackClick: (() -> Unit)? = null,
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
+    belowAppBar: @Composable () -> Unit = {}
 ) {
     Surface(
         color = MaterialTheme.colors.primary,
-        elevation = 4.dp
+        // This is from Material 2. AppBarDefaults.TopAppBarElevation is 4.dp, I don't know why.
+        elevation = 20.dp,
     ) {
         Column {
             Spacer(
@@ -180,8 +187,8 @@ fun TopBar(
                 actions = actions,
                 backgroundColor = MaterialTheme.colors.primary,
                 contentColor = MaterialTheme.colors.onPrimary,
-                elevation = 4.dp,
             )
+            belowAppBar()
         }
     }
 }
@@ -191,6 +198,7 @@ fun AppScaffold(
     title: String,
     onBackClick: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    belowAppBar: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     KakugoTheme {
@@ -200,7 +208,8 @@ fun AppScaffold(
                     TopBar(
                         title = title,
                         onBackClick = onBackClick,
-                        actions = actions
+                        actions = actions,
+                        belowAppBar = belowAppBar
                     )
                 },
                 content = { paddingValues ->
