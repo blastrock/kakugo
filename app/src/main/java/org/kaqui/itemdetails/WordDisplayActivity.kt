@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,8 +48,10 @@ import org.kaqui.model.KnowledgeType
 import org.kaqui.model.Word
 import org.kaqui.showKanjiInDict
 import org.kaqui.showWordInDict
+import org.kaqui.SrsCalculator
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.theme.ThemeAttributes
+import java.util.Calendar
 
 enum class WordDisplayTab {
     WORD, KANJI
@@ -66,6 +71,7 @@ data class WordData(
     val meaningShortScore: Double,
     val meaningLongScore: Double,
     val wordObject: Word,
+    val wordId: Int,
 ) {
     companion object {
         fun default() = WordData(
@@ -76,7 +82,8 @@ data class WordData(
             readingLongScore = 0.0,
             meaningShortScore = 0.0,
             meaningLongScore = 0.0,
-            wordObject = Word("", "", emptyList(), emptyList(), false)
+            wordObject = Word("", "", emptyList(), emptyList(), false),
+            wordId = -1
         )
     }
 }
@@ -107,7 +114,8 @@ class WordDisplayViewModel : ViewModel() {
             readingLongScore = wordReading.longScore,
             meaningShortScore = wordMeaning.shortScore,
             meaningLongScore = wordMeaning.longScore,
-            wordObject = wordContents
+            wordObject = wordContents,
+            wordId = wordId
         )
 
         // Extract and load kanji
@@ -132,6 +140,33 @@ class WordDisplayViewModel : ViewModel() {
 
     fun onTabSelected(tab: WordDisplayTab) {
         uiState = uiState.copy(selectedTab = tab)
+    }
+
+    fun updateScore(context: Context, knowledgeType: KnowledgeType, increase: Boolean) {
+        val database = Database.getInstance(context)
+        val wordView = database.getWordView(knowledgeType)
+
+        val currentShortScore = when (knowledgeType) {
+            KnowledgeType.Reading -> uiState.wordData.readingShortScore
+            KnowledgeType.Meaning -> uiState.wordData.meaningShortScore
+            else -> throw IllegalArgumentException("Invalid knowledge type for word: $knowledgeType")
+        }
+
+        val currentLongScore = when (knowledgeType) {
+            KnowledgeType.Reading -> uiState.wordData.readingLongScore
+            KnowledgeType.Meaning -> uiState.wordData.meaningLongScore
+            else -> throw IllegalArgumentException("Invalid knowledge type for word: $knowledgeType")
+        }
+
+        val scoreUpdate = SrsCalculator.createManualScoreUpdate(
+            itemId = uiState.wordData.wordId,
+            currentShortScore = currentShortScore,
+            currentLongScore = currentLongScore,
+            increase = increase
+        )
+
+        wordView.applyScoreUpdate(scoreUpdate)
+        initialize(context, uiState.wordData.wordId)
     }
 
     private fun extractKanjiFromWord(word: String): List<String> {
@@ -161,7 +196,10 @@ class WordDisplayActivity : ComponentActivity() {
             WordDisplayScreen(
                 uiState = viewModel.uiState,
                 onTabSelected = viewModel::onTabSelected,
-                onBackClick = { finish() }
+                onBackClick = { finish() },
+                onUpdateScore = { knowledgeType, increase ->
+                    viewModel.updateScore(this@WordDisplayActivity, knowledgeType, increase)
+                }
             )
         }
     }
@@ -172,6 +210,7 @@ fun WordDisplayScreen(
     uiState: WordDisplayUiState,
     onTabSelected: (WordDisplayTab) -> Unit,
     onBackClick: () -> Unit,
+    onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -216,7 +255,8 @@ fun WordDisplayScreen(
             WordDisplayTab.WORD -> WordTabContent(
                 wordData = wordData,
                 onOpenExternalDict = { showWordInDict(context, wordData.wordObject) },
-                contentPadding = paddingValues
+                contentPadding = paddingValues,
+                onUpdateScore = onUpdateScore
             )
 
             WordDisplayTab.KANJI -> KanjiTabContent(
@@ -233,6 +273,7 @@ fun WordTabContent(
     wordData: WordData,
     onOpenExternalDict: () -> Unit,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
+    onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -311,7 +352,12 @@ fun WordTabContent(
             MemorizationStatusRow(
                 label = "Reading",
                 status = readingStatus.text,
-                color = readingStatus.color
+                color = readingStatus.color,
+                shortScore = wordData.readingShortScore,
+                onButtonClick = {
+                    val increase = wordData.readingShortScore != 1.0
+                    onUpdateScore(KnowledgeType.Reading, increase)
+                }
             )
         }
 
@@ -326,7 +372,12 @@ fun WordTabContent(
             MemorizationStatusRow(
                 label = "Meaning",
                 status = meaningStatus.text,
-                color = meaningStatus.color
+                color = meaningStatus.color,
+                shortScore = wordData.meaningShortScore,
+                onButtonClick = {
+                    val increase = wordData.meaningShortScore != 1.0
+                    onUpdateScore(KnowledgeType.Meaning, increase)
+                }
             )
         }
 
@@ -350,7 +401,13 @@ fun WordTabContent(
 }
 
 @Composable
-fun MemorizationStatusRow(label: String, status: String, color: Color) {
+fun MemorizationStatusRow(
+    label: String,
+    status: String,
+    color: Color,
+    shortScore: Double,
+    onButtonClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -361,13 +418,29 @@ fun MemorizationStatusRow(label: String, status: String, color: Color) {
             text = "$label:",
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(0.3f)
+            modifier = Modifier.weight(0.2f)
         )
         StatusTag(
             text = status,
             backgroundColor = color,
-            modifier = Modifier.weight(0.7f, fill = false)
+            modifier = Modifier.width(150.dp)
         )
+        Spacer(modifier = Modifier.width(8.dp))
+        if (shortScore == 1.0) {
+            TextButton(
+                onClick = onButtonClick,
+                modifier = Modifier.weight(0.3f)
+            ) {
+                Text("Review sooner", textAlign = TextAlign.Center, fontSize = 12.sp)
+            }
+        } else {
+            TextButton(
+                onClick = onButtonClick,
+                modifier = Modifier.weight(0.3f)
+            ) {
+                Text("Skip next review", textAlign = TextAlign.Center, fontSize = 12.sp)
+            }
+        }
     }
 }
 
@@ -466,7 +539,8 @@ fun PreviewWordDisplayScreenWordTab() {
         readingLongScore = 0.0,
         meaningShortScore = 1.0,
         meaningLongScore = 0.1,
-        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false)
+        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false),
+        wordId = 123
     )
 
     val sampleKanjiList = listOf(
@@ -488,7 +562,8 @@ fun PreviewWordDisplayScreenWordTab() {
             kanjiList = sampleKanjiList
         ),
         onTabSelected = {},
-        onBackClick = {}
+        onBackClick = {},
+        onUpdateScore = { _, _ -> }
     )
 }
 
@@ -503,7 +578,8 @@ fun PreviewWordDisplayScreenKanjiTab() {
         readingLongScore = 0.75,
         meaningShortScore = 0.3,
         meaningLongScore = 0.45,
-        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false)
+        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false),
+        wordId = 123
     )
 
     val sampleKanjiList = listOf(
@@ -525,7 +601,8 @@ fun PreviewWordDisplayScreenKanjiTab() {
             kanjiList = sampleKanjiList
         ),
         onTabSelected = {},
-        onBackClick = {}
+        onBackClick = {},
+        onUpdateScore = { _, _ -> }
     )
 }
 
@@ -538,7 +615,7 @@ fun PreviewWordDisplayScreenKanaOnly() {
         meanings = listOf("hiragana", "Japanese syllabary"),
         readingShortScore = 1.0,
         readingLongScore = 0.5,
-        meaningShortScore = 1.0,
+        meaningShortScore = 0.7,
         meaningLongScore = 1.0,
         wordObject = Word(
             "ひらがな",
@@ -546,7 +623,8 @@ fun PreviewWordDisplayScreenKanaOnly() {
             listOf("hiragana", "Japanese syllabary"),
             listOf(),
             true
-        )
+        ),
+        wordId = 123
     )
 
     WordDisplayScreen(
@@ -556,7 +634,8 @@ fun PreviewWordDisplayScreenKanaOnly() {
             kanjiList = emptyList()
         ),
         onTabSelected = {},
-        onBackClick = {}
+        onBackClick = {},
+        onUpdateScore = { _, _ -> }
     )
 }
 
@@ -571,7 +650,8 @@ fun PreviewWordDisplayScreenMultipleKanji() {
         readingLongScore = 0.95,
         meaningShortScore = 1.0,
         meaningLongScore = 0.9,
-        wordObject = Word("日本語", "にほんご", listOf("Japanese language"), listOf(), false)
+        wordObject = Word("日本語", "にほんご", listOf("Japanese language"), listOf(), false),
+        wordId = 123
     )
 
     val sampleKanjiList = listOf(
@@ -611,6 +691,7 @@ fun PreviewWordDisplayScreenMultipleKanji() {
             kanjiList = sampleKanjiList
         ),
         onTabSelected = {},
-        onBackClick = {}
+        onBackClick = {},
+        onUpdateScore = { _, _ -> }
     )
 }

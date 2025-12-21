@@ -418,6 +418,11 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         viewModel.setTitle(getString(testType.toName()))
         viewModel.setFragmentClass(testFragmentClass)
     }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setStats(testEngine.itemView.getStats())
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)

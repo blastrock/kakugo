@@ -134,6 +134,35 @@ class SrsCalculator {
             return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(), now, minLastAsked)
         }
 
+        fun createManualScoreUpdate(
+            itemId: Int,
+            currentShortScore: Double,
+            currentLongScore: Double,
+            increase: Boolean
+        ): ScoreUpdate {
+            val now = Calendar.getInstance().timeInMillis / 1000
+
+            // Calculate new short score based on increase/decrease
+            val newShortScore = if (increase) 1.0f else 0.7f
+
+            // Calculate new long score based on increase/decrease
+            val newLongScore = if (increase) {
+                // Formula: min(1.0, min(max(previousLongScore, 0.01) * 2.0, previousLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
+                min(1.0, min(max(currentLongScore, 0.01) * 2.0, currentLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
+            } else {
+                // Formula: previousLongScore - min(previousLongScore / 2, MAX_LONG_SCORE_UPDATE_INCREMENT)
+                currentLongScore - min(currentLongScore / 2, MAX_LONG_SCORE_UPDATE_INCREMENT)
+            }
+
+            return ScoreUpdate(
+                itemId = itemId,
+                shortScore = newShortScore,
+                longScore = newLongScore.toFloat(),
+                lastAsked = now,
+                minLastAsked = now
+            )
+        }
+
         private fun getProbaParamsStage1(now: Long, minLastAsked: Long): ProbaParamsStage1 {
             val daysEnd = (now - minLastAsked) / 3600.0 / 24.0
 
