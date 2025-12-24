@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -26,9 +28,12 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +57,7 @@ import org.kaqui.SrsCalculator
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.theme.ThemeAttributes
 import java.util.Calendar
+import kotlinx.coroutines.launch
 
 enum class WordDisplayTab {
     WORD, KANJI
@@ -213,18 +219,30 @@ fun WordDisplayScreen(
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val hasKanji = uiState.kanjiList.isNotEmpty()
+    val pageCount = if (hasKanji) 2 else 1
+    val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { pageCount })
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            val targetTab = when (page) {
+                0 -> WordDisplayTab.WORD
+                1 -> WordDisplayTab.KANJI
+                else -> WordDisplayTab.WORD
+            }
+            onTabSelected(targetTab)
+        }
+    }
 
     AppScaffold(
         title = uiState.wordData.word,
         onBackClick = onBackClick,
         belowAppBar = {
             // Tab selector (only show if there are kanji)
-            if (uiState.kanjiList.isNotEmpty()) {
+            if (hasKanji) {
                 val tabs = listOf("Word", "Kanji")
-                val selectedIndex = when (uiState.selectedTab) {
-                    WordDisplayTab.WORD -> 0
-                    WordDisplayTab.KANJI -> 1
-                }
+                val selectedIndex = uiState.selectedTab.ordinal
 
                 TabRow(
                     selectedTabIndex = selectedIndex,
@@ -235,12 +253,9 @@ fun WordDisplayScreen(
                             text = { Text(title) },
                             selected = selectedIndex == index,
                             onClick = {
-                                val newTab = when (index) {
-                                    0 -> WordDisplayTab.WORD
-                                    1 -> WordDisplayTab.KANJI
-                                    else -> WordDisplayTab.WORD
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
                                 }
-                                onTabSelected(newTab)
                             }
                         )
                     }
@@ -250,20 +265,24 @@ fun WordDisplayScreen(
     ) { paddingValues ->
         val wordData = uiState.wordData
 
-        // Content area
-        when (uiState.selectedTab) {
-            WordDisplayTab.WORD -> WordTabContent(
-                wordData = wordData,
-                onOpenExternalDict = { showWordInDict(context, wordData.wordObject) },
-                contentPadding = paddingValues,
-                onUpdateScore = onUpdateScore
-            )
-
-            WordDisplayTab.KANJI -> KanjiTabContent(
-                kanjiList = uiState.kanjiList,
-                onKanjiClick = { kanji -> showKanjiInDict(context, kanji) },
-                contentPadding = paddingValues
-            )
+        // Content area with swipeable pager
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> WordTabContent(
+                    wordData = wordData,
+                    onOpenExternalDict = { showWordInDict(context, wordData.wordObject) },
+                    contentPadding = paddingValues,
+                    onUpdateScore = onUpdateScore
+                )
+                1 -> KanjiTabContent(
+                    kanjiList = uiState.kanjiList,
+                    onKanjiClick = { kanji -> showKanjiInDict(context, kanji) },
+                    contentPadding = paddingValues
+                )
+            }
         }
     }
 }
