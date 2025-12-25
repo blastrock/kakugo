@@ -37,6 +37,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -241,7 +242,10 @@ fun WordDisplayScreen(
         belowAppBar = {
             // Tab selector (only show if there are kanji)
             if (hasKanji) {
-                val tabs = listOf("Word", "Kanji")
+                val tabs = listOf(
+                    stringResource(org.kaqui.R.string.word_tab),
+                    stringResource(org.kaqui.R.string.kanji_tab)
+                )
                 val selectedIndex = uiState.selectedTab.ordinal
 
                 TabRow(
@@ -315,7 +319,7 @@ fun WordTabContent(
         // Readings section
         item {
             Text(
-                text = "Readings:",
+                text = stringResource(org.kaqui.R.string.reading_label) + ":",
                 style = MaterialTheme.typography.h6,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -331,7 +335,7 @@ fun WordTabContent(
         // Definitions section
         item {
             Text(
-                text = "Definitions:",
+                text = stringResource(org.kaqui.R.string.definitions_label) + ":",
                 style = MaterialTheme.typography.h6,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -346,18 +350,18 @@ fun WordTabContent(
         }
 
         item {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
         }
 
         // Memorization status
         item {
             Text(
-                text = "Learning status:",
+                text = stringResource(org.kaqui.R.string.learning_status_label) + ":",
                 style = MaterialTheme.typography.h6,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
         }
 
         item {
@@ -369,7 +373,7 @@ fun WordTabContent(
             )
 
             MemorizationStatusRow(
-                label = "Reading",
+                label = stringResource(org.kaqui.R.string.reading_label),
                 status = readingStatus.text,
                 color = readingStatus.color,
                 shortScore = wordData.readingShortScore,
@@ -389,7 +393,7 @@ fun WordTabContent(
             )
 
             MemorizationStatusRow(
-                label = "Meaning",
+                label = stringResource(org.kaqui.R.string.meaning_label),
                 status = meaningStatus.text,
                 color = meaningStatus.color,
                 shortScore = wordData.meaningShortScore,
@@ -401,7 +405,7 @@ fun WordTabContent(
         }
 
         item {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // External dictionary button
@@ -412,7 +416,7 @@ fun WordTabContent(
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
             ) {
-                Text("Open in external dictionary")
+                Text(stringResource(org.kaqui.R.string.open_in_external_dictionary), modifier = Modifier.padding(vertical = 8.dp))
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -430,14 +434,14 @@ fun MemorizationStatusRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "$label:",
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(0.2f)
+            modifier = Modifier.weight(20f)
         )
         StatusTag(
             text = status,
@@ -448,16 +452,16 @@ fun MemorizationStatusRow(
         if (shortScore == 1.0) {
             TextButton(
                 onClick = onButtonClick,
-                modifier = Modifier.weight(0.3f)
+                modifier = Modifier.weight(30f)
             ) {
-                Text("Review sooner", textAlign = TextAlign.Center, fontSize = 12.sp)
+                Text(stringResource(org.kaqui.R.string.review_sooner), textAlign = TextAlign.Center, fontSize = 12.sp)
             }
         } else {
             TextButton(
                 onClick = onButtonClick,
-                modifier = Modifier.weight(0.3f)
+                modifier = Modifier.weight(30f)
             ) {
-                Text("Skip next review", textAlign = TextAlign.Center, fontSize = 12.sp)
+                Text(stringResource(org.kaqui.R.string.skip_next_review), textAlign = TextAlign.Center, fontSize = 12.sp)
             }
         }
     }
@@ -482,18 +486,19 @@ fun StatusTag(
     }
 }
 
+@Composable
 fun getMemorizationStatus(
     shortScore: Double,
     longScore: Double,
     themeColors: ThemeAttributes
 ): MemorizationStatus {
     return when {
-        shortScore == 0.0 -> MemorizationStatus("Not known", themeColors.itemBad)
-        shortScore > 0 && longScore == 0.0 -> MemorizationStatus("Learning", themeColors.itemMeh)
-        longScore > 0 && longScore <= 0.2 -> MemorizationStatus("Memorizing", themeColors.itemLearn)
-        longScore > 0.2 && longScore <= 0.8 -> MemorizationStatus("Well known", themeColors.itemGood)
-        longScore > 0.8 -> MemorizationStatus("Perfectly known", themeColors.itemPerfect)
-        else -> MemorizationStatus("Unknown", themeColors.itemBad)
+        shortScore == 0.0 -> MemorizationStatus(stringResource(org.kaqui.R.string.memorization_status_not_known), themeColors.itemBad)
+        shortScore > 0 && longScore == 0.0 -> MemorizationStatus(stringResource(org.kaqui.R.string.memorization_status_learning), themeColors.itemMeh)
+        longScore > 0 && longScore <= 0.2 -> MemorizationStatus(stringResource(org.kaqui.R.string.memorization_status_memorizing), themeColors.itemLearn)
+        longScore > 0.2 && longScore <= 0.8 -> MemorizationStatus(stringResource(org.kaqui.R.string.memorization_status_well_known), themeColors.itemGood)
+        longScore > 0.8 -> MemorizationStatus(stringResource(org.kaqui.R.string.memorization_status_perfectly_known), themeColors.itemPerfect)
+        else -> MemorizationStatus(stringResource(org.kaqui.R.string.memorization_status_unknown), themeColors.itemBad)
     }
 }
 

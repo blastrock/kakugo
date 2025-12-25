@@ -180,4 +180,20 @@
         <br/>This version doesn\'t bring any new feature. It\'s a major rewrite of the UI because the previous implementation was using deprecated Android components which made new updates to the app impossible.
         <br/>I\'m planning on adding new features now that the app can be updated again. Please report any regression or issue you may find with this version.
     ]]></string>
+
+    <string name="word_tab">Word</string>
+    <string name="kanji_tab">Kanji</string>
+    <string name="reading_label">Reading</string>
+    <string name="definitions_label">Definitions</string>
+    <string name="learning_status_label">Learning status</string>
+    <string name="meaning_label">Meaning</string>
+    <string name="open_in_external_dictionary">Open in external dictionary</string>
+    <string name="review_sooner">Review sooner</string>
+    <string name="skip_next_review">Skip next review</string>
+    <string name="memorization_status_not_known">Not known</string>
+    <string name="memorization_status_learning">Learning</string>
+    <string name="memorization_status_memorizing">Memorizing</string>
+    <string name="memorization_status_well_known">Well known</string>
+    <string name="memorization_status_perfectly_known">Perfectly known</string>
+    <string name="memorization_status_unknown">Unknown</string>
 </resources>

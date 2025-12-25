@@ -158,4 +158,20 @@
     <string name="clear_search">Effacer la recherche</string>
     <string name="show_history">Afficher l\'historique</string>
     <string name="info">Info</string>
+
+    <string name="word_tab">Mot</string>
+    <string name="kanji_tab">Kanji</string>
+    <string name="reading_label">Lecture</string>
+    <string name="definitions_label">Définitions</string>
+    <string name="learning_status_label">État d\'apprentissage</string>
+    <string name="meaning_label">Sens</string>
+    <string name="open_in_external_dictionary">Ouvrir dans le dictionnaire externe</string>
+    <string name="review_sooner">Réviser plus tôt</string>
+    <string name="skip_next_review">Sauter la prochaine révision</string>
+    <string name="memorization_status_not_known">Non connu</string>
+    <string name="memorization_status_learning">Apprentissage</string>
+    <string name="memorization_status_memorizing">Mémorisation</string>
+    <string name="memorization_status_well_known">Bien connu</string>
+    <string name="memorization_status_perfectly_known">Parfaitement connu</string>
+    <string name="memorization_status_unknown">Inconnu</string>
 </resources>
