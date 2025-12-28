@@ -201,6 +201,23 @@ class Database private constructor(context: Context, val database: SQLiteDatabas
         }
     }
 
+    fun getWordsByKanji(kanjiCharacter: String): List<Item> {
+        val words = mutableListOf<Item>()
+        database.rawQuery(
+            """SELECT id
+               FROM $WORDS_TABLE_NAME
+               WHERE item LIKE ?
+               ORDER BY INSTR(item, ?) ASC, id ASC""",
+            arrayOf("%$kanjiCharacter%", kanjiCharacter)
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                val wordId = cursor.getInt(0)
+                words.add(getWord(wordId, null))
+            }
+        }
+        return words
+    }
+
     fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {
         val contents = Word("", "", listOf(), listOf(), false)
         val item = Item(id, contents, 0.0, 0.0, 0, false)

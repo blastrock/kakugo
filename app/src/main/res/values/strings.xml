@@ -196,4 +196,10 @@
     <string name="memorization_status_well_known">Well known</string>
     <string name="memorization_status_perfectly_known">Perfectly known</string>
     <string name="memorization_status_unknown">Unknown</string>
+
+    <string name="words_tab">Words</string>
+    <string name="on_readings_label">On\'yomi</string>
+    <string name="kun_readings_label">Kun\'yomi</string>
+    <string name="strokes_label">Strokes</string>
+    <string name="no_words_found">No words containing this kanji found</string>
 </resources>

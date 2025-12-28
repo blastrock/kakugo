@@ -362,8 +362,8 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
     }
 
     private fun openItemInDictionary(item: Item) {
-        when (val contents = item.contents) {
-            is Kanji -> showKanjiInDict(this, contents)
+        when (item.contents) {
+            is Kanji -> startActivity<org.kaqui.itemdetails.KanjiDisplayActivity>("kanji_id" to item.id)
             is Word -> startActivity<org.kaqui.itemdetails.WordDisplayActivity>("word_id" to item.id)
             else -> { /* do nothing */
             }
