@@ -48,12 +48,14 @@ import org.kaqui.AppScaffold
 import org.kaqui.Separator
 import org.kaqui.model.Database
 import org.kaqui.model.HiraganaRange
+import org.kaqui.model.Item
 import org.kaqui.model.Kanji
 import org.kaqui.model.KatakanaRange
 import org.kaqui.model.KnowledgeType
 import org.kaqui.model.Word
 import org.kaqui.showKanjiInDict
 import org.kaqui.showWordInDict
+import org.kaqui.startActivity
 import org.kaqui.SrsCalculator
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.theme.ThemeAttributes
@@ -98,7 +100,7 @@ data class WordData(
 data class WordDisplayUiState(
     val selectedTab: WordDisplayTab = WordDisplayTab.WORD,
     val wordData: WordData = WordData.default(),
-    val kanjiList: List<Kanji> = emptyList(),
+    val kanjiList: List<Item> = emptyList(),
 )
 
 class WordDisplayViewModel : ViewModel() {
@@ -125,18 +127,9 @@ class WordDisplayViewModel : ViewModel() {
             wordId = wordId
         )
 
-        // Extract and load kanji
-        val kanjiList = extractKanjiFromWord(wordContents.word).map { char ->
-            val kanjiItem = database.getKanjiByCharacter(char)
-            (kanjiItem?.contents as? Kanji) ?: Kanji(
-                kanji = char,
-                on_readings = emptyList(),
-                kun_readings = emptyList(),
-                meanings = emptyList(),
-                similarities = emptyList(),
-                parts = emptyList(),
-                jlptLevel = 0
-            )
+        // Extract and load kanji - return Items to get IDs for navigation
+        val kanjiList = extractKanjiFromWord(wordContents.word).mapNotNull { char ->
+            database.getKanjiByCharacter(char)
         }
 
         uiState = uiState.copy(
@@ -283,7 +276,9 @@ fun WordDisplayScreen(
                 )
                 1 -> KanjiTabContent(
                     kanjiList = uiState.kanjiList,
-                    onKanjiClick = { kanji -> showKanjiInDict(context, kanji) },
+                    onKanjiClick = { kanjiItem ->
+                        context.startActivity<KanjiDisplayActivity>("kanji_id" to kanjiItem.id)
+                    },
                     contentPadding = paddingValues
                 )
             }
@@ -504,18 +499,18 @@ fun getMemorizationStatus(
 
 @Composable
 fun KanjiTabContent(
-    kanjiList: List<Kanji>,
-    onKanjiClick: (Kanji) -> Unit,
+    kanjiList: List<Item>,
+    onKanjiClick: (Item) -> Unit,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding
     ) {
-        items(kanjiList) { kanji ->
+        items(kanjiList) { kanjiItem ->
             KanjiRow(
-                kanji = kanji,
-                onClick = { onKanjiClick(kanji) }
+                kanjiItem = kanjiItem,
+                onClick = { onKanjiClick(kanjiItem) }
             )
             Separator()
         }
@@ -524,9 +519,10 @@ fun KanjiTabContent(
 
 @Composable
 fun KanjiRow(
-    kanji: Kanji,
+    kanjiItem: Item,
     onClick: () -> Unit,
 ) {
+    val kanji = kanjiItem.contents as Kanji
     val hasData = kanji.on_readings.isNotEmpty() || kanji.kun_readings.isNotEmpty() || kanji.meanings.isNotEmpty()
     val description = kanji.on_readings.joinToString(", ") + "\n" +
             kanji.kun_readings.joinToString(", ") + "\n" +
@@ -568,14 +564,18 @@ fun PreviewWordDisplayScreenWordTab() {
     )
 
     val sampleKanjiList = listOf(
-        Kanji(
-            "食",
-            listOf("ショク", "ジキ"),
-            listOf("た.べる", "く.う"),
-            listOf("eat", "food"),
-            listOf(),
-            listOf(),
-            5
+        Item(
+            39135,
+            Kanji(
+                "食",
+                listOf("ショク", "ジキ"),
+                listOf("た.べる", "く.う"),
+                listOf("eat", "food"),
+                listOf(),
+                listOf(),
+                5
+            ),
+            0.5, 0.3, 0, true
         )
     )
 
@@ -607,14 +607,18 @@ fun PreviewWordDisplayScreenKanjiTab() {
     )
 
     val sampleKanjiList = listOf(
-        Kanji(
-            "食",
-            listOf("ショク", "ジキ"),
-            listOf("た.べる", "く.う"),
-            listOf("eat", "food"),
-            listOf(),
-            listOf(),
-            5
+        Item(
+            39135,
+            Kanji(
+                "食",
+                listOf("ショク", "ジキ"),
+                listOf("た.べる", "く.う"),
+                listOf("eat", "food"),
+                listOf(),
+                listOf(),
+                5
+            ),
+            0.5, 0.3, 0, true
         )
     )
 
@@ -679,32 +683,44 @@ fun PreviewWordDisplayScreenMultipleKanji() {
     )
 
     val sampleKanjiList = listOf(
-        Kanji(
-            "日",
-            listOf("ニチ", "ジツ"),
-            listOf("ひ", "か"),
-            listOf("day", "sun", "Japan"),
-            listOf(),
-            listOf(),
-            5
+        Item(
+            26085,
+            Kanji(
+                "日",
+                listOf("ニチ", "ジツ"),
+                listOf("ひ", "か"),
+                listOf("day", "sun", "Japan"),
+                listOf(),
+                listOf(),
+                5
+            ),
+            0.8, 0.6, 0, true
         ),
-        Kanji(
-            "本",
-            listOf("ホン"),
-            listOf("もと"),
-            listOf("book", "origin"),
-            listOf(),
-            listOf(),
-            5
+        Item(
+            26412,
+            Kanji(
+                "本",
+                listOf("ホン"),
+                listOf("もと"),
+                listOf("book", "origin"),
+                listOf(),
+                listOf(),
+                5
+            ),
+            0.7, 0.5, 0, true
         ),
-        Kanji(
-            "語",
-            listOf("ゴ"),
-            listOf("かた.る", "かた.らう"),
-            listOf("language", "word"),
-            listOf(),
-            listOf(),
-            3
+        Item(
+            35486,
+            Kanji(
+                "語",
+                listOf("ゴ"),
+                listOf("かた.る", "かた.らう"),
+                listOf("language", "word"),
+                listOf(),
+                listOf(),
+                3
+            ),
+            0.6, 0.4, 0, true
         )
     )
 
