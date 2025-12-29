@@ -6,9 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,12 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,6 +44,8 @@ import org.kaqui.model.Item
 import org.kaqui.model.Kanji
 import org.kaqui.model.KnowledgeType
 import org.kaqui.model.Word
+import org.kaqui.settings.ItemData
+import org.kaqui.settings.ItemRow
 import org.kaqui.showKanjiInDict
 import org.kaqui.startActivity
 import org.kaqui.theme.LocalThemeAttributes
@@ -129,6 +126,7 @@ class KanjiDisplayViewModel : ViewModel() {
 
         // Load words containing this kanji
         val wordList = database.getWordsByKanji(kanjiContents.kanji)
+            .sortedByDescending { it.shortScore }
 
         uiState = uiState.copy(
             kanjiData = kanjiData,
@@ -476,43 +474,19 @@ fun WordsTabContent(
     ) {
         items(wordList) { wordItem ->
             val word = wordItem.contents as Word
-            WordRow(
-                word = word,
+            val description = word.reading + "\n" + word.meanings.joinToString(", ")
+
+            ItemRow(
+                itemData = ItemData(
+                    id = wordItem.id,
+                    text = word.word,
+                    description = description,
+                    enabled = wordItem.enabled,
+                    shortScore = wordItem.shortScore
+                ),
                 onClick = { onWordClick(wordItem) }
             )
             Separator()
-        }
-    }
-}
-
-@Composable
-fun WordRow(
-    word: Word,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = word.word,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(end = 16.dp)
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = word.reading,
-                style = MaterialTheme.typography.body2
-            )
-            Text(
-                text = word.meanings.joinToString(", "),
-                style = MaterialTheme.typography.body2,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }
