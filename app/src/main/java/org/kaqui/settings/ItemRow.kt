@@ -1,6 +1,7 @@
 package org.kaqui.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -31,13 +32,15 @@ data class ItemData(
 @Composable
 fun ItemRow(
     itemData: ItemData,
-    onEnabledChange: ((Int, Boolean) -> Unit)? = null
+    onEnabledChange: ((Int, Boolean) -> Unit)? = null,
+    onClick: (() -> Unit)? = null
 ) {
     val themeColors = LocalThemeAttributes.current
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
