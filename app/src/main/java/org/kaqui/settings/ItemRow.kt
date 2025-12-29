@@ -31,7 +31,7 @@ data class ItemData(
 @Composable
 fun ItemRow(
     itemData: ItemData,
-    onEnabledChange: (Int, Boolean) -> Unit
+    onEnabledChange: ((Int, Boolean) -> Unit)? = null
 ) {
     val themeColors = LocalThemeAttributes.current
 
@@ -41,13 +41,15 @@ fun ItemRow(
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(
-            checked = itemData.enabled,
-            onCheckedChange = { checked ->
-                onEnabledChange(itemData.id, checked)
-            },
-            modifier = Modifier.padding(8.dp)
-        )
+        if (onEnabledChange != null) {
+            Checkbox(
+                checked = itemData.enabled,
+                onCheckedChange = { checked ->
+                    onEnabledChange(itemData.id, checked)
+                },
+                modifier = Modifier.padding(8.dp)
+            )
+        }
 
         val backgroundColor = themeColors.getColorFromScore(itemData.shortScore)
 
