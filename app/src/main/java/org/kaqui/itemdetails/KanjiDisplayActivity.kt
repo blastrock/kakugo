@@ -16,10 +16,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -224,6 +228,14 @@ fun KanjiDisplayScreen(
     AppScaffold(
         title = uiState.kanjiData.kanji,
         onBackClick = onBackClick,
+        actions = {
+            IconButton(onClick = { showKanjiInDict(context, uiState.kanjiData.kanjiObject) }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = stringResource(R.string.open_in_external_dictionary)
+                )
+            }
+        },
         belowAppBar = {
             val tabs = listOf(
                 stringResource(R.string.kanji_tab),
@@ -259,7 +271,6 @@ fun KanjiDisplayScreen(
             when (page) {
                 0 -> KanjiTabContent(
                     kanjiData = kanjiData,
-                    onOpenExternalDict = { showKanjiInDict(context, kanjiData.kanjiObject) },
                     contentPadding = paddingValues,
                     onUpdateScore = onUpdateScore
                 )
@@ -276,7 +287,6 @@ fun KanjiDisplayScreen(
 @Composable
 fun KanjiTabContent(
     kanjiData: KanjiData,
-    onOpenExternalDict: () -> Unit,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
@@ -440,19 +450,6 @@ fun KanjiTabContent(
         }
 
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // External dictionary button
-        item {
-            Button(
-                onClick = onOpenExternalDict,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.open_in_external_dictionary), modifier = Modifier.padding(vertical = 8.dp))
-            }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

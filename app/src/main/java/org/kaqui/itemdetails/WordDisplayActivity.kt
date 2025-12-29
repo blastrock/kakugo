@@ -19,12 +19,16 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -233,6 +237,14 @@ fun WordDisplayScreen(
     AppScaffold(
         title = uiState.wordData.word,
         onBackClick = onBackClick,
+        actions = {
+            IconButton(onClick = { showWordInDict(context, uiState.wordData.wordObject) }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = stringResource(org.kaqui.R.string.open_in_external_dictionary)
+                )
+            }
+        },
         belowAppBar = {
             // Tab selector (only show if there are kanji)
             if (hasKanji) {
@@ -271,7 +283,6 @@ fun WordDisplayScreen(
             when (page) {
                 0 -> WordTabContent(
                     wordData = wordData,
-                    onOpenExternalDict = { showWordInDict(context, wordData.wordObject) },
                     contentPadding = paddingValues,
                     onUpdateScore = onUpdateScore
                 )
@@ -290,7 +301,6 @@ fun WordDisplayScreen(
 @Composable
 fun WordTabContent(
     wordData: WordData,
-    onOpenExternalDict: () -> Unit,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
@@ -401,19 +411,6 @@ fun WordTabContent(
         }
 
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // External dictionary button
-        item {
-            Button(
-                onClick = onOpenExternalDict,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(stringResource(org.kaqui.R.string.open_in_external_dictionary), modifier = Modifier.padding(vertical = 8.dp))
-            }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
