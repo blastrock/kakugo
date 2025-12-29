@@ -166,6 +166,7 @@
     <string name="learning_status_label">État d\'apprentissage</string>
     <string name="meaning_label">Sens</string>
     <string name="open_in_external_dictionary">Ouvrir dans le dictionnaire externe</string>
+    <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
     <string name="review_sooner">Réviser plus tôt</string>
     <string name="skip_next_review">Sauter la prochaine révision</string>
     <string name="memorization_status_not_known">Non connu</string>

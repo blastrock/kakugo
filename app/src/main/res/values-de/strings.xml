@@ -124,6 +124,7 @@
     <string name="learning_status_label">Lernstatus</string>
     <string name="meaning_label">Bedeutung</string>
     <string name="open_in_external_dictionary">Im externen Wörterbuch öffnen</string>
+    <string name="copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="review_sooner">Früher wiederholen</string>
     <string name="skip_next_review">Nächste Wiederholung überspringen</string>
     <string name="memorization_status_not_known">Nicht bekannt</string>

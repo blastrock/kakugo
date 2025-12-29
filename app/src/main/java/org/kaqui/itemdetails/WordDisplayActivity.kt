@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -304,6 +305,8 @@ fun WordTabContent(
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding
@@ -317,7 +320,17 @@ fun WordTabContent(
             Text(
                 text = wordData.word,
                 fontSize = 48.sp,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .combinedClickable(
+                        onClick = {},
+                        onLongClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("word", wordData.word)
+                            clipboard.setPrimaryClip(clip)
+                            android.widget.Toast.makeText(context, context.getString(org.kaqui.R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    )
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
