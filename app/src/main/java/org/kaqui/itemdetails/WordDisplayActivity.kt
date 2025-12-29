@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,6 +52,8 @@ import org.kaqui.model.Kanji
 import org.kaqui.model.KatakanaRange
 import org.kaqui.model.KnowledgeType
 import org.kaqui.model.Word
+import org.kaqui.settings.ItemData
+import org.kaqui.settings.ItemRow
 import org.kaqui.showKanjiInDict
 import org.kaqui.showWordInDict
 import org.kaqui.startActivity
@@ -508,43 +509,24 @@ fun KanjiTabContent(
         contentPadding = contentPadding
     ) {
         items(kanjiList) { kanjiItem ->
-            KanjiRow(
-                kanjiItem = kanjiItem,
-                onClick = { onKanjiClick(kanjiItem) }
+            val kanji = kanjiItem.contents as Kanji
+            val hasData = kanji.on_readings.isNotEmpty() || kanji.kun_readings.isNotEmpty() || kanji.meanings.isNotEmpty()
+            val description = kanji.on_readings.joinToString(", ") + "\n" +
+                    kanji.kun_readings.joinToString(", ") + "\n" +
+                    kanji.meanings.joinToString(", ")
+
+            ItemRow(
+                itemData = ItemData(
+                    id = kanjiItem.id,
+                    text = kanji.kanji,
+                    description = description,
+                    enabled = kanjiItem.enabled,
+                    shortScore = kanjiItem.shortScore
+                ),
+                onClick = if (hasData) {{ onKanjiClick(kanjiItem) }} else null
             )
             Separator()
         }
-    }
-}
-
-@Composable
-fun KanjiRow(
-    kanjiItem: Item,
-    onClick: () -> Unit,
-) {
-    val kanji = kanjiItem.contents as Kanji
-    val hasData = kanji.on_readings.isNotEmpty() || kanji.kun_readings.isNotEmpty() || kanji.meanings.isNotEmpty()
-    val description = kanji.on_readings.joinToString(", ") + "\n" +
-            kanji.kun_readings.joinToString(", ") + "\n" +
-            kanji.meanings.joinToString(", ")
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = hasData, onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = kanji.kanji,
-            fontSize = 36.sp,
-            modifier = Modifier.padding(end = 16.dp)
-        )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.weight(1f)
-        )
     }
 }
 
