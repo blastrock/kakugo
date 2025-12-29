@@ -16,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 
 data class ItemData(
@@ -41,7 +43,12 @@ fun ItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .let { if (onClick != null) it.clickable(onClick = onClick) else it }
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+            .let {
+                if (onEnabledChange != null)
+                    it.padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                else
+                    it.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (onEnabledChange != null) {
@@ -50,7 +57,7 @@ fun ItemRow(
                 onCheckedChange = { checked ->
                     onEnabledChange(itemData.id, checked)
                 },
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(end = 4.dp)
             )
         }
 
@@ -58,10 +65,10 @@ fun ItemRow(
 
         Box(
             modifier = Modifier
+                .padding(vertical = 4.dp)
                 .defaultMinSize(if (itemData.text.length > 1) 50.dp else 35.dp, 35.dp)
                 .clip(CircleShape)
-                .background(backgroundColor)
-                .padding(0.dp),
+                .background(backgroundColor),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -75,10 +82,64 @@ fun ItemRow(
             text = itemData.description,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp),
+                .padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
             fontSize = 16.sp,
             style = MaterialTheme.typography.body2,
             lineHeight = 1.1.em,
+            maxLines = 3,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemRowPreview() {
+    KakugoTheme {
+        ItemRow(
+            itemData = ItemData(
+                id = 1,
+                text = "漢",
+                description = "Kan,\nHan;\nSino-, China",
+                enabled = true,
+                shortScore = 0.75
+            ),
+            onEnabledChange = { _, _ -> },
+            onClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemRowWordPreview() {
+    KakugoTheme {
+        ItemRow(
+            itemData = ItemData(
+                id = 1,
+                text = "食べる",
+                description = "食べる\neat",
+                enabled = true,
+                shortScore = 0.75
+            ),
+            onEnabledChange = { _, _ -> },
+            onClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemRowNoCheckboxPreview() {
+    KakugoTheme {
+        ItemRow(
+            itemData = ItemData(
+                id = 2,
+                text = "あ",
+                description = "a",
+                enabled = false,
+                shortScore = 0.3
+            ),
+            onClick = { }
         )
     }
 }
