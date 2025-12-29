@@ -206,8 +206,7 @@ fun KanjiDisplayScreen(
     onWordClick: (Item) -> Unit,
 ) {
     val context = LocalContext.current
-    val hasWords = uiState.wordList.isNotEmpty()
-    val pageCount = if (hasWords) 2 else 1
+    val pageCount = 2
     val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { pageCount })
     val coroutineScope = rememberCoroutineScope()
 
@@ -226,29 +225,26 @@ fun KanjiDisplayScreen(
         title = uiState.kanjiData.kanji,
         onBackClick = onBackClick,
         belowAppBar = {
-            // Tab selector (only show if there are words)
-            if (hasWords) {
-                val tabs = listOf(
-                    stringResource(R.string.kanji_tab),
-                    stringResource(R.string.words_tab)
-                )
-                val selectedIndex = uiState.selectedTab.ordinal
+            val tabs = listOf(
+                stringResource(R.string.kanji_tab),
+                stringResource(R.string.words_tab)
+            )
+            val selectedIndex = uiState.selectedTab.ordinal
 
-                TabRow(
-                    selectedTabIndex = selectedIndex,
-                    backgroundColor = MaterialTheme.colors.primary,
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            text = { Text(title) },
-                            selected = selectedIndex == index,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
+            TabRow(
+                selectedTabIndex = selectedIndex,
+                backgroundColor = MaterialTheme.colors.primary,
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = selectedIndex == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
