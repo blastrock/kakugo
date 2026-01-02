@@ -595,7 +595,11 @@ private fun LastItemRow(
                 if (animatedWrong != null) {
                     ItemButton(
                         item = animatedWrong,
-                        probabilityData = null,
+                        probabilityData =
+                            if (animatedCorrect == animatedWrong)
+                                lastProbabilityData
+                            else
+                                null,
                         style = HistoryItemStyle.BAD,
                         showInfo = animatedWrong.contents is Kanji || animatedWrong.contents is Word,
                         kanaWords = kanaWords,
