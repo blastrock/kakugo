@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
@@ -258,9 +260,9 @@ fun ItemSearchScreen(
                     }
                 }
             ) { paddingValues ->
+                // This is normally handled by AppScaffold, but this activity uses a manual Scaffold
                 val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
                 val layoutDirection = LocalLayoutDirection.current
-
                 val combinedPadding = PaddingValues(
                     start = paddingValues.calculateStartPadding(layoutDirection),
                     top = paddingValues.calculateTopPadding(),
@@ -271,6 +273,8 @@ fun ItemSearchScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .consumeWindowInsets(combinedPadding)
+                        .imePadding()
                 ) {
                     ItemListWithStats(
                         itemIds = uiState.itemIds,
