@@ -24,6 +24,7 @@ class SrsCalculator {
         private const val TAG = "SrsCalculator"
 
         private const val SHORT_SCORE_UPDATE = 0.34
+        private const val MIN_LONG_SCORE = 0.01
         private const val MIN_PROBA_SHORT_UNKNOWN = 0.2
         private const val MAX_PROBA_SHORT_UNKNOWN = 0.9
         private const val MAX_COUNT_SHORT_UNKNOWN = 30
@@ -105,7 +106,7 @@ class SrsCalculator {
                     else
                         now
             val daysSinceAsked = secondsToDays(now - lastAsked)
-            val newLongScore =
+            var newLongScore =
                     when {
                         certainty == Certainty.MAYBE ->
                             previousLongScore / 2
@@ -115,10 +116,10 @@ class SrsCalculator {
                             if (newShortScore < 1.0)
                                 previousLongScore
                             else
-                                max(previousLongScore, 0.01)
+                                max(previousLongScore, MIN_LONG_SCORE)
                         certainty == Certainty.SURE -> {
                             val stepCompletion = min(daysSinceAsked / (probaParams.daysEnd * 0.99 * previousLongScore), 2.0)
-                            min(1.0, min(max(previousLongScore, 0.01) * lerp(1.0, 2.0, stepCompletion), previousLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
+                            min(1.0, min(max(previousLongScore, MIN_LONG_SCORE) * lerp(1.0, 2.0, stepCompletion), previousLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
                         }
                         else ->
                             throw RuntimeException("Unknown certainty $certainty")
@@ -126,6 +127,8 @@ class SrsCalculator {
             if (newLongScore !in 0f..1f) {
                 Log.wtf(TAG, "Score calculation error, previousLongScore = $previousLongScore, daysSinceAsked = $daysSinceAsked, probaParamsStage1: $probaParams, newLongScore = $newLongScore")
             }
+            if (newLongScore < MIN_LONG_SCORE)
+                newLongScore = 0.0
 
             Log.v(TAG, "Score calculation: certainty: $certainty, daysSinceAsked: $daysSinceAsked, probaParamsStage1: $probaParams")
             Log.v(TAG, "Short score of $item going from $previousShortScore to $newShortScore")
@@ -146,13 +149,13 @@ class SrsCalculator {
             val newShortScore = if (increase) 1.0f else 0.7f
 
             // Calculate new long score based on increase/decrease
-            val newLongScore = if (increase) {
-                // Formula: min(1.0, min(max(previousLongScore, 0.01) * 2.0, previousLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
-                min(1.0, min(max(currentLongScore, 0.01) * 2.0, currentLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
+            var newLongScore = if (increase) {
+                min(1.0, min(max(currentLongScore, MIN_LONG_SCORE) * 2.0, currentLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
             } else {
-                // Formula: previousLongScore - min(previousLongScore / 2, MAX_LONG_SCORE_UPDATE_INCREMENT)
                 currentLongScore - min(currentLongScore / 2, MAX_LONG_SCORE_UPDATE_INCREMENT)
             }
+            if (newLongScore < MIN_LONG_SCORE)
+                newLongScore = 0.0
 
             return ScoreUpdate(
                 itemId = itemId,
