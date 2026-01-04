@@ -12,7 +12,7 @@ android {
     defaultConfig {
         applicationId = "org.kaqui"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 96
         versionName = "1.40.1"
 
