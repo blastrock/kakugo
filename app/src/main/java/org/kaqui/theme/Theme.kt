@@ -37,6 +37,7 @@ private val DarkColors = darkColors(
 // Light theme colors from XML
 private val LightThemeColors = ThemeAttributes(
     itemBad = Color(0xFFFFC9C9),
+    itemBad2 = Color(0xFFEF9A9A),
     itemMeh = Color(0xFFFFE8C4),
     itemLearn = Color(0xFFF9FFC4),
     itemGood = Color(0xFFB5DA8F),
@@ -47,9 +48,6 @@ private val LightThemeColors = ThemeAttributes(
     backgroundSure = Color(0xFF9CCC65),
     backgroundMaybe = Color(0xFFDCEDC8),
     backgroundDontKnow = Color(0xFFE0E0E0),
-    compositionGood = Color(0xFF9CCC65),
-    compositionBadSelected = Color(0xFFEF9A9A),
-    compositionBadNotSelected = Color(0xFFFFCDD2),
     statsItemsGood = Color(0xFF9CCC65),
     statsItemsBad = Color(0xFFEF9A9A),
     drawingDontKnow = Color(0xFFFF7F7F)
@@ -58,6 +56,7 @@ private val LightThemeColors = ThemeAttributes(
 // Dark theme colors from XML
 private val DarkThemeColors = ThemeAttributes(
     itemBad = Color(0xFF500000),
+    itemBad2 = Color(0xFF350000),
     itemMeh = Color(0xFF894E16),
     itemLearn = Color(0xFF937F1B),
     itemGood = Color(0xFF085300),
@@ -68,9 +67,6 @@ private val DarkThemeColors = ThemeAttributes(
     backgroundSure = Color(0xFF085300),
     backgroundMaybe = Color(0xFF303F30),
     backgroundDontKnow = Color(0xFF282828),
-    compositionGood = Color(0xFF085300),
-    compositionBadSelected = Color(0xFF350000),
-    compositionBadNotSelected = Color(0xFF650000),
     statsItemsGood = Color(0xFF085300),
     statsItemsBad = Color(0xFF650000),
     drawingDontKnow = Color(0xFFFF7F7F)
@@ -82,6 +78,7 @@ data class ThemeAttributes(
     val itemGood: Color,
     val itemMeh: Color,
     val itemBad: Color,
+    val itemBad2: Color,
     val itemLearn: Color,
     val itemPerfect: Color,
     val historyBackground: Color,
@@ -90,9 +87,6 @@ data class ThemeAttributes(
     val backgroundSure: Color,
     val backgroundMaybe: Color,
     val backgroundDontKnow: Color,
-    val compositionGood: Color,
-    val compositionBadSelected: Color,
-    val compositionBadNotSelected: Color,
     val statsItemsGood: Color,
     val statsItemsBad: Color,
     val drawingDontKnow: Color

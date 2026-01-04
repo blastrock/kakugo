@@ -397,12 +397,12 @@ fun CompositionToggleButton(
     val themeColors = LocalThemeAttributes.current
 
     val backgroundColor = when (validationState) {
-        ButtonValidationState.CORRECT -> themeColors.compositionGood
-        ButtonValidationState.WRONG_SELECTED -> themeColors.compositionBadSelected
-        ButtonValidationState.WRONG_NOT_SELECTED -> themeColors.compositionBadNotSelected
+        ButtonValidationState.CORRECT -> themeColors.itemGood
+        ButtonValidationState.WRONG_SELECTED -> themeColors.itemBad2
+        ButtonValidationState.WRONG_NOT_SELECTED -> themeColors.itemBad
         ButtonValidationState.NONE -> {
             if (isSelected) {
-                themeColors.compositionGood
+                themeColors.itemGood
             } else {
                 themeColors.backgroundDontKnow
             }
