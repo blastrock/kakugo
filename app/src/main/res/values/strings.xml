@@ -175,10 +175,9 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.39?</h3>
+        <h3>What\'s new in 1.40?</h3>
 
-        <br/>This version doesn\'t bring any new feature. It\'s a major rewrite of the UI because the previous implementation was using deprecated Android components which made new updates to the app impossible.
-        <br/>I\'m planning on adding new features now that the app can be updated again. Please report any regression or issue you may find with this version.
+        <br/>Added a dictionary view for words and kanji, accessible when clicking on an item after answering a question.
     ]]></string>
 
     <string name="word_tab">Word</string>
