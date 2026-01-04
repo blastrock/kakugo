@@ -323,30 +323,23 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
-            AppScaffold(
+            TestScreen(
                 title = uiState.title,
-                onBackClick = { confirmActivityClose(true) }
-            ) { paddingValues ->
-                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                    TestScreen(
-                        testFragment = uiState.fragment,
-                        forceFragmentRefresh = uiState.forceFragmentRefresh,
-                        onFragmentUpdated = { fragment ->
-                            testFragment = fragment as TestFragment
-                        },
-                        stats = uiState.stats,
-                        correctCount = uiState.correctCount,
-                        questionCount = uiState.questionCount,
-                        historyState = uiState.historyState,
-                        sheetExpanded = uiState.sheetExpanded,
-                        onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
-                        kanaWords = kanaWords,
-                        onItemClick = this::openItemInDictionary,
-                        onConfirmClose = { confirmActivityClose(false) },
-                        modifier = Modifier
-                    )
-                }
-            }
+                testFragment = uiState.fragment,
+                forceFragmentRefresh = uiState.forceFragmentRefresh,
+                onFragmentUpdated = { fragment ->
+                    testFragment = fragment as TestFragment
+                },
+                stats = uiState.stats,
+                correctCount = uiState.correctCount,
+                questionCount = uiState.questionCount,
+                historyState = uiState.historyState,
+                sheetExpanded = uiState.sheetExpanded,
+                onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
+                kanaWords = kanaWords,
+                onItemClick = this::openItemInDictionary,
+                onBackClick = { confirmActivityClose() },
+            )
         }
     }
 
@@ -368,15 +361,12 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
         super.onSaveInstanceState(outState)
     }
 
-    private fun confirmActivityClose(upNavigation: Boolean) {
+    private fun confirmActivityClose() {
         AlertDialog.Builder(this)
             .setTitle(R.string.confirm_test_stop_title)
             .setMessage(R.string.confirm_test_stop_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                if (upNavigation)
-                    NavUtils.navigateUpFromSameTask(this)
-                else
-                    finish()
+                finish()
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
@@ -417,6 +407,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TestScreen(
+    title: String,
     testFragment: Class<out Fragment>?,
     forceFragmentRefresh: Int,
     onFragmentUpdated: (Fragment) -> Unit,
@@ -428,8 +419,7 @@ fun TestScreen(
     onSheetExpandedChange: (Boolean) -> Unit,
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
-    onConfirmClose: () -> Unit,
-    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
 ) {
     val themeAttrs = LocalThemeAttributes.current
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -457,103 +447,109 @@ fun TestScreen(
 
     // Handle back gesture for activity close
     BackHandler(enabled = !sheetExpanded) {
-        onConfirmClose()
+        onBackClick()
     }
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetContent = {
-            HistoryBottomSheet(
-                items = historyState.items,
-                kanaWords = kanaWords,
-                onItemClick = onItemClick
-            )
-        },
-        sheetPeekHeight = 0.dp,
-        sheetBackgroundColor = themeAttrs.historyBackground,
-        floatingActionButton = {
-            if (!sheetExpanded && historyState.items.isNotEmpty()) {
-                val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
-                val layoutDirection = LocalLayoutDirection.current
+    AppScaffold(
+        title = title,
+        onBackClick = onBackClick
+    ) { paddingValues ->
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            BottomSheetScaffold(
+                scaffoldState = scaffoldState,
+                sheetContent = {
+                    HistoryBottomSheet(
+                        items = historyState.items,
+                        kanaWords = kanaWords,
+                        onItemClick = onItemClick
+                    )
+                },
+                sheetPeekHeight = 0.dp,
+                sheetBackgroundColor = themeAttrs.historyBackground,
+                floatingActionButton = {
+                    if (!sheetExpanded && historyState.items.isNotEmpty()) {
+                        val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+                        val layoutDirection = LocalLayoutDirection.current
 
-                FloatingActionButton(
-                    onClick = { onSheetExpandedChange(true) },
-                    modifier =
-                        Modifier
-                            .offset(
-                                x = 10.dp - safeDrawing.calculateEndPadding(layoutDirection),
-                                y = 10.dp - safeDrawing.calculateBottomPadding()
+                        FloatingActionButton(
+                            onClick = { onSheetExpandedChange(true) },
+                            modifier =
+                                Modifier
+                                    .offset(
+                                        x = 10.dp - safeDrawing.calculateEndPadding(layoutDirection),
+                                        y = 10.dp - safeDrawing.calculateBottomPadding()
+                                    )
+                                    .size(40.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_arrow_upward),
+                                contentDescription = stringResource(R.string.show_history),
+                                tint = MaterialTheme.colors.onPrimary
                             )
-                            .size(40.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_upward),
-                        contentDescription = stringResource(R.string.show_history),
-                        tint = MaterialTheme.colors.onPrimary
-                    )
-                }
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End,
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            StatsBar(
-                itemsDontKnow = 0,
-                itemsBad = stats.bad,
-                itemsMeh = stats.meh,
-                itemsGood = stats.good
-            )
-
-            Text(
-                text = LocalContext.current.getString(
-                    R.string.score_string,
-                    correctCount,
-                    questionCount
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.body2,
-                textAlign = TextAlign.Center
-            )
-
-            val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
-            val layoutDirection = LocalLayoutDirection.current
-
-            Column(
-                modifier = Modifier
-                    .padding(
-                        start = safeDrawing.calculateStartPadding(layoutDirection),
-                        end = safeDrawing.calculateEndPadding(layoutDirection),
-                    )
-                    .weight(1f),
-            )
-            {
-                if (testFragment != null) {
-                    key(forceFragmentRefresh) {
-                        AndroidFragment(
-                            testFragment,
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            onUpdate = onFragmentUpdated,
-                        )
+                        }
                     }
-                } else {
-                    Spacer(
+                },
+                floatingActionButtonPosition = FabPosition.End,
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    StatsBar(
+                        itemsDontKnow = 0,
+                        itemsBad = stats.bad,
+                        itemsMeh = stats.meh,
+                        itemsGood = stats.good
+                    )
+
+                    Text(
+                        text = LocalContext.current.getString(
+                            R.string.score_string,
+                            correctCount,
+                            questionCount
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.body2,
+                        textAlign = TextAlign.Center
+                    )
+
+                    val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+                    val layoutDirection = LocalLayoutDirection.current
+
+                    Column(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .padding(
+                                start = safeDrawing.calculateStartPadding(layoutDirection),
+                                end = safeDrawing.calculateEndPadding(layoutDirection),
+                            )
+                            .weight(1f),
+                    )
+                    {
+                        if (testFragment != null) {
+                            key(forceFragmentRefresh) {
+                                AndroidFragment(
+                                    testFragment,
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    onUpdate = onFragmentUpdated,
+                                )
+                            }
+                        } else {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            )
+                        }
+                    }
+
+                    LastItemRow(
+                        lastCorrect = historyState.lastCorrect,
+                        lastWrong = historyState.lastWrong,
+                        lastProbabilityData = historyState.lastProbabilityData,
+                        kanaWords = kanaWords,
+                        onItemClick = onItemClick,
                     )
                 }
             }
-
-            LastItemRow(
-                lastCorrect = historyState.lastCorrect,
-                lastWrong = historyState.lastWrong,
-                lastProbabilityData = historyState.lastProbabilityData,
-                kanaWords = kanaWords,
-                onItemClick = onItemClick,
-            )
         }
     }
 }
@@ -765,6 +761,7 @@ fun TestScreenPreviewCollapsed() {
 
     KakugoTheme {
         TestScreen(
+            title = "Test",
             testFragment = null,
             forceFragmentRefresh = 0,
             onFragmentUpdated = {},
@@ -775,7 +772,7 @@ fun TestScreenPreviewCollapsed() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
-            onConfirmClose = {},
+            onBackClick = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
@@ -841,6 +838,7 @@ fun TestScreenPreviewWrong() {
 
     KakugoTheme {
         TestScreen(
+            title = "Test",
             testFragment = null,
             forceFragmentRefresh = 0,
             onFragmentUpdated = {},
@@ -851,7 +849,7 @@ fun TestScreenPreviewWrong() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
-            onConfirmClose = {},
+            onBackClick = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
@@ -915,6 +913,7 @@ fun TestScreenPreviewLongText() {
 
     KakugoTheme {
         TestScreen(
+            title = "Test",
             testFragment = null,
             forceFragmentRefresh = 0,
             onFragmentUpdated = {},
@@ -925,7 +924,7 @@ fun TestScreenPreviewLongText() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
-            onConfirmClose = {},
+            onBackClick = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
@@ -994,6 +993,7 @@ fun TestScreenPreviewWrongHistory() {
 
     KakugoTheme {
         TestScreen(
+            title = "Test",
             testFragment = null,
             forceFragmentRefresh = 0,
             onFragmentUpdated = {},
@@ -1004,7 +1004,7 @@ fun TestScreenPreviewWrongHistory() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
-            onConfirmClose = {},
+            onBackClick = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
