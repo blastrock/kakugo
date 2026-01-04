@@ -6,6 +6,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -319,19 +320,6 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 
         viewModel.initialize(testEngine)
 
-        // Setup back navigation handler
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                val sheetExpanded = viewModel.uiState.value.sheetExpanded
-
-                if (sheetExpanded) {
-                    viewModel.setSheetExpanded(false)
-                } else {
-                    confirmActivityClose(false)
-                }
-            }
-        })
-
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
@@ -354,6 +342,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                         onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
                         kanaWords = kanaWords,
                         onItemClick = this::openItemInDictionary,
+                        onConfirmClose = { confirmActivityClose(false) },
                         modifier = Modifier
                     )
                 }
@@ -439,6 +428,7 @@ fun TestScreen(
     onSheetExpandedChange: (Boolean) -> Unit,
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
+    onConfirmClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val themeAttrs = LocalThemeAttributes.current
@@ -458,6 +448,16 @@ fun TestScreen(
     // Listen to sheet state changes from user gestures
     LaunchedEffect(scaffoldState.bottomSheetState.isExpanded) {
         onSheetExpandedChange(scaffoldState.bottomSheetState.isExpanded)
+    }
+
+    // Handle back gesture for sheet collapse
+    BackHandler(enabled = sheetExpanded) {
+        onSheetExpandedChange(false)
+    }
+
+    // Handle back gesture for activity close
+    BackHandler(enabled = !sheetExpanded) {
+        onConfirmClose()
     }
 
     BottomSheetScaffold(
@@ -775,6 +775,7 @@ fun TestScreenPreviewCollapsed() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
+            onConfirmClose = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
@@ -850,6 +851,7 @@ fun TestScreenPreviewWrong() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
+            onConfirmClose = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
@@ -923,6 +925,7 @@ fun TestScreenPreviewLongText() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
+            onConfirmClose = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
@@ -1001,6 +1004,7 @@ fun TestScreenPreviewWrongHistory() {
             onSheetExpandedChange = {},
             kanaWords = true,
             onItemClick = {},
+            onConfirmClose = {},
             stats = LearningDbView.Stats(
                 good = 5,
                 meh = 3,
