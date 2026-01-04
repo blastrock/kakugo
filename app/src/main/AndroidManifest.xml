@@ -34,54 +34,34 @@
         </activity>
         <activity
             android:name=".mainmenu.HiraganaMenuActivity"
-            android:label="@string/hiragana_title"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:label="@string/hiragana_title" />
         <activity
             android:name=".mainmenu.KatakanaMenuActivity"
-            android:label="@string/katakana_title"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:label="@string/katakana_title" />
         <activity
             android:name=".mainmenu.KanjiMenuActivity"
-            android:label="@string/kanji_title"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:label="@string/kanji_title" />
         <activity
             android:name=".mainmenu.VocabularyMenuActivity"
-            android:label="@string/word_title"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:label="@string/word_title" />
         <activity
             android:name=".testactivities.TestActivity"
-            android:parentActivityName=".mainmenu.MainActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".itemdetails.WordDisplayActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
-        <activity
-            android:name=".itemdetails.KanjiDisplayActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
-        <activity
-            android:name=".settings.SavedSelectionsActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
-        <activity
-            android:name=".settings.ClassSelectionActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
-        <activity
-            android:name=".settings.ItemSearchActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
-        <activity
-            android:name=".settings.ItemSelectionActivity"
-            android:parentActivityName=".mainmenu.MainActivity" />
+        <activity android:name=".itemdetails.WordDisplayActivity" />
+        <activity android:name=".itemdetails.KanjiDisplayActivity" />
+        <activity android:name=".settings.SavedSelectionsActivity" />
+        <activity android:name=".settings.ClassSelectionActivity" />
+        <activity android:name=".settings.ItemSearchActivity" />
+        <activity android:name=".settings.ItemSelectionActivity" />
         <activity
             android:name=".settings.MainSettingsActivity"
-            android:label="@string/title_activity_main_settings"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:label="@string/title_activity_main_settings" />
         <activity
             android:name=".settings.AboutActivity"
-            android:label="@string/title_about"
-            android:parentActivityName=".settings.MainSettingsActivity" />
+            android:label="@string/title_about" />
         <activity
             android:name=".stats.StatsActivity"
-            android:label="@string/title_stats"
-            android:parentActivityName=".mainmenu.MainActivity" />
+            android:label="@string/title_stats" />
     </application>
 
 </manifest>
