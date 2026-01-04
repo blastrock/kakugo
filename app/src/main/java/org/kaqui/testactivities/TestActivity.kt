@@ -704,7 +704,7 @@ private fun ItemButton(
     val backgroundColor = when (style) {
         HistoryItemStyle.GOOD -> themeAttrs.itemGood
         HistoryItemStyle.BAD -> themeAttrs.itemBad
-        HistoryItemStyle.DONT_KNOW -> themeAttrs.backgroundDontKnow
+        HistoryItemStyle.DONT_KNOW -> themeAttrs.itemBad2
     }
     val context = LocalContext.current
 
@@ -969,12 +969,19 @@ fun TestScreenPreviewWrongHistory() {
             HistoryItem(
                 item = good,
                 probabilityData = null,
-                style = HistoryItemStyle.GOOD
+                style = HistoryItemStyle.GOOD,
             ),
             HistoryItem(
                 item = bad,
                 probabilityData = null,
-                style = HistoryItemStyle.BAD
+                style = HistoryItemStyle.BAD,
+                prependSeparator = true,
+            ),
+            HistoryItem(
+                item = good,
+                probabilityData = null,
+                style = HistoryItemStyle.DONT_KNOW,
+                prependSeparator = false,
             ),
         ),
         lastCorrect = good,
