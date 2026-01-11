@@ -175,6 +175,7 @@
     <string name="memorization_status_well_known">Bien connu</string>
     <string name="memorization_status_perfectly_known">Parfaitement connu</string>
     <string name="memorization_status_unknown">Inconnu</string>
+    <string name="usually_written_in_kana">habituellement écrit en kana</string>
 
     <string name="words_tab">Mots</string>
     <string name="on_readings_label">On\'yomi</string>

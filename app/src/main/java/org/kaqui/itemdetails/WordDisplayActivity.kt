@@ -351,6 +351,17 @@ fun WordTabContent(
                         }
                     )
             )
+
+            // Show "usually written in kana" if applicable
+            if (wordData.wordObject.kanaAlone) {
+                Text(
+                    text = stringResource(org.kaqui.R.string.usually_written_in_kana),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
         }
 

@@ -133,6 +133,7 @@
     <string name="memorization_status_well_known">Gut bekannt</string>
     <string name="memorization_status_perfectly_known">Perfekt bekannt</string>
     <string name="memorization_status_unknown">Unbekannt</string>
+    <string name="usually_written_in_kana">üblicherweise in Kana geschrieben</string>
 
     <string name="words_tab">Wörter</string>
     <string name="on_readings_label">On\'yomi</string>
