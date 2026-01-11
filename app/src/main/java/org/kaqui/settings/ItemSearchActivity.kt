@@ -225,7 +225,10 @@ fun ItemSearchScreen(
                                         },
                                         trailingIcon = {
                                             if (uiState.searchQuery.isNotEmpty()) {
-                                                IconButton(onClick = { onSearchQueryChange("") }) {
+                                                IconButton(onClick = {
+                                                    onSearchQueryChange("")
+                                                    focusRequester.requestFocus()
+                                                }) {
                                                     Icon(
                                                         imageVector = Icons.Default.Clear,
                                                         contentDescription = stringResource(R.string.clear_search),
