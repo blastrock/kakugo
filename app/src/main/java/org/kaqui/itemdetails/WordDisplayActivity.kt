@@ -134,8 +134,8 @@ class WordDisplayViewModel : ViewModel() {
         )
 
         // Extract and load kanji - return Items to get IDs for navigation
-        val kanjiList = extractKanjiFromWord(wordContents.word).mapNotNull { char ->
-            database.getKanjiByCharacter(char)
+        val kanjiList = extractKanjiFromWord(wordContents.word).map { char ->
+            database.getKanjiByCharacter(char) ?: createPlaceholderKanjiItem(char)
         }
 
         uiState = uiState.copy(
@@ -180,6 +180,25 @@ class WordDisplayViewModel : ViewModel() {
             .filter { c -> c.code !in HiraganaRange && c.code !in KatakanaRange }
             .map { it.toString() }
             .distinct()
+    }
+
+    private fun createPlaceholderKanjiItem(character: String): Item {
+        return Item(
+            id = -1,
+            contents = Kanji(
+                kanji = character,
+                on_readings = emptyList(),
+                kun_readings = emptyList(),
+                meanings = emptyList(),
+                similarities = emptyList(),
+                parts = emptyList(),
+                jlptLevel = 0
+            ),
+            shortScore = 0.0,
+            longScore = 0.0,
+            lastAsked = 0L,
+            enabled = false
+        )
     }
 }
 
