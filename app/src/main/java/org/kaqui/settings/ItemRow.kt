@@ -86,7 +86,6 @@ fun ItemRow(
             fontSize = 16.sp,
             style = MaterialTheme.typography.body2,
             lineHeight = 1.1.em,
-            maxLines = 3,
         )
     }
 }
