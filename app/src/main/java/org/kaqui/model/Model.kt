@@ -167,51 +167,66 @@ fun Item.getAnswerText(testType: TestType, kanaWords: Boolean): String =
             TestType.KANJI_DRAWING, TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING -> throw RuntimeException("No answer text for writing test")
         }
 
+val Kana.text: String
+    get() = kana
+
+val Kana.description: String
+    get() = romaji
+
 val Kanji.readingsText: String
-    get() = on_readings.joinToString(", ") + "\n" +
-            kun_readings.joinToString(", ")
+    get() = """
+        ${on_readings.joinToString(", ")}
+        ${kun_readings.joinToString(", ")}""".trimIndent()
 
 val Kanji.meaningsText: String
     get() = meanings.joinToString(", ")
 
+val Kanji.text: String
+    get() = kanji
+
+val Kanji.description: String
+    get() = """
+        ${on_readings.joinToString(", ")}
+        ${kun_readings.joinToString(", ")}
+        ${meanings.joinToString(", ")}""".trimIndent()
+
 val Word.meaningsText: String
     get() = meanings.joinToString(", ")
 
+fun Word.text(kanaWords: Boolean): String =
+    if (kanaAlone && kanaWords)
+        reading
+    else
+        word
+
+val Word.description: String
+    get() = """
+        $reading
+        ${meanings.joinToString(", ")}""".trimIndent()
+
 fun Item.text(kanaWords: Boolean): String =
-    when (contents) {
+    when (val contents = contents) {
         is Kana -> {
-            val kana = contents as Kana
-            kana.kana
+            contents.text
         }
         is Kanji -> {
-            val kanji = contents as Kanji
-            kanji.kanji
+            contents.text
         }
         is Word -> {
-            val word = contents as Word
-            if (word.kanaAlone && kanaWords)
-                word.reading
-            else
-                word.word
+            contents.text(kanaWords)
         }
     }
 
 val Item.description: String
-    get() = when (contents) {
+    get() = when (val contents = contents) {
         is Kana -> {
-            val kana = contents as Kana
-            kana.romaji
+            contents.description
         }
         is Kanji -> {
-            val kanji = contents as Kanji
-            kanji.on_readings.joinToString(", ") + "\n" +
-                    kanji.kun_readings.joinToString(", ") + "\n" +
-                    kanji.meanings.joinToString(", ")
+            contents.description
         }
         is Word -> {
-            val word = contents as Word
-            word.reading + "\n" +
-                    word.meanings.joinToString(", ")
+            contents.description
         }
     }
 
