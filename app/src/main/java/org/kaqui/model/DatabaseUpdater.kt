@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.database.sqlite.transaction
 
 class DatabaseUpdater(private val database: SQLiteDatabase) {
+    private val wordIdCache = HashMap<WordId, Int>()
     data class Dump(
             val enabledKanas: List<Int>,
             val enabledKanjis: List<Int>,
@@ -21,11 +22,11 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             val sessions: List<DumpSession>)
 
     data class DumpScore(val id: Int, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
-    data class DumpWordScore(val item: String, val reading: String, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
+    data class DumpWordScore(val item: String, val reading: String, val firstMeaningEn: String, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
     data class DumpStatsSnapshot(val itemType: ItemType, val knowledgeType: KnowledgeType, val time: Long, val goodCount: Int, val mehCount: Int, val badCount: Int, val longPartition: String, val longSum: Float)
     data class DumpSession(val itemType: ItemType, val testTypes: String, val startTime: Long, val items: List<DumpSessionItem>)
     data class DumpSessionItem(val testType: TestType, val content: DumpSessionItemContent, val certainty: Certainty, val time: Long)
-    data class WordId(val item: String, val reading: String)
+    data class WordId(val item: String, val reading: String, val firstMeaningEn: String = "")
     sealed class DumpSessionItemContent {
         data class Normal(val question: Long, val wrong: Long?) : DumpSessionItemContent()
         data class Word(val question: WordId, val wrong: WordId?) : DumpSessionItemContent()
@@ -48,6 +49,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                         + "radical INTEGER NOT NULL DEFAULT 0,"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
+        database.execSQL("CREATE INDEX IF NOT EXISTS idx_kanjis_enabled ON ${Database.KANJIS_TABLE_NAME}(enabled)")
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.ITEM_STROKES_TABLE_NAME} ("
                         + "id INTEGER NOT NULL PRIMARY KEY,"
@@ -60,6 +62,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 "CREATE TABLE IF NOT EXISTS ${Database.SIMILAR_ITEMS_TABLE_NAME} ("
                         + "id_item1 INTEGER NOT NULL,"
                         + "id_item2 INTEGER NOT NULL,"
+                        + "similarity_score FLOAT NOT NULL,"
                         + "PRIMARY KEY (id_item1, id_item2)"
                         + ")")
         database.execSQL(
@@ -104,9 +107,14 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                         + "rtk_index INTEGER NOT NULL DEFAULT 0,"
                         + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
                         + "similarity_class INTEGER NOT NULL DEFAULT 0,"
-                        + "enabled INTEGER NOT NULL DEFAULT 1,"
-                        + "UNIQUE(item, reading)"
+                        + "ent_seq INTEGER NOT NULL DEFAULT 0,"
+                        + "expr TEXT NOT NULL DEFAULT '',"
+                        + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
+        database.execSQL("CREATE INDEX IF NOT EXISTS idx_words_item ON ${Database.WORDS_TABLE_NAME}(item)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS idx_words_enabled ON ${Database.WORDS_TABLE_NAME}(enabled) WHERE enabled = 1")
+        database.execSQL("CREATE INDEX IF NOT EXISTS idx_words_similarity_class ON ${Database.WORDS_TABLE_NAME}(similarity_class)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS idx_words_expr ON ${Database.WORDS_TABLE_NAME}(expr)")
 
         database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.KANAS_TABLE_NAME} ("
@@ -227,8 +235,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         )
         database.execSQL(
                 "INSERT INTO ${Database.SIMILAR_ITEMS_TABLE_NAME} "
-                        + "(id_item1, id_item2) "
-                        + "SELECT id_item1, id_item2 "
+                        + "(id_item1, id_item2, similarity_score) "
+                        + "SELECT id_item1, id_item2, similarity_score "
                         + "FROM dict.similar_items "
         )
         database.execSQL(
@@ -241,8 +249,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         database.delete(Database.WORDS_TABLE_NAME, null, null)
         database.execSQL(
                 "INSERT INTO ${Database.WORDS_TABLE_NAME} "
-                        + "(id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class) "
-                        + "SELECT id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class "
+                        + "(id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class, ent_seq, expr) "
+                        + "SELECT id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class, ent_seq, expr "
                         + "FROM dict.words"
         )
     }
@@ -257,9 +265,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 DumpScore(id, knowledgeType, shortScore, longScore, lastCorrect)
             }
 
-    private fun convertWordScore(item: String, reading: String, shortScore: Float, longScore: Float, lastCorrect: Long) =
+    private fun convertWordScore(item: String, reading: String, firstMeaningEn: String, shortScore: Float, longScore: Float, lastCorrect: Long) =
             listOf(KnowledgeType.Reading, KnowledgeType.Meaning).map { knowledgeType ->
-                DumpWordScore(item, reading, knowledgeType, shortScore, longScore, lastCorrect)
+                DumpWordScore(item, reading, firstMeaningEn, knowledgeType, shortScore, longScore, lastCorrect)
             }
 
     private fun dumpScoresV16(scores: MutableList<DumpScore>, enabledItems: MutableList<Int>, converter: (Int, Float, Float, Long) -> Iterable<DumpScore>, cursor: Cursor) {
@@ -286,10 +294,11 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         while (cursor.moveToNext()) {
             val item = cursor.getString(0)
             val reading = cursor.getString(1)
+            val firstMeaningEn = cursor.getString(6).split('_')[0]
             val enabled = cursor.getInt(5) != 0
-            scores.addAll(convertWordScore(item, reading, cursor.getFloat(2), cursor.getFloat(3), cursor.getLong(4)))
+            scores.addAll(convertWordScore(item, reading, firstMeaningEn, cursor.getFloat(2), cursor.getFloat(3), cursor.getLong(4)))
             if (enabled)
-                enabledItems.add(WordId(item, reading))
+                enabledItems.add(WordId(item, reading, firstMeaningEn))
         }
     }
 
@@ -324,7 +333,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
         val wordScores = mutableListOf<DumpWordScore>()
         val enabledWords = mutableListOf<WordId>()
-        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled", "meanings"), "last_correct > 0", null, null, null, null).use { cursor ->
             dumpWordScores(wordScores, enabledWords, cursor)
         }
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, mapOf(), mapOf(), listOf(), listOf())
@@ -355,7 +364,38 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
         val wordScores = mutableListOf<DumpWordScore>()
         val enabledWords = mutableListOf<WordId>()
-        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled", "meanings"), "last_correct > 0", null, null, null, null).use { cursor ->
+            dumpWordScores(wordScores, enabledWords, cursor)
+        }
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), listOf(), listOf())
+    }
+
+    private fun dumpUserDataV16(): Dump {
+        val scores = mutableListOf<DumpScore>()
+        val enabledKanas = mutableListOf<Int>()
+        database.query("hiraganas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
+            dumpScoresV16(scores, enabledKanas, this::convertKanaScore, cursor)
+        }
+        database.query("katakanas", arrayOf("kana", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
+            dumpScoresV16(scores, enabledKanas, this::convertKanaScore, cursor)
+        }
+        val enabledKanjis = mutableListOf<Int>()
+        database.query(Database.KANJIS_TABLE_NAME, arrayOf("item", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
+            dumpScoresV16(scores, enabledKanjis, this::convertKanjiScore, cursor)
+        }
+        val kanjiSelections = mutableMapOf<String, MutableList<Int>>()
+        database.rawQuery("""
+                SELECT ks.name, k.item
+                FROM ${Database.KANJIS_SELECTION_TABLE_NAME} ks
+                LEFT JOIN ${Database.KANJIS_ITEM_SELECTION_TABLE_NAME} kis USING(id_selection)
+                LEFT JOIN ${Database.KANJIS_TABLE_NAME} k ON kis.id_kanji = k.id
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getString(1).codePointAt(0))
+        }
+        val wordScores = mutableListOf<DumpWordScore>()
+        val enabledWords = mutableListOf<WordId>()
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled", "meanings_en"), "last_correct > 0", null, null, null, null).use { cursor ->
             dumpWordScores(wordScores, enabledWords, cursor)
         }
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), listOf(), listOf())
@@ -385,7 +425,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
         val wordScores = mutableListOf<DumpWordScore>()
         val enabledWords = mutableListOf<WordId>()
-        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled"), "last_correct > 0", null, null, null, null).use { cursor ->
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "short_score", "long_score", "last_correct", "enabled", "meanings_en"), "last_correct > 0", null, null, null, null).use { cursor ->
             dumpWordScores(wordScores, enabledWords, cursor)
         }
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), listOf(), listOf())
@@ -414,10 +454,10 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getInt(1))
         }
         val enabledWords = mutableListOf<WordId>()
-        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "enabled", "meanings_en"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 if (cursor.getInt(2) != 0)
-                    enabledWords.add(WordId(cursor.getString(0), cursor.getString(1)))
+                    enabledWords.add(WordId(cursor.getString(0), cursor.getString(1), cursor.getString(3).split('_')[0]))
         }
         val scores = mutableListOf<DumpScore>()
         database.query(Database.ITEM_SCORES_TABLE_NAME, arrayOf("id", "type", "short_score", "long_score", "last_correct"), "id < $WordBaseId", null, null, null, null).use { cursor ->
@@ -426,12 +466,12 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
         val wordScores = mutableListOf<DumpWordScore>()
         database.rawQuery("""
-                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct
+                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct, w.meanings_en
                 FROM ${Database.ITEM_SCORES_TABLE_NAME} s
                 JOIN ${Database.WORDS_TABLE_NAME} w USING(id)
             """, null).use { cursor ->
             while (cursor.moveToNext())
-                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
+                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), cursor.getString(6).split('_')[0], KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
         }
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, mapOf(), listOf(), listOf())
     }
@@ -459,21 +499,21 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getInt(1))
         }
         val enabledWords = mutableListOf<WordId>()
-        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "enabled", "meanings_en"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 if (cursor.getInt(2) != 0)
-                    enabledWords.add(WordId(cursor.getString(0), cursor.getString(1)))
+                    enabledWords.add(WordId(cursor.getString(0), cursor.getString(1), cursor.getString(3).split('_')[0]))
         }
         val wordSelections = mutableMapOf<String, MutableList<WordId>>()
         database.rawQuery("""
-                SELECT ws.name, w.item, w.reading
+                SELECT ws.name, w.item, w.reading, w.meanings_en
                 FROM ${Database.WORDS_SELECTION_TABLE_NAME} ws
                 LEFT JOIN ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} wis USING(id_selection)
                 JOIN ${Database.WORDS_TABLE_NAME} w ON w.id = wis.id_word
             """, null).use { cursor ->
             while (cursor.moveToNext())
                 wordSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(
-                        WordId(cursor.getString(1), cursor.getString(2)))
+                        WordId(cursor.getString(1), cursor.getString(2), cursor.getString(3).split('_')[0]))
         }
         val scores = mutableListOf<DumpScore>()
         database.query(Database.ITEM_SCORES_TABLE_NAME, arrayOf("id", "type", "short_score", "long_score", "last_correct"), "id < $WordBaseId", null, null, null, null).use { cursor ->
@@ -482,12 +522,12 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
         val wordScores = mutableListOf<DumpWordScore>()
         database.rawQuery("""
-                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct
+                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct, w.meanings_en
                 FROM ${Database.ITEM_SCORES_TABLE_NAME} s
                 JOIN ${Database.WORDS_TABLE_NAME} w USING(id)
             """, null).use { cursor ->
             while (cursor.moveToNext())
-                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
+                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), cursor.getString(6).split('_')[0], KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
         }
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, listOf(), listOf())
     }
@@ -515,21 +555,21 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getInt(1))
         }
         val enabledWords = mutableListOf<WordId>()
-        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "enabled"), null, null, null, null, null).use { cursor ->
+        database.query(Database.WORDS_TABLE_NAME, arrayOf("item", "reading", "enabled", "meanings_en"), null, null, null, null, null).use { cursor ->
             while (cursor.moveToNext())
                 if (cursor.getInt(2) != 0)
-                    enabledWords.add(WordId(cursor.getString(0), cursor.getString(1)))
+                    enabledWords.add(WordId(cursor.getString(0), cursor.getString(1), cursor.getString(3).split('_')[0]))
         }
         val wordSelections = mutableMapOf<String, MutableList<WordId>>()
         database.rawQuery("""
-                SELECT ws.name, w.item, w.reading
+                SELECT ws.name, w.item, w.reading, w.meanings_en
                 FROM ${Database.WORDS_SELECTION_TABLE_NAME} ws
                 LEFT JOIN ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} wis USING(id_selection)
                 JOIN ${Database.WORDS_TABLE_NAME} w ON w.id = wis.id_word
             """, null).use { cursor ->
             while (cursor.moveToNext())
                 wordSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(
-                        WordId(cursor.getString(1), cursor.getString(2)))
+                        WordId(cursor.getString(1), cursor.getString(2), cursor.getString(3).split('_')[0]))
         }
         val scores = mutableListOf<DumpScore>()
         database.query(Database.ITEM_SCORES_TABLE_NAME, arrayOf("id", "type", "short_score", "long_score", "last_correct"), "id < $WordBaseId", null, null, null, null).use { cursor ->
@@ -538,12 +578,12 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
         val wordScores = mutableListOf<DumpWordScore>()
         database.rawQuery("""
-                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct
+                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct, w.meanings_en
                 FROM ${Database.ITEM_SCORES_TABLE_NAME} s
                 JOIN ${Database.WORDS_TABLE_NAME} w USING(id)
             """, null).use { cursor ->
             while (cursor.moveToNext())
-                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
+                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), cursor.getString(6).split('_')[0], KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5)))
         }
         val sessionItems = mutableMapOf<Long, MutableList<DumpSessionItem>>()
         database.rawQuery("""
@@ -563,7 +603,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 ))
         }
         database.rawQuery("""
-                SELECT si.id_session, si.test_type, qw.item, ww.item, si.certainty, si.time, qw.reading, ww.reading
+                SELECT si.id_session, si.test_type, qw.item, ww.item, si.certainty, si.time, qw.reading, ww.reading, qw.meanings_en, ww.meanings_en
                 FROM ${Database.SESSION_ITEMS_TABLE_NAME} si
                 JOIN ${Database.WORDS_TABLE_NAME} qw ON qw.id = si.id_item_question
                 LEFT JOIN ${Database.WORDS_TABLE_NAME} ww ON ww.id = si.id_item_wrong
@@ -573,9 +613,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 sessionItems.getOrPut(cursor.getLong(0)) { mutableListOf() }.add(DumpSessionItem(
                         TestType.fromInt(cursor.getInt(1)),
                         DumpSessionItemContent.Word(
-                                WordId(cursor.getString(2), cursor.getString(6)),
+                                WordId(cursor.getString(2), cursor.getString(6), cursor.getString(8).split('_')[0]),
                                 if (cursor.isNull(3)) null
-                                else WordId(cursor.getString(3), cursor.getString(7))),
+                                else WordId(cursor.getString(3), cursor.getString(7), if (cursor.isNull(9)) "" else cursor.getString(9).split('_')[0])),
                         Certainty.fromInt(cursor.getInt(4)),
                         cursor.getLong(5)
                 ))
@@ -622,13 +662,41 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             oldVersion == 0 -> null
             oldVersion < 10 -> dumpUserDataV1()
             oldVersion < 13 -> dumpUserDataV10()
-            oldVersion < 17 -> dumpUserDataV13()
+            oldVersion < 16 -> dumpUserDataV13()
+            oldVersion < 17 -> dumpUserDataV16()
             oldVersion < 19 -> dumpUserDataV17()
             oldVersion < 21 -> dumpUserDataV19()
             oldVersion < 22 -> dumpUserDataV21()
-            oldVersion < 32 -> dumpUserDataV22()
+            oldVersion <= DATABASE_VERSION -> dumpUserDataV22()
             else -> throw RuntimeException("Unsupported future version $oldVersion")
         }
+    }
+
+    private fun findWordId(wordId: WordId): Int? {
+        wordIdCache[wordId]?.let { return if (it == -1) null else it }
+
+        val result = database.rawQuery(
+                """SELECT id, meanings_en
+                     FROM ${Database.WORDS_TABLE_NAME}
+                     WHERE item = ? AND reading = ?""",
+                arrayOf(wordId.item, wordId.reading)).use { cursor ->
+            if (cursor.count == 0) {
+                Log.w(TAG, "No match for word (${wordId.item}, ${wordId.reading})")
+                return@use null
+            }
+            var firstId: Int? = null
+            while (cursor.moveToNext()) {
+                if (firstId == null)
+                    firstId = cursor.getInt(0)
+                if (wordId.firstMeaningEn.isNotEmpty() && cursor.getString(1).split('_')[0] == wordId.firstMeaningEn)
+                    return@use cursor.getInt(0)
+            }
+            if (wordId.firstMeaningEn.isNotEmpty())
+                Log.w(TAG, "No exact first-meaning match for word (${wordId.item}, ${wordId.reading}, ${wordId.firstMeaningEn}), falling back to first match")
+            firstId
+        }
+        wordIdCache[wordId] = result ?: -1
+        return result
     }
 
     private fun enableOnly(tableName: String, toEnable: List<Int>) {
@@ -651,9 +719,10 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             database.update(tableName, cv, null, null)
         }
         for (row in toEnable) {
+            val id = findWordId(row) ?: continue
             val cv = ContentValues()
             cv.put("enabled", 1)
-            database.update(tableName, cv, "item = ? AND reading = ?", arrayOf(row.item, row.reading))
+            database.update(tableName, cv, "id = ?", arrayOf(id.toString()))
         }
     }
 
@@ -673,16 +742,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             }
             run {
                 for (row in data.wordScores) {
-                    val wordId = database.rawQuery(
-                            """SELECT id
-                                 FROM ${Database.WORDS_TABLE_NAME}
-                                 WHERE item = ? AND reading = ?""",
-                            arrayOf(row.item, row.reading)).use { cursor ->
-                        if (cursor.count == 0)
-                            return@use null
-                        cursor.moveToFirst()
-                        return@use cursor.getInt(0)
-                    } ?: continue
+                    val wordId = findWordId(WordId(row.item, row.reading, row.firstMeaningEn)) ?: continue
 
                     val cv = ContentValues()
                     cv.put("id", wordId)
@@ -719,16 +779,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                     cv.put("name", selectionName)
                     val selectionId = database.insertOrThrow(Database.WORDS_SELECTION_TABLE_NAME, null, cv)
                     for (item in selectionItems) {
-                        val wordId = database.rawQuery(
-                                """SELECT id
-                                 FROM ${Database.WORDS_TABLE_NAME}
-                                 WHERE item = ? AND reading = ?""",
-                                arrayOf(item.item, item.reading)).use { cursor ->
-                            if (cursor.count == 0)
-                                return@use null
-                            cursor.moveToFirst()
-                            return@use cursor.getInt(0)
-                        } ?: continue
+                        val wordId = findWordId(item) ?: continue
 
                         val cv = ContentValues()
                         cv.put("id_selection", selectionId)
@@ -773,28 +824,10 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                                 cv.put("id_item_wrong", item.content.wrong)
                             }
                             is DumpSessionItemContent.Word -> {
-                                val wordId = database.rawQuery(
-                                        """SELECT id
-                                             FROM ${Database.WORDS_TABLE_NAME}
-                                             WHERE item = ? AND reading = ?""",
-                                        arrayOf(item.content.question.item, item.content.question.reading)).use { cursor ->
-                                    if (cursor.count == 0)
-                                        return@use null
-                                    cursor.moveToFirst()
-                                    return@use cursor.getInt(0)
-                                } ?: continue
+                                val wordId = findWordId(item.content.question) ?: continue
                                 cv.put("id_item_question", wordId)
                                 if (item.content.wrong != null) {
-                                    val wrongWordId = database.rawQuery(
-                                            """SELECT id
-                                             FROM ${Database.WORDS_TABLE_NAME}
-                                             WHERE item = ? AND reading = ?""",
-                                            arrayOf(item.content.wrong.item, item.content.wrong.reading)).use { cursor ->
-                                        if (cursor.count == 0)
-                                            return@use null
-                                        cursor.moveToFirst()
-                                        return@use cursor.getInt(0)
-                                    }
+                                    val wrongWordId = findWordId(item.content.wrong)
                                     cv.put("id_item_wrong", wrongWordId)
                                 }
                             }
@@ -808,7 +841,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 31
+        const val DATABASE_VERSION = 38
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {

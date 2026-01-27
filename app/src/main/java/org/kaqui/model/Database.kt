@@ -125,7 +125,7 @@ class Database private constructor(context: Context, val database: SQLiteDatabas
 
     private fun getKana(id: Int, knowledgeType: KnowledgeType?): Item {
         val similarities = mutableListOf<Item>()
-        database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, "similarity_score DESC").use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kana("", "", "", listOf()), 0.0, 0.0, 0, false))
         }
@@ -154,7 +154,7 @@ class Database private constructor(context: Context, val database: SQLiteDatabas
 
     fun getKanji(id: Int, knowledgeType: KnowledgeType?): Item {
         val similarities = mutableListOf<Item>()
-        database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, null).use { cursor ->
+        database.query(SIMILAR_ITEMS_TABLE_NAME, arrayOf("id_item2"), "id_item1 = ?", arrayOf(id.toString()), null, null, "similarity_score DESC").use { cursor ->
             while (cursor.moveToNext())
                 similarities.add(Item(cursor.getInt(0), Kanji("", listOf(), listOf(), listOf(), listOf(), listOf(), 0), 0.0, 0.0, 0, false))
         }
