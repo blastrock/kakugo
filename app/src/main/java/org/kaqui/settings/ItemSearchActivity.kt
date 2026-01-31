@@ -46,6 +46,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -185,6 +186,7 @@ fun ItemSearchScreen(
     onItemEnabledChange: (Int, Boolean) -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -228,6 +230,7 @@ fun ItemSearchScreen(
                                                 IconButton(onClick = {
                                                     onSearchQueryChange("")
                                                     focusRequester.requestFocus()
+                                                    keyboardController?.show()
                                                 }) {
                                                     Icon(
                                                         imageVector = Icons.Default.Clear,
