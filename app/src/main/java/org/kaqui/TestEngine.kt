@@ -11,6 +11,7 @@ import org.kaqui.model.Database
 import org.kaqui.model.Item
 import org.kaqui.model.Kanji
 import org.kaqui.model.LearningDbView
+import org.kaqui.model.Word
 import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerCount
 import org.kaqui.model.getItemType
@@ -218,9 +219,24 @@ class TestEngine(
                 else
                     similarItemIds
 
-        val additionalAnswers = pickRandom(ids.map { it.itemId }, answerCount - 1 - similarItems.size, setOf(currentQuestion.id) + similarItems)
+        val usedIds = setOf(currentQuestion.id) + similarItems
+        var remaining = answerCount - usedIds.size
 
-        val currentAnswers = ((additionalAnswers + similarItems).map { getItem(it) } + listOf(currentQuestion)).toMutableList()
+        val word = currentQuestion.contents as? Word
+        val exprItems =
+                if (remaining > 0 && word != null) {
+                    val exprCandidates = db.getEnabledWordIdsByExpr(word.expr, usedIds)
+                    if (exprCandidates.size >= remaining)
+                        pickRandom(exprCandidates, remaining)
+                    else
+                        exprCandidates
+                } else
+                    listOf()
+        remaining -= exprItems.size
+
+        val additionalAnswers = pickRandom(ids.map { it.itemId }, remaining, usedIds + exprItems)
+
+        val currentAnswers = ((additionalAnswers + exprItems + similarItems).map { getItem(it) } + listOf(currentQuestion)).toMutableList()
         if (currentAnswers.size != answerCount)
             Log.wtf(TAG, "Got ${currentAnswers.size} answers instead of $answerCount")
         currentAnswers.shuffle()

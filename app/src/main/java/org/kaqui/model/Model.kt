@@ -29,6 +29,7 @@ data class Word(
         var meanings: List<String>,
         var similarities: List<Item>,
         var kanaAlone: Boolean,
+        var expr: String,
 ) : ItemContents()
 
 data class Item(

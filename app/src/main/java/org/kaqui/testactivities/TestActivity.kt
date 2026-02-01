@@ -892,6 +892,7 @@ fun TestScreenPreviewLongText() {
             ),
             listOf(),
             false,
+            "",
         ),
         0.0,
         0.0,
@@ -945,7 +946,8 @@ fun TestScreenPreviewWrongHistory() {
             "すき",
             listOf("fond", "pleasing", "like something"),
             listOf(),
-            false
+            false,
+            ""
         ),
         0.0,
         0.0,
@@ -959,7 +961,8 @@ fun TestScreenPreviewWrongHistory() {
             "ひと",
             listOf("person"),
             listOf(),
-            false
+            false,
+            ""
         ),
         0.0,
         0.0,

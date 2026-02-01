@@ -525,8 +525,8 @@ fun PreviewKanjiDisplayScreenKanjiTab() {
     )
 
     val sampleWordList = listOf(
-        Item(1, Word("食べる", "たべる", listOf("to eat"), listOf(), false), 0.5, 0.3, 0, true),
-        Item(2, Word("食事", "しょくじ", listOf("meal"), listOf(), false), 0.8, 0.6, 0, true)
+        Item(1, Word("食べる", "たべる", listOf("to eat"), listOf(), false, ""), 0.5, 0.3, 0, true),
+        Item(2, Word("食事", "しょくじ", listOf("meal"), listOf(), false, ""), 0.8, 0.6, 0, true)
     )
 
     KanjiDisplayScreen(
@@ -570,9 +570,9 @@ fun PreviewKanjiDisplayScreenWordsTab() {
     )
 
     val sampleWordList = listOf(
-        Item(1, Word("食べる", "たべる", listOf("to eat"), listOf(), false), 0.5, 0.3, 0, true),
-        Item(2, Word("食事", "しょくじ", listOf("meal"), listOf(), false), 0.8, 0.6, 0, true),
-        Item(3, Word("食堂", "しょくどう", listOf("dining hall", "cafeteria"), listOf(), false), 0.3, 0.1, 0, true)
+        Item(1, Word("食べる", "たべる", listOf("to eat"), listOf(), false, ""), 0.5, 0.3, 0, true),
+        Item(2, Word("食事", "しょくじ", listOf("meal"), listOf(), false, ""), 0.8, 0.6, 0, true),
+        Item(3, Word("食堂", "しょくどう", listOf("dining hall", "cafeteria"), listOf(), false, ""), 0.3, 0.1, 0, true)
     )
 
     KanjiDisplayScreen(

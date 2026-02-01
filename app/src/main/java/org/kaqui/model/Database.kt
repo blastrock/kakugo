@@ -219,11 +219,11 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
     }
 
     fun getWord(id: Int, knowledgeType: KnowledgeType?): Item {
-        val contents = Word("", "", listOf(), listOf(), false)
+        val contents = Word("", "", listOf(), listOf(), false, "")
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         database.rawQuery("""
-            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone
+            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone, expr
             FROM $WORDS_TABLE_NAME k
             LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
@@ -240,6 +240,7 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
             else
                 contents.meanings = cursor.getString(8).split('_')
             contents.kanaAlone = cursor.getInt(9) != 0
+            contents.expr = cursor.getString(10)
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
             item.lastAsked = cursor.getLong(5)
@@ -251,10 +252,25 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
                 "similarity_class = ? AND id <> ?", arrayOf(similarityClass.toString(), id.toString()),
                 null, null, "RANDOM()", "20").use { cursor ->
             while (cursor.moveToNext())
-                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf(), false), 0.0, 0.0, 0, false))
+                similarWords.add(Item(cursor.getInt(0), Word("", "", listOf(), listOf(), false, ""), 0.0, 0.0, 0, false))
         }
         contents.similarities = similarWords
         return item
+    }
+
+    fun getEnabledWordIdsByExpr(expr: String, excludeIds: Set<Int>): List<Int> {
+        val excludeClause = if (excludeIds.isNotEmpty()) " AND id NOT IN (${excludeIds.joinToString(",")})" else ""
+        val ret = mutableListOf<Int>()
+        database.rawQuery("""
+            SELECT id FROM $WORDS_TABLE_NAME
+            WHERE expr = ? AND enabled = 1$excludeClause
+            ORDER BY RANDOM()
+            LIMIT 20
+        """, arrayOf(expr)).use { cursor ->
+            while (cursor.moveToNext())
+                ret.add(cursor.getInt(0))
+        }
+        return ret
     }
 
     fun setKanjiSelection(kanjis: String) {

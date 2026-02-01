@@ -97,7 +97,7 @@ data class WordData(
             readingLongScore = 0.0,
             meaningShortScore = 0.0,
             meaningLongScore = 0.0,
-            wordObject = Word("", "", emptyList(), emptyList(), false),
+            wordObject = Word("", "", emptyList(), emptyList(), false, ""),
             wordId = -1
         )
     }
@@ -581,7 +581,7 @@ fun PreviewWordDisplayScreenWordTab() {
         readingLongScore = 0.0,
         meaningShortScore = 1.0,
         meaningLongScore = 0.1,
-        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false),
+        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false, ""),
         wordId = 123
     )
 
@@ -624,7 +624,7 @@ fun PreviewWordDisplayScreenKanjiTab() {
         readingLongScore = 0.75,
         meaningShortScore = 0.3,
         meaningLongScore = 0.45,
-        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false),
+        wordObject = Word("食べる", "たべる", listOf("to eat", "to consume"), listOf(), false, ""),
         wordId = 123
     )
 
@@ -672,7 +672,8 @@ fun PreviewWordDisplayScreenKanaOnly() {
             "ひらがな",
             listOf("hiragana", "Japanese syllabary"),
             listOf(),
-            true
+            true,
+            ""
         ),
         wordId = 123
     )
@@ -700,7 +701,7 @@ fun PreviewWordDisplayScreenMultipleKanji() {
         readingLongScore = 0.95,
         meaningShortScore = 1.0,
         meaningLongScore = 0.9,
-        wordObject = Word("日本語", "にほんご", listOf("Japanese language"), listOf(), false),
+        wordObject = Word("日本語", "にほんご", listOf("Japanese language"), listOf(), false, ""),
         wordId = 123
     )
 
