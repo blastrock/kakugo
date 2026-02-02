@@ -40,7 +40,8 @@ Danksagung
 
 - Die Kanji Quiz basieren auf `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
 - Die Vokabel Quiz basieren auf `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
-- Die Kanji Ähnlichkeits-Daten stammem aus `einer Studio von Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
+- Die Vokabel-Häufigkeitsdaten basieren auf `jpdb <https://jpdb.io/>`_.
+- Die Kanji Ähnlichkeits-Daten wurden aus dem `Niai Projekt <https://niai.mrahhal.net/similar>`_, dem `similar-kanji Projekt <https://github.com/siikamiika/similar-kanji>`_ und `einer Studie von Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_ zusammengestellt.
 - Die Kanji Aufbau- und Strichfolge-Datenbank stammt von `KanjiVG <https://kanjivg.tagaini.net/>`_.
 - Die JLPT Einteilung stammt von `Jonathan Waller <https://www.tanos.co.uk/jlpt/>`_.
 - App Symbol-Schriftart ist `Nagayama Kai <https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/>`_.

@@ -130,7 +130,8 @@
         <p>Le dictionnaire de kanji est basé sur <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
         <p>Les traductions allemandes des kanji viennent de l\'<a href="https://www.kanjistudyapp.com/">app Kanji Study</a> de Chase Colburn.</p>
         <p>Le dictionnaire de vocabulaire est basé sur <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
-        <p>Les données de similarité des kanji viennent d&apos;<a href="http://lars.yencken.org/datasets/phd/">une étude du Dr. Lars Yencken</a>.</p>
+        <p>Les données de fréquence du vocabulaire sont basées sur <a href="https://jpdb.io/">jpdb</a>.</p>
+        <p>Les données de similarité des kanji ont été compilées à partir du <a href="https://niai.mrahhal.net/similar">projet Niai</a>, du <a href="https://github.com/siikamiika/similar-kanji">projet similar-kanji</a>, et d&apos;<a href="http://lars.yencken.org/datasets/phd/">une étude du Dr. Lars Yencken</a>.</p>
         <p>Les données de composition et de dessin de kanji viennent de <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
         <p>Les données de classification JLPT vient de <a href="https://www.tanos.co.uk/jlpt/">Jonathan Waller</a>.</p>
         <p>La police de caractères de l\'icône de l\'application est <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>

@@ -47,7 +47,8 @@ Credits
 
 - The kanji quizzes are based on `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
 - The vocabulary quizzes are based on `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
-- The kanji similarity data comes from `a study from Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
+- The vocabulary frequency data is based on `jpdb <https://jpdb.io/>`_.
+- The kanji similarity data has been compiled from the `Niai project <https://niai.mrahhal.net/similar>`_, the `similar-kanji project <https://github.com/siikamiika/similar-kanji>`_, and `a study from Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
 - The kanji composition and drawing database comes from `KanjiVG <https://kanjivg.tagaini.net/>`_.
 - The JLPT classification data comes from `Jonathan Waller <https://www.tanos.co.uk/jlpt/>`_.
 - The app icon font is `Nagayama Kai <https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/>`_.

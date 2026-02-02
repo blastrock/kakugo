@@ -40,7 +40,8 @@ Créditos
 
 - El diccionario de kanji se basa en `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
 - El diccionario de vocabulario se basa en `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
-- Los datos de similitud de kanji son a cortesía de `un estudio del Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
+- Los datos de frecuencia de vocabulario se basan en `jpdb <https://jpdb.io/>`_.
+- Los datos de similitud de kanji han sido recopilados del `proyecto Niai <https://niai.mrahhal.net/similar>`_, del `proyecto similar-kanji <https://github.com/siikamiika/similar-kanji>`_ y de `un estudio del Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
 - Los datos de composición y dibujo de kanji provienen de `KanjiVG <https://kanjivg.tagaini.net/>`_.
 - Los datos de clasificación JLPT vienen de `Jonathan Waller <https://www.tanos.co.uk/jlpt/>`_.
 - La fuente del icono de la aplicación es `Nagayama Kai <https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/>`_.
