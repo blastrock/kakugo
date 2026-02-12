@@ -72,6 +72,7 @@
     <string name="pref_cat_language">Sprache</string>
     <string name="pref_cat_about">Über</string>
     <string name="pref_cat_classification">Aufgliederung</string>
+    <string name="pref_cat_backup">Sicherung</string>
     <string name="kanji_composition_title">Kanji Komposita</string>
     <string name="confirm_test_stop_message">Sind sie sicher, dass sie die Lerneinheit beenden möchten?</string>
     <string name="stats_correct_answers">Richtige Antworten</string>
@@ -99,6 +100,9 @@
     <string name="loaded_selection">Auswahl geladen \"%1$s\"</string>
     <string name="deleted_selection">Auswahl gelöscht \"%1$s\"</string>
     <string name="saved_selection">Aktuelle Auswahl gespeichert als \"%1$s\"</string>
+    <string name="saved_selections">Gespeicherte Auswahlen</string>
+    <string name="confirm_delete">Löschen bestätigen</string>
+    <string name="confirm_delete_selection">Sind Sie sicher, dass Sie die Auswahl \"%1$s\" löschen möchten?</string>
     <string name="enter_name_of_selection">Geben sie einen Namen für diese Auswahl ein</string>
     <string name="could_not_import_file">Kann folgende Datei nicht importieren: %1$s</string>
     <string name="additional_kanji">Zusätzliche Kanji</string>
@@ -106,6 +110,15 @@
     <string name="rtk6_index_range">Indexe %1$s+</string>
     <string name="keep_screen_on_summary">Bildschirm während der Tests aktiv lassen</string>
     <string name="keep_screen_on">Bildschirm eingeschaltet lassen</string>
+    <string name="export_backup">Sicherung exportieren</string>
+    <string name="import_backup">Sicherung importieren</string>
+    <string name="choose_backup_idr">Verzeichnis für Sicherung wählen</string>
+    <string name="warning_import_backup">Warnung: Dies wird den aktuellen Stand überschreiben</string>
+    <string name="import_backup_failure">Sicherung konnte nicht importiert werden: %1$s</string>
+    <string name="backup_import_completed">Import der Sicherung abgeschlossen</string>
+    <string name="kana_words">Kana-Wörter in Kana anzeigen</string>
+    <string name="kana_words_off_summary">Wörter werden nach Möglichkeit mit Kanji geschrieben</string>
+    <string name="kana_words_on_summary">Wörter, die üblicherweise in Kana geschrieben werden, werden in Kana angezeigt</string>
     <string name="import_kanji_help">Diese Funktion erlaubt den Import einer Kanji-Auswahl aus einer Datei. Die Datei muss jeweils ein Kanji pro Zeile beinhalten. Die Kanji werden der aktuellen Auswahl hinzugefügt.</string>
     <string name="import_words_help">Diese Funktion erlaubt den Import einer Vokabel-Auswahl aus einer Datei. Die Datei muss jeweils eine Vokabel pro Zeile beinhalten. Die Vokabeln werden der aktuellen Auswahl hinzugefügt.</string>
     <string name="about_text"><![CDATA[         <p>Kakugo ist eine Japanisch Lern-App. Version %1$s (%2$d).</p>          <p>Sie ist quelloffen und verfügbar über <a href="https://github.com/blastrock/kakugo/">github</a> unter der GPLv3 Lizenz.</p>          <p>Das Kanji Wörterbuch basiert auf <a href="https://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>         <p>Die deutsche Übersetzung der Kanji stammt von der <a href="https://www.kanjistudyapp.com/">Kanji Study App</a> von Chase Colburn.</p>         <p>Das Vokabel-Wörterbuch basiert auf <a href="https://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>         <p>Die Vokabel-Häufigkeitsdaten basieren auf <a href="https://jpdb.io/">jpdb</a>.</p>         <p>Die Kanji Ähnlichkeits-Daten wurden aus dem <a href="https://niai.mrahhal.net/similar">Niai Projekt</a>, dem <a href="https://github.com/siikamiika/similar-kanji">similar-kanji Projekt</a> und <a href="http://lars.yencken.org/datasets/phd/">einer Studie von Dr. Lars Yencken</a> zusammengestellt.</p>         <p>Die Kanji Aufbau- und Strichfolge-Datenbank stammt von <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>         <p>Die Daten für die JLPT Einteilung stammen von <a href="https://www.tanos.co.uk/jlpt/">Jonathan Waller</a>.</p>         <p>Die App Symbol-Schriftart ist <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>         <p>Die App Titel-Schriftart ist <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>          <p>Kakugo  Urheberrecht (Copyright) &#169; 2025  Philippe Daouadi</p>     ]]></string>

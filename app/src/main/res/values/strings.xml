@@ -145,10 +145,6 @@
     <string name="kana_words_off_summary">Words will be written with kanji whenever possible</string>
     <string name="kana_words_on_summary">Words usually written in kana will be written in kana</string>
 
-    app:summaryOff="@string/kana_words_off_summary"
-    app:summaryOn="@string/kana_words_on_summary"
-    app:title="@string/kana_words"
-
     <string name="title_about">About Kakugo</string>
     <string name="about_text"><![CDATA[
         <p>Kakugo is a Japanese learning app. Version %1$s (%2$d).</p>

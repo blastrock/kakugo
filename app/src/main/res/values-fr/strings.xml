@@ -76,6 +76,9 @@
     <string name="loaded_selection">Sélection \"%1$s\" chargée</string>
     <string name="deleted_selection">Sélection \"%1$s\" supprimée</string>
     <string name="saved_selection">Sélection courrante sauvegardée en \"%1$s\"</string>
+    <string name="saved_selections">Sélections sauvegardées</string>
+    <string name="confirm_delete">Confirmer la suppression</string>
+    <string name="confirm_delete_selection">Êtes-vous sûr de vouloir supprimer la sélection \"%1$s\" ?</string>
     <string name="answerDone">Fini</string>
     <string name="enter_name_of_selection">Entrez le nom de cette sélection</string>
     <string name="could_not_import_file">Impossible d\'importer le fichier: %1$s</string>
@@ -147,12 +150,6 @@
     <string name="stats_wrong_answers">Mauvaises réponses</string>
 
     <string name="changelog">Changelog</string>
-    <string name="changelog_contents"><![CDATA[
-        <h3>Nouveautés en 1.39</h3>
-
-        <br/>Cette version n\'apporte pas de nouvelles fonctionnalités. C\'est une réécriture majeure de l\'application car la version précédente utilisait des composants Android dépréciés qui rendaient les mises à jour impossibles.
-        <br/>Je prévois d\'ajouter de nouvelles fonctionnalités maintenant que l\'application peut de nouveau être mise à jour. Reportez toute régression ou problème que vous rencontrerez avec cette version.
-    ]]></string>
     <string name="search">Recherche</string>
     <string name="more_options">Plus d\'options</string>
     <string name="back">Retour</string>
