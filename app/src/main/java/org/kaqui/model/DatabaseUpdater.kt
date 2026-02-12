@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.database.sqlite.transaction
+import java.io.File
 
 class DatabaseUpdater(private val database: SQLiteDatabase) {
     private val wordIdCache = HashMap<WordId, Int>()
@@ -855,9 +856,26 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
 
         fun upgradeDatabase(context: Context, dictDb: String) {
+            val dbFile = context.getDatabasePath(Database.DATABASE_NAME)
             // the databases folder may not exist on older androids
-            context.getDatabasePath(Database.DATABASE_NAME).parentFile!!.mkdirs()
-            SQLiteDatabase.openDatabase(context.getDatabasePath(Database.DATABASE_NAME).absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            dbFile.parentFile!!.mkdirs()
+
+            // Backup existing database before upgrading
+            if (dbFile.exists()) {
+                // If the database is corrupted, sqlite may try to fix it, so we need to open it in readwrite mode
+                val version = SQLiteDatabase.openDatabase(dbFile.absolutePath, null, SQLiteDatabase.OPEN_READWRITE).use { it.version }
+                val backupFile = File(dbFile.parentFile, "${Database.DATABASE_NAME}.v${version}.bak")
+                dbFile.copyTo(backupFile, overwrite = true)
+                Log.i(TAG, "Backed up database version $version to ${backupFile.name}")
+
+                // Keep only 2 most recent backups
+                val backups = dbFile.parentFile!!.listFiles { f -> f.name.startsWith("${Database.DATABASE_NAME}.v") && f.name.endsWith(".bak") }
+                if (backups != null && backups.size > 2) {
+                    backups.sortedBy { it.lastModified() }.dropLast(2).forEach { it.delete() }
+                }
+            }
+
+            SQLiteDatabase.openDatabase(dbFile.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
                 DatabaseUpdater(db).doUpgrade(dictDb)
             }
         }
