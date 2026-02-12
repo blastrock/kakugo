@@ -13,8 +13,8 @@ android {
         applicationId = "org.kaqui"
         minSdk = 21
         targetSdk = 36
-        versionCode = 96
-        versionName = "1.40.1"
+        versionCode = 98
+        versionName = "1.41"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

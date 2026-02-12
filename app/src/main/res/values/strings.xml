@@ -174,9 +174,11 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.40?</h3>
+        <h3>What\'s new in 1.41?</h3>
 
-        <br/>Added a dictionary view for words and kanji, accessible when clicking on an item after answering a question.
+        <br/>- Improved the vocabulary dictionary.
+        <!-- -->
+        <br/>- Added a dictionary view for words and kanji, accessible when clicking on an item after answering a question.
     ]]></string>
 
     <string name="word_tab">Word</string>
