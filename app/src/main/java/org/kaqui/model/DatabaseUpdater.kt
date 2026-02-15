@@ -109,6 +109,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                         + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
                         + "similarity_class INTEGER NOT NULL DEFAULT 0,"
                         + "ent_seq INTEGER NOT NULL DEFAULT 0,"
+                        + "freq INTEGER NOT NULL DEFAULT 0,"
                         + "expr TEXT NOT NULL DEFAULT '',"
                         + "enabled INTEGER NOT NULL DEFAULT 1"
                         + ")")
@@ -251,8 +252,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         database.delete(Database.WORDS_TABLE_NAME, null, null)
         database.execSQL(
                 "INSERT INTO ${Database.WORDS_TABLE_NAME} "
-                        + "(id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class, ent_seq, expr) "
-                        + "SELECT id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class, ent_seq, expr "
+                        + "(id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class, ent_seq, freq, expr) "
+                        + "SELECT id, item, reading, meanings_en, meanings_fr, meanings_es, meanings_de, kana_alone, jlpt_level, rtk_index, rtk6_index, similarity_class, ent_seq, freq, expr "
                         + "FROM dict.words"
         )
     }
