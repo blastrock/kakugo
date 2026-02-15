@@ -53,10 +53,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
 import org.kaqui.R
+import org.kaqui.itemdetails.KanjiDisplayActivity
+import org.kaqui.itemdetails.WordDisplayActivity
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
 import org.kaqui.model.description
 import org.kaqui.model.text
+import org.kaqui.startActivity
 import org.kaqui.theme.KakugoTheme
 
 data class ItemSearchUiState(
@@ -171,7 +174,12 @@ class ItemSearchActivity : ComponentActivity() {
                 getItemData = viewModel::getItemData,
                 onBackClick = { finish() },
                 onSearchQueryChange = viewModel::onSearchQueryChange,
-                onItemEnabledChange = viewModel::onItemEnabledChange
+                onItemEnabledChange = viewModel::onItemEnabledChange,
+                onItemClick = when (mode) {
+                    SelectionMode.KANJI -> { id: Int -> startActivity<KanjiDisplayActivity>("kanji_id" to id) }
+                    SelectionMode.WORD -> { id: Int -> startActivity<WordDisplayActivity>("word_id" to id) }
+                    else -> null
+                }
             )
         }
     }
@@ -183,7 +191,8 @@ fun ItemSearchScreen(
     getItemData: (Int) -> ItemData,
     onBackClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
-    onItemEnabledChange: (Int, Boolean) -> Unit
+    onItemEnabledChange: (Int, Boolean) -> Unit,
+    onItemClick: ((Int) -> Unit)? = null
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -288,6 +297,7 @@ fun ItemSearchScreen(
                         cacheVersion = uiState.cacheVersion,
                         getItemData = getItemData,
                         onItemEnabledChange = onItemEnabledChange,
+                        onItemClick = onItemClick,
                         contentPadding = combinedPadding,
                     )
                 }

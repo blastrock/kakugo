@@ -37,8 +37,11 @@ import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
 import org.kaqui.model.Classifier
+import org.kaqui.itemdetails.KanjiDisplayActivity
+import org.kaqui.itemdetails.WordDisplayActivity
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
+import org.kaqui.startActivity
 import org.kaqui.model.description
 import org.kaqui.model.text
 import org.kaqui.theme.KakugoTheme
@@ -173,6 +176,11 @@ class ItemSelectionActivity : ComponentActivity() {
                 getItemData = viewModel::getItemData,
                 onBackClick = { finish() },
                 onItemEnabledChange = viewModel::onItemEnabledChange,
+                onItemClick = when (mode) {
+                    SelectionMode.KANJI -> { id: Int -> startActivity<KanjiDisplayActivity>("kanji_id" to id) }
+                    SelectionMode.WORD -> { id: Int -> startActivity<WordDisplayActivity>("word_id" to id) }
+                    else -> null
+                },
                 onSelectAll = viewModel::selectAll,
                 onSelectNone = viewModel::selectNone
             )
@@ -190,6 +198,7 @@ fun ItemSelectionScreen(
     getItemData: (Int) -> ItemData,
     onBackClick: () -> Unit,
     onItemEnabledChange: (Int, Boolean) -> Unit,
+    onItemClick: ((Int) -> Unit)? = null,
     onSelectAll: () -> Unit,
     onSelectNone: () -> Unit
 ) {
@@ -241,6 +250,7 @@ fun ItemSelectionScreen(
                         cacheVersion = uiState.cacheVersion,
                         getItemData = getItemData,
                         onItemEnabledChange = onItemEnabledChange,
+                        onItemClick = onItemClick,
                         contentPadding = paddingValues,
                     )
                 }
@@ -254,6 +264,7 @@ fun ItemListWithStats(
     cacheVersion: Int,
     getItemData: (Int) -> ItemData,
     onItemEnabledChange: (Int, Boolean) -> Unit,
+    onItemClick: ((Int) -> Unit)? = null,
     contentPadding: PaddingValues,
 ) {
     Column(
@@ -277,7 +288,8 @@ fun ItemListWithStats(
                 val itemData = remember(id, cacheVersion) { getItemData(id) }
                 ItemRow(
                     itemData = itemData,
-                    onEnabledChange = onItemEnabledChange
+                    onEnabledChange = onItemEnabledChange,
+                    onClick = if (onItemClick != null) {{ onItemClick(itemData.id) }} else null
                 )
                 Separator()
             }
