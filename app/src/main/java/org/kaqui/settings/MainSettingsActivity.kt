@@ -26,6 +26,10 @@ import org.kaqui.R
 import org.kaqui.TypefaceManager
 import org.kaqui.model.Database
 import org.kaqui.model.DatabaseUpdater
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Date
 
@@ -200,28 +204,56 @@ class MainSettingsActivity : BaseActivity() {
         }
 
         private fun importBackup(path: Uri) {
-            try {
-                val tmpFile = File.createTempFile("import", "", requireContext().cacheDir)
-                requireContext().contentResolver.openInputStream(path).use { input ->
-                    if (input == null)
-                        throw RuntimeException("failed to open database")
-                    tmpFile.outputStream().use { output ->
-                        input.copyTo(output)
+            val context = requireContext()
+
+            val progressBar = android.widget.ProgressBar(context).apply {
+                isIndeterminate = true
+            }
+            val padding = (24 * resources.displayMetrics.density).toInt()
+            val layout = android.widget.LinearLayout(context).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding(padding, padding, padding, padding)
+                addView(progressBar)
+                addView(android.widget.TextView(context).apply {
+                    text = getString(R.string.importing_backup)
+                    setPadding(padding, 0, 0, 0)
+                })
+            }
+            val dialog = androidx.appcompat.app.AlertDialog.Builder(context)
+                .setView(layout)
+                .setCancelable(false)
+                .create()
+            dialog.show()
+
+            lifecycleScope.launch {
+                try {
+                    withContext(Dispatchers.IO) {
+                        val tmpFile = File.createTempFile("import", "", context.cacheDir)
+                        context.contentResolver.openInputStream(path).use { input ->
+                            if (input == null)
+                                throw RuntimeException("failed to open database")
+                            tmpFile.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+
+                        val dataDump = SQLiteDatabase.openDatabase(
+                            tmpFile.absolutePath,
+                            null,
+                            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+                        ).use { db ->
+                            DatabaseUpdater(db).dumpUserData() ?: throw RuntimeException("invalid database version")
+                        }
+
+                        DatabaseUpdater(Database.getInstance(context).database).restoreUserData(dataDump)
                     }
+                    android.widget.Toast.makeText(context, R.string.backup_import_completed, android.widget.Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    android.widget.Toast.makeText(context, getString(R.string.import_backup_failure, e.message), android.widget.Toast.LENGTH_LONG).show()
+                } finally {
+                    dialog.dismiss()
                 }
-
-                val dataDump = SQLiteDatabase.openDatabase(
-                    tmpFile.absolutePath,
-                    null,
-                    SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
-                ).use { db ->
-                    DatabaseUpdater(db).dumpUserData() ?: throw RuntimeException("invalid database version")
-                }
-
-                DatabaseUpdater(Database.getInstance(requireContext()).database).restoreUserData(dataDump)
-                android.widget.Toast.makeText(requireContext(), R.string.backup_import_completed, android.widget.Toast.LENGTH_LONG).show()
-            } catch (e: Exception) {
-                android.widget.Toast.makeText(requireContext(), getString(R.string.import_backup_failure, e.message), android.widget.Toast.LENGTH_LONG).show()
             }
         }
 

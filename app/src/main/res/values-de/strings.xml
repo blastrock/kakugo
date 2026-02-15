@@ -116,6 +116,7 @@
     <string name="warning_import_backup">Warnung: Dies wird den aktuellen Stand überschreiben</string>
     <string name="import_backup_failure">Sicherung konnte nicht importiert werden: %1$s</string>
     <string name="backup_import_completed">Import der Sicherung abgeschlossen</string>
+    <string name="importing_backup">Sicherung wird importiert…</string>
     <string name="kana_words">Kana-Wörter in Kana anzeigen</string>
     <string name="kana_words_off_summary">Wörter werden nach Möglichkeit mit Kanji geschrieben</string>
     <string name="kana_words_on_summary">Wörter, die üblicherweise in Kana geschrieben werden, werden in Kana angezeigt</string>

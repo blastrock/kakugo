@@ -121,6 +121,7 @@
     <string name="warning_import_backup">Advertencia: esto borrará el estado actual</string>
     <string name="import_backup_failure">Error al importar la copia de seguridad: %1$s</string>
     <string name="backup_import_completed">Importación de copia de seguridad completada</string>
+    <string name="importing_backup">Importando copia de seguridad…</string>
     <string name="kana_words">Mostrar palabras kana en kana</string>
     <string name="kana_words_off_summary">Las palabras se escribirán con kanji siempre que sea posible</string>
     <string name="kana_words_on_summary">Las palabras que generalmente se escriben en kana se mostrarán en kana</string>
