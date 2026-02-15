@@ -30,6 +30,9 @@ data class Word(
         var similarities: List<Item>,
         var kanaAlone: Boolean,
         var expr: String,
+        var jlptLevel: Int = 0,
+        var rtk6Index: Int = 0,
+        var freq: Int = 0,
 ) : ItemContents()
 
 data class Item(

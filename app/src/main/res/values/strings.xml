@@ -196,6 +196,11 @@
     <string name="memorization_status_perfectly_known">Perfectly known</string>
     <string name="memorization_status_unknown">Unknown</string>
     <string name="usually_written_in_kana">usually written in kana</string>
+    <string name="classification_label">Classification</string>
+    <string name="jlpt_label" translatable="false">JLPT</string>
+    <string name="rtk6_label" translatable="false">RTK6</string>
+    <string name="frequency_label">Frequency</string>
+    <string name="not_applicable" translatable="false">N/A</string>
 
     <string name="words_tab">Words</string>
     <string name="on_readings_label">On\'yomi</string>

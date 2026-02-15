@@ -223,7 +223,7 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         database.rawQuery("""
-            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone, expr
+            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone, expr, jlpt_level, rtk6_index, freq
             FROM $WORDS_TABLE_NAME k
             LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
@@ -241,6 +241,9 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
                 contents.meanings = cursor.getString(8).split('_')
             contents.kanaAlone = cursor.getInt(9) != 0
             contents.expr = cursor.getString(10)
+            contents.jlptLevel = cursor.getInt(11)
+            contents.rtk6Index = cursor.getInt(12)
+            contents.freq = cursor.getInt(13)
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
             item.lastAsked = cursor.getLong(5)

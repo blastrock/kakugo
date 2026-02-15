@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,6 +68,7 @@ import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.theme.ThemeAttributes
 import java.util.Calendar
 import kotlinx.coroutines.launch
+import org.kaqui.model.RtkUnclassified
 
 enum class WordDisplayTab {
     WORD, KANJI
@@ -81,6 +83,9 @@ data class WordData(
     val word: String,
     val reading: String,
     val meanings: List<String>,
+    val jlptLevel: Int,
+    val rtk6Index: Int,
+    val freq: Int,
     val readingShortScore: Double,
     val readingLongScore: Double,
     val meaningShortScore: Double,
@@ -93,6 +98,9 @@ data class WordData(
             word = "",
             reading = "",
             meanings = emptyList(),
+            jlptLevel = 0,
+            rtk6Index = 0,
+            freq = 0,
             readingShortScore = 0.0,
             readingLongScore = 0.0,
             meaningShortScore = 0.0,
@@ -125,6 +133,9 @@ class WordDisplayViewModel : ViewModel() {
             word = wordContents.word,
             reading = wordContents.reading,
             meanings = wordContents.meanings,
+            jlptLevel = wordContents.jlptLevel,
+            rtk6Index = wordContents.rtk6Index,
+            freq = wordContents.freq,
             readingShortScore = wordReading.shortScore,
             readingLongScore = wordReading.longScore,
             meaningShortScore = wordMeaning.shortScore,
@@ -334,71 +345,98 @@ fun WordTabContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Word text in large font
         item {
-            Text(
-                text = wordData.word,
-                fontSize = 48.sp,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .combinedClickable(
-                        onClick = {},
-                        onLongClick = {
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("word", wordData.word)
-                            clipboard.setPrimaryClip(clip)
-                            android.widget.Toast.makeText(context, context.getString(org.kaqui.R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show()
-                        }
+            Row {
+                Column(modifier = Modifier.weight(1f)) {
+                    // Word text in large font
+                    Text(
+                        text = wordData.word,
+                        fontSize = 48.sp,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = {
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                    val clip = android.content.ClipData.newPlainText("word", wordData.word)
+                                    clipboard.setPrimaryClip(clip)
+                                    android.widget.Toast.makeText(context, context.getString(org.kaqui.R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show()
+                                }
+                            )
                     )
-            )
 
-            // Show "usually written in kana" if applicable
-            if (wordData.wordObject.kanaAlone) {
-                Text(
-                    text = stringResource(org.kaqui.R.string.usually_written_in_kana),
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                    // Show "usually written in kana" if applicable
+                    if (wordData.wordObject.kanaAlone) {
+                        Text(
+                            text = stringResource(org.kaqui.R.string.usually_written_in_kana),
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Readings section
+                    Text(
+                        text = stringResource(org.kaqui.R.string.reading_label) + ":",
+                        style = MaterialTheme.typography.h6,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Text(
+                        text = wordData.reading,
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Definitions section
+                    Text(
+                        text = stringResource(org.kaqui.R.string.definitions_label) + ":",
+                        style = MaterialTheme.typography.h6,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    for (meaning in wordData.meanings) {
+                        Text(
+                            text = meaning,
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+
+                // Classification section
+                Column(horizontalAlignment = Alignment.End) {
+                    val na = stringResource(org.kaqui.R.string.not_applicable)
+                    Text(
+                        text = stringResource(org.kaqui.R.string.classification_label) + ":",
+                        style = MaterialTheme.typography.caption,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Text(
+                        text = stringResource(org.kaqui.R.string.jlpt_label) + ": " + if (wordData.jlptLevel > 0) "N${wordData.jlptLevel}" else na,
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp)
+                    )
+                    Text(
+                        text = stringResource(org.kaqui.R.string.rtk6_label) + ": " + if (wordData.rtk6Index != RtkUnclassified) "${wordData.rtk6Index}" else na,
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp)
+                    )
+                    Text(
+                        text = stringResource(org.kaqui.R.string.frequency_label) + ": " + if (wordData.freq > 0) "${wordData.freq}" else na,
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp)
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Readings section
-        item {
-            Text(
-                text = stringResource(org.kaqui.R.string.reading_label) + ":",
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Text(
-                text = wordData.reading,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Definitions section
-        item {
-            Text(
-                text = stringResource(org.kaqui.R.string.definitions_label) + ":",
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-        }
-        items(wordData.meanings) { meaning ->
-            Text(
-                text = meaning,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
-            )
-        }
-
-        item {
             Spacer(modifier = Modifier.height(18.dp))
         }
 
@@ -577,6 +615,9 @@ fun PreviewWordDisplayScreenWordTab() {
         word = "食べる",
         reading = "たべる",
         meanings = listOf("to eat", "to consume"),
+        jlptLevel = 5,
+        rtk6Index = RtkUnclassified,
+        freq = 1234,
         readingShortScore = 0.5,
         readingLongScore = 0.0,
         meaningShortScore = 1.0,
@@ -620,6 +661,9 @@ fun PreviewWordDisplayScreenKanjiTab() {
         word = "食べる",
         reading = "たべる",
         meanings = listOf("to eat", "to consume"),
+        jlptLevel = 5,
+        rtk6Index = 0,
+        freq = 1234,
         readingShortScore = 0.5,
         readingLongScore = 0.75,
         meaningShortScore = 0.3,
@@ -663,6 +707,9 @@ fun PreviewWordDisplayScreenKanaOnly() {
         word = "ひらがな",
         reading = "ひらがな",
         meanings = listOf("hiragana", "Japanese syllabary"),
+        jlptLevel = 3,
+        rtk6Index = 0,
+        freq = 5678,
         readingShortScore = 1.0,
         readingLongScore = 0.5,
         meaningShortScore = 0.7,
@@ -697,6 +744,9 @@ fun PreviewWordDisplayScreenMultipleKanji() {
         word = "日本語",
         reading = "にほんご",
         meanings = listOf("Japanese language"),
+        jlptLevel = 5,
+        rtk6Index = 0,
+        freq = 500,
         readingShortScore = 1.0,
         readingLongScore = 0.95,
         meaningShortScore = 1.0,
