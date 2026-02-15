@@ -50,6 +50,7 @@ import org.kaqui.model.Classification
 import org.kaqui.model.Classifier
 import org.kaqui.model.Database
 import org.kaqui.model.LearningDbView
+import org.kaqui.model.RtkUnclassified
 import org.kaqui.model.getClassifiers
 import org.kaqui.model.name
 import org.kaqui.startActivity
@@ -105,7 +106,18 @@ class ClassSelectionActivity : ComponentActivity() {
             else -> throw IllegalArgumentException("ClassSelectionActivity only supports KANJI and WORD modes")
         }
 
-        classifiers = getClassifiers(classification)
+        val maxFreq = if (mode == SelectionMode.WORD) {
+            val unclassifiedCondition = when (classification) {
+                Classification.JlptLevel -> "jlpt_level = 0"
+                Classification.RtkIndexRange -> "rtk_index = $RtkUnclassified"
+                Classification.Rtk6IndexRange -> "rtk6_index = $RtkUnclassified"
+            }
+            Database.getInstance(this).getMaxFreq(unclassifiedCondition)
+        } else {
+            0
+        }
+
+        classifiers = getClassifiers(classification, maxFreq)
 
         setContent {
             val uiState = remember(refreshTrigger) { prepareUiState() }

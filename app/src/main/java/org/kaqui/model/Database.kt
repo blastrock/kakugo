@@ -530,6 +530,12 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         return stats
     }
 
+    fun getMaxFreq(whereCondition: String): Int {
+        database.rawQuery("SELECT MAX(freq) FROM $WORDS_TABLE_NAME WHERE $whereCondition", null).use { cursor ->
+            return if (cursor.moveToNext()) cursor.getInt(0) else 0
+        }
+    }
+
     companion object {
         private const val TAG = "Database"
 

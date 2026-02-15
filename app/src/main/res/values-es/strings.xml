@@ -85,6 +85,7 @@
     <string name="import_kanji_help">Esta característica permite importar una selección de kanji desde un archivo. El archivo debe contener un kanji por línea. Los kanji serán añadidos a la selección actual.</string>
     <string name="import_words_help">Esta característica permite importar una selección de palabras desde un archivo. El archivo debe contener una palabra por línea. Las palabras serán añadidas a la selección actual.</string>
     <string name="additional_kanji">Kanji adicionales</string>
+    <string name="additional_words_range">Palabras adicionales (%1$s-%2$s)</string>
     <string name="jlpt_level_n">JLPT nivel %1$s</string>
     <string name="rtk_index_range">Índices %1$s+</string>
     <string name="rtk6_index_range">Índices %1$s+</string>

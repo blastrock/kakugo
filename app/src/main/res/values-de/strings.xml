@@ -106,6 +106,7 @@
     <string name="enter_name_of_selection">Geben sie einen Namen für diese Auswahl ein</string>
     <string name="could_not_import_file">Kann folgende Datei nicht importieren: %1$s</string>
     <string name="additional_kanji">Zusätzliche Kanji</string>
+    <string name="additional_words_range">Zusätzliche Wörter (%1$s-%2$s)</string>
     <string name="rtk_index_range">Indexe %1$s+</string>
     <string name="rtk6_index_range">Indexe %1$s+</string>
     <string name="keep_screen_on_summary">Bildschirm während der Tests aktiv lassen</string>
