@@ -23,9 +23,14 @@ fun StatsBar(
     itemsGood: Int,
 ) {
     val themeColors = LocalThemeAttributes.current
-    val totalWeight = (itemsDontKnow + itemsBad + itemsMeh + itemsGood).toFloat()
-    fun weightMin(weight: Float): Float {
-        return max(weight, 0.1f)
+    val total = itemsDontKnow + itemsBad + itemsMeh + itemsGood
+    fun weightMin(value: Int, total: Int): Float {
+        val minWeight = when {
+            value < 100 -> 0.10f
+            value < 1000 -> 0.13f
+            else -> 0.16f
+        }
+        return max(value / total.toFloat(), minWeight)
     }
 
     Row(
@@ -36,25 +41,25 @@ fun StatsBar(
             StatsText(
                 text = "$itemsDontKnow",
                 backgroundColor = themeColors.backgroundDontKnow,
-                modifier = Modifier.weight(weightMin(itemsDontKnow / totalWeight))
+                modifier = Modifier.weight(weightMin(itemsDontKnow, total))
             )
         if (itemsBad > 0)
             StatsText(
                 text = "$itemsBad",
                 backgroundColor = themeColors.itemBad,
-                modifier = Modifier.weight(weightMin(itemsBad / totalWeight))
+                modifier = Modifier.weight(weightMin(itemsBad, total))
             )
         if (itemsMeh > 0)
             StatsText(
                 text = "$itemsMeh",
                 backgroundColor = themeColors.itemMeh,
-                modifier = Modifier.weight(weightMin(itemsMeh / totalWeight))
+                modifier = Modifier.weight(weightMin(itemsMeh, total))
             )
         if (itemsGood > 0)
             StatsText(
                 text = "$itemsGood",
                 backgroundColor = themeColors.itemGood,
-                modifier = Modifier.weight(weightMin(itemsGood / totalWeight))
+                modifier = Modifier.weight(weightMin(itemsGood, total))
             )
     }
 }
@@ -88,6 +93,6 @@ fun StatsScreenPreview() {
 @Composable
 fun StatsScreenPreviewUnbalanced() {
     KakugoTheme {
-        StatsBar(100, 1, 2, 5000)
+        StatsBar(1001, 100, 20, 50000)
     }
 }
