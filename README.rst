@@ -45,8 +45,8 @@ not use the Internet access.
 Credits
 =======
 
-- The kanji quizzes are based on `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
-- The vocabulary quizzes are based on `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
+- The kanji quizzes are based on `kanjidic <https://www.edrdg.org/kanjidic/kanjidic.html>`_.
+- The vocabulary quizzes are based on `JMdict <https://www.edrdg.org/jmdict/j_jmdict.html>`_.
 - The vocabulary frequency data is based on `jpdb <https://jpdb.io/>`_.
 - The kanji similarity data has been compiled from the `Niai project <https://niai.mrahhal.net/similar>`_, the `similar-kanji project <https://github.com/siikamiika/similar-kanji>`_, and `a study from Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
 - The kanji composition and drawing database comes from `KanjiVG <https://kanjivg.tagaini.net/>`_.

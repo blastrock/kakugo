@@ -38,8 +38,8 @@ Parmi les fonctionnalités :
 Crédit
 ======
 
-- Les tests de kanji sont basés sur `kanjidic <http://www.edrdg.org/kanjidic/kanjidic.html>`_.
-- Les tests de vocabulaire sont basés sur `JMdict <http://www.edrdg.org/jmdict/j_jmdict.html>`_.
+- Les tests de kanji sont basés sur `kanjidic <https://www.edrdg.org/kanjidic/kanjidic.html>`_.
+- Les tests de vocabulaire sont basés sur `JMdict <https://www.edrdg.org/jmdict/j_jmdict.html>`_.
 - Les données de fréquence du vocabulaire sont basées sur `jpdb <https://jpdb.io/>`_.
 - Les données de similarité des kanji ont été compilées à partir du `projet Niai <https://niai.mrahhal.net/similar>`_, du `projet similar-kanji <https://github.com/siikamiika/similar-kanji>`_, et d'`une étude du Dr. Lars Yencken <http://lars.yencken.org/datasets/phd/>`_.
 - La base de données de composition et de tracé des kanji vient de `KanjiVG <https://kanjivg.tagaini.net/>`_.

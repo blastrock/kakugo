@@ -118,8 +118,8 @@
 
         <p>Es de código abierto y está disponible en <a href="https://github.com/blastrock/kakugo/">github</a> bajo la licencia GPLv3.</p>
 
-        <p>El diccionario de kanji se basa en <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
-        <p>El diccionario de vocabulario se basa en <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
+        <p>El diccionario de kanji se basa en <a href="https://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
+        <p>El diccionario de vocabulario se basa en <a href="https://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
         <p>Los datos de frecuencia de vocabulario se basan en <a href="https://jpdb.io/">jpdb</a>.</p>
         <p>Los datos de similitud de kanji han sido recopilados del <a href="https://niai.mrahhal.net/similar">proyecto Niai</a>, del <a href="https://github.com/siikamiika/similar-kanji">proyecto similar-kanji</a> y de <a href="http://lars.yencken.org/datasets/phd/">un estudio del Dr. Lars Yencken</a>.</p>
         <p>Los datos de composición y dibujo de los kanji provienen de <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>

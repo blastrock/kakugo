@@ -155,9 +155,9 @@
 
         <p>It is open-source and available on <a href="https://github.com/blastrock/kakugo/">github</a> under the GPLv3 license.</p>
 
-        <p>The kanji dictionary is based on <a href="http://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
+        <p>The kanji dictionary is based on <a href="https://www.edrdg.org/kanjidic/kanjidic.html">kanjidic</a>.</p>
         <p>The kanji German translations come from the <a href="https://www.kanjistudyapp.com/">Kanji Study app</a> from Chase Colburn.</p>
-        <p>The vocabulary dictionary is based on <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
+        <p>The vocabulary dictionary is based on <a href="https://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a>.</p>
         <p>The vocabulary frequency data is based on <a href="https://jpdb.io/">jpdb</a>.</p>
         <p>The kanji similarity data has been compiled from the <a href="https://niai.mrahhal.net/similar">Niai project</a>, the <a href="https://github.com/siikamiika/similar-kanji">similar-kanji project</a>, and <a href="http://lars.yencken.org/datasets/phd/">a study from Dr. Lars Yencken</a>.</p>
         <p>The kanji composition and drawing data comes from <a href="https://kanjivg.tagaini.net/">KanjiVG</a>.</p>
