@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
@@ -47,6 +48,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
@@ -59,6 +63,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -68,6 +77,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -102,7 +112,9 @@ import org.kaqui.startActivity
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.toName
+import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 enum class HistoryItemStyle {
     GOOD, BAD, DONT_KNOW
@@ -611,83 +623,142 @@ private fun LastItemRow(
 ) {
     val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
     val canSwap = lastCorrect != null || lastWrong != null
+    val offsetX = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    val themeAttrs = LocalThemeAttributes.current
+    // Captured when a drag starts so the hint keeps the color of the action being performed.
+    // Deriving it live would invert it for one frame after the swap flips the content.
+    var hintToCorrect by remember { mutableStateOf(false) }
 
-    Row(
+    // After a swap, recenter the row once the new content is shown. We wait one extra frame
+    // before snapping back because AnimatedContent still draws the outgoing content for the
+    // frame on which the content changes; recentering on that frame would flash the old row.
+    LaunchedEffect(lastCorrect, lastWrong) {
+        if (offsetX.value != 0f) {
+            withFrameNanos { }
+            offsetX.snapTo(0f)
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp + safeDrawing.calculateBottomPadding())
-            .background(MaterialTheme.colors.surface)
-            .padding(bottom = safeDrawing.calculateBottomPadding())
-            .then(
-                if (canSwap)
-                    Modifier.pointerInput(Unit) {
-                        val threshold = 64.dp.toPx()
-                        var totalDrag = 0f
-                        detectHorizontalDragGestures(
-                            onDragStart = { totalDrag = 0f },
-                            onDragEnd = {
-                                if (abs(totalDrag) > threshold)
-                                    onSwap()
-                            },
-                            onHorizontalDrag = { _, dragAmount -> totalDrag += dragAmount },
+    ) {
+        // While dragging, reveal a colored hint behind the row showing what releasing
+        // would do: green + check to mark correct, red + cross to mark wrong.
+        if (offsetX.value != 0f) {
+            val toCorrect = hintToCorrect
+            Row(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(if (toCorrect) themeAttrs.itemGood else themeAttrs.itemBad)
+                    .padding(bottom = safeDrawing.calculateBottomPadding())
+                    .padding(horizontal = 24.dp)
+                    .padding(end = 36.dp),
+                horizontalArrangement =
+                    if (offsetX.value > 0) Arrangement.Start else Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = if (toCorrect) Icons.Default.Check else Icons.Default.Close,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onBackground,
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .background(MaterialTheme.colors.surface)
+                .padding(bottom = safeDrawing.calculateBottomPadding())
+                .then(
+                    if (canSwap)
+                        Modifier.pointerInput(lastCorrect, lastWrong) {
+                            val threshold = 64.dp.toPx()
+                            detectHorizontalDragGestures(
+                                onDragStart = { hintToCorrect = lastWrong != null },
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
+                                    scope.launch { offsetX.snapTo(offsetX.value + dragAmount) }
+                                },
+                                onDragEnd = {
+                                    if (abs(offsetX.value) > threshold) {
+                                        val target =
+                                            if (offsetX.value > 0) size.width.toFloat()
+                                            else -size.width.toFloat()
+                                        scope.launch {
+                                            offsetX.animateTo(target, tween(150))
+                                            onSwap()
+                                        }
+                                    } else {
+                                        scope.launch { offsetX.animateTo(0f) }
+                                    }
+                                },
+                                onDragCancel = {
+                                    scope.launch { offsetX.animateTo(0f) }
+                                },
+                            )
+                        }
+                    else
+                        Modifier
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnimatedContent(
+                targetState = lastCorrect to lastWrong,
+                transitionSpec = {
+                    slideInVertically(
+                        animationSpec = tween(100),
+                        initialOffsetY = { -it }
+                    ) togetherWith ExitTransition.None
+                },
+                label = "LastItemAnimation"
+            ) { (animatedCorrect, animatedWrong) ->
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (animatedWrong != null) {
+                        ItemButton(
+                            item = animatedWrong,
+                            probabilityData =
+                                if (animatedCorrect == animatedWrong)
+                                    lastProbabilityData
+                                else
+                                    null,
+                            style = HistoryItemStyle.BAD,
+                            showInfo = animatedWrong.contents is Kanji || animatedWrong.contents is Word,
+                            kanaWords = kanaWords,
+                            onClick = { onItemClick(animatedWrong) }
                         )
                     }
-                else
-                    Modifier
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AnimatedContent(
-            targetState = lastCorrect to lastWrong,
-            transitionSpec = {
-                slideInVertically(
-                    animationSpec = tween(100),
-                    initialOffsetY = { -it }
-                ) togetherWith ExitTransition.None
-            },
-            label = "LastItemAnimation"
-        ) { (animatedCorrect, animatedWrong) ->
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(8.dp))
 
-                if (animatedWrong != null) {
-                    ItemButton(
-                        item = animatedWrong,
-                        probabilityData =
-                            if (animatedCorrect == animatedWrong)
-                                lastProbabilityData
-                            else
-                                null,
-                        style = HistoryItemStyle.BAD,
-                        showInfo = animatedWrong.contents is Kanji || animatedWrong.contents is Word,
-                        kanaWords = kanaWords,
-                        onClick = { onItemClick(animatedWrong) }
-                    )
-                }
+                    if (animatedCorrect != null && animatedCorrect != animatedWrong) {
+                        ItemButton(
+                            item = animatedCorrect,
+                            probabilityData = lastProbabilityData,
+                            style = HistoryItemStyle.GOOD,
+                            showInfo = animatedCorrect.contents is Kanji || animatedCorrect.contents is Word,
+                            kanaWords = kanaWords,
+                            onClick = { onItemClick(animatedCorrect) }
+                        )
+                    }
 
-                if (animatedCorrect != null && animatedCorrect != animatedWrong) {
-                    ItemButton(
-                        item = animatedCorrect,
-                        probabilityData = lastProbabilityData,
-                        style = HistoryItemStyle.GOOD,
-                        showInfo = animatedCorrect.contents is Kanji || animatedCorrect.contents is Word,
-                        kanaWords = kanaWords,
-                        onClick = { onItemClick(animatedCorrect) }
-                    )
-                }
-
-                animatedCorrect?.let { item ->
-                    Text(
-                        text = item.description,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .weight(1f),
-                        style = MaterialTheme.typography.body2,
-                        lineHeight = 1.1.em,
-                    )
+                    animatedCorrect?.let { item ->
+                        Text(
+                            text = item.description,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .weight(1f),
+                            style = MaterialTheme.typography.body2,
+                            lineHeight = 1.1.em,
+                        )
+                    }
                 }
             }
         }
