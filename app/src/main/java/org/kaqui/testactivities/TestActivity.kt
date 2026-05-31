@@ -17,6 +17,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -100,6 +102,7 @@ import org.kaqui.startActivity
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.toName
+import kotlin.math.abs
 
 enum class HistoryItemStyle {
     GOOD, BAD, DONT_KNOW
@@ -142,6 +145,11 @@ class TestViewModel : ViewModel() {
 
     lateinit var testEngine: TestEngine
 
+    // Number of history items the last answer pushed to the front (1 for good/unknown,
+    // 2 for wrong), and the probability data attached to it, so a swap can rebuild them.
+    private var lastAnswerItemCount = 0
+    private var lastAnswerProbabilityData: TestEngine.DebugData? = null
+
     // Example of how you might initialize TestEngine if it needs application context
     fun initialize(testEngine: TestEngine) {
         this.testEngine = testEngine
@@ -158,6 +166,8 @@ class TestViewModel : ViewModel() {
         correct: Item,
         probabilityData: TestEngine.DebugData?,
     ) {
+        lastAnswerItemCount = 1
+        lastAnswerProbabilityData = probabilityData
         _uiState.update { currentState ->
             val newHistoryItems =
                 listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.GOOD, true)) +
@@ -178,6 +188,8 @@ class TestViewModel : ViewModel() {
         probabilityData: TestEngine.DebugData?,
         wrong: Item,
     ) {
+        lastAnswerItemCount = 2
+        lastAnswerProbabilityData = probabilityData
         _uiState.update { currentState ->
             val newHistoryItems = listOf(
                 HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true),
@@ -198,6 +210,8 @@ class TestViewModel : ViewModel() {
         correct: Item,
         probabilityData: TestEngine.DebugData?,
     ) {
+        lastAnswerItemCount = 1
+        lastAnswerProbabilityData = probabilityData
         _uiState.update { currentState ->
             val newHistoryItems =
                 listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.BAD, true)) +
@@ -235,6 +249,35 @@ class TestViewModel : ViewModel() {
             it.copy(
                 correctCount = testEngine.correctCount,
                 questionCount = testEngine.questionCount,
+                stats = testEngine.itemView.getStats(),
+            )
+        }
+    }
+
+    fun swapLastAnswer() {
+        val la = testEngine.toggleLastAnswer() ?: return
+        val probabilityData = lastAnswerProbabilityData
+        val dropCount = lastAnswerItemCount
+
+        // Remove the history items the last answer added, then re-add them for the new
+        // state through the existing helpers (which also update lastAnswerItemCount).
+        _uiState.update { currentState ->
+            currentState.copy(
+                historyState = currentState.historyState.copy(
+                    items = currentState.historyState.items.drop(dropCount)
+                )
+            )
+        }
+        if (la.currentlyCorrect)
+            addGoodAnswerToHistory(la.correctItem, probabilityData)
+        else if (la.wrongItem != null)
+            addWrongAnswerToHistory(la.correctItem, probabilityData, la.wrongItem)
+        else
+            addUnknownAnswerToHistory(la.correctItem, probabilityData)
+
+        _uiState.update {
+            it.copy(
+                correctCount = testEngine.correctCount,
                 stats = testEngine.itemView.getStats(),
             )
         }
@@ -339,6 +382,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                 kanaWords = kanaWords,
                 onItemClick = this::openItemInDictionary,
                 onBackClick = { confirmActivityClose() },
+                onSwapLastAnswer = { viewModel.swapLastAnswer() },
             )
         }
     }
@@ -420,6 +464,7 @@ fun TestScreen(
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
     onBackClick: () -> Unit,
+    onSwapLastAnswer: () -> Unit = {},
 ) {
     val themeAttrs = LocalThemeAttributes.current
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -547,6 +592,7 @@ fun TestScreen(
                         lastProbabilityData = historyState.lastProbabilityData,
                         kanaWords = kanaWords,
                         onItemClick = onItemClick,
+                        onSwap = onSwapLastAnswer,
                     )
                 }
             }
@@ -561,15 +607,34 @@ private fun LastItemRow(
     lastProbabilityData: TestEngine.DebugData?,
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
+    onSwap: () -> Unit = {},
 ) {
     val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+    val canSwap = lastCorrect != null || lastWrong != null
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp + safeDrawing.calculateBottomPadding())
             .background(MaterialTheme.colors.surface)
-            .padding(bottom = safeDrawing.calculateBottomPadding()),
+            .padding(bottom = safeDrawing.calculateBottomPadding())
+            .then(
+                if (canSwap)
+                    Modifier.pointerInput(Unit) {
+                        val threshold = 64.dp.toPx()
+                        var totalDrag = 0f
+                        detectHorizontalDragGestures(
+                            onDragStart = { totalDrag = 0f },
+                            onDragEnd = {
+                                if (abs(totalDrag) > threshold)
+                                    onSwap()
+                            },
+                            onHorizontalDrag = { _, dragAmount -> totalDrag += dragAmount },
+                        )
+                    }
+                else
+                    Modifier
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AnimatedContent(
