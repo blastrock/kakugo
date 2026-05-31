@@ -130,7 +130,7 @@ class LearningDbView(
         database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
-    fun logTestItem(testType: TestType, scoreUpdate: SrsCalculator.ScoreUpdate, certainty: Certainty, wrongAnswer: Int?) {
+    fun logTestItem(testType: TestType, scoreUpdate: SrsCalculator.ScoreUpdate, certainty: Certainty, wrongAnswer: Int?): Long {
         val cv = ContentValues()
         cv.put("id_session", sessionId!!)
         cv.put("test_type", testType.value)
@@ -139,7 +139,17 @@ class LearningDbView(
             cv.put("id_item_wrong", wrongAnswer)
         cv.put("certainty", certainty.value)
         cv.put("time", Calendar.getInstance().timeInMillis / 1000)
-        database.insertOrThrow(Database.SESSION_ITEMS_TABLE_NAME, null, cv)
+        return database.insertOrThrow(Database.SESSION_ITEMS_TABLE_NAME, null, cv)
+    }
+
+    fun updateTestItem(rowId: Long, certainty: Certainty, wrongAnswer: Int?) {
+        val cv = ContentValues()
+        cv.put("certainty", certainty.value)
+        if (wrongAnswer != null)
+            cv.put("id_item_wrong", wrongAnswer)
+        else
+            cv.putNull("id_item_wrong")
+        database.update(Database.SESSION_ITEMS_TABLE_NAME, cv, "id = ?", arrayOf(rowId.toString()))
     }
 
     data class LongStats(val bad: Int, val meh: Int, val good: Int, val longScoreSum: Float, val longPartition: List<Int>)

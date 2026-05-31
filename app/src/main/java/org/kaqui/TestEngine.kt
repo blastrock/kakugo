@@ -59,6 +59,27 @@ class TestEngine(
 
     data class PickedQuestion(val item: Item, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
+    // In-memory record of the last marked answer, used to let the user swap it between
+    // correct and wrong. Not serialized: surviving background/resume is not a requirement.
+    // The Item references retain their pre-answer (baseline) scores because applyScoreUpdate
+    // only writes the DB and never mutates the Item.
+    data class LastAnswer(
+            val correctItem: Item,
+            val wrongItem: Item?,
+            val originalCorrectUpdate: SrsCalculator.ScoreUpdate,
+            val originalWrongUpdate: SrsCalculator.ScoreUpdate?,
+            val minLastAsked: Long,
+            val answeredAt: Long,
+            val originalWasCorrect: Boolean,
+            val logRowId: Long,
+            val originalCertainty: Certainty,
+            val debugData: DebugData?,
+            var currentlyCorrect: Boolean,
+    )
+
+    var lastAnswer: LastAnswer? = null
+        private set
+
     private fun getItem(id: Int): Item =
         itemView.getItem(id)
 
@@ -286,31 +307,86 @@ class TestEngine(
 
     fun markAnswer(certainty: Certainty, wrong: Item? = null) {
         val minLastCorrect = itemView.getMinLastAsked()
+        val answeredItem = currentQuestion
 
+        val scoreUpdate: SrsCalculator.ScoreUpdate
+        val logRowId: Long
         if (certainty == Certainty.DONTKNOW) {
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, Certainty.DONTKNOW)
+            scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, answeredItem, Certainty.DONTKNOW)
             itemView.applyScoreUpdate(scoreUpdate)
-            itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
+            logRowId = itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
             currentDebugData?.scoreUpdate = scoreUpdate
             if (wrong != null)
-                addWrongAnswerToHistory(currentQuestion, wrong)
+                addWrongAnswerToHistory(answeredItem, wrong)
             else
-                addUnknownAnswerToHistory(currentQuestion)
+                addUnknownAnswerToHistory(answeredItem)
         } else {
-            val scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, currentQuestion, certainty)
+            scoreUpdate = SrsCalculator.getScoreUpdate(minLastCorrect, answeredItem, certainty)
             itemView.applyScoreUpdate(scoreUpdate)
-            itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
+            logRowId = itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
             currentDebugData?.scoreUpdate = scoreUpdate
-            addGoodAnswerToHistory(currentQuestion)
+            addGoodAnswerToHistory(answeredItem)
             correctCount += 1
         }
 
+        var scoreUpdateBad: SrsCalculator.ScoreUpdate? = null
         if (wrong != null) {
-            val scoreUpdateBad = SrsCalculator.getScoreUpdate(minLastCorrect, wrong, Certainty.DONTKNOW)
+            scoreUpdateBad = SrsCalculator.getScoreUpdate(minLastCorrect, wrong, Certainty.DONTKNOW)
             itemView.applyScoreUpdate(scoreUpdateBad)
         }
 
+        val wasCorrect = certainty != Certainty.DONTKNOW && wrong == null
+        lastAnswer = LastAnswer(
+                correctItem = answeredItem,
+                wrongItem = wrong,
+                originalCorrectUpdate = scoreUpdate,
+                originalWrongUpdate = scoreUpdateBad,
+                minLastAsked = minLastCorrect,
+                answeredAt = scoreUpdate.lastAsked,
+                originalWasCorrect = wasCorrect,
+                logRowId = logRowId,
+                originalCertainty = certainty,
+                debugData = currentDebugData,
+                currentlyCorrect = wasCorrect,
+        )
+
         questionCount += 1
+    }
+
+    // Swap the last answer between correct and wrong, reverting and re-applying scores
+    // accordingly. Returns the updated LastAnswer, or null if there is no last answer.
+    fun toggleLastAnswer(): LastAnswer? {
+        val la = lastAnswer ?: return null
+        la.currentlyCorrect = !la.currentlyCorrect
+        val correctScoreUpdate: SrsCalculator.ScoreUpdate
+        if (la.currentlyCorrect == la.originalWasCorrect) {
+            // Back to the original side: re-apply the exact original updates and log row.
+            correctScoreUpdate = la.originalCorrectUpdate
+            itemView.applyScoreUpdate(correctScoreUpdate)
+            la.originalWrongUpdate?.let { itemView.applyScoreUpdate(it) }
+            itemView.updateTestItem(la.logRowId, la.originalCertainty, la.wrongItem?.id)
+        } else if (la.currentlyCorrect) {
+            // wrong -> correct: reward short score only (SURE), leave long at baseline.
+            val sure = SrsCalculator.getScoreUpdate(la.minLastAsked, la.correctItem, Certainty.SURE)
+            correctScoreUpdate = sure.copy(longScore = la.correctItem.longScore.toFloat(), lastAsked = la.answeredAt)
+            itemView.applyScoreUpdate(correctScoreUpdate)
+            // Cancel the penalty on the picked wrong item by restoring its baseline scores.
+            la.wrongItem?.let { w ->
+                itemView.applyScoreUpdate(SrsCalculator.ScoreUpdate(
+                        w.id, w.shortScore.toFloat(), w.longScore.toFloat(), w.lastAsked, la.minLastAsked))
+            }
+            itemView.updateTestItem(la.logRowId, Certainty.SURE, null)
+        } else {
+            // correct -> wrong: revert the increase and apply the MAYBE penalty
+            val dk = SrsCalculator.getScoreUpdate(la.minLastAsked, la.correctItem, Certainty.MAYBE)
+            correctScoreUpdate = dk.copy(lastAsked = la.answeredAt)
+            itemView.applyScoreUpdate(correctScoreUpdate)
+            itemView.updateTestItem(la.logRowId, Certainty.MAYBE, null)
+        }
+        // Keep the debug overlay in sync with the swapped state.
+        la.debugData?.scoreUpdate = correctScoreUpdate
+        correctCount += if (la.currentlyCorrect) 1 else -1
+        return la
     }
 
     private fun addGoodAnswerToHistory(correct: Item) {
