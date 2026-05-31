@@ -23,6 +23,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -41,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -197,6 +201,16 @@ fun ItemSearchScreen(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // The text field owns the query via TextFieldState. The state-based TextField
+    // uses the new text-input pipeline, which renders the IME's composing spans
+    // (e.g. the kana->kanji conversion highlight), unlike the value/onValueChange
+    // overload. We mirror committed text out to the ViewModel to drive the search.
+    val searchState = rememberTextFieldState()
+    LaunchedEffect(Unit) {
+        snapshotFlow { searchState.text.toString() }
+            .collect { onSearchQueryChange(it) }
+    }
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -227,17 +241,16 @@ fun ItemSearchScreen(
                                 },
                                 title = {
                                     TextField(
-                                        value = uiState.searchQuery,
-                                        onValueChange = onSearchQueryChange,
+                                        state = searchState,
                                         placeholder = {
                                             Text(
                                                 text = stringResource(R.string.search)
                                             )
                                         },
                                         trailingIcon = {
-                                            if (uiState.searchQuery.isNotEmpty()) {
+                                            if (searchState.text.isNotEmpty()) {
                                                 IconButton(onClick = {
-                                                    onSearchQueryChange("")
+                                                    searchState.clearText()
                                                     focusRequester.requestFocus()
                                                     keyboardController?.show()
                                                 }) {
@@ -252,7 +265,7 @@ fun ItemSearchScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .focusRequester(focusRequester),
-                                        singleLine = true,
+                                        lineLimits = TextFieldLineLimits.SingleLine,
                                         colors = TextFieldDefaults.textFieldColors(
                                             backgroundColor = MaterialTheme.colors.primary,
                                             textColor = MaterialTheme.colors.onPrimary,

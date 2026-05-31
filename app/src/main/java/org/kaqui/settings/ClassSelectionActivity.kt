@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
@@ -75,7 +77,6 @@ class ClassSelectionActivity : ComponentActivity() {
     private var refreshTrigger by mutableIntStateOf(0)
     private var showMenu by mutableStateOf(false)
     private var showSaveDialog by mutableStateOf(false)
-    private var saveDialogText by mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,16 +140,12 @@ class ClassSelectionActivity : ComponentActivity() {
 
             if (showSaveDialog) {
                 SaveSelectionDialog(
-                    text = saveDialogText,
-                    onTextChange = { saveDialogText = it },
-                    onConfirm = {
-                        saveSelection(saveDialogText)
+                    onConfirm = { name ->
+                        saveSelection(name)
                         showSaveDialog = false
-                        saveDialogText = ""
                     },
                     onDismiss = {
                         showSaveDialog = false
-                        saveDialogText = ""
                     }
                 )
             }
@@ -451,11 +448,12 @@ fun ClassSelectionScreenPreviewWord() {
 
 @Composable
 fun SaveSelectionDialog(
-    text: String,
-    onTextChange: (String) -> Unit,
-    onConfirm: () -> Unit,
+    onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // State-based TextField so the IME composing region/conversion highlight renders
+    // (the name can be Japanese). The dialog owns the text; it resets each time it opens.
+    val state = rememberTextFieldState()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -463,17 +461,16 @@ fun SaveSelectionDialog(
         },
         text = {
             TextField(
-                value = text,
-                onValueChange = onTextChange,
+                state = state,
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                lineLimits = TextFieldLineLimits.SingleLine,
                 placeholder = { Text("Selection name") }
             )
         },
         confirmButton = {
             TextButton(
-                onClick = onConfirm,
-                enabled = text.isNotBlank()
+                onClick = { onConfirm(state.text.toString()) },
+                enabled = state.text.isNotBlank()
             ) {
                 Text(stringResource(android.R.string.ok))
             }
