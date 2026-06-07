@@ -139,6 +139,8 @@ data class TestActivityUiState(
     val forceFragmentRefresh: Int = 0,
     val correctCount: Int = 0,
     val questionCount: Int = 0,
+    val uniqueCorrectCount: Int = 0,
+    val uniqueItemCount: Int = 0,
     val historyState: HistoryState = HistoryState(),
     val sheetExpanded: Boolean = false,
     val stats: LearningDbView.Stats = LearningDbView.Stats(
@@ -170,6 +172,8 @@ class TestViewModel : ViewModel() {
             currentState.copy(
                 correctCount = testEngine.correctCount,
                 questionCount = testEngine.questionCount,
+                uniqueCorrectCount = testEngine.uniqueCorrectCount,
+                uniqueItemCount = testEngine.uniqueItemCount,
             )
         }
     }
@@ -261,6 +265,8 @@ class TestViewModel : ViewModel() {
             it.copy(
                 correctCount = testEngine.correctCount,
                 questionCount = testEngine.questionCount,
+                uniqueCorrectCount = testEngine.uniqueCorrectCount,
+                uniqueItemCount = testEngine.uniqueItemCount,
                 stats = testEngine.itemView.getStats(),
             )
         }
@@ -290,6 +296,8 @@ class TestViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 correctCount = testEngine.correctCount,
+                uniqueCorrectCount = testEngine.uniqueCorrectCount,
+                uniqueItemCount = testEngine.uniqueItemCount,
                 stats = testEngine.itemView.getStats(),
             )
         }
