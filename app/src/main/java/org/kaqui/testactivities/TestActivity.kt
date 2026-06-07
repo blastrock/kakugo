@@ -396,6 +396,8 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                 stats = uiState.stats,
                 correctCount = uiState.correctCount,
                 questionCount = uiState.questionCount,
+                uniqueCorrectCount = uiState.uniqueCorrectCount,
+                uniqueItemCount = uiState.uniqueItemCount,
                 historyState = uiState.historyState,
                 sheetExpanded = uiState.sheetExpanded,
                 onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
@@ -478,6 +480,8 @@ fun TestScreen(
     stats: LearningDbView.Stats,
     correctCount: Int,
     questionCount: Int,
+    uniqueCorrectCount: Int,
+    uniqueItemCount: Int,
     historyState: HistoryState,
     sheetExpanded: Boolean,
     onSheetExpandedChange: (Boolean) -> Unit,
@@ -566,16 +570,29 @@ fun TestScreen(
                         itemsGood = stats.good
                     )
 
-                    Text(
-                        text = LocalContext.current.getString(
-                            R.string.score_string,
-                            correctCount,
-                            questionCount
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.body2,
-                        textAlign = TextAlign.Center
-                    )
+                    Row {
+                        Text(
+                            text = LocalContext.current.getString(
+                                R.string.score_string,
+                                correctCount,
+                                questionCount
+                            ),
+                            modifier = Modifier.weight(1.0f),
+                            style = MaterialTheme.typography.body2,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Text(
+                            text = LocalContext.current.getString(
+                                R.string.unique_string,
+                                uniqueCorrectCount,
+                                uniqueItemCount
+                            ),
+                            modifier = Modifier.weight(1.0f),
+                            style = MaterialTheme.typography.body2,
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
                     val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
                     val layoutDirection = LocalLayoutDirection.current
@@ -911,6 +928,8 @@ fun TestScreenPreviewCollapsed() {
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
+            uniqueCorrectCount = 8,
+            uniqueItemCount = 10,
             historyState = sampleHistoryState,
             sheetExpanded = false,
             onSheetExpandedChange = {},
@@ -988,6 +1007,8 @@ fun TestScreenPreviewWrong() {
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
+            uniqueCorrectCount = 8,
+            uniqueItemCount = 10,
             historyState = sampleHistoryState,
             sheetExpanded = false,
             onSheetExpandedChange = {},
@@ -1064,6 +1085,8 @@ fun TestScreenPreviewLongText() {
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
+            uniqueCorrectCount = 8,
+            uniqueItemCount = 10,
             historyState = sampleHistoryState,
             sheetExpanded = false,
             onSheetExpandedChange = {},
@@ -1146,6 +1169,8 @@ fun TestScreenPreviewWrongHistory() {
             onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
+            uniqueCorrectCount = 8,
+            uniqueItemCount = 10,
             historyState = sampleHistoryState,
             sheetExpanded = true,
             onSheetExpandedChange = {},

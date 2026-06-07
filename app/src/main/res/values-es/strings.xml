@@ -62,6 +62,7 @@
     <string name="maybe">Tal vez</string>
     <string name="dont_know">No lo sé</string>
     <string name="score_string">Puntuación de la sesión: %1$d/%2$d</string>
+    <string name="unique_string">Elementos únicos: %1$d/%2$d</string>
     <string name="confirm_test_stop_title">Terminar sesión</string>
     <string name="confirm_test_stop_message">¿Estás seguro de que quieres terminar la sesión?</string>
     <string name="enable_a_few_items">Debes habilitar al menos 10 elementos para iniciar una sesión</string>

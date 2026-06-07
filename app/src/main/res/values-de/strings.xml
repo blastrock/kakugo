@@ -61,6 +61,7 @@
     <string name="stats_items_answered">Fragen beantwortet</string>
     <string name="title_about">Über Kakugo</string>
     <string name="score_string">Lerneinheit Punkte: %1$d/%2$d</string>
+    <string name="unique_string">Einzigartige Objekte: %1$d/%2$d</string>
     <string name="confirm_test_stop_title">Lerneinheit beenden</string>
     <string name="initializing_kanji_db">Initialisiere Datenbank</string>
     <string name="jlpt_level_n">JLPT Stufe %1$s</string>

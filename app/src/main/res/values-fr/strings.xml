@@ -62,6 +62,7 @@
     <string name="maybe">Pas sûr</string>
     <string name="dont_know">Ne sait pas</string>
     <string name="score_string">Score de session: %1$d/%2$d</string>
+    <string name="unique_string">Éléments uniques : %1$d/%2$d</string>
     <string name="confirm_test_stop_title">Mettre fin à la session</string>
     <string name="confirm_test_stop_message">Étes-vous sûr de vouloir arrêter cette session ?</string>
     <string name="enable_a_few_items">Vous devez activer au moins 10 éléments pour lancer une session</string>
