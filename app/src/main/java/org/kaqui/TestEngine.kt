@@ -75,6 +75,10 @@ class TestEngine(
             val originalCertainty: Certainty,
             val debugData: DebugData?,
             var currentlyCorrect: Boolean,
+            // Whether the answered item was already counted as a unique correct item
+            // before this answer was applied, so toggling can decide whether removing
+            // it from the correct set is safe (only when this answer was its sole source).
+            val wasCorrectBeforeThisAnswer: Boolean,
     )
 
     var lastAnswer: LastAnswer? = null
@@ -101,6 +105,13 @@ class TestEngine(
     var questionCount = 0
         private set
 
+    // Distinct items asked this session, and the subset currently counted as correct.
+    private val askedItemIds = HashSet<Int>()
+    private val correctItemIds = HashSet<Int>()
+
+    val uniqueItemCount get() = askedItemIds.size
+    val uniqueCorrectCount get() = correctItemIds.size
+
     private val history = ArrayList<HistoryLine>()
     private val lastQuestionsIds = ArrayDeque<Int>()
     private var sessionId: Long = 0
@@ -119,6 +130,10 @@ class TestEngine(
         currentAnswers = savedInstanceState.getIntArray("answers")!!.map { getItem(it) }
         correctCount = savedInstanceState.getInt("correctCount")
         questionCount = savedInstanceState.getInt("questionCount")
+        askedItemIds.clear()
+        savedInstanceState.getIntArray("askedItemIds")?.let { askedItemIds.addAll(it.toList()) }
+        correctItemIds.clear()
+        savedInstanceState.getIntArray("correctItemIds")?.let { correctItemIds.addAll(it.toList()) }
         unserializeHistory(savedInstanceState.getByteArray("history")!!)
     }
 
@@ -129,6 +144,8 @@ class TestEngine(
         outState.putIntArray("answers", currentAnswers.map { it.id }.toIntArray())
         outState.putInt("correctCount", correctCount)
         outState.putInt("questionCount", questionCount)
+        outState.putIntArray("askedItemIds", askedItemIds.toIntArray())
+        outState.putIntArray("correctItemIds", correctItemIds.toIntArray())
         outState.putByteArray("history", serializeHistory())
     }
 
@@ -336,6 +353,12 @@ class TestEngine(
         }
 
         val wasCorrect = certainty != Certainty.DONTKNOW && wrong == null
+
+        val wasCorrectBefore = answeredItem.id in correctItemIds
+        askedItemIds.add(answeredItem.id)
+        if (wasCorrect)
+            correctItemIds.add(answeredItem.id)
+
         lastAnswer = LastAnswer(
                 correctItem = answeredItem,
                 wrongItem = wrong,
@@ -348,6 +371,7 @@ class TestEngine(
                 originalCertainty = certainty,
                 debugData = currentDebugData,
                 currentlyCorrect = wasCorrect,
+                wasCorrectBeforeThisAnswer = wasCorrectBefore,
         )
 
         questionCount += 1
@@ -386,6 +410,15 @@ class TestEngine(
         // Keep the debug overlay in sync with the swapped state.
         la.debugData?.scoreUpdate = correctScoreUpdate
         correctCount += if (la.currentlyCorrect) 1 else -1
+
+        // Keep the unique-correct set in sync. Toggling to correct always counts the
+        // item; toggling to wrong only uncounts it when this answer was its sole source
+        // of correctness (an earlier committed question keeps it sticky).
+        if (la.currentlyCorrect)
+            correctItemIds.add(la.correctItem.id)
+        else if (!la.wasCorrectBeforeThisAnswer)
+            correctItemIds.remove(la.correctItem.id)
+
         return la
     }
 
