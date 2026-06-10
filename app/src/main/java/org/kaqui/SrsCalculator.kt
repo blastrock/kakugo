@@ -6,6 +6,7 @@ import org.kaqui.model.Item
 import java.util.Calendar
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 class SrsCalculator {
 
@@ -119,7 +120,11 @@ class SrsCalculator {
                                 max(previousLongScore, MIN_LONG_SCORE)
                         certainty == Certainty.SURE -> {
                             val stepCompletion = min(daysSinceAsked / (probaParams.daysEnd * 0.99 * previousLongScore), 2.0)
-                            min(1.0, min(max(previousLongScore, MIN_LONG_SCORE) * lerp(1.0, 2.0, stepCompletion), previousLongScore + MAX_LONG_SCORE_UPDATE_INCREMENT))
+                            val scoreIncrement = min(previousLongScore * stepCompletion, MAX_LONG_SCORE_UPDATE_INCREMENT)
+                            // Handle the case where previousLongScore is 0 by forcing it to a minimum value.
+                            val sqrtPreviousScore = max(sqrt(previousLongScore), 0.01)
+                            val sqrtNewScore = min(sqrtPreviousScore + scoreIncrement, 1.0)
+                            sqrtNewScore * sqrtNewScore
                         }
                         else ->
                             throw RuntimeException("Unknown certainty $certainty")
