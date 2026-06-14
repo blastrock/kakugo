@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +41,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ButtonDefaults
@@ -868,17 +870,6 @@ private fun ItemButton(
     Box(
         modifier = modifier
     ) {
-        if (showInfo) {
-            Icon(
-                painter = painterResource(id = android.R.drawable.ic_dialog_info),
-                contentDescription = stringResource(R.string.info),
-                modifier = Modifier
-                    .size(10.dp)
-                    .align(Alignment.BottomEnd),
-                tint = MaterialTheme.colors.primary
-            )
-        }
-
         CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
             BetterButton(
                 onClick = { if (showInfo) onClick() },
@@ -887,20 +878,15 @@ private fun ItemButton(
                         showItemProbabilityData(context, item.text(kanaWords), it)
                     }
                 },
-                modifier = Modifier
-                    .then(
-                        if (item.text(kanaWords).length > 1)
-                            Modifier.height(35.dp)
-                        else
-                            Modifier.size(35.dp),
-                    ),
+                modifier = Modifier.defaultMinSize(35.dp, 35.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = backgroundColor
                 ),
                 contentPadding = PaddingValues(0.dp),
-                shape = CircleShape,
+                shape = RoundedCornerShape(8.dp),
             ) {
                 Text(
+                    modifier = Modifier.padding(horizontal = 4.dp),
                     text = item.text(kanaWords),
                     fontSize = 25.sp,
                     color = MaterialTheme.colors.onBackground

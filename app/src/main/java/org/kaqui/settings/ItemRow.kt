@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -66,9 +66,10 @@ fun ItemRow(
         Box(
             modifier = Modifier
                 .padding(vertical = 4.dp)
-                .defaultMinSize(if (itemData.text.length > 1) 50.dp else 35.dp, 35.dp)
-                .clip(CircleShape)
-                .background(backgroundColor),
+                .defaultMinSize(35.dp, 35.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(backgroundColor)
+                .padding(horizontal = 4.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
