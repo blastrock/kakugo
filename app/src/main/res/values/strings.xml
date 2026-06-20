@@ -167,7 +167,7 @@
         <p>The app icon font is <a href="https://www.freejapanesefont.com/nagayama-kai-calligraphy-font-download/">Nagayama Kai<a>.</p>
         <p>The app title font is <a href="https://www.dafont.com/fonters.font">Fonters<a>.</p>
 
-        <p>Kakugo  Copyright &#169; 2025  Philippe Daouadi</p>
+        <p>Kakugo  Copyright &#169; 2026  Philippe Daouadi</p>
     ]]></string>
 
     <string name="title_stats">Progress</string>
@@ -178,11 +178,12 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.41?</h3>
+        <h3>What\'s new in 1.42?</h3>
 
-        <br/>- Improved the vocabulary dictionary.
+        <br/>- Swiping on the last answer now allows fixing a mistake or misclick.
+        <br/>- Set the default font to mincho style. You can change it back to gothic style in the settings.
         <!-- -->
-        <br/>- Added a dictionary view for words and kanji, accessible when clicking on an item after answering a question.
+        <br/>- Improved the vocabulary dictionary.
     ]]></string>
 
     <string name="word_tab">Word</string>
