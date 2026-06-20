@@ -35,6 +35,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.SrsCalculator
+import org.kaqui.TypefaceManager
 import org.kaqui.model.Database
 import org.kaqui.model.Item
 import org.kaqui.model.Kanji
@@ -292,6 +294,7 @@ fun KanjiTabContent(
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val fontFamily = TypefaceManager.getTypeface(context)?.let { FontFamily(it) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -306,6 +309,7 @@ fun KanjiTabContent(
             Text(
                 text = kanjiData.kanji,
                 fontSize = 72.sp,
+                fontFamily = fontFamily,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .combinedClickable(
@@ -335,6 +339,7 @@ fun KanjiTabContent(
                 Text(
                     text = reading,
                     style = MaterialTheme.typography.body1,
+                    fontFamily = fontFamily,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                 )
             }
@@ -357,6 +362,7 @@ fun KanjiTabContent(
                 Text(
                     text = reading,
                     style = MaterialTheme.typography.body1,
+                    fontFamily = fontFamily,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                 )
             }

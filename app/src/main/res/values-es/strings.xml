@@ -105,7 +105,10 @@
     <string name="dictionary_language">Idioma del diccionario</string>
     <string name="lang_system_default">Idioma del sistema</string>
     <string name="kanji_classification">Clasificación de los kanji</string>
-    <string name="use_custom_font">Usar fuente personalizada</string>
+    <string name="font_choice">Fuente</string>
+    <string name="font_gothic">Gótica (sin serifa)</string>
+    <string name="font_mincho">Mincho (con serifa)</string>
+    <string name="font_custom">Fuente personalizada</string>
     <string name="pick_custom_font">Escojer una fuente japonesa personalizada</string>
     <string name="single_button_off_summary">Dos botones \"seguro\" y \"tal vez\" aparecerán</string>
     <string name="single_button_on_summary">Mantener presionada la respuesta la validará como \"tal vez\"</string>

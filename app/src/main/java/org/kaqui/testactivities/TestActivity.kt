@@ -78,6 +78,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -100,6 +101,7 @@ import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
 import org.kaqui.TestEngine
+import org.kaqui.TypefaceManager
 import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.Item
@@ -845,6 +847,7 @@ private fun HistoryItemRow(
             style = MaterialTheme.typography.body2,
             modifier = Modifier.weight(1f),
             lineHeight = 1.1.em,
+            fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) },
         )
     }
 }
@@ -899,7 +902,8 @@ private fun ItemButton(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     text = item.text(kanaWords),
                     fontSize = 25.sp,
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.colors.onBackground,
+                    fontFamily = TypefaceManager.getTypeface(context)?.let { FontFamily(it) },
                 )
             }
         }

@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.ListPreference
 import org.kaqui.BaseActivity
 import org.kaqui.LocaleManager
 import org.kaqui.R
@@ -104,14 +104,8 @@ class MainSettingsActivity : BaseActivity() {
                 pickBackup()
                 true
             }
-            findPreference<SwitchPreferenceCompat>("useCustomFont")!!.setOnPreferenceClickListener {
-                if (!(it as SwitchPreferenceCompat).isChecked) {
-                    setCustomFontPath(null)
-                    true
-                } else {
-                    false
-                }
-            }
+            migrateFontPreference()
+            updatePickCustomFontState()
             findPreference<Preference>("showChangelog")!!.setOnPreferenceClickListener {
                 androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setMessage(HtmlCompat.fromHtml(getString(R.string.changelog_contents), HtmlCompat.FROM_HTML_MODE_COMPACT))
@@ -132,8 +126,26 @@ class MainSettingsActivity : BaseActivity() {
         }
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-            if (key == "dictionary_language")
-                LocaleManager.updateDictionaryLocale(requireContext())
+            when (key) {
+                "dictionary_language" -> LocaleManager.updateDictionaryLocale(requireContext())
+                "font_type" -> {
+                    updatePickCustomFontState()
+                    TypefaceManager.updateTypeface(requireContext())
+                }
+            }
+        }
+
+        // Migrate from the old boolean useCustomFont preference: users who had a
+        // custom font set should keep using it under the new font_type preference.
+        private fun migrateFontPreference() {
+            val prefs = preferenceManager.sharedPreferences!!
+            if (!prefs.contains("font_type") && prefs.getString("custom_font", null) != null)
+                findPreference<ListPreference>("font_type")!!.value = "custom"
+        }
+
+        private fun updatePickCustomFontState() {
+            val fontType = preferenceManager.sharedPreferences!!.getString("font_type", "gothic")
+            findPreference<Preference>("pickCustomFont")!!.isEnabled = fontType == "custom"
         }
 
         private fun pickBackupFolder() {

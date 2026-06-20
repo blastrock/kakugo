@@ -28,12 +28,15 @@
             app:summary="@string/will_update_later"
             app:title="@string/enable_dark_theme" />
 
-        <SwitchPreferenceCompat
-            app:key="useCustomFont"
-            app:title="@string/use_custom_font" />
+        <ListPreference
+            app:defaultValue="gothic"
+            app:entries="@array/font_strings"
+            app:entryValues="@array/font_ids"
+            app:key="font_type"
+            app:summary="%s"
+            app:title="@string/font_choice" />
 
         <Preference
-            app:dependency="useCustomFont"
             app:key="pickCustomFont"
             app:title="@string/pick_custom_font" />
 

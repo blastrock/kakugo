@@ -25,4 +25,15 @@
         <item>rtk</item>
         <item>rtk6</item>
     </string-array>
+
+    <string-array name="font_strings">
+        <item>@string/font_gothic</item>
+        <item>@string/font_mincho</item>
+        <item>@string/font_custom</item>
+    </string-array>
+    <string-array name="font_ids">
+        <item>gothic</item>
+        <item>mincho</item>
+        <item>custom</item>
+    </string-array>
 </resources>

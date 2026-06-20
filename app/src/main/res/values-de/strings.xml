@@ -84,7 +84,10 @@
     <string name="hide_answers_off_summary">Die Antworten werden zeitgleich zur Frage angezeigt</string>
     <string name="single_button_mode">Einzelknopf Modus</string>
     <string name="failed_to_load_font">Fehler beim laden benutzerdefinierter Schriftart: %s</string>
-    <string name="use_custom_font">Benutzerdefinierte Schriftart verwenden</string>
+    <string name="font_choice">Schriftart</string>
+    <string name="font_gothic">Gothic (serifenlos)</string>
+    <string name="font_mincho">Mincho (mit Serifen)</string>
+    <string name="font_custom">Benutzerdefinierte Schriftart</string>
     <string name="pick_custom_font">Wählen sie eine benutzerdefinierte japanische Schriftart</string>
     <string name="single_button_off_summary">Zwei Schaltflächen \"sicher\" und \"möglich\" werden angezeigt</string>
     <string name="single_button_on_summary">Langer Klick auf eine Antwort wird als \"möglich\" gewertet</string>

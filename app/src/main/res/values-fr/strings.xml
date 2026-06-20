@@ -104,7 +104,10 @@
     <string name="dictionary_language">Langue du dictionnaire</string>
     <string name="lang_system_default">Langue du système</string>
     <string name="kanji_classification">Classification des kanji</string>
-    <string name="use_custom_font">Utiliser une police de caractères personalisée</string>
+    <string name="font_choice">Police de caractères</string>
+    <string name="font_gothic">Gothique (sans empattement)</string>
+    <string name="font_mincho">Mincho (avec empattement)</string>
+    <string name="font_custom">Police personnalisée</string>
     <string name="pick_custom_font">Sélectionner une police de caractères japonaise</string>
     <string name="single_button_off_summary">Deux boutons \"sûr\" et \"pas sûr\" vont apparaitre</string>
     <string name="single_button_on_summary">Une pression longue sur une réponse la validera en \"pas sûr\"</string>

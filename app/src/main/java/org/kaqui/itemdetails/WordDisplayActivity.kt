@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,6 +65,7 @@ import org.kaqui.showKanjiInDict
 import org.kaqui.showWordInDict
 import org.kaqui.startActivity
 import org.kaqui.SrsCalculator
+import org.kaqui.TypefaceManager
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.theme.ThemeAttributes
 import java.util.Calendar
@@ -336,6 +338,7 @@ fun WordTabContent(
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val fontFamily = TypefaceManager.getTypeface(context)?.let { FontFamily(it) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -352,6 +355,7 @@ fun WordTabContent(
                     Text(
                         text = wordData.word,
                         fontSize = 48.sp,
+                        fontFamily = fontFamily,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .combinedClickable(
@@ -387,6 +391,7 @@ fun WordTabContent(
                     Text(
                         text = wordData.reading,
                         style = MaterialTheme.typography.body1,
+                        fontFamily = fontFamily,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))

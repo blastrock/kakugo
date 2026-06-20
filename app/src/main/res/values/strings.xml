@@ -125,7 +125,10 @@
     <string name="kanji_class_jlpt" translatable="false">JLPT</string>
     <string name="kanji_class_rtk" translatable="false">Remembering The Kanji</string>
     <string name="kanji_class_rtk6" translatable="false">Remembering The Kanji (6th edition)</string>
-    <string name="use_custom_font">Use a custom font</string>
+    <string name="font_choice">Font</string>
+    <string name="font_gothic">Gothic (sans-serif)</string>
+    <string name="font_mincho">Mincho (serif)</string>
+    <string name="font_custom">Custom font</string>
     <string name="pick_custom_font">Pick a custom Japanese font</string>
     <string name="single_button_off_summary">Two buttons \"sure\" and \"maybe\" will appear</string>
     <string name="single_button_on_summary">Long pressing an answer will validate it as \"maybe\"</string>

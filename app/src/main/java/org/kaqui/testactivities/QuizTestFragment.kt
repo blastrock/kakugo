@@ -489,8 +489,6 @@ fun AnswerButton(
         ) {
             Text(
                 text = stringResource(id = textResId).toUpperCase(Locale.current),
-                fontFamily = TypefaceManager.getTypeface(LocalContext.current)
-                    ?.let { FontFamily(it) }
             )
         }
     }

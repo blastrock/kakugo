@@ -15,11 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import org.kaqui.TypefaceManager
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 
@@ -38,6 +41,7 @@ fun ItemRow(
     onClick: (() -> Unit)? = null
 ) {
     val themeColors = LocalThemeAttributes.current
+    val fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
 
     Row(
         modifier = Modifier
@@ -76,6 +80,7 @@ fun ItemRow(
                 text = itemData.text,
                 fontSize = 25.sp,
                 textAlign = TextAlign.Center,
+                fontFamily = fontFamily,
             )
         }
 
