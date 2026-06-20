@@ -72,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -884,6 +885,15 @@ private fun ItemButton(
                 ),
                 contentPadding = PaddingValues(0.dp),
                 shape = RoundedCornerShape(8.dp),
+                elevation = if (showInfo)
+                        ButtonDefaults.elevation()
+                    else
+                        ButtonDefaults.elevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 0.dp,
+                            hoveredElevation = 0.dp,
+                            focusedElevation = 0.dp
+                        )
             ) {
                 Text(
                     modifier = Modifier.padding(horizontal = 4.dp),

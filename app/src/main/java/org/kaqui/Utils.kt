@@ -37,6 +37,7 @@ import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ButtonElevation
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -372,6 +373,7 @@ fun BetterButton(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     shape: Shape = MaterialTheme.shapes.small,
+    elevation: ButtonElevation? = ButtonDefaults.elevation(),
     content: @Composable RowScope.() -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -411,6 +413,7 @@ fun BetterButton(
         colors = colors,
         contentPadding = contentPadding,
         shape = shape,
+        elevation = elevation,
     )
 }
 
