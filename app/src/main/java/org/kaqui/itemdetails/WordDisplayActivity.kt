@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -251,9 +252,7 @@ fun WordDisplayScreen(
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
-    val hasKanji = uiState.kanjiList.isNotEmpty()
-    val pageCount = if (hasKanji) 2 else 1
-    val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { pageCount })
+    val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState) {
@@ -279,29 +278,26 @@ fun WordDisplayScreen(
             }
         },
         belowAppBar = {
-            // Tab selector (only show if there are kanji)
-            if (hasKanji) {
-                val tabs = listOf(
-                    stringResource(org.kaqui.R.string.word_tab),
-                    stringResource(org.kaqui.R.string.kanji_tab)
-                )
-                val selectedIndex = uiState.selectedTab.ordinal
+            val tabs = listOf(
+                stringResource(org.kaqui.R.string.word_tab),
+                stringResource(org.kaqui.R.string.kanji_tab)
+            )
+            val selectedIndex = uiState.selectedTab.ordinal
 
-                TabRow(
-                    selectedTabIndex = selectedIndex,
-                    backgroundColor = MaterialTheme.colors.primary,
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            text = { Text(title) },
-                            selected = selectedIndex == index,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
+            TabRow(
+                selectedTabIndex = selectedIndex,
+                backgroundColor = MaterialTheme.colors.primary,
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = selectedIndex == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -587,6 +583,25 @@ fun KanjiTabContent(
     onKanjiClick: (Item) -> Unit,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
 ) {
+    if (kanjiList.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(org.kaqui.R.string.no_kanji_in_word),
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding

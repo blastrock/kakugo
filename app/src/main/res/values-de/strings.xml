@@ -138,6 +138,7 @@
 
     <string name="word_tab">Wort</string>
     <string name="kanji_tab">Kanji</string>
+    <string name="no_kanji_in_word">Dieses Wort enthält keine Kanji.</string>
     <string name="reading_label">Lesung</string>
     <string name="definitions_label">Definitionen</string>
     <string name="learning_status_label">Lernstatus</string>

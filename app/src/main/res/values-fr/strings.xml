@@ -165,6 +165,7 @@
 
     <string name="word_tab">Mot</string>
     <string name="kanji_tab">Kanji</string>
+    <string name="no_kanji_in_word">Ce mot ne contient aucun kanji.</string>
     <string name="reading_label">Lecture</string>
     <string name="definitions_label">Définitions</string>
     <string name="learning_status_label">État d\'apprentissage</string>

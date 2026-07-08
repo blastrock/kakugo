@@ -188,6 +188,7 @@
 
     <string name="word_tab">Word</string>
     <string name="kanji_tab">Kanji</string>
+    <string name="no_kanji_in_word">This word contains no kanji.</string>
     <string name="reading_label">Reading</string>
     <string name="definitions_label">Definitions</string>
     <string name="learning_status_label">Learning status</string>
