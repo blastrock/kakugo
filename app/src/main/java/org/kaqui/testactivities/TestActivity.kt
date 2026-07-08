@@ -97,6 +97,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kaqui.AppScaffold
 import org.kaqui.BetterButton
+import org.kaqui.HistoryItem
+import org.kaqui.HistoryItemRow
+import org.kaqui.HistoryItemStyle
+import org.kaqui.ItemButton
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
@@ -120,17 +124,6 @@ import org.kaqui.toName
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
-enum class HistoryItemStyle {
-    GOOD, BAD, DONT_KNOW
-}
-
-data class HistoryItem(
-    val item: Item,
-    val probabilityData: TestEngine.DebugData?,
-    val style: HistoryItemStyle,
-    val prependSeparator: Boolean = false,
-)
 
 data class HistoryState(
     val items: List<HistoryItem> = listOf(),
@@ -816,96 +809,6 @@ private fun HistoryBottomSheet(
                 kanaWords = kanaWords,
                 onItemClick = onItemClick
             )
-        }
-    }
-}
-
-@Composable
-private fun HistoryItemRow(
-    historyItem: HistoryItem,
-    kanaWords: Boolean,
-    onItemClick: (Item) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ItemButton(
-            item = historyItem.item,
-            probabilityData = historyItem.probabilityData,
-            style = historyItem.style,
-            showInfo = historyItem.item.contents is Kanji || historyItem.item.contents is Word,
-            kanaWords = kanaWords,
-            onClick = { onItemClick(historyItem.item) }
-        )
-
-        Text(
-            text = historyItem.item.description,
-            style = MaterialTheme.typography.body2,
-            modifier = Modifier.weight(1f),
-            lineHeight = 1.1.em,
-            fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) },
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun ItemButton(
-    item: Item,
-    probabilityData: TestEngine.DebugData?,
-    style: HistoryItemStyle,
-    showInfo: Boolean,
-    kanaWords: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    val themeAttrs = LocalThemeAttributes.current
-    val backgroundColor = when (style) {
-        HistoryItemStyle.GOOD -> themeAttrs.itemGood
-        HistoryItemStyle.BAD -> themeAttrs.itemBad
-        HistoryItemStyle.DONT_KNOW -> themeAttrs.itemBad2
-    }
-    val context = LocalContext.current
-
-    Box(
-        modifier = modifier
-    ) {
-        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-            BetterButton(
-                onClick = { if (showInfo) onClick() },
-                onLongPress = {
-                    probabilityData?.let {
-                        showItemProbabilityData(context, item.text(kanaWords), it)
-                    }
-                },
-                modifier = Modifier.defaultMinSize(35.dp, 35.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = backgroundColor
-                ),
-                contentPadding = PaddingValues(0.dp),
-                shape = RoundedCornerShape(8.dp),
-                elevation = if (showInfo)
-                        ButtonDefaults.elevation()
-                    else
-                        ButtonDefaults.elevation(
-                            defaultElevation = 0.dp,
-                            pressedElevation = 0.dp,
-                            hoveredElevation = 0.dp,
-                            focusedElevation = 0.dp
-                        )
-            ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    text = item.text(kanaWords),
-                    fontSize = 25.sp,
-                    color = MaterialTheme.colors.onBackground,
-                    fontFamily = TypefaceManager.getTypeface(context)?.let { FontFamily(it) },
-                )
-            }
         }
     }
 }

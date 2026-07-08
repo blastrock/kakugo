@@ -72,12 +72,27 @@ import androidx.preference.PreferenceManager
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import org.kaqui.model.Database
+import org.kaqui.model.Item
 import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
 import org.kaqui.model.Word
+import org.kaqui.model.description
+import org.kaqui.model.text
 import org.kaqui.testactivities.TestActivity
 import org.kaqui.theme.KakugoTheme
+import org.kaqui.theme.LocalThemeAttributes
 import java.io.Serializable
 import java.util.Calendar
 
@@ -449,5 +464,106 @@ fun showWordInDict(context: Context, word: Word) {
                 "https://jisho.org/search/${word.word}".toUri()
             )
         )
+    }
+}
+
+enum class HistoryItemStyle {
+    GOOD, BAD, DONT_KNOW
+}
+
+data class HistoryItem(
+    val item: Item,
+    val probabilityData: TestEngine.DebugData?,
+    val style: HistoryItemStyle,
+    val prependSeparator: Boolean = false,
+)
+
+@Composable
+fun HistoryItemRow(
+    historyItem: HistoryItem,
+    kanaWords: Boolean,
+    onItemClick: (Item) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ItemButton(
+            item = historyItem.item,
+            probabilityData = historyItem.probabilityData,
+            style = historyItem.style,
+            showInfo = historyItem.item.contents is Kanji || historyItem.item.contents is Word,
+            kanaWords = kanaWords,
+            onClick = { onItemClick(historyItem.item) }
+        )
+
+        Text(
+            text = historyItem.item.description,
+            style = MaterialTheme.typography.body2,
+            modifier = Modifier.weight(1f),
+            lineHeight = 1.1.em,
+            fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ItemButton(
+    item: Item,
+    probabilityData: TestEngine.DebugData?,
+    style: HistoryItemStyle,
+    showInfo: Boolean,
+    kanaWords: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val themeAttrs = LocalThemeAttributes.current
+    val backgroundColor = when (style) {
+        HistoryItemStyle.GOOD -> themeAttrs.itemGood
+        HistoryItemStyle.BAD -> themeAttrs.itemBad
+        HistoryItemStyle.DONT_KNOW -> themeAttrs.itemBad2
+    }
+    val context = LocalContext.current
+
+    Box(
+        modifier = modifier
+    ) {
+        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+            BetterButton(
+                onClick = { if (showInfo) onClick() },
+                onLongPress = {
+                    probabilityData?.let {
+                        showItemProbabilityData(context, item.text(kanaWords), it)
+                    }
+                },
+                modifier = Modifier.defaultMinSize(35.dp, 35.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = backgroundColor
+                ),
+                contentPadding = PaddingValues(0.dp),
+                shape = RoundedCornerShape(8.dp),
+                elevation = if (showInfo)
+                        ButtonDefaults.elevation()
+                    else
+                        ButtonDefaults.elevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 0.dp,
+                            hoveredElevation = 0.dp,
+                            focusedElevation = 0.dp
+                        )
+            ) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    text = item.text(kanaWords),
+                    fontSize = 25.sp,
+                    color = MaterialTheme.colors.onBackground,
+                    fontFamily = TypefaceManager.getTypeface(context)?.let { FontFamily(it) },
+                )
+            }
+        }
     }
 }
