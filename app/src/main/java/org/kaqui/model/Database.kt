@@ -539,6 +539,41 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         }
     }
 
+    data class ItemHistoryEntry(
+        val time: Long,            // unix seconds
+        val testType: TestType,
+        val questionItemId: Int,
+        val wrongItemId: Int?,
+        val certainty: Certainty,
+    )
+
+    // Returns every question that involved the given item, either as the asked item or as the
+    // wrong answer that was selected for another item's question, most recent first.
+    fun getItemHistory(itemId: Int): List<ItemHistoryEntry> {
+        val result = mutableListOf<ItemHistoryEntry>()
+        database.query(
+            SESSION_ITEMS_TABLE_NAME,
+            arrayOf("time", "test_type", "id_item_question", "id_item_wrong", "certainty"),
+            "id_item_question = ? OR id_item_wrong = ?",
+            arrayOf(itemId.toString(), itemId.toString()),
+            null, null, "time DESC"
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                val wrong = if (cursor.isNull(3)) null else cursor.getInt(3)
+                result.add(
+                    ItemHistoryEntry(
+                        time = cursor.getLong(0),
+                        testType = TestType.fromInt(cursor.getInt(1)),
+                        questionItemId = cursor.getInt(2),
+                        wrongItemId = wrong,
+                        certainty = Certainty.fromInt(cursor.getInt(4))
+                    )
+                )
+            }
+        }
+        return result
+    }
+
     companion object {
         private const val TAG = "Database"
 
