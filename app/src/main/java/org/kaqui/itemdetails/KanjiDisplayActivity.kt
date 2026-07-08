@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -41,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.preference.PreferenceManager
 import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.Separator
@@ -59,7 +61,7 @@ import org.kaqui.theme.LocalThemeAttributes
 import kotlinx.coroutines.launch
 
 enum class KanjiDisplayTab {
-    KANJI, WORDS
+    KANJI, WORDS, HISTORY
 }
 
 data class KanjiData(
@@ -100,6 +102,7 @@ data class KanjiDisplayUiState(
     val selectedTab: KanjiDisplayTab = KanjiDisplayTab.KANJI,
     val kanjiData: KanjiData = KanjiData.default(),
     val wordList: List<Item> = emptyList(),
+    val historyEntries: List<HistoryEntryUi> = emptyList(),
 )
 
 class KanjiDisplayViewModel : ViewModel() {
@@ -135,9 +138,15 @@ class KanjiDisplayViewModel : ViewModel() {
         val wordList = database.getWordsByKanji(kanjiContents.kanji)
             .sortedByDescending { it.shortScore }
 
+        // Load the question history for this kanji (asked, or picked as a wrong answer)
+        val historyEntries = buildHistoryEntries(database.getItemHistory(kanjiId)) { id ->
+            database.getKanji(id, KnowledgeType.Reading)
+        }
+
         uiState = uiState.copy(
             kanjiData = kanjiData,
-            wordList = wordList
+            wordList = wordList,
+            historyEntries = historyEntries
         )
     }
 
@@ -198,6 +207,9 @@ class KanjiDisplayActivity : ComponentActivity() {
                 },
                 onWordClick = { wordItem ->
                     startActivity<WordDisplayActivity>("word_id" to wordItem.id)
+                },
+                onHistoryItemClick = { item ->
+                    startActivity<KanjiDisplayActivity>("kanji_id" to item.id)
                 }
             )
         }
@@ -211,9 +223,13 @@ fun KanjiDisplayScreen(
     onBackClick: () -> Unit,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
     onWordClick: (Item) -> Unit,
+    onHistoryItemClick: (Item) -> Unit,
 ) {
     val context = LocalContext.current
-    val pageCount = 2
+    val kanaWords = remember {
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean("kana_words", true)
+    }
+    val pageCount = 3
     val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { pageCount })
     val coroutineScope = rememberCoroutineScope()
 
@@ -222,6 +238,7 @@ fun KanjiDisplayScreen(
             val targetTab = when (page) {
                 0 -> KanjiDisplayTab.KANJI
                 1 -> KanjiDisplayTab.WORDS
+                2 -> KanjiDisplayTab.HISTORY
                 else -> KanjiDisplayTab.KANJI
             }
             onTabSelected(targetTab)
@@ -242,7 +259,8 @@ fun KanjiDisplayScreen(
         belowAppBar = {
             val tabs = listOf(
                 stringResource(R.string.kanji_tab),
-                stringResource(R.string.words_tab)
+                stringResource(R.string.words_tab),
+                stringResource(R.string.history_tab)
             )
             val selectedIndex = uiState.selectedTab.ordinal
 
@@ -280,6 +298,12 @@ fun KanjiDisplayScreen(
                 1 -> WordsTabContent(
                     wordList = uiState.wordList,
                     onWordClick = onWordClick,
+                    contentPadding = paddingValues
+                )
+                2 -> HistoryTabContent(
+                    entries = uiState.historyEntries,
+                    kanaWords = kanaWords,
+                    onItemClick = onHistoryItemClick,
                     contentPadding = paddingValues
                 )
             }
@@ -544,7 +568,8 @@ fun PreviewKanjiDisplayScreenKanjiTab() {
         onTabSelected = {},
         onBackClick = {},
         onUpdateScore = { _, _ -> },
-        onWordClick = {}
+        onWordClick = {},
+        onHistoryItemClick = {}
     )
 }
 
@@ -590,6 +615,7 @@ fun PreviewKanjiDisplayScreenWordsTab() {
         onTabSelected = {},
         onBackClick = {},
         onUpdateScore = { _, _ -> },
-        onWordClick = {}
+        onWordClick = {},
+        onHistoryItemClick = {}
     )
 }

@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -51,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.preference.PreferenceManager
 import org.kaqui.AppScaffold
 import org.kaqui.Separator
 import org.kaqui.model.Database
@@ -74,7 +76,7 @@ import kotlinx.coroutines.launch
 import org.kaqui.model.RtkUnclassified
 
 enum class WordDisplayTab {
-    WORD, KANJI
+    WORD, KANJI, HISTORY
 }
 
 data class MemorizationStatus(
@@ -118,6 +120,7 @@ data class WordDisplayUiState(
     val selectedTab: WordDisplayTab = WordDisplayTab.WORD,
     val wordData: WordData = WordData.default(),
     val kanjiList: List<Item> = emptyList(),
+    val historyEntries: List<HistoryEntryUi> = emptyList(),
 )
 
 class WordDisplayViewModel : ViewModel() {
@@ -152,9 +155,15 @@ class WordDisplayViewModel : ViewModel() {
             database.getKanjiByCharacter(char) ?: createPlaceholderKanjiItem(char)
         }
 
+        // Load the question history for this word (asked, or picked as a wrong answer)
+        val historyEntries = buildHistoryEntries(database.getItemHistory(wordId)) { id ->
+            database.getWord(id, KnowledgeType.Reading)
+        }
+
         uiState = uiState.copy(
             wordData = wordData,
-            kanjiList = kanjiList
+            kanjiList = kanjiList,
+            historyEntries = historyEntries
         )
     }
 
@@ -238,6 +247,9 @@ class WordDisplayActivity : ComponentActivity() {
                 onBackClick = { finish() },
                 onUpdateScore = { knowledgeType, increase ->
                     viewModel.updateScore(this@WordDisplayActivity, knowledgeType, increase)
+                },
+                onHistoryItemClick = { item ->
+                    startActivity<WordDisplayActivity>("word_id" to item.id)
                 }
             )
         }
@@ -250,9 +262,13 @@ fun WordDisplayScreen(
     onTabSelected: (WordDisplayTab) -> Unit,
     onBackClick: () -> Unit,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
+    onHistoryItemClick: (Item) -> Unit,
 ) {
     val context = LocalContext.current
-    val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { 2 })
+    val kanaWords = remember {
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean("kana_words", true)
+    }
+    val pagerState = rememberPagerState(initialPage = uiState.selectedTab.ordinal, pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState) {
@@ -260,6 +276,7 @@ fun WordDisplayScreen(
             val targetTab = when (page) {
                 0 -> WordDisplayTab.WORD
                 1 -> WordDisplayTab.KANJI
+                2 -> WordDisplayTab.HISTORY
                 else -> WordDisplayTab.WORD
             }
             onTabSelected(targetTab)
@@ -280,7 +297,8 @@ fun WordDisplayScreen(
         belowAppBar = {
             val tabs = listOf(
                 stringResource(org.kaqui.R.string.word_tab),
-                stringResource(org.kaqui.R.string.kanji_tab)
+                stringResource(org.kaqui.R.string.kanji_tab),
+                stringResource(org.kaqui.R.string.history_tab)
             )
             val selectedIndex = uiState.selectedTab.ordinal
 
@@ -320,6 +338,12 @@ fun WordDisplayScreen(
                     onKanjiClick = { kanjiItem ->
                         context.startActivity<KanjiDisplayActivity>("kanji_id" to kanjiItem.id)
                     },
+                    contentPadding = paddingValues
+                )
+                2 -> HistoryTabContent(
+                    entries = uiState.historyEntries,
+                    kanaWords = kanaWords,
+                    onItemClick = onHistoryItemClick,
                     contentPadding = paddingValues
                 )
             }
@@ -670,7 +694,8 @@ fun PreviewWordDisplayScreenWordTab() {
         ),
         onTabSelected = {},
         onBackClick = {},
-        onUpdateScore = { _, _ -> }
+        onUpdateScore = { _, _ -> },
+        onHistoryItemClick = {}
     )
 }
 
@@ -716,7 +741,8 @@ fun PreviewWordDisplayScreenKanjiTab() {
         ),
         onTabSelected = {},
         onBackClick = {},
-        onUpdateScore = { _, _ -> }
+        onUpdateScore = { _, _ -> },
+        onHistoryItemClick = {}
     )
 }
 
@@ -753,7 +779,8 @@ fun PreviewWordDisplayScreenKanaOnly() {
         ),
         onTabSelected = {},
         onBackClick = {},
-        onUpdateScore = { _, _ -> }
+        onUpdateScore = { _, _ -> },
+        onHistoryItemClick = {}
     )
 }
 
@@ -825,6 +852,7 @@ fun PreviewWordDisplayScreenMultipleKanji() {
         ),
         onTabSelected = {},
         onBackClick = {},
-        onUpdateScore = { _, _ -> }
+        onUpdateScore = { _, _ -> },
+        onHistoryItemClick = {}
     )
 }

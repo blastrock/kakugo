@@ -186,6 +186,8 @@
     <string name="frequency_label">Frecuencia</string>
 
     <string name="words_tab">Palabras</string>
+    <string name="history_tab">Historial</string>
+    <string name="history_empty">Aún no hay historial</string>
     <string name="on_readings_label">On\'yomi</string>
     <string name="kun_readings_label">Kun\'yomi</string>
     <string name="strokes_label">Trazos</string>

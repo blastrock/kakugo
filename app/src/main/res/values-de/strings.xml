@@ -158,6 +158,8 @@
     <string name="frequency_label">Häufigkeit</string>
 
     <string name="words_tab">Wörter</string>
+    <string name="history_tab">Verlauf</string>
+    <string name="history_empty">Noch kein Verlauf</string>
     <string name="on_readings_label">On\'yomi</string>
     <string name="kun_readings_label">Kun\'yomi</string>
     <string name="strokes_label">Striche</string>

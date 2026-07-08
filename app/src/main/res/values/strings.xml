@@ -211,6 +211,8 @@
     <string name="not_applicable" translatable="false">N/A</string>
 
     <string name="words_tab">Words</string>
+    <string name="history_tab">History</string>
+    <string name="history_empty">No history yet</string>
     <string name="on_readings_label">On\'yomi</string>
     <string name="kun_readings_label">Kun\'yomi</string>
     <string name="strokes_label">Strokes</string>
