@@ -51,8 +51,10 @@ fun buildHistoryEntries(
                 HistoryItem(question, null, HistoryItemStyle.BAD, prependSeparator = true),
                 HistoryItem(resolveItem(entry.wrongItemId), null, HistoryItemStyle.DONT_KNOW),
             )
-            entry.certainty != Certainty.DONTKNOW ->
+            entry.certainty == Certainty.SURE ->
                 listOf(HistoryItem(question, null, HistoryItemStyle.GOOD))
+            entry.certainty == Certainty.MAYBE ->
+                listOf(HistoryItem(question, null, HistoryItemStyle.MAYBE))
             else ->
                 listOf(HistoryItem(question, null, HistoryItemStyle.BAD))
         }

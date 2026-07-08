@@ -468,7 +468,7 @@ fun showWordInDict(context: Context, word: Word) {
 }
 
 enum class HistoryItemStyle {
-    GOOD, BAD, DONT_KNOW
+    GOOD, MAYBE, BAD, DONT_KNOW
 }
 
 data class HistoryItem(
@@ -524,6 +524,7 @@ fun ItemButton(
     val themeAttrs = LocalThemeAttributes.current
     val backgroundColor = when (style) {
         HistoryItemStyle.GOOD -> themeAttrs.itemGood
+        HistoryItemStyle.MAYBE -> themeAttrs.itemMaybe
         HistoryItemStyle.BAD -> themeAttrs.itemBad
         HistoryItemStyle.DONT_KNOW -> themeAttrs.itemBad2
     }

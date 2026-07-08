@@ -41,6 +41,7 @@ private val LightThemeColors = ThemeAttributes(
     itemMeh = Color(0xFFFFE8C4),
     itemLearn = Color(0xFFF9FFC4),
     itemGood = Color(0xFFB5DA8F),
+    itemMaybe = Color(0xFFD4EDC0),
     itemPerfect = Color(0xFFB3E5FC),
     historyBackground = Color(0xFFDDDDDD),
     wrongAnswerBackground = Color(0xFFFFDDDD),
@@ -60,6 +61,7 @@ private val DarkThemeColors = ThemeAttributes(
     itemMeh = Color(0xFF894E16),
     itemLearn = Color(0xFF937F1B),
     itemGood = Color(0xFF085300),
+    itemMaybe = Color(0xFF0C7A00),
     itemPerfect = Color(0xFF01579B),
     historyBackground = Color(0xFF222222),
     wrongAnswerBackground = Color(0xFF350000),
@@ -76,6 +78,7 @@ val LocalThemeAttributes = staticCompositionLocalOf { LightThemeColors }
 
 data class ThemeAttributes(
     val itemGood: Color,
+    val itemMaybe: Color,
     val itemMeh: Color,
     val itemBad: Color,
     val itemBad2: Color,
