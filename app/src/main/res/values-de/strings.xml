@@ -164,4 +164,7 @@
     <string name="kun_readings_label">Kun\'yomi</string>
     <string name="strokes_label">Striche</string>
     <string name="no_words_found">Keine Wörter mit diesem Kanji gefunden</string>
+    <string name="keep_android_open">Android offen halten</string>
+    <string name="keep_android_open_message">Ab September 2026 wird ein stilles Update von Google ohne Zustimmung der Nutzer alle Android-Apps blockieren, deren Entwickler sich nicht bei Google registriert, ihren Vertrag nicht unterzeichnet und nicht bezahlt haben.</string>
+    <string name="keep_android_open_link">Wir brauchen deine Hilfe.</string>
 </resources>

@@ -1,5 +1,7 @@
 package org.kaqui.mainmenu
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,7 +10,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -121,9 +127,13 @@ fun MainScreen(
     onDatabaseInitRequired: () -> Unit
 ) {
     val context = LocalContext.current
+    val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
     var showProgress by remember { mutableStateOf(false) }
     var errorTitle by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var cardDismissed by remember {
+        mutableStateOf(sharedPrefs.getBoolean("hide_keep_android_open_card", false))
+    }
 
     LaunchedEffect(Unit) {
         if (DatabaseUpdater.databaseNeedsUpdate(context)) {
@@ -159,11 +169,20 @@ fun MainScreen(
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (!cardDismissed) {
+                    KeepAndroidOpenCard(
+                        onDismiss = {
+                            cardDismissed = true
+                            sharedPrefs.edit { putBoolean("hide_keep_android_open_card", true) }
+                        }
+                    )
+                }
+
                 AppTitleImage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(160.dp)
-                        .padding(horizontal = 64.dp, vertical =8.dp)
+                        .padding(horizontal = 64.dp, vertical = 8.dp)
                 )
 
                 MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
@@ -206,6 +225,44 @@ fun MenuButton(textRes: Int, onClick: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+fun KeepAndroidOpenCard(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    Card(
+        backgroundColor = MaterialTheme.colors.error,
+        contentColor = MaterialTheme.colors.onError,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "✕",
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .clickable { onDismiss() }
+                    .padding(end = 4.dp)
+            )
+            Column(
+                modifier = Modifier.padding(end = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(stringResource(R.string.keep_android_open_message))
+                Text(
+                    text = stringResource(R.string.keep_android_open_link),
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse("https://keepandroidopen.org/"))
+                        )
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -192,4 +192,7 @@
     <string name="kun_readings_label">Kun\'yomi</string>
     <string name="strokes_label">Trazos</string>
     <string name="no_words_found">No se encontraron palabras con este kanji</string>
+    <string name="keep_android_open">Mantengamos Android abierto</string>
+    <string name="keep_android_open_message">Comenzando en septiembre de 2026, una actualización silenciosa, no consensuada, pusheada por Google, bloqueará cada app de Android cuyo desarrollador no se haya registrado en Google, firmado su contrato, pagado su cuota y entregado un documento de identidad nacional.</string>
+    <string name="keep_android_open_link">Necesitamos tu ayuda.</string>
 </resources>

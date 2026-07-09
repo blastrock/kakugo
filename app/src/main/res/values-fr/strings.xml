@@ -191,4 +191,7 @@
     <string name="kun_readings_label">Kun\'yomi</string>
     <string name="strokes_label">Traits</string>
     <string name="no_words_found">Aucun mot contenant ce kanji trouvé</string>
+    <string name="keep_android_open">Gardons Android ouvert</string>
+    <string name="keep_android_open_message">À partir de septembre 2026, une mise à jour silencieuse et imposée sans consentement par Google bloquera toutes les applications Android dont le développeur ne s\'est pas enregistré auprès de Google, n\'a pas signé son contrat, n\'a pas payé et n\'a pas fourni de pièce d\'identité officielle.</string>
+    <string name="keep_android_open_link">Nous avons besoin de votre aide.</string>
 </resources>
