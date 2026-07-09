@@ -178,12 +178,12 @@
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[
-        <h3>What\'s new in 1.42?</h3>
+        <h3>What\'s new in 1.43?</h3>
 
+        <br/>- Added an history tab on each review item to follow when the item was asked and how it was answered.
+        <!-- -->
         <br/>- Swiping on the last answer now allows fixing a mistake or misclick.
         <br/>- Set the default font to mincho style. You can change it back to gothic style in the settings.
-        <!-- -->
-        <br/>- Improved the vocabulary dictionary.
     ]]></string>
 
     <string name="word_tab">Word</string>
