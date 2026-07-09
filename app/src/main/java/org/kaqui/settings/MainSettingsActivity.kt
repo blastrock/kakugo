@@ -118,6 +118,17 @@ class MainSettingsActivity : BaseActivity() {
                     .show()
                 true
             }
+            findPreference<Preference>("keepAndroidOpen")!!.setOnPreferenceClickListener {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.keep_android_open)
+                    .setMessage(R.string.keep_android_open_message)
+                    .setNeutralButton(R.string.keep_android_open_link) { _, _ ->
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://keepandroidopen.org/")))
+                    }
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+                true
+            }
         }
 
         override fun onStart() {

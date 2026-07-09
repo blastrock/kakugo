@@ -91,6 +91,9 @@
         <Preference
             app:key="showChangelog"
             app:title="@string/changelog" />
+        <Preference
+            app:key="keepAndroidOpen"
+            app:title="@string/keep_android_open" />
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>
