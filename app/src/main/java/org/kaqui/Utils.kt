@@ -330,27 +330,32 @@ inline fun <reified T : Activity> Context.startActivity(vararg params: Pair<Stri
 
 fun showItemProbabilityData(context: Context, item: String, probabilityData: TestEngine.DebugData) {
     AlertDialog.Builder(context)
-            .setTitle("$item - ${item.codePointAt(0)}")
-            .setMessage(
-                    context.getString(R.string.debug_info,
-                            probabilityData.probabilityData.daysSinceAsked,
-                            probabilityData.probabilityData.longScore,
-                            probabilityData.probabilityData.longWeight,
-                            probabilityData.probabilityData.shortScore,
-                            probabilityData.probabilityData.shortWeight,
-                            probabilityData.probaParamsStage2.shortCoefficient,
-                            probabilityData.probaParamsStage2.longCoefficient,
-                            probabilityData.probabilityData.finalProbability,
-                            probabilityData.totalWeight,
-                            if (probabilityData.scoreUpdate != null)
-                                secondsToDays(probabilityData.scoreUpdate!!.lastAsked - probabilityData.scoreUpdate!!.minLastAsked)
-                            else
-                                null,
-                            probabilityData.scoreUpdate?.shortScore,
-                            probabilityData.scoreUpdate?.longScore,
-                            probabilityData.probaParamsStage2.minProbaShort))
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+        .setTitle("$item - ${item.codePointAt(0)}")
+        .setMessage(
+            context.getString(
+                R.string.debug_info,
+                probabilityData.probabilityData.daysSinceAsked,
+                probabilityData.probabilityData.longScore,
+                probabilityData.probabilityData.longWeight,
+                probabilityData.probabilityData.shortScore,
+                probabilityData.probabilityData.shortWeight,
+                probabilityData.probaParamsStage2.shortCoefficient,
+                probabilityData.probaParamsStage2.longCoefficient,
+                probabilityData.probabilityData.finalProbability,
+                probabilityData.totalWeight,
+                probabilityData.scoreUpdate?.let {
+                    secondsToDays(it.lastAsked - it.minLastAsked)
+                },
+                probabilityData.scoreUpdate?.shortScore,
+                probabilityData.scoreUpdate?.longScore,
+                probabilityData.probaParamsStage2.minProbaShort,
+                probabilityData.scoreUpdate?.let {
+                    (probabilityData.probaParamsStage1.daysEnd * 0.99) * it.longScore
+                }
+            )
+        )
+        .setPositiveButton(android.R.string.ok, null)
+        .show()
 }
 
 fun TestType.toName(): Int =
