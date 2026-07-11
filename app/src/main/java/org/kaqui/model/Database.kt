@@ -15,6 +15,9 @@ import java.util.TimeZone
 class Database constructor(context: Context, val database: SQLiteDatabase) {
     private val locale: String get() = LocaleManager.getDictionaryLocale()
 
+    // items without a meaning in the dictionary locale fall back to english
+    private val localizedMeanings: String get() = "COALESCE(meanings_$locale, meanings_en)"
+
     init {
         // the app can be restored from android without going through the main activity,
         // we need a locale here though and we can't try to fetch it every time we need it
@@ -81,8 +84,8 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         database.rawQuery(
                 """SELECT id
                 FROM $KANJIS_TABLE_NAME
-                WHERE (id = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?)) AND radical = 0""",
-                arrayOf(firstCodePoint, "%$text%", "%$text%", "%$text%", "%$text%")).use { cursor ->
+                WHERE (id = ? OR on_readings LIKE ? OR kun_readings LIKE ? OR $localizedMeanings LIKE ?) AND radical = 0""",
+                arrayOf(firstCodePoint, "%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
@@ -95,8 +98,8 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         database.rawQuery(
                 """SELECT id
                 FROM $WORDS_TABLE_NAME
-                WHERE item LIKE ? OR reading LIKE ? OR (meanings_$locale <> '' AND meanings_$locale LIKE ? OR meanings_$locale == '' AND meanings_en LIKE ?)""",
-                arrayOf("%$text%", "%$text%", "%$text%", "%$text%")).use { cursor ->
+                WHERE item LIKE ? OR reading LIKE ? OR $localizedMeanings LIKE ?""",
+                arrayOf("%$text%", "%$text%", "%$text%")).use { cursor ->
             val ret = mutableListOf<Int>()
             while (cursor.moveToNext()) {
                 ret.add(cursor.getInt(0))
@@ -166,7 +169,7 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         val contents = Kanji("", listOf(), listOf(), listOf(), similarities, parts, 0)
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         database.rawQuery("""
-            SELECT jlpt_level, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, on_readings, kun_readings, meanings_$locale, meanings_en
+            SELECT jlpt_level, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, on_readings, kun_readings, $localizedMeanings
             FROM $KANJIS_TABLE_NAME k
             LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
@@ -178,11 +181,7 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
             contents.kanji = id.asUnicodeCodePoint()
             contents.on_readings = cursor.getString(5).split('_')
             contents.kun_readings = cursor.getString(6).split('_')
-            val localMeaning = cursor.getString(7)
-            if (localMeaning != "")
-                contents.meanings = localMeaning.split('_')
-            else
-                contents.meanings = cursor.getString(8).split('_')
+            contents.meanings = cursor.getString(7).split('_')
             contents.jlptLevel = cursor.getInt(0)
             item.shortScore = cursor.getDouble(1)
             item.longScore = cursor.getDouble(2)
@@ -223,7 +222,7 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         val item = Item(id, contents, 0.0, 0.0, 0, false)
         var similarityClass = 0
         database.rawQuery("""
-            SELECT item, reading, meanings_$locale, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, meanings_en, kana_alone, expr, jlpt_level, rtk6_index, freq
+            SELECT item, reading, $localizedMeanings, MAX(ifnull(short_score, 0.0)), MAX(ifnull(long_score, 0.0)), ifnull(last_correct, 0), enabled, similarity_class, kana_alone, expr, jlpt_level, rtk6_index, freq
             FROM $WORDS_TABLE_NAME k
             LEFT JOIN $ITEM_SCORES_TABLE_NAME s ON k.id = s.id ${getOnClause(knowledgeType)}
             WHERE k.id = $id
@@ -234,16 +233,12 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
             cursor.moveToFirst()
             contents.word = cursor.getString(0)
             contents.reading = cursor.getString(1)
-            val localMeaning = cursor.getString(2)
-            if (localMeaning != "")
-                contents.meanings = localMeaning.split('_')
-            else
-                contents.meanings = cursor.getString(8).split('_')
-            contents.kanaAlone = cursor.getInt(9) != 0
-            contents.expr = cursor.getString(10)
-            contents.jlptLevel = cursor.getInt(11)
-            contents.rtk6Index = cursor.getInt(12)
-            contents.freq = cursor.getInt(13)
+            contents.meanings = cursor.getString(2).split('_')
+            contents.kanaAlone = cursor.getInt(8) != 0
+            contents.expr = cursor.getString(9)
+            contents.jlptLevel = cursor.getInt(10)
+            contents.rtk6Index = cursor.getInt(11)
+            contents.freq = cursor.getInt(12)
             item.shortScore = cursor.getDouble(3)
             item.longScore = cursor.getDouble(4)
             item.lastAsked = cursor.getLong(5)

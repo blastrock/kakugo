@@ -7,10 +7,12 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.database.sqlite.transaction
+import org.kaqui.LocaleManager
 import java.io.File
 
-class DatabaseUpdater(private val database: SQLiteDatabase) {
+class DatabaseUpdater(private val database: SQLiteDatabase, private val locale: String = "en") {
     private val wordIdCache = HashMap<WordId, Int>()
+    private val remappedWordIds = HashMap<WordId, Int>()
     data class Dump(
             val enabledKanas: List<Int>,
             val enabledKanjis: List<Int>,
@@ -23,11 +25,11 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             val sessions: List<DumpSession>)
 
     data class DumpScore(val id: Int, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
-    data class DumpWordScore(val item: String, val reading: String, val firstMeaningEn: String, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long)
+    data class DumpWordScore(val item: String, val reading: String, val firstMeaningEn: String, val knowledgeType: KnowledgeType, val shortScore: Float, val longScore: Float, val lastCorrect: Long, val entSeq: Int = 0, val hasLocalizedMeaning: Boolean = false)
     data class DumpStatsSnapshot(val itemType: ItemType, val knowledgeType: KnowledgeType, val time: Long, val goodCount: Int, val mehCount: Int, val badCount: Int, val longPartition: String, val longSum: Float)
     data class DumpSession(val itemType: ItemType, val testTypes: String, val startTime: Long, val items: List<DumpSessionItem>)
     data class DumpSessionItem(val testType: TestType, val content: DumpSessionItemContent, val certainty: Certainty, val time: Long)
-    data class WordId(val item: String, val reading: String, val firstMeaningEn: String = "")
+    data class WordId(val item: String, val reading: String, val firstMeaningEn: String = "", val entSeq: Int = 0, val hasLocalizedMeaning: Boolean = false)
     sealed class DumpSessionItemContent {
         data class Normal(val question: Long, val wrong: Long?) : DumpSessionItemContent()
         data class Word(val question: WordId, val wrong: WordId?) : DumpSessionItemContent()
@@ -40,9 +42,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                         + "on_readings TEXT NOT NULL DEFAULT '',"
                         + "kun_readings TEXT NOT NULL DEFAULT '',"
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
-                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
-                        + "meanings_es TEXT NOT NULL DEFAULT '',"
-                        + "meanings_de TEXT NOT NULL DEFAULT '',"
+                        + "meanings_fr TEXT,"
+                        + "meanings_es TEXT,"
+                        + "meanings_de TEXT,"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "rtk_index INTEGER NOT NULL DEFAULT 0,"
                         + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
@@ -100,9 +102,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                         + "item TEXT NOT NULL,"
                         + "reading TEXT NOT NULL DEFAULT '',"
                         + "meanings_en TEXT NOT NULL DEFAULT '',"
-                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
-                        + "meanings_es TEXT NOT NULL DEFAULT '',"
-                        + "meanings_de TEXT NOT NULL DEFAULT '',"
+                        + "meanings_fr TEXT,"
+                        + "meanings_es TEXT,"
+                        + "meanings_de TEXT,"
                         + "kana_alone INTEGER NOT NULL DEFAULT 0,"
                         + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
                         + "rtk_index INTEGER NOT NULL DEFAULT 0,"
@@ -659,6 +661,141 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, snapshots, sessions)
     }
 
+    // Same as dumpUserDataV22 but additionally reads each word's ent_seq and whether it has a
+    // translation in the user's dictionary locale, so restoreUserData can remap the "lump" rows the
+    // v38 word split left behind (see computeRemappedWordIds).
+    private fun dumpUserDataV38(): Dump {
+        val enabledKanas = mutableListOf<Int>()
+        database.query(Database.KANAS_TABLE_NAME, arrayOf("id", "enabled"), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                if (cursor.getInt(1) != 0)
+                    enabledKanas.add(cursor.getInt(0))
+        }
+        val enabledKanjis = mutableListOf<Int>()
+        database.query(Database.KANJIS_TABLE_NAME, arrayOf("id", "enabled"), null, null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                if (cursor.getInt(1) != 0)
+                    enabledKanjis.add(cursor.getInt(0))
+        }
+        val kanjiSelections = mutableMapOf<String, MutableList<Int>>()
+        database.rawQuery("""
+                SELECT ks.name, kis.id_kanji
+                FROM ${Database.KANJIS_SELECTION_TABLE_NAME} ks
+                LEFT JOIN ${Database.KANJIS_ITEM_SELECTION_TABLE_NAME} kis USING(id_selection)
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                kanjiSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(cursor.getInt(1))
+        }
+        val enabledWords = mutableListOf<WordId>()
+        database.rawQuery("""
+                SELECT item, reading, enabled, meanings_en, ent_seq, meanings_$locale
+                FROM ${Database.WORDS_TABLE_NAME}
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                if (cursor.getInt(2) != 0)
+                    enabledWords.add(wordIdFrom(cursor, 0, 1, 3, 4, 5))
+        }
+        val wordSelections = mutableMapOf<String, MutableList<WordId>>()
+        database.rawQuery("""
+                SELECT ws.name, w.item, w.reading, w.meanings_en, w.ent_seq, w.meanings_$locale
+                FROM ${Database.WORDS_SELECTION_TABLE_NAME} ws
+                LEFT JOIN ${Database.WORDS_ITEM_SELECTION_TABLE_NAME} wis USING(id_selection)
+                JOIN ${Database.WORDS_TABLE_NAME} w ON w.id = wis.id_word
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                wordSelections.getOrPut(cursor.getString(0)) { mutableListOf() }.add(
+                        wordIdFrom(cursor, 1, 2, 3, 4, 5))
+        }
+        val scores = mutableListOf<DumpScore>()
+        database.query(Database.ITEM_SCORES_TABLE_NAME, arrayOf("id", "type", "short_score", "long_score", "last_correct"), "id < $WordBaseId", null, null, null, null).use { cursor ->
+            while (cursor.moveToNext())
+                scores.add(DumpScore(cursor.getInt(0), KnowledgeType.fromInt(cursor.getInt(1)), cursor.getFloat(2), cursor.getFloat(3), cursor.getLong(4)))
+        }
+        val wordScores = mutableListOf<DumpWordScore>()
+        database.rawQuery("""
+                SELECT w.item, w.reading, s.type, s.short_score, s.long_score, s.last_correct, w.meanings_en, w.ent_seq, w.meanings_$locale
+                FROM ${Database.ITEM_SCORES_TABLE_NAME} s
+                JOIN ${Database.WORDS_TABLE_NAME} w USING(id)
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                wordScores.add(DumpWordScore(cursor.getString(0), cursor.getString(1), cursor.getString(6).split('_')[0], KnowledgeType.fromInt(cursor.getInt(2)), cursor.getFloat(3), cursor.getFloat(4), cursor.getLong(5),
+                        cursor.getInt(7), !cursor.isNull(8) && cursor.getString(8).isNotEmpty()))
+        }
+        val sessionItems = mutableMapOf<Long, MutableList<DumpSessionItem>>()
+        database.rawQuery("""
+                SELECT si.id_session, si.test_type, si.id_item_question, si.id_item_wrong, si.certainty, si.time
+                FROM ${Database.SESSION_ITEMS_TABLE_NAME} si
+                WHERE id_item_question < $WordBaseId
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                sessionItems.getOrPut(cursor.getLong(0)) { mutableListOf() }.add(DumpSessionItem(
+                        TestType.fromInt(cursor.getInt(1)),
+                        DumpSessionItemContent.Normal(
+                                cursor.getLong(2),
+                                if (cursor.isNull(3)) null
+                                else cursor.getLong(3)),
+                        Certainty.fromInt(cursor.getInt(4)),
+                        cursor.getLong(5)
+                ))
+        }
+        database.rawQuery("""
+                SELECT si.id_session, si.test_type, qw.item, ww.item, si.certainty, si.time, qw.reading, ww.reading, qw.meanings_en, ww.meanings_en, qw.ent_seq, qw.meanings_$locale, ww.ent_seq, ww.meanings_$locale
+                FROM ${Database.SESSION_ITEMS_TABLE_NAME} si
+                JOIN ${Database.WORDS_TABLE_NAME} qw ON qw.id = si.id_item_question
+                LEFT JOIN ${Database.WORDS_TABLE_NAME} ww ON ww.id = si.id_item_wrong
+                WHERE id_item_question >= $WordBaseId
+            """, null).use { cursor ->
+            while (cursor.moveToNext())
+                sessionItems.getOrPut(cursor.getLong(0)) { mutableListOf() }.add(DumpSessionItem(
+                        TestType.fromInt(cursor.getInt(1)),
+                        DumpSessionItemContent.Word(
+                                wordIdFrom(cursor, 2, 6, 8, 10, 11),
+                                if (cursor.isNull(3)) null
+                                else wordIdFrom(cursor, 3, 7, 9, 12, 13)),
+                        Certainty.fromInt(cursor.getInt(4)),
+                        cursor.getLong(5)
+                ))
+        }
+        val sessions = mutableListOf<DumpSession>()
+        database.rawQuery("""
+                SELECT s.id, s.item_type, s.test_types, s.start_time
+                FROM ${Database.SESSIONS_TABLE_NAME} s
+            """, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                val items = sessionItems[cursor.getLong(0)] ?: continue
+                sessions.add(DumpSession(
+                        ItemType.fromInt(cursor.getInt(1)),
+                        cursor.getString(2),
+                        cursor.getLong(3),
+                        items,
+                ))
+            }
+        }
+        val snapshots = mutableListOf<DumpStatsSnapshot>()
+        database.rawQuery("""
+                SELECT s.item_type, s.knowledge_type, s.time, s.good_count, s.meh_count, s.bad_count, s.long_score_partition, s.long_score_sum
+                FROM ${Database.STATS_SNAPSHOT_TABLE_NAME} s
+            """, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                snapshots.add(DumpStatsSnapshot(
+                        ItemType.fromInt(cursor.getInt(0)),
+                        KnowledgeType.fromInt(cursor.getInt(1)),
+                        cursor.getLong(2),
+                        cursor.getInt(3),
+                        cursor.getInt(4),
+                        cursor.getInt(5),
+                        cursor.getString(6),
+                        cursor.getFloat(7),
+                ))
+            }
+        }
+        return Dump(enabledKanas, enabledKanjis, enabledWords, scores, wordScores, kanjiSelections, wordSelections, snapshots, sessions)
+    }
+
+    // v39 is identical to v22 for our purposes; it exists only so the word split repair in
+    // dumpUserDataV38 does not run when re-dumping an already-migrated database.
+    private fun dumpUserDataV39(): Dump = dumpUserDataV22()
+
     fun dumpUserData(): Dump? {
         val oldVersion = database.version
         return when {
@@ -670,12 +807,23 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             oldVersion < 19 -> dumpUserDataV17()
             oldVersion < 21 -> dumpUserDataV19()
             oldVersion < 22 -> dumpUserDataV21()
-            oldVersion <= DATABASE_VERSION -> dumpUserDataV22()
+            oldVersion < 38 -> dumpUserDataV22()
+            // v38 split words into one row per sense; dumpUserDataV38 repairs the mapping for
+            // foreign-locale users. That repair must run only on the v38 -> v39 upgrade.
+            oldVersion < 39 -> dumpUserDataV38()
+            oldVersion <= DATABASE_VERSION -> dumpUserDataV39()
             else -> throw RuntimeException("Unsupported future version $oldVersion")
         }
     }
 
+    private fun wordIdFrom(cursor: Cursor, itemIdx: Int, readingIdx: Int, meaningEnIdx: Int, entSeqIdx: Int, localizedIdx: Int): WordId {
+        val firstMeaningEn = if (cursor.isNull(meaningEnIdx)) "" else cursor.getString(meaningEnIdx).split('_')[0]
+        val hasLocalizedMeaning = !cursor.isNull(localizedIdx) && cursor.getString(localizedIdx).isNotEmpty()
+        return WordId(cursor.getString(itemIdx), cursor.getString(readingIdx), firstMeaningEn, cursor.getInt(entSeqIdx), hasLocalizedMeaning)
+    }
+
     private fun findWordId(wordId: WordId): Int? {
+        remappedWordIds[wordId]?.let { return it }
         wordIdCache[wordId]?.let { return if (it == -1) null else it }
 
         val result = database.rawQuery(
@@ -729,8 +877,65 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
         }
     }
 
+    // v38 split each JMdict entry into one row per sense, but the old bug had dumped all of an
+    // entry's foreign translations onto a single ("lump") row while leaving the others empty. A
+    // non-english user browsing that entry saw the translation only on the lump row and naturally
+    // studied it, even though its meanings_en points at a different sense. Send such a user to the
+    // first row of the same entry (the first, and thus first-translated, sense) instead of letting
+    // findWordId match on meanings_en. Only done when the user referenced a single row of the
+    // entry: if they referenced several they were distinguishing senses on purpose, and remapping
+    // could also collide two references onto one new id.
+    //
+    // Only dumpUserDataV38 carries the ent_seq and localized-meaning flags this needs; every other
+    // dump path leaves them at their defaults (entSeq == 0), so this is a no-op unless the user is
+    // actually upgrading from v38.
+    private fun computeRemappedWordIds(data: Dump) {
+        remappedWordIds.clear()
+        if (locale == "en")
+            return
+
+        // Everything the user's data points at counts as a reference. For a user who never curated
+        // their word list every sense is enabled, so entries look multiply-referenced and nothing is
+        // remapped — which is fine, those users have no meaningful mapping to preserve. A user who
+        // narrowed the 100k default down to a curated list gets the remap even without any scores.
+        val referenced = mutableListOf<WordId>()
+        referenced.addAll(data.enabledWords)
+        for (row in data.wordScores)
+            referenced.add(WordId(row.item, row.reading, row.firstMeaningEn, row.entSeq, row.hasLocalizedMeaning))
+        for (selectionItems in data.wordSelections.values)
+            referenced.addAll(selectionItems)
+        for (session in data.sessions)
+            for (item in session.items)
+                if (item.content is DumpSessionItemContent.Word) {
+                    referenced.add(item.content.question)
+                    item.content.wrong?.let { referenced.add(it) }
+                }
+
+        val bySeries = referenced.groupBy { Triple(it.item, it.reading, it.entSeq) }
+        for ((series, refs) in bySeries) {
+            val (item, reading, entSeq) = series
+            if (entSeq == 0)
+                continue
+            val distinct = refs.toSet()
+            if (distinct.size != 1)
+                continue
+            val ref = distinct.first()
+            if (!ref.hasLocalizedMeaning)
+                continue
+            val targetId = database.rawQuery(
+                    """SELECT id FROM ${Database.WORDS_TABLE_NAME}
+                         WHERE item = ? AND reading = ? AND ent_seq = ?
+                         ORDER BY id LIMIT 1""",
+                    arrayOf(item, reading, entSeq.toString())).use { cursor ->
+                if (cursor.moveToNext()) cursor.getInt(0) else null
+            } ?: continue
+            remappedWordIds[ref] = targetId
+        }
+    }
+
     fun restoreUserData(data: Dump) {
         database.transaction {
+            computeRemappedWordIds(data)
             database.delete(Database.ITEM_SCORES_TABLE_NAME, null, null)
             run {
                 val cv = ContentValues()
@@ -744,8 +949,10 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                 }
             }
             run {
+                // several old rows can resolve to the same new word (remapping, or the meanings_en
+                // fallback in findWordId); item_scores has a (id, type) primary key, so skip dupes
                 for (row in data.wordScores) {
-                    val wordId = findWordId(WordId(row.item, row.reading, row.firstMeaningEn)) ?: continue
+                    val wordId = findWordId(WordId(row.item, row.reading, row.firstMeaningEn, row.entSeq, row.hasLocalizedMeaning)) ?: continue
 
                     val cv = ContentValues()
                     cv.put("id", wordId)
@@ -753,7 +960,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                     cv.put("short_score", row.shortScore)
                     cv.put("long_score", row.longScore)
                     cv.put("last_correct", row.lastCorrect)
-                    database.insertOrThrow(Database.ITEM_SCORES_TABLE_NAME, null, cv)
+                    database.insertWithOnConflict(Database.ITEM_SCORES_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_IGNORE)
                 }
             }
             enableOnly(Database.KANAS_TABLE_NAME, data.enabledKanas)
@@ -781,13 +988,15 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
                     val cv = ContentValues()
                     cv.put("name", selectionName)
                     val selectionId = database.insertOrThrow(Database.WORDS_SELECTION_TABLE_NAME, null, cv)
+                    // as with scores, several old rows can resolve to the same new word; the
+                    // (id_selection, id_word) primary key would reject the duplicate
                     for (item in selectionItems) {
                         val wordId = findWordId(item) ?: continue
 
                         val cv = ContentValues()
                         cv.put("id_selection", selectionId)
                         cv.put("id_word", wordId)
-                        database.insertOrThrow(Database.WORDS_ITEM_SELECTION_TABLE_NAME, null, cv)
+                        database.insertWithOnConflict(Database.WORDS_ITEM_SELECTION_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_IGNORE)
                     }
                 }
             }
@@ -844,7 +1053,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 38
+        const val DATABASE_VERSION = 39
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
@@ -878,7 +1087,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase) {
             }
 
             SQLiteDatabase.openDatabase(dbFile.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
-                DatabaseUpdater(db).doUpgrade(dictDb)
+                DatabaseUpdater(db, LocaleManager.getDictionaryLocale()).doUpgrade(dictDb)
             }
         }
     }

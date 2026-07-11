@@ -2,6 +2,7 @@ package org.kaqui
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.Assert.*
@@ -11,6 +12,8 @@ import org.junit.runner.RunWith
 import org.kaqui.model.Database
 import org.kaqui.model.Database.Companion.KANAS_TABLE_NAME
 import org.kaqui.model.DatabaseUpdater
+import org.kaqui.model.Kanji
+import org.kaqui.model.Word
 import java.io.File
 import java.util.zip.GZIPInputStream
 
@@ -1215,6 +1218,184 @@ class DatabaseUpdaterTest {
         database.version = 32
     }
 
+    // Builds a v38 database: the words table now has one row per sense with an ent_seq column and
+    // no UNIQUE(item, reading). Seeds 彼処 and は as the old (pre-split) dictionary bump stored them,
+    // where all of an entry's foreign translations were lumped onto a single row. Individual scores
+    // and selections are added by each test before migrating.
+    private fun createV38Tables(database: SQLiteDatabase) {
+        createV32Tables(database)
+        database.execSQL("DELETE FROM $ITEM_SCORES_TABLE_NAME WHERE id >= 0x1000000")
+        database.execSQL("DROP TABLE $WORDS_TABLE_NAME")
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS $WORDS_TABLE_NAME ("
+                        + "id INTEGER NOT NULL PRIMARY KEY,"
+                        + "item TEXT NOT NULL,"
+                        + "reading TEXT NOT NULL DEFAULT '',"
+                        + "meanings_en TEXT NOT NULL DEFAULT '',"
+                        + "meanings_fr TEXT NOT NULL DEFAULT '',"
+                        + "meanings_es TEXT NOT NULL DEFAULT '',"
+                        + "meanings_de TEXT NOT NULL DEFAULT '',"
+                        + "kana_alone INTEGER NOT NULL DEFAULT 0,"
+                        + "jlpt_level INTEGER NOT NULL DEFAULT 0,"
+                        + "rtk_index INTEGER NOT NULL DEFAULT 0,"
+                        + "rtk6_index INTEGER NOT NULL DEFAULT 0,"
+                        + "similarity_class INTEGER NOT NULL DEFAULT 0,"
+                        + "ent_seq INTEGER NOT NULL DEFAULT 0,"
+                        + "freq INTEGER NOT NULL DEFAULT 0,"
+                        + "expr TEXT NOT NULL DEFAULT '',"
+                        + "enabled INTEGER NOT NULL DEFAULT 1"
+                        + ")")
+        // 彼処/あそこ: three senses sharing ent_seq 1000320, French only on the last ("that far") row
+        database.execSQL("""
+                INSERT INTO $WORDS_TABLE_NAME (id, item, reading, meanings_en, meanings_fr, ent_seq) VALUES
+                (0x1000100, '彼処', 'あそこ', 'there_over there_that place_yonder_you-know-where', '', 1000320),
+                (0x1000101, '彼処', 'あそこ', 'genitals_private parts_nether regions', '', 1000320),
+                (0x1000102, '彼処', 'あそこ', 'that far_that much_that point', 'là-bas_cet endroit-là_là', 1000320)
+        """)
+        // は/は: two different JMdict entries share the same (item, reading); French only on the
+        // interjection entry (ent_seq 2069620), never on the topic-particle entry (ent_seq 2028920)
+        database.execSQL("""
+                INSERT INTO $WORDS_TABLE_NAME (id, item, reading, meanings_en, meanings_fr, ent_seq) VALUES
+                (0x1000200, 'は', 'は', 'indicates sentence topic_indicates contrast with another option (stated or unstated)_adds emphasis', '', 2028920),
+                (0x1000201, 'は', 'は', 'yes_indeed_well_ha!_what?_huh?_sigh', 'oui_en effet_bien_ha !_quoi ?_hein ?_soupir', 2069620)
+        """)
+        database.version = 38
+    }
+
+    // id in item_scores of the word matching (item, reading, meanings_en) in the migrated database
+    private fun wordId(database: SQLiteDatabase, item: String, reading: String, meaningsEn: String): Int =
+            database.rawQuery("SELECT id FROM $WORDS_TABLE_NAME WHERE item = ? AND reading = ? AND meanings_en = ?", arrayOf(item, reading, meaningsEn)).use { cursor ->
+                assertTrue(cursor.moveToNext())
+                cursor.getInt(0)
+            }
+
+    private fun wordScoreIds(database: SQLiteDatabase): List<Int> =
+            database.rawQuery("SELECT id FROM $ITEM_SCORES_TABLE_NAME WHERE id >= 0x1000000 ORDER BY id", null).use { cursor ->
+                val ids = mutableListOf<Int>()
+                while (cursor.moveToNext())
+                    ids.add(cursor.getInt(0))
+                ids
+            }
+
+    private fun enabledWordIds(database: SQLiteDatabase, item: String, reading: String): List<Int> =
+            database.rawQuery("SELECT id FROM $WORDS_TABLE_NAME WHERE enabled = 1 AND item = ? AND reading = ? ORDER BY id", arrayOf(item, reading)).use { cursor ->
+                val ids = mutableListOf<Int>()
+                while (cursor.moveToNext())
+                    ids.add(cursor.getInt(0))
+                ids
+            }
+
+    @Test
+    fun v38RemapsLoneLumpRowToFirstSense() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV38Tables(db)
+            // a curated user who narrowed 彼処 down to just the French-bearing (lump) sense, and also
+            // has a score on it
+            db.execSQL("UPDATE $WORDS_TABLE_NAME SET enabled = 0 WHERE id != 0x1000102")
+            db.execSQL("INSERT INTO $ITEM_SCORES_TABLE_NAME (id, type, short_score, long_score, last_correct) VALUES (0x1000102, 1, 0.5, 0.4, 10)")
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db, "fr").doUpgrade(dictDb.absolutePath)
+            // both the enabled flag and the score should land on the sense they were reading in
+            // French ("there"), not the sense whose English happened to sit on the lump row
+            val there = wordId(db, "彼処", "あそこ", "there_over there_that place_yonder_you-know-where")
+            assertEquals(listOf(there), enabledWordIds(db, "彼処", "あそこ"))
+            assertEquals(listOf(there), wordScoreIds(db))
+        }
+    }
+
+    @Test
+    fun v38RemapsLoneEnabledLumpWithoutAnyScore() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV38Tables(db)
+            // a curated user who enabled only the lump sense and never took a test
+            db.execSQL("UPDATE $WORDS_TABLE_NAME SET enabled = 0 WHERE id != 0x1000102")
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db, "fr").doUpgrade(dictDb.absolutePath)
+            val there = wordId(db, "彼処", "あそこ", "there_over there_that place_yonder_you-know-where")
+            assertEquals(listOf(there), enabledWordIds(db, "彼処", "あそこ"))
+        }
+    }
+
+    @Test
+    fun v38KeepsMultipleReferencedSensesDistinct() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV38Tables(db)
+            // a curated user who enabled two distinct senses of 彼処 on purpose
+            db.execSQL("UPDATE $WORDS_TABLE_NAME SET enabled = 0 WHERE id NOT IN (0x1000100, 0x1000102)")
+            db.execSQL("INSERT INTO $ITEM_SCORES_TABLE_NAME (id, type, short_score, long_score, last_correct) VALUES (0x1000100, 1, 0.5, 0.4, 10)")
+            db.execSQL("INSERT INTO $ITEM_SCORES_TABLE_NAME (id, type, short_score, long_score, last_correct) VALUES (0x1000102, 1, 0.8, 0.9, 15)")
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db, "fr").doUpgrade(dictDb.absolutePath)
+            // referencing several senses means no remap: each keeps its own meanings_en match
+            val there = wordId(db, "彼処", "あそこ", "there_over there_that place_yonder_you-know-where")
+            val thatFar = wordId(db, "彼処", "あそこ", "that far_that much_that point")
+            assertEquals(listOf(there, thatFar).sorted(), wordScoreIds(db).sorted())
+        }
+    }
+
+    @Test
+    fun v38EnglishLocaleIsUnchanged() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV38Tables(db)
+            db.execSQL("UPDATE $WORDS_TABLE_NAME SET enabled = 0 WHERE id != 0x1000102")
+            db.execSQL("INSERT INTO $ITEM_SCORES_TABLE_NAME (id, type, short_score, long_score, last_correct) VALUES (0x1000102, 1, 0.5, 0.4, 10)")
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db, "en").doUpgrade(dictDb.absolutePath)
+            // an English user is matched purely on meanings_en, so the lump row keeps its own sense
+            val thatFar = wordId(db, "彼処", "あそこ", "that far_that much_that point")
+            assertEquals(listOf(thatFar), enabledWordIds(db, "彼処", "あそこ"))
+            assertEquals(listOf(thatFar), wordScoreIds(db))
+        }
+    }
+
+    @Test
+    fun v39CuratedNonFirstSenseIsNotRemapped() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV38Tables(db)
+            // an already-migrated (v39) user who curated 彼処 down to just its third sense
+            db.execSQL("UPDATE $WORDS_TABLE_NAME SET enabled = 0 WHERE id != 0x1000102")
+            db.version = 39
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db, "fr").doUpgrade(dictDb.absolutePath)
+            // re-dumping an already-split database must not remap: "that far" stays "that far"
+            val thatFar = wordId(db, "彼処", "あそこ", "that far_that much_that point")
+            assertEquals(listOf(thatFar), enabledWordIds(db, "彼処", "あそこ"))
+        }
+    }
+
+    @Test
+    fun v38SurvivesFirstIdFallbackCollision() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV38Tables(db)
+            // two senses whose English no longer matches any new row both fall back to the first
+            // 彼処 row in findWordId; without a dedup guard they would violate the (id, type) PK
+            db.execSQL("""
+                    INSERT INTO $WORDS_TABLE_NAME (id, item, reading, meanings_en, meanings_fr, ent_seq) VALUES
+                    (0x1000103, '彼処', 'あそこ', 'obsolete meaning one', '', 1000320),
+                    (0x1000104, '彼処', 'あそこ', 'obsolete meaning two', '', 1000320)
+            """)
+            db.execSQL("INSERT INTO $ITEM_SCORES_TABLE_NAME (id, type, short_score, long_score, last_correct) VALUES (0x1000103, 1, 0.5, 0.4, 10)")
+            db.execSQL("INSERT INTO $ITEM_SCORES_TABLE_NAME (id, type, short_score, long_score, last_correct) VALUES (0x1000104, 1, 0.8, 0.9, 15)")
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db, "fr").doUpgrade(dictDb.absolutePath)
+            val there = wordId(db, "彼処", "あそこ", "there_over there_that place_yonder_you-know-where")
+            // both collapsed onto the first 彼処 row, kept once, no crash
+            assertEquals(listOf(there), wordScoreIds(db))
+        }
+    }
+
     private fun doChecksV20(database: SQLiteDatabase) {
         database.query(KANJIS_TABLE_NAME, arrayOf("id"), "enabled = 1", null, null, null, null).use { cursor ->
             assertTrue(cursor.moveToNext())
@@ -1511,6 +1692,50 @@ class DatabaseUpdaterTest {
             Database(InstrumentationRegistry.getInstrumentation().context, db).commitAllSessions()
             doChecksV21(db)
             doChecksV22(db)
+        }
+    }
+
+    @Test
+    fun localizedMeaningsFallBackToEnglish() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        val appContext = InstrumentationRegistry.getInstrumentation().context
+        val prefs = PreferenceManager.getDefaultSharedPreferences(appContext)
+        prefs.edit().putString("dictionary_language", "fr").commit()
+        LocaleManager.updateDictionaryLocale(appContext)
+        try {
+            SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+                DatabaseUpdater(db).doUpgrade(dictDb.absolutePath)
+                val database = Database(appContext, db)
+
+                val (wordWithoutFr, wordMeaningsEn) = db.rawQuery("SELECT id, meanings_en FROM $WORDS_TABLE_NAME WHERE meanings_fr IS NULL LIMIT 1", null).use { cursor ->
+                    assertTrue(cursor.moveToNext())
+                    Pair(cursor.getInt(0), cursor.getString(1))
+                }
+                val (wordWithFr, wordMeaningsFr) = db.rawQuery("SELECT id, meanings_fr FROM $WORDS_TABLE_NAME WHERE meanings_fr IS NOT NULL LIMIT 1", null).use { cursor ->
+                    assertTrue(cursor.moveToNext())
+                    Pair(cursor.getInt(0), cursor.getString(1))
+                }
+                val wordView = database.getWordView()
+                assertEquals(wordMeaningsEn.split('_'), (wordView.getItem(wordWithoutFr).contents as Word).meanings)
+                assertEquals(wordMeaningsFr.split('_'), (wordView.getItem(wordWithFr).contents as Word).meanings)
+                assertTrue(wordView.search(wordMeaningsEn.split('_')[0]).contains(wordWithoutFr))
+
+                val (kanjiWithoutFr, kanjiMeaningsEn) = db.rawQuery("SELECT id, meanings_en FROM $KANJIS_TABLE_NAME WHERE meanings_fr IS NULL AND radical = 0 LIMIT 1", null).use { cursor ->
+                    assertTrue(cursor.moveToNext())
+                    Pair(cursor.getInt(0), cursor.getString(1))
+                }
+                val (kanjiWithFr, kanjiMeaningsFr) = db.rawQuery("SELECT id, meanings_fr FROM $KANJIS_TABLE_NAME WHERE meanings_fr IS NOT NULL AND radical = 0 LIMIT 1", null).use { cursor ->
+                    assertTrue(cursor.moveToNext())
+                    Pair(cursor.getInt(0), cursor.getString(1))
+                }
+                val kanjiView = database.getKanjiView()
+                assertEquals(kanjiMeaningsEn.split('_'), (kanjiView.getItem(kanjiWithoutFr).contents as Kanji).meanings)
+                assertEquals(kanjiMeaningsFr.split('_'), (kanjiView.getItem(kanjiWithFr).contents as Kanji).meanings)
+                assertTrue(kanjiView.search(kanjiMeaningsEn.split('_')[0]).contains(kanjiWithoutFr))
+            }
+        } finally {
+            prefs.edit().remove("dictionary_language").commit()
+            LocaleManager.updateDictionaryLocale(appContext)
         }
     }
 
