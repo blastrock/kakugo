@@ -1262,6 +1262,20 @@ class DatabaseUpdaterTest {
         database.version = 38
     }
 
+    private fun createV39Tables(database: SQLiteDatabase) {
+        createV38Tables(database)
+        // A session asking the same kana twice, wrong then right, plus another kana never answered
+        database.execSQL(
+                "INSERT INTO $SESSIONS_TABLE_NAME (id, item_type, test_types, start_time, end_time, item_count, correct_count)"
+                        + "VALUES (7, 1, '1', 1602620658, NULL, NULL, NULL)")
+        database.execSQL(
+                "INSERT INTO $SESSION_ITEMS_TABLE_NAME (id, id_session, test_type, id_item_question, id_item_wrong, certainty, time) VALUES"
+                        + "(3, 7, 1, 100, 101, 0, 1602620658+10),"
+                        + "(4, 7, 1, 100, NULL, 2, 1602620658+20),"
+                        + "(5, 7, 1, 101, NULL, 0, 1602620658+30)")
+        database.version = 39
+    }
+
     // id in item_scores of the word matching (item, reading, meanings_en) in the migrated database
     private fun wordId(database: SQLiteDatabase, item: String, reading: String, meaningsEn: String): Int =
             database.rawQuery("SELECT id FROM $WORDS_TABLE_NAME WHERE item = ? AND reading = ? AND meanings_en = ?", arrayOf(item, reading, meaningsEn)).use { cursor ->
@@ -1515,7 +1529,7 @@ class DatabaseUpdaterTest {
     }
 
     private fun doChecksV22(database: SQLiteDatabase) {
-        database.query(SESSIONS_TABLE_NAME, arrayOf("id", "item_type", "test_types", "start_time", "end_time", "item_count", "correct_count"), null, null, null, null, null).use { cursor ->
+        database.query(SESSIONS_TABLE_NAME, arrayOf("id", "item_type", "test_types", "start_time", "end_time", "item_count", "correct_count", "unique_item_count", "unique_correct_count"), null, null, null, null, null).use { cursor ->
             assertTrue(cursor.moveToNext())
             assertEquals(1, cursor.getInt(1))
             assertEquals("1", cursor.getString(2))
@@ -1523,6 +1537,8 @@ class DatabaseUpdaterTest {
             assertEquals(1602600658+300, cursor.getLong(4))
             assertEquals(1, cursor.getInt(5))
             assertEquals(1, cursor.getInt(6))
+            assertEquals(1, cursor.getInt(7))
+            assertEquals(1, cursor.getInt(8))
             assertTrue(cursor.moveToNext())
             assertEquals(4, cursor.getInt(1))
             assertEquals("13,14", cursor.getString(2))
@@ -1530,6 +1546,8 @@ class DatabaseUpdaterTest {
             assertEquals(1602610658+20, cursor.getLong(4))
             assertEquals(1, cursor.getInt(5))
             assertEquals(0, cursor.getInt(6))
+            assertEquals(1, cursor.getInt(7))
+            assertEquals(0, cursor.getInt(8))
             assertFalse(cursor.moveToNext())
         }
         database.query(SESSION_ITEMS_TABLE_NAME, arrayOf("id", "id_session", "test_type", "id_item_question", "id_item_wrong", "certainty", "time"), "id == 1", null, null, null, null).use { cursor ->
@@ -1692,6 +1710,39 @@ class DatabaseUpdaterTest {
             Database(InstrumentationRegistry.getInstrumentation().context, db).commitAllSessions()
             doChecksV21(db)
             doChecksV22(db)
+        }
+    }
+
+    @Test
+    fun createFromV39() {
+        val newDb = File.createTempFile("testdb", "", context.cacheDir)
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            createV39Tables(db)
+        }
+        SQLiteDatabase.openDatabase(newDb.absolutePath, null, SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY).use { db ->
+            DatabaseUpdater(db).doUpgrade(dictDb.absolutePath)
+            Database(InstrumentationRegistry.getInstrumentation().context, db).commitAllSessions()
+
+            // The word session of the base fixture is dropped by the v38 word split, its item does
+            // not exist anymore
+            db.query(SESSIONS_TABLE_NAME, arrayOf("start_time", "end_time", "item_count", "correct_count", "unique_item_count", "unique_correct_count"), null, null, null, null, "start_time").use { cursor ->
+                assertTrue(cursor.moveToNext())
+                assertEquals(1602600658L, cursor.getLong(0))
+                assertEquals(1602600658L+300, cursor.getLong(1))
+                assertEquals(1, cursor.getInt(2))
+                assertEquals(1, cursor.getInt(3))
+                assertEquals(1, cursor.getInt(4))
+                assertEquals(1, cursor.getInt(5))
+                // Three questions on two items, the one asked twice ends up counted as correct
+                assertTrue(cursor.moveToNext())
+                assertEquals(1602620658L, cursor.getLong(0))
+                assertEquals(1602620658L+30, cursor.getLong(1))
+                assertEquals(3, cursor.getInt(2))
+                assertEquals(1, cursor.getInt(3))
+                assertEquals(2, cursor.getInt(4))
+                assertEquals(1, cursor.getInt(5))
+                assertFalse(cursor.moveToNext())
+            }
         }
     }
 
@@ -1905,7 +1956,7 @@ class DatabaseUpdaterTest {
             }
 
             // Assert sessions (after commitAllSessions)
-            db.query(SESSIONS_TABLE_NAME, arrayOf("item_type", "test_types", "start_time", "end_time", "item_count", "correct_count"), null, null, null, null, "start_time").use { cursor ->
+            db.query(SESSIONS_TABLE_NAME, arrayOf("item_type", "test_types", "start_time", "end_time", "item_count", "correct_count", "unique_item_count", "unique_correct_count"), null, null, null, null, "start_time").use { cursor ->
                 // Session 1: finished kana session
                 assertTrue(cursor.moveToNext())
                 assertEquals(1, cursor.getInt(0))
@@ -1914,6 +1965,8 @@ class DatabaseUpdaterTest {
                 assertEquals(1602600958L, cursor.getLong(3))
                 assertEquals(1, cursor.getInt(4))
                 assertEquals(1, cursor.getInt(5))
+                assertEquals(1, cursor.getInt(6))
+                assertEquals(1, cursor.getInt(7))
                 // Session 2: was unfinished, now committed
                 assertTrue(cursor.moveToNext())
                 assertEquals(4, cursor.getInt(0))
@@ -1922,6 +1975,8 @@ class DatabaseUpdaterTest {
                 assertEquals(1602610678L, cursor.getLong(3))
                 assertEquals(1, cursor.getInt(4))
                 assertEquals(0, cursor.getInt(5))
+                assertEquals(1, cursor.getInt(6))
+                assertEquals(0, cursor.getInt(7))
                 assertFalse(cursor.moveToNext())
             }
 
