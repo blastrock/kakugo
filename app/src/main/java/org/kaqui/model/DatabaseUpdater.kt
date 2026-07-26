@@ -160,7 +160,9 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val locale: 
                         + "start_time INTEGER NOT NULL,"
                         + "end_time INTEGER,"
                         + "item_count INTEGER,"
-                        + "correct_count INTEGER"
+                        + "correct_count INTEGER,"
+                        + "unique_item_count INTEGER,"
+                        + "unique_correct_count INTEGER"
                         + ")")
 
         database.execSQL(
@@ -811,6 +813,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val locale: 
             // v38 split words into one row per sense; dumpUserDataV38 repairs the mapping for
             // foreign-locale users. That repair must run only on the v38 -> v39 upgrade.
             oldVersion < 39 -> dumpUserDataV38()
+            // v40 only added session columns that are recomputed from session_items on restore,
+            // so the v39 dump is still accurate for it.
             oldVersion <= DATABASE_VERSION -> dumpUserDataV39()
             else -> throw RuntimeException("Unsupported future version $oldVersion")
         }
@@ -1053,7 +1057,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val locale: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 39
+        const val DATABASE_VERSION = 40
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {
