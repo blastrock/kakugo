@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
@@ -51,10 +52,12 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.compose.common.vicoTheme
 import com.patrykandpatrick.vico.compose.m2.common.rememberM2VicoTheme
+import kotlinx.coroutines.runBlocking
 import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.model.Database
 import org.kaqui.roundToPreviousDay
+import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import java.text.DateFormat
 import java.util.Calendar
@@ -63,11 +66,19 @@ import kotlin.math.max
 
 private val ChartHeight = 280.dp
 private const val ColumnThickness = 4
+private const val ColumnSpacing = 2
 private const val YLabelCount = 5
 
 // Beyond this many days, date labels are too dense to be readable one per day
 private const val DailyLabelDayLimit = 14
 private const val SparseLabelSpacing = 7
+
+private fun nextDayTimestamp(): Long {
+    val calendar = Calendar.getInstance()
+    calendar.roundToPreviousDay()
+    calendar.roll(Calendar.DAY_OF_MONTH, true)
+    return calendar.timeInMillis / 1000
+}
 
 class StatsActivity : ComponentActivity() {
     companion object {
@@ -108,12 +119,7 @@ fun StatsScreen(
             calendar.timeInMillis / 1000
         }.map { Database.DayStatistics(it.key, it.value.sumOf { it.askedCount }, it.value.sumOf { it.correctCount }) }
 
-        val nextDay = run {
-            val calendar = Calendar.getInstance()
-            calendar.roundToPreviousDay()
-            calendar.roll(Calendar.DAY_OF_MONTH, true)
-            calendar.timeInMillis / 1000
-        }
+        val nextDay = nextDayTimestamp()
 
         val days = dayStats.map { stat ->
             DayStat(
@@ -181,6 +187,13 @@ fun StatsScreen(
     }
 }
 
+private fun CartesianChartModelProducer.Transaction.statsColumns(data: StatsData) {
+    columnModel {
+        series(data.days.map { it.dayOffset }, data.days.map { it.correct })
+        series(data.days.map { it.dayOffset }, data.days.map { it.wrong })
+    }
+}
+
 @Composable
 fun StatsChart(
     data: StatsData,
@@ -192,14 +205,22 @@ fun StatsChart(
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
     LaunchedEffect(data) {
-        modelProducer.runTransaction {
-            columnModel {
-                series(data.days.map { it.dayOffset }, data.days.map { it.correct })
-                series(data.days.map { it.dayOffset }, data.days.map { it.wrong })
-            }
-        }
+        modelProducer.runTransaction { statsColumns(data) }
     }
 
+    StatsChart(modelProducer, data, correctColor, wrongColor, correctLabel, wrongLabel, modifier)
+}
+
+@Composable
+private fun StatsChart(
+    modelProducer: CartesianChartModelProducer,
+    data: StatsData,
+    correctColor: Color,
+    wrongColor: Color,
+    correctLabel: String,
+    wrongLabel: String,
+    modifier: Modifier = Modifier
+) {
     val dateFormatter = remember(data.nextDay) {
         val calendar = Calendar.getInstance()
         val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
@@ -225,6 +246,7 @@ fun StatsChart(
                         rememberLineComponent(Fill(correctColor), ColumnThickness.dp),
                         rememberLineComponent(Fill(wrongColor), ColumnThickness.dp)
                     ),
+                    columnCollectionSpacing = ColumnSpacing.dp,
                     mergeMode = { ColumnCartesianLayer.MergeMode.Stacked }
                 ),
                 startAxis = VerticalAxis.rememberStart(
@@ -285,3 +307,44 @@ data class StatsData(
     val days: List<DayStat>,
     val nextDay: Long
 )
+
+private fun previewStatsData(dayCount: Int) = StatsData(
+    days = (0 until dayCount).map { day ->
+        DayStat(day - dayCount, 12 + day * 7 % 28, day * 5 % 11)
+    },
+    nextDay = nextDayTimestamp()
+)
+
+@Composable
+private fun StatsChartPreview(data: StatsData) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    // Previews don't run effects, so the model has to be built before rendering
+    runBlocking { modelProducer.runTransaction { statsColumns(data) } }
+
+    KakugoTheme {
+        val themeAttributes = LocalThemeAttributes.current
+        StatsChart(
+            modelProducer = modelProducer,
+            data = data,
+            correctColor = themeAttributes.statsItemsGood,
+            wrongColor = themeAttributes.statsItemsBad,
+            correctLabel = stringResource(R.string.stats_correct_answers),
+            wrongLabel = stringResource(R.string.stats_wrong_answers),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ChartHeight)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatsChartShortHistoryPreview() {
+    StatsChartPreview(previewStatsData(10))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatsChartLongHistoryPreview() {
+    StatsChartPreview(previewStatsData(60))
+}
