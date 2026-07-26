@@ -11,7 +11,7 @@ androidx-preference-ktx = "1.2.1"
 androidx-lifecycle-viewmodel-compose = "2.9.4"
 
 # Compose
-androidx-compose = "1.9.4"
+androidx-compose = "1.11.3"
 androidx-compose-material-icons = "1.7.8"
 androidx-activity-compose = "1.11.0"
 
@@ -24,6 +24,7 @@ kotlinx-coroutines-android = "1.10.2"
 # Third-party Libraries
 accompanist = "0.37.3"
 mpandroidchart = "v3.1.0"
+vico = "3.2.3"
 
 # Testing
 junit = "4.13.2"
@@ -58,6 +59,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 # Third-party
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
+vico-compose-m2 = { group = "com.patrykandpatrick.vico", name = "compose-m2", version.ref = "vico" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
