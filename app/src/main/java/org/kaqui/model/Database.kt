@@ -492,23 +492,30 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
                     openSessions.add(cursor.getLong(0))
             }
 
-            data class Session(val id: Long, val totalCount: Int, val correctCount: Int, val endTime: Long)
+            data class Session(val id: Long, val totalCount: Int, val correctCount: Int, val uniqueCount: Int, val uniqueCorrectCount: Int, val endTime: Long)
+
+            // An item counts as correct as soon as one of its questions was answered correctly,
+            // even if it was missed later on, which is what the test screen displays.
+            val correctCondition = "certainty != ${Certainty.DONTKNOW.value} AND id_item_wrong IS NULL"
 
             val sessions = mutableListOf<Session>()
             database.query(
                     SESSION_ITEMS_TABLE_NAME,
-                    arrayOf("id_session, COUNT(*), MAX(time), SUM(CASE WHEN certainty != ${Certainty.DONTKNOW.value} THEN 1 ELSE 0 END)"),
+                    arrayOf("id_session, COUNT(*), MAX(time), SUM(CASE WHEN certainty != ${Certainty.DONTKNOW.value} THEN 1 ELSE 0 END), " +
+                            "COUNT(DISTINCT id_item_question), COUNT(DISTINCT CASE WHEN $correctCondition THEN id_item_question END)"),
                     "id_session IN (${openSessions.joinToString(",")})",
                     null,
                     "id_session", null, null).use { cursor ->
                 while (cursor.moveToNext())
-                    sessions.add(Session(cursor.getLong(0), cursor.getInt(1), cursor.getInt(3), cursor.getLong(2)))
+                    sessions.add(Session(cursor.getLong(0), cursor.getInt(1), cursor.getInt(3), cursor.getInt(4), cursor.getInt(5), cursor.getLong(2)))
             }
 
             for (session in sessions) {
                 val cv = ContentValues()
                 cv.put("item_count", session.totalCount)
                 cv.put("correct_count", session.correctCount)
+                cv.put("unique_item_count", session.uniqueCount)
+                cv.put("unique_correct_count", session.uniqueCorrectCount)
                 cv.put("end_time", session.endTime)
                 database.update(SESSIONS_TABLE_NAME, cv, "id = ?", arrayOf(session.id.toString()))
             }
