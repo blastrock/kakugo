@@ -107,7 +107,6 @@ fun StatsScreen(
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val themeAttributes = LocalThemeAttributes.current
 
     val statsData = remember {
         val rawDayStats = Database.getInstance(context).getAskedItem()
@@ -140,6 +139,20 @@ fun StatsScreen(
         StatsData(days.sortedBy { it.dayOffset }, nextDay)
     }
 
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(statsData) {
+        modelProducer.runTransaction { statsColumns(statsData) }
+    }
+
+    StatsScreen(statsData, modelProducer, onBackClick)
+}
+
+@Composable
+private fun StatsScreen(
+    statsData: StatsData,
+    modelProducer: CartesianChartModelProducer,
+    onBackClick: () -> Unit
+) {
     AppScaffold(
         title = stringResource(R.string.title_stats),
         onBackClick = onBackClick
@@ -159,7 +172,9 @@ fun StatsScreen(
             )
 
             if (statsData.days.isNotEmpty()) {
+                val themeAttributes = LocalThemeAttributes.current
                 StatsChart(
+                    modelProducer = modelProducer,
                     data = statsData,
                     correctColor = themeAttributes.statsItemsGood,
                     wrongColor = themeAttributes.statsItemsBad,
@@ -192,23 +207,6 @@ private fun CartesianChartModelProducer.Transaction.statsColumns(data: StatsData
         series(data.days.map { it.dayOffset }, data.days.map { it.correct })
         series(data.days.map { it.dayOffset }, data.days.map { it.wrong })
     }
-}
-
-@Composable
-fun StatsChart(
-    data: StatsData,
-    correctColor: Color,
-    wrongColor: Color,
-    correctLabel: String,
-    wrongLabel: String,
-    modifier: Modifier = Modifier
-) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(data) {
-        modelProducer.runTransaction { statsColumns(data) }
-    }
-
-    StatsChart(modelProducer, data, correctColor, wrongColor, correctLabel, wrongLabel, modifier)
 }
 
 @Composable
@@ -315,11 +313,16 @@ private fun previewStatsData(dayCount: Int) = StatsData(
     nextDay = nextDayTimestamp()
 )
 
+// Previews don't run effects, so the model has to be built before rendering
+@Composable
+private fun previewModelProducer(data: StatsData) =
+    remember { CartesianChartModelProducer() }.also {
+        runBlocking { it.runTransaction { statsColumns(data) } }
+    }
+
 @Composable
 private fun StatsChartPreview(data: StatsData) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    // Previews don't run effects, so the model has to be built before rendering
-    runBlocking { modelProducer.runTransaction { statsColumns(data) } }
+    val modelProducer = previewModelProducer(data)
 
     KakugoTheme {
         val themeAttributes = LocalThemeAttributes.current
@@ -335,6 +338,23 @@ private fun StatsChartPreview(data: StatsData) {
                 .height(ChartHeight)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatsScreenWithDataPreview() {
+    val data = previewStatsData(30)
+    StatsScreen(data, previewModelProducer(data), onBackClick = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatsScreenNoDataPreview() {
+    StatsScreen(
+        StatsData(days = emptyList(), nextDay = nextDayTimestamp()),
+        remember { CartesianChartModelProducer() },
+        onBackClick = {}
+    )
 }
 
 @Preview(showBackground = true)
