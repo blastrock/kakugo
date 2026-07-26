@@ -1,8 +1,6 @@
 package org.kaqui.stats
 
-import android.content.res.Configuration
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -13,33 +11,46 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.ValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.Zoom
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.LegendItem
+import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
+import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.common.rememberVerticalLegend
+import com.patrykandpatrick.vico.compose.common.vicoTheme
+import com.patrykandpatrick.vico.compose.m2.common.rememberM2VicoTheme
 import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.model.Database
@@ -47,9 +58,16 @@ import org.kaqui.roundToPreviousDay
 import org.kaqui.theme.LocalThemeAttributes
 import java.text.DateFormat
 import java.util.Calendar
-import kotlin.math.min
+import kotlin.math.ceil
+import kotlin.math.max
 
-private const val AppBarOverhead = 100
+private val ChartHeight = 280.dp
+private const val ColumnThickness = 4
+private const val YLabelCount = 5
+
+// Beyond this many days, date labels are too dense to be readable one per day
+private const val DailyLabelDayLimit = 14
+private const val SparseLabelSpacing = 7
 
 class StatsActivity : ComponentActivity() {
     companion object {
@@ -79,26 +97,7 @@ fun StatsScreen(
 ) {
     val context = LocalContext.current
     val themeAttributes = LocalThemeAttributes.current
-    val configuration = LocalConfiguration.current
-    val windowInfo = LocalWindowInfo.current
 
-    val density = LocalDensity.current
-    val screenWidthDp = with(density) { (windowInfo.containerSize.width / this.density).toInt() }
-    val screenHeightDp = with(density) { (windowInfo.containerSize.height / this.density).toInt() }
-
-    // Calculate chart dimensions based on orientation
-    val (chartWidth, chartHeight) = remember(configuration.orientation, screenWidthDp, screenHeightDp) {
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            val height = screenHeightDp - AppBarOverhead
-            val width = min(screenWidthDp, height * 16 / 9)
-            Pair(width.dp, height.dp)
-        } else {
-            val height = min(screenHeightDp - AppBarOverhead, screenWidthDp)
-            Pair(-1.dp, height.dp) // -1 means match parent
-        }
-    }
-
-    // Load data
     val statsData = remember {
         val rawDayStats = Database.getInstance(context).getAskedItem()
 
@@ -116,13 +115,11 @@ fun StatsScreen(
             calendar.timeInMillis / 1000
         }
 
-        val values = dayStats.map { stat ->
-            BarEntry(
-                ((stat.timestamp - nextDay) / 24 / 3600).toFloat(),
-                floatArrayOf(
-                    stat.correctCount.toFloat(),
-                    (stat.askedCount - stat.correctCount).toFloat()
-                )
+        val days = dayStats.map { stat ->
+            DayStat(
+                ((stat.timestamp - nextDay) / 24 / 3600).toInt(),
+                stat.correctCount,
+                stat.askedCount - stat.correctCount
             )
         }.toMutableList()
 
@@ -132,133 +129,159 @@ fun StatsScreen(
             cal.timeInMillis / 1000
         }
         if (rawDayStats.isNotEmpty() && rawDayStats.last().timestamp != today)
-            values.add(BarEntry(((today - nextDay) / 24 / 3600).toFloat(), floatArrayOf(0f, 0f)))
+            days.add(DayStat(((today - nextDay) / 24 / 3600).toInt(), 0, 0))
 
-        StatsData(values, nextDay)
+        StatsData(days.sortedBy { it.dayOffset }, nextDay)
     }
 
     AppScaffold(
         title = stringResource(R.string.title_stats),
         onBackClick = onBackClick
     ) { paddingValues ->
-                Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.stats_items_answered),
+                style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            if (statsData.days.isNotEmpty()) {
+                StatsChart(
+                    data = statsData,
+                    correctColor = themeAttributes.statsItemsGood,
+                    wrongColor = themeAttributes.statsItemsBad,
+                    correctLabel = stringResource(R.string.stats_correct_answers),
+                    wrongLabel = stringResource(R.string.stats_wrong_answers),
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .fillMaxWidth()
+                        .height(ChartHeight)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ChartHeight),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.stats_items_answered),
-                        style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        text = stringResource(R.string.stats_no_data),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body1
                     )
-
-                    if (statsData.values.isNotEmpty()) {
-                        StatsChart(
-                            data = statsData,
-                            chartWidth = chartWidth,
-                            chartHeight = chartHeight,
-                            correctColor = themeAttributes.statsItemsGood.toArgb(),
-                            wrongColor = themeAttributes.statsItemsBad.toArgb(),
-                            textColor = MaterialTheme.colors.onBackground.toArgb(),
-                            correctLabel = stringResource(R.string.stats_correct_answers),
-                            wrongLabel = stringResource(R.string.stats_wrong_answers)
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(chartHeight),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.stats_no_data),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
-                    }
                 }
             }
         }
+    }
+}
 
 @Composable
 fun StatsChart(
     data: StatsData,
-    chartWidth: androidx.compose.ui.unit.Dp,
-    chartHeight: androidx.compose.ui.unit.Dp,
-    correctColor: Int,
-    wrongColor: Int,
-    textColor: Int,
+    correctColor: Color,
+    wrongColor: Color,
     correctLabel: String,
-    wrongLabel: String
+    wrongLabel: String,
+    modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        modifier = Modifier
-            .then(
-                if (chartWidth > 0.dp)
-                    Modifier.width(chartWidth)
-                else
-                    Modifier.fillMaxWidth()
-            )
-            .height(chartHeight)
-            .padding(bottom = 20.dp),
-        factory = { context ->
-            BarChart(context).apply {
-                description.isEnabled = false
-                setDrawValueAboveBar(false)
-                axisRight.isEnabled = false
-                xAxis.position = XAxis.XAxisPosition.BOTTOM
-                setPinchZoom(false)
-                isDoubleTapToZoomEnabled = false
-                setScaleEnabled(false)
-                setDrawBorders(true)
-                isHighlightPerTapEnabled = false
-                isHighlightPerDragEnabled = false
-
-                legend.isEnabled = true
-                legend.orientation = Legend.LegendOrientation.VERTICAL
-                legend.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-                legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
-
-                xAxis.valueFormatter = object : ValueFormatter() {
-                    val calendar = Calendar.getInstance()
-
-                    override fun getAxisLabel(value: Float, axis: AxisBase): String {
-                        calendar.timeInMillis = (value.toLong() * 24 * 3600 + data.nextDay) * 1000
-                        return DateFormat.getDateInstance(DateFormat.SHORT).format(calendar.time)
-                    }
-                }
-                xAxis.granularity = 1f
-                axisLeft.axisMinimum = 0f
-                axisLeft.granularity = 1f
-
-                xAxis.textColor = textColor
-                axisLeft.textColor = textColor
-                legend.textColor = textColor
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(data) {
+        modelProducer.runTransaction {
+            columnModel {
+                series(data.days.map { it.dayOffset }, data.days.map { it.correct })
+                series(data.days.map { it.dayOffset }, data.days.map { it.wrong })
             }
-        },
-        update = { chart ->
-            val dataSet = BarDataSet(data.values, "")
-            dataSet.colors = listOf(correctColor, wrongColor)
-            dataSet.stackLabels = arrayOf(correctLabel, wrongLabel)
-
-            val barData = BarData(dataSet)
-            barData.setDrawValues(false)
-
-            chart.data = barData
-            chart.xAxis.textColor = textColor
-            chart.axisLeft.textColor = textColor
-            chart.legend.textColor = textColor
-            chart.visibility = View.VISIBLE
-            chart.invalidate()
         }
-    )
+    }
+
+    val dateFormatter = remember(data.nextDay) {
+        val calendar = Calendar.getInstance()
+        val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
+        CartesianValueFormatter { _, value, _ ->
+            calendar.timeInMillis = (value.toLong() * 24 * 3600 + data.nextDay) * 1000
+            dateFormat.format(calendar.time)
+        }
+    }
+
+    val labelSpacing =
+        if (data.days.size > DailyLabelDayLimit) SparseLabelSpacing else 1
+    val yStep = remember(data) {
+        val maxTotal = data.days.maxOf { it.correct + it.wrong }
+        max(1.0, ceil(maxTotal.toDouble() / YLabelCount))
+    }
+
+    ProvideVicoTheme(rememberM2VicoTheme()) {
+        val legendLabel = rememberTextComponent(TextStyle(vicoTheme.textColor))
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(Fill(correctColor), ColumnThickness.dp),
+                        rememberLineComponent(Fill(wrongColor), ColumnThickness.dp)
+                    ),
+                    mergeMode = { ColumnCartesianLayer.MergeMode.Stacked }
+                ),
+                startAxis = VerticalAxis.rememberStart(
+                    valueFormatter = remember { CartesianValueFormatter.decimal(decimalCount = 0) },
+                    itemPlacer = remember(yStep) { VerticalAxis.ItemPlacer.step({ yStep }) }
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = dateFormatter,
+                    itemPlacer = remember(labelSpacing) {
+                        // Extreme label padding would inset the line by half a date label to keep
+                        // the first and last labels from being clipped, detaching it from the axis.
+                        // Without it the labels have to be kept away from the edges by hand.
+                        HorizontalAxis.ItemPlacer.aligned(
+                            spacing = { labelSpacing },
+                            offset = { labelSpacing / 2 },
+                            addExtremeLabelPadding = false
+                        )
+                    }
+                ),
+                legend = rememberVerticalLegend(
+                    items = {
+                        add(
+                            LegendItem(
+                                ShapeComponent(Fill(correctColor), CircleShape),
+                                legendLabel,
+                                correctLabel
+                            )
+                        )
+                        add(
+                            LegendItem(
+                                ShapeComponent(Fill(wrongColor), CircleShape),
+                                legendLabel,
+                                wrongLabel
+                            )
+                        )
+                    },
+                    padding = Insets(top = 8.dp)
+                )
+            ),
+            modelProducer = modelProducer,
+            modifier = modifier,
+            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
+            zoomState = rememberVicoZoomState(
+                zoomEnabled = false,
+                initialZoom = Zoom.max(Zoom.Content, Zoom.fixed())
+            )
+        )
+    }
 }
 
+data class DayStat(
+    val dayOffset: Int,
+    val correct: Int,
+    val wrong: Int
+)
+
 data class StatsData(
-    val values: List<BarEntry>,
+    val days: List<DayStat>,
     val nextDay: Long
 )
