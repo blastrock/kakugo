@@ -23,7 +23,6 @@ kotlinx-coroutines-android = "1.10.2"
 
 # Third-party Libraries
 accompanist = "0.37.3"
-mpandroidchart = "v3.1.0"
 vico = "3.2.3"
 
 # Testing
@@ -58,7 +57,6 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 # Third-party
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
-mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
 vico-compose-m2 = { group = "com.patrykandpatrick.vico", name = "compose-m2", version.ref = "vico" }
 
 # Testing
