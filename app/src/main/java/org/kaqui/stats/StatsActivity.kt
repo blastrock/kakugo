@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -108,7 +109,7 @@ fun StatsScreen(
 ) {
     val context = LocalContext.current
 
-    val statsData = remember {
+    val stats = remember {
         val rawDayStats = Database.getInstance(context).getAskedItem()
 
         val dayStats = rawDayStats.groupBy {
@@ -116,41 +117,64 @@ fun StatsScreen(
             calendar.timeInMillis = it.timestamp * 1000
             calendar.roundToPreviousDay()
             calendar.timeInMillis / 1000
-        }.map { Database.DayStatistics(it.key, it.value.sumOf { it.askedCount }, it.value.sumOf { it.correctCount }) }
+        }.map {
+            Database.DayStatistics(
+                it.key,
+                it.value.sumOf { it.askedCount },
+                it.value.sumOf { it.correctCount },
+                it.value.sumOf { it.uniqueAskedCount },
+                it.value.sumOf { it.uniqueCorrectCount }
+            )
+        }
 
         val nextDay = nextDayTimestamp()
-
-        val days = dayStats.map { stat ->
-            DayStat(
-                ((stat.timestamp - nextDay) / 24 / 3600).toInt(),
-                stat.correctCount,
-                stat.askedCount - stat.correctCount
-            )
-        }.toMutableList()
 
         val today = run {
             val cal = Calendar.getInstance()
             cal.roundToPreviousDay()
             cal.timeInMillis / 1000
         }
-        if (rawDayStats.isNotEmpty() && rawDayStats.last().timestamp != today)
-            days.add(DayStat(((today - nextDay) / 24 / 3600).toInt(), 0, 0))
+        val padToday = rawDayStats.isNotEmpty() && rawDayStats.last().timestamp != today
 
-        StatsData(days.sortedBy { it.dayOffset }, nextDay)
+        fun statsData(asked: (Database.DayStatistics) -> Int, correct: (Database.DayStatistics) -> Int): StatsData {
+            val days = dayStats.map { stat ->
+                DayStat(
+                    ((stat.timestamp - nextDay) / 24 / 3600).toInt(),
+                    correct(stat),
+                    asked(stat) - correct(stat)
+                )
+            }.toMutableList()
+
+            if (padToday)
+                days.add(DayStat(((today - nextDay) / 24 / 3600).toInt(), 0, 0))
+
+            return StatsData(days.sortedBy { it.dayOffset }, nextDay)
+        }
+
+        Stats(
+            answers = statsData({ it.askedCount }, { it.correctCount }),
+            uniqueItems = statsData({ it.uniqueAskedCount }, { it.uniqueCorrectCount })
+        )
     }
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(statsData) {
-        modelProducer.runTransaction { statsColumns(statsData) }
+    val answersModelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(stats.answers) {
+        answersModelProducer.runTransaction { statsColumns(stats.answers) }
     }
 
-    StatsScreen(statsData, modelProducer, onBackClick)
+    val uniqueItemsModelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(stats.uniqueItems) {
+        uniqueItemsModelProducer.runTransaction { statsColumns(stats.uniqueItems) }
+    }
+
+    StatsScreen(stats, answersModelProducer, uniqueItemsModelProducer, onBackClick)
 }
 
 @Composable
 private fun StatsScreen(
-    statsData: StatsData,
-    modelProducer: CartesianChartModelProducer,
+    stats: Stats,
+    answersModelProducer: CartesianChartModelProducer,
+    uniqueItemsModelProducer: CartesianChartModelProducer,
     onBackClick: () -> Unit
 ) {
     AppScaffold(
@@ -162,41 +186,69 @@ private fun StatsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            Text(
-                text = stringResource(R.string.stats_items_answered),
-                style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(vertical = 4.dp)
+            StatsSection(
+                title = stringResource(R.string.stats_items_answered),
+                statsData = stats.answers,
+                modelProducer = answersModelProducer,
+                correctLabel = stringResource(R.string.stats_correct_answers),
+                wrongLabel = stringResource(R.string.stats_wrong_answers)
             )
 
-            if (statsData.days.isNotEmpty()) {
-                val themeAttributes = LocalThemeAttributes.current
-                StatsChart(
-                    modelProducer = modelProducer,
-                    data = statsData,
-                    correctColor = themeAttributes.statsItemsGood,
-                    wrongColor = themeAttributes.statsItemsBad,
-                    correctLabel = stringResource(R.string.stats_correct_answers),
-                    wrongLabel = stringResource(R.string.stats_wrong_answers),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(ChartHeight)
+            StatsSection(
+                title = stringResource(R.string.stats_unique_items_answered),
+                statsData = stats.uniqueItems,
+                modelProducer = uniqueItemsModelProducer,
+                correctLabel = stringResource(R.string.stats_correct_items),
+                wrongLabel = stringResource(R.string.stats_wrong_items)
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatsSection(
+    title: String,
+    statsData: StatsData,
+    modelProducer: CartesianChartModelProducer,
+    correctLabel: String,
+    wrongLabel: String
+) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+
+        if (statsData.days.isNotEmpty()) {
+            val themeAttributes = LocalThemeAttributes.current
+            StatsChart(
+                modelProducer = modelProducer,
+                data = statsData,
+                correctColor = themeAttributes.statsItemsGood,
+                wrongColor = themeAttributes.statsItemsBad,
+                correctLabel = correctLabel,
+                wrongLabel = wrongLabel,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ChartHeight)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ChartHeight),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.stats_no_data),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.body1
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(ChartHeight),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.stats_no_data),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body1
-                    )
-                }
             }
         }
     }
@@ -281,7 +333,8 @@ private fun StatsChart(
                             )
                         )
                     },
-                    padding = Insets(top = 8.dp)
+                    padding = Insets(top = 8.dp),
+                    rowSpacing = 4.dp,
                 )
             ),
             modelProducer = modelProducer,
@@ -306,9 +359,21 @@ data class StatsData(
     val nextDay: Long
 )
 
+data class Stats(
+    val answers: StatsData,
+    val uniqueItems: StatsData
+)
+
 private fun previewStatsData(dayCount: Int) = StatsData(
     days = (0 until dayCount).map { day ->
         DayStat(day - dayCount, 12 + day * 7 % 28, day * 5 % 11)
+    },
+    nextDay = nextDayTimestamp()
+)
+
+private fun previewUniqueStatsData(dayCount: Int) = StatsData(
+    days = (0 until dayCount).map { day ->
+        DayStat(day - dayCount, 7 + day * 3 % 15, day * 2 % 7)
     },
     nextDay = nextDayTimestamp()
 )
@@ -321,7 +386,11 @@ private fun previewModelProducer(data: StatsData) =
     }
 
 @Composable
-private fun StatsChartPreview(data: StatsData) {
+private fun StatsChartPreview(
+    data: StatsData,
+    correctLabel: String = stringResource(R.string.stats_correct_answers),
+    wrongLabel: String = stringResource(R.string.stats_wrong_answers)
+) {
     val modelProducer = previewModelProducer(data)
 
     KakugoTheme {
@@ -331,8 +400,8 @@ private fun StatsChartPreview(data: StatsData) {
             data = data,
             correctColor = themeAttributes.statsItemsGood,
             wrongColor = themeAttributes.statsItemsBad,
-            correctLabel = stringResource(R.string.stats_correct_answers),
-            wrongLabel = stringResource(R.string.stats_wrong_answers),
+            correctLabel = correctLabel,
+            wrongLabel = wrongLabel,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(ChartHeight)
@@ -343,15 +412,22 @@ private fun StatsChartPreview(data: StatsData) {
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenWithDataPreview() {
-    val data = previewStatsData(30)
-    StatsScreen(data, previewModelProducer(data), onBackClick = {})
+    val stats = Stats(previewStatsData(30), previewUniqueStatsData(30))
+    StatsScreen(
+        stats,
+        previewModelProducer(stats.answers),
+        previewModelProducer(stats.uniqueItems),
+        onBackClick = {}
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenNoDataPreview() {
+    val empty = StatsData(days = emptyList(), nextDay = nextDayTimestamp())
     StatsScreen(
-        StatsData(days = emptyList(), nextDay = nextDayTimestamp()),
+        Stats(empty, empty),
+        remember { CartesianChartModelProducer() },
         remember { CartesianChartModelProducer() },
         onBackClick = {}
     )

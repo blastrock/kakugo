@@ -175,6 +175,9 @@
     <string name="stats_items_answered">Questions answered</string>
     <string name="stats_correct_answers">Correct answers</string>
     <string name="stats_wrong_answers">Wrong answers</string>
+    <string name="stats_unique_items_answered">Unique items answered</string>
+    <string name="stats_correct_items">Correct items</string>
+    <string name="stats_wrong_items">Wrong items</string>
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[

@@ -78,6 +78,9 @@
     <string name="confirm_test_stop_message">Sind sie sicher, dass sie die Lerneinheit beenden möchten?</string>
     <string name="stats_correct_answers">Richtige Antworten</string>
     <string name="stats_wrong_answers">Falsche Antworten</string>
+    <string name="stats_unique_items_answered">Einzigartige Objekte abgefragt</string>
+    <string name="stats_correct_items">Richtige Objekte</string>
+    <string name="stats_wrong_items">Falsche Objekte</string>
     <string name="show_answers">Antworten anzeigen</string>
     <string name="hide_answers">Antworten verbergen</string>
     <string name="hide_answers_on_summary">Sie müssen auf eine Schaltfläche klicken um die Antworten zu sehen</string>

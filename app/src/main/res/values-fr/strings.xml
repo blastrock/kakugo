@@ -154,6 +154,9 @@
     <string name="stats_items_answered">Réponses données</string>
     <string name="stats_correct_answers">Réponses correctes</string>
     <string name="stats_wrong_answers">Mauvaises réponses</string>
+    <string name="stats_unique_items_answered">Éléments uniques révisés</string>
+    <string name="stats_correct_items">Éléments corrects</string>
+    <string name="stats_wrong_items">Éléments incorrects</string>
 
     <string name="changelog">Changelog</string>
     <string name="search">Recherche</string>
