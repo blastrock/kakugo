@@ -77,6 +77,7 @@ private val ChartHeight = 280.dp
 private const val ColumnThickness = 4
 private const val ColumnSpacing = 2
 private const val YLabelCount = 5
+private const val YStepRounding = 10
 private const val AreaFillAlpha = 0.25f
 
 // Beyond this many days, date labels are too dense to be readable one per day
@@ -406,6 +407,11 @@ private fun fittedLabelSpacing(dayCount: Int) =
 
 private fun yStep(maxValue: Int) = max(1.0, ceil(maxValue.toDouble() / YLabelCount))
 
+// Item counts are large enough that a step of less than ten, or one that is not round, only makes
+// the labels harder to read
+private fun roundedYStep(maxValue: Int) =
+    ceil(yStep(maxValue) / YStepRounding) * YStepRounding
+
 @Composable
 private fun StatsChart(
     modelProducer: CartesianChartModelProducer,
@@ -490,7 +496,7 @@ private fun LearnedItemsChart(
 ) {
     val dateFormatter = rememberDayFormatter(data.nextDay)
     val labelSpacing = fittedLabelSpacing(data.days.size)
-    val yStep = remember(data) { yStep(data.days.maxOf { it.count }) }
+    val yStep = remember(data) { roundedYStep(data.days.maxOf { it.count }) }
 
     ProvideVicoTheme(rememberM2VicoTheme()) {
         CartesianChartHost(
