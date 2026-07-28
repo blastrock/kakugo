@@ -178,6 +178,8 @@
     <string name="stats_unique_items_answered">Unique items answered</string>
     <string name="stats_correct_items">Correct items</string>
     <string name="stats_wrong_items">Wrong items</string>
+    <string name="stats_learned_kanji">Kanji learned</string>
+    <string name="stats_learned_words">Words learned</string>
 
     <string name="changelog">Changelog</string>
     <string name="changelog_contents"><![CDATA[

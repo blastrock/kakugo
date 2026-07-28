@@ -157,6 +157,8 @@
     <string name="stats_unique_items_answered">Éléments uniques révisés</string>
     <string name="stats_correct_items">Éléments corrects</string>
     <string name="stats_wrong_items">Éléments incorrects</string>
+    <string name="stats_learned_kanji">Kanji appris</string>
+    <string name="stats_learned_words">Mots appris</string>
 
     <string name="changelog">Changelog</string>
     <string name="search">Recherche</string>

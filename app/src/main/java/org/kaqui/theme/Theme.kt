@@ -51,6 +51,7 @@ private val LightThemeColors = ThemeAttributes(
     backgroundDontKnow = Color(0xFFE0E0E0),
     statsItemsGood = Color(0xFF9CCC65),
     statsItemsBad = Color(0xFFEF9A9A),
+    statsLearnedItems = Color(0xFF3F51B5),
     drawingDontKnow = Color(0xFFFF7F7F)
 )
 
@@ -71,6 +72,7 @@ private val DarkThemeColors = ThemeAttributes(
     backgroundDontKnow = Color(0xFF282828),
     statsItemsGood = Color(0xFF085300),
     statsItemsBad = Color(0xFF650000),
+    statsLearnedItems = Color(0xFF7986CB),
     drawingDontKnow = Color(0xFFFF7F7F)
 )
 
@@ -92,6 +94,7 @@ data class ThemeAttributes(
     val backgroundDontKnow: Color,
     val statsItemsGood: Color,
     val statsItemsBad: Color,
+    val statsLearnedItems: Color,
     val drawingDontKnow: Color
 ) {
     /**

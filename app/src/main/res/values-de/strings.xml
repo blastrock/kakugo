@@ -81,6 +81,8 @@
     <string name="stats_unique_items_answered">Einzigartige Objekte abgefragt</string>
     <string name="stats_correct_items">Richtige Objekte</string>
     <string name="stats_wrong_items">Falsche Objekte</string>
+    <string name="stats_learned_kanji">Gelernte Kanji</string>
+    <string name="stats_learned_words">Gelernte Wörter</string>
     <string name="show_answers">Antworten anzeigen</string>
     <string name="hide_answers">Antworten verbergen</string>
     <string name="hide_answers_on_summary">Sie müssen auf eine Schaltfläche klicken um die Antworten zu sehen</string>

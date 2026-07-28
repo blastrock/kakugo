@@ -36,10 +36,15 @@ import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
@@ -57,28 +62,86 @@ import kotlinx.coroutines.runBlocking
 import org.kaqui.AppScaffold
 import org.kaqui.R
 import org.kaqui.model.Database
+import org.kaqui.model.ItemType
 import org.kaqui.roundToPreviousDay
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import java.text.DateFormat
 import java.util.Calendar
+import java.util.TimeZone
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 private val ChartHeight = 280.dp
 private const val ColumnThickness = 4
 private const val ColumnSpacing = 2
 private const val YLabelCount = 5
+private const val AreaFillAlpha = 0.25f
 
 // Beyond this many days, date labels are too dense to be readable one per day
 private const val DailyLabelDayLimit = 14
 private const val SparseLabelSpacing = 7
+
+// Charts that start fully zoomed out show their whole history at once, so their labels have to be
+// spread over it instead of using a fixed spacing
+private const val MaxDateLabels = 4
 
 private fun nextDayTimestamp(): Long {
     val calendar = Calendar.getInstance()
     calendar.roundToPreviousDay()
     calendar.roll(Calendar.DAY_OF_MONTH, true)
     return calendar.timeInMillis / 1000
+}
+
+// Snapshot timestamps are UTC midnights while the charts bucket days in local time, so the day has
+// to be carried over as a date rather than as an offset in seconds
+private fun snapshotDayOffset(snapshotTime: Long, nextDay: Long): Int {
+    val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+    utc.timeInMillis = snapshotTime * 1000
+
+    val local = Calendar.getInstance()
+    local.roundToPreviousDay()
+    local.set(utc.get(Calendar.YEAR), utc.get(Calendar.MONTH), utc.get(Calendar.DAY_OF_MONTH))
+
+    return ((local.timeInMillis / 1000 - nextDay) / 24 / 3600).toInt()
+}
+
+// Fills the days between two snapshots by linear interpolation, then holds the last value up to lastDay
+private fun densify(points: List<DayCount>, lastDay: Int): Map<Int, Int> {
+    val counts = mutableMapOf<Int, Int>()
+    for ((previous, next) in points.zipWithNext())
+        for (day in previous.dayOffset until next.dayOffset) {
+            val ratio = (day - previous.dayOffset).toDouble() / (next.dayOffset - previous.dayOffset)
+            counts[day] = (previous.count + (next.count - previous.count) * ratio).roundToInt()
+        }
+    for (day in points.last().dayOffset..lastDay)
+        counts[day] = points.last().count
+    return counts
+}
+
+private fun learnedItemsData(snapshots: List<Database.LongScoreSnapshot>, nextDay: Long, todayOffset: Int): CountData {
+    if (snapshots.isEmpty())
+        return CountData(emptyList(), nextDay)
+
+    // A snapshot is only taken for the knowledge types of the session that is starting, so each
+    // knowledge type has to be completed on its own, otherwise the max of a day on which only one
+    // of them was tested would drop down to that one
+    val perKnowledgeType = snapshots.groupBy { it.knowledgeType }.map { (_, typeSnapshots) ->
+        typeSnapshots
+            .map { DayCount(snapshotDayOffset(it.timestamp, nextDay), it.itemCount) }
+            .associateBy { it.dayOffset }
+            .values.sortedBy { it.dayOffset }
+    }
+
+    val firstDay = perKnowledgeType.minOf { it.first().dayOffset }
+    val lastDay = maxOf(todayOffset, perKnowledgeType.maxOf { it.last().dayOffset })
+
+    val completed = perKnowledgeType.map { densify(it, lastDay) }
+    val days = (firstDay..lastDay).map { day ->
+        DayCount(day, completed.mapNotNull { it[day] }.max())
+    }
+    return CountData(days, nextDay)
 }
 
 class StatsActivity : ComponentActivity() {
@@ -110,7 +173,8 @@ fun StatsScreen(
     val context = LocalContext.current
 
     val stats = remember {
-        val rawDayStats = Database.getInstance(context).getAskedItem()
+        val database = Database.getInstance(context)
+        val rawDayStats = database.getAskedItem()
 
         val dayStats = rawDayStats.groupBy {
             val calendar = Calendar.getInstance()
@@ -151,30 +215,45 @@ fun StatsScreen(
             return StatsData(days.sortedBy { it.dayOffset }, nextDay)
         }
 
+        val todayOffset = ((today - nextDay) / 24 / 3600).toInt()
+
         Stats(
             answers = statsData({ it.askedCount }, { it.correctCount }),
-            uniqueItems = statsData({ it.uniqueAskedCount }, { it.uniqueCorrectCount })
+            uniqueItems = statsData({ it.uniqueAskedCount }, { it.uniqueCorrectCount }),
+            learnedKanji = learnedItemsData(database.getLongScoreSnapshots(ItemType.Kanji), nextDay, todayOffset),
+            learnedWords = learnedItemsData(database.getLongScoreSnapshots(ItemType.Word), nextDay, todayOffset)
         )
     }
 
-    val answersModelProducer = remember { CartesianChartModelProducer() }
+    val models = remember {
+        StatsModels(
+            CartesianChartModelProducer(),
+            CartesianChartModelProducer(),
+            CartesianChartModelProducer(),
+            CartesianChartModelProducer()
+        )
+    }
+
     LaunchedEffect(stats.answers) {
-        answersModelProducer.runTransaction { statsColumns(stats.answers) }
+        models.answers.runTransaction { statsColumns(stats.answers) }
     }
-
-    val uniqueItemsModelProducer = remember { CartesianChartModelProducer() }
     LaunchedEffect(stats.uniqueItems) {
-        uniqueItemsModelProducer.runTransaction { statsColumns(stats.uniqueItems) }
+        models.uniqueItems.runTransaction { statsColumns(stats.uniqueItems) }
+    }
+    LaunchedEffect(stats.learnedKanji) {
+        models.learnedKanji.runTransaction { learnedItemsLine(stats.learnedKanji) }
+    }
+    LaunchedEffect(stats.learnedWords) {
+        models.learnedWords.runTransaction { learnedItemsLine(stats.learnedWords) }
     }
 
-    StatsScreen(stats, answersModelProducer, uniqueItemsModelProducer, onBackClick)
+    StatsScreen(stats, models, onBackClick)
 }
 
 @Composable
 private fun StatsScreen(
     stats: Stats,
-    answersModelProducer: CartesianChartModelProducer,
-    uniqueItemsModelProducer: CartesianChartModelProducer,
+    models: StatsModels,
     onBackClick: () -> Unit
 ) {
     AppScaffold(
@@ -190,32 +269,84 @@ private fun StatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            StatsSection(
+            AnswersSection(
                 title = stringResource(R.string.stats_items_answered),
                 statsData = stats.answers,
-                modelProducer = answersModelProducer,
+                modelProducer = models.answers,
                 correctLabel = stringResource(R.string.stats_correct_answers),
                 wrongLabel = stringResource(R.string.stats_wrong_answers)
             )
 
-            StatsSection(
+            AnswersSection(
                 title = stringResource(R.string.stats_unique_items_answered),
                 statsData = stats.uniqueItems,
-                modelProducer = uniqueItemsModelProducer,
+                modelProducer = models.uniqueItems,
                 correctLabel = stringResource(R.string.stats_correct_items),
                 wrongLabel = stringResource(R.string.stats_wrong_items)
+            )
+
+            LearnedItemsSection(
+                title = stringResource(R.string.stats_learned_kanji),
+                countData = stats.learnedKanji,
+                modelProducer = models.learnedKanji
+            )
+
+            LearnedItemsSection(
+                title = stringResource(R.string.stats_learned_words),
+                countData = stats.learnedWords,
+                modelProducer = models.learnedWords
             )
         }
     }
 }
 
 @Composable
-private fun StatsSection(
+private fun AnswersSection(
     title: String,
     statsData: StatsData,
     modelProducer: CartesianChartModelProducer,
     correctLabel: String,
     wrongLabel: String
+) {
+    StatsSection(title, statsData.days.isNotEmpty()) {
+        val themeAttributes = LocalThemeAttributes.current
+        StatsChart(
+            modelProducer = modelProducer,
+            data = statsData,
+            correctColor = themeAttributes.statsItemsGood,
+            wrongColor = themeAttributes.statsItemsBad,
+            correctLabel = correctLabel,
+            wrongLabel = wrongLabel,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ChartHeight)
+        )
+    }
+}
+
+@Composable
+private fun LearnedItemsSection(
+    title: String,
+    countData: CountData,
+    modelProducer: CartesianChartModelProducer
+) {
+    StatsSection(title, countData.days.isNotEmpty()) {
+        LearnedItemsChart(
+            modelProducer = modelProducer,
+            data = countData,
+            color = LocalThemeAttributes.current.statsLearnedItems,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ChartHeight)
+        )
+    }
+}
+
+@Composable
+private fun StatsSection(
+    title: String,
+    hasData: Boolean,
+    chart: @Composable () -> Unit
 ) {
     Column {
         Text(
@@ -224,19 +355,8 @@ private fun StatsSection(
             modifier = Modifier.padding(bottom = 8.dp),
         )
 
-        if (statsData.days.isNotEmpty()) {
-            val themeAttributes = LocalThemeAttributes.current
-            StatsChart(
-                modelProducer = modelProducer,
-                data = statsData,
-                correctColor = themeAttributes.statsItemsGood,
-                wrongColor = themeAttributes.statsItemsBad,
-                correctLabel = correctLabel,
-                wrongLabel = wrongLabel,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ChartHeight)
-            )
+        if (hasData) {
+            chart()
         } else {
             Box(
                 modifier = Modifier
@@ -261,6 +381,31 @@ private fun CartesianChartModelProducer.Transaction.statsColumns(data: StatsData
     }
 }
 
+private fun CartesianChartModelProducer.Transaction.learnedItemsLine(data: CountData) {
+    lineModel {
+        series(data.days.map { it.dayOffset }, data.days.map { it.count })
+    }
+}
+
+@Composable
+private fun rememberDayFormatter(nextDay: Long) = remember(nextDay) {
+    val calendar = Calendar.getInstance()
+    val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
+    CartesianValueFormatter { _, value, _ ->
+        calendar.timeInMillis = (value.toLong() * 24 * 3600 + nextDay) * 1000
+        dateFormat.format(calendar.time)
+    }
+}
+
+private fun labelSpacing(dayCount: Int) =
+    if (dayCount > DailyLabelDayLimit) SparseLabelSpacing else 1
+
+// Kept at 2 at the least so that the labels can be offset by half a spacing, see LearnedItemsChart
+private fun fittedLabelSpacing(dayCount: Int) =
+    max(2, ceil(dayCount.toDouble() / MaxDateLabels).toInt())
+
+private fun yStep(maxValue: Int) = max(1.0, ceil(maxValue.toDouble() / YLabelCount))
+
 @Composable
 private fun StatsChart(
     modelProducer: CartesianChartModelProducer,
@@ -271,21 +416,9 @@ private fun StatsChart(
     wrongLabel: String,
     modifier: Modifier = Modifier
 ) {
-    val dateFormatter = remember(data.nextDay) {
-        val calendar = Calendar.getInstance()
-        val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
-        CartesianValueFormatter { _, value, _ ->
-            calendar.timeInMillis = (value.toLong() * 24 * 3600 + data.nextDay) * 1000
-            dateFormat.format(calendar.time)
-        }
-    }
-
-    val labelSpacing =
-        if (data.days.size > DailyLabelDayLimit) SparseLabelSpacing else 1
-    val yStep = remember(data) {
-        val maxTotal = data.days.maxOf { it.correct + it.wrong }
-        max(1.0, ceil(maxTotal.toDouble() / YLabelCount))
-    }
+    val dateFormatter = rememberDayFormatter(data.nextDay)
+    val labelSpacing = labelSpacing(data.days.size)
+    val yStep = remember(data) { yStep(data.days.maxOf { it.correct + it.wrong }) }
 
     ProvideVicoTheme(rememberM2VicoTheme()) {
         val legendLabel = rememberTextComponent(TextStyle(vicoTheme.textColor))
@@ -348,6 +481,59 @@ private fun StatsChart(
     }
 }
 
+@Composable
+private fun LearnedItemsChart(
+    modelProducer: CartesianChartModelProducer,
+    data: CountData,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    val dateFormatter = rememberDayFormatter(data.nextDay)
+    val labelSpacing = fittedLabelSpacing(data.days.size)
+    val yStep = remember(data) { yStep(data.days.maxOf { it.count }) }
+
+    ProvideVicoTheme(rememberM2VicoTheme()) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(
+                        LineCartesianLayer.rememberLine(
+                            fill = LineCartesianLayer.LineFill.single(Fill(color)),
+                            areaFill = remember(color) {
+                                LineCartesianLayer.AreaFill.single(Fill(color.copy(alpha = AreaFillAlpha)))
+                            }
+                        )
+                    ),
+                    rangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0) }
+                ),
+                startAxis = VerticalAxis.rememberStart(
+                    valueFormatter = remember { CartesianValueFormatter.decimal(decimalCount = 0) },
+                    itemPlacer = remember(yStep) { VerticalAxis.ItemPlacer.step({ yStep }) }
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = dateFormatter,
+                    itemPlacer = remember(labelSpacing) {
+                        // Extreme label padding would inset the line by half a date label to keep
+                        // the first and last labels from being clipped, detaching it from the axis.
+                        // Without it the labels have to be kept away from the edges by hand.
+                        HorizontalAxis.ItemPlacer.aligned(
+                            spacing = { labelSpacing },
+                            offset = { labelSpacing / 2 },
+                            addExtremeLabelPadding = false
+                        )
+                    }
+                )
+            ),
+            modelProducer = modelProducer,
+            modifier = modifier,
+            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
+            // Zoom.Content shows the whole history at once, and is also the default minimum zoom,
+            // so the chart starts fully zoomed out and can only be zoomed in from there
+            zoomState = rememberVicoZoomState(initialZoom = Zoom.Content)
+        )
+    }
+}
+
 data class DayStat(
     val dayOffset: Int,
     val correct: Int,
@@ -359,9 +545,28 @@ data class StatsData(
     val nextDay: Long
 )
 
+data class DayCount(
+    val dayOffset: Int,
+    val count: Int
+)
+
+data class CountData(
+    val days: List<DayCount>,
+    val nextDay: Long
+)
+
 data class Stats(
     val answers: StatsData,
-    val uniqueItems: StatsData
+    val uniqueItems: StatsData,
+    val learnedKanji: CountData,
+    val learnedWords: CountData
+)
+
+private data class StatsModels(
+    val answers: CartesianChartModelProducer,
+    val uniqueItems: CartesianChartModelProducer,
+    val learnedKanji: CartesianChartModelProducer,
+    val learnedWords: CartesianChartModelProducer
 )
 
 private fun previewStatsData(dayCount: Int) = StatsData(
@@ -378,12 +583,33 @@ private fun previewUniqueStatsData(dayCount: Int) = StatsData(
     nextDay = nextDayTimestamp()
 )
 
+private fun previewCountData(dayCount: Int, dailyGrowth: Int) = CountData(
+    days = (0 until dayCount).map { day ->
+        DayCount(day - dayCount, day * dailyGrowth + day % 5)
+    },
+    nextDay = nextDayTimestamp()
+)
+
 // Previews don't run effects, so the model has to be built before rendering
 @Composable
 private fun previewModelProducer(data: StatsData) =
     remember { CartesianChartModelProducer() }.also {
         runBlocking { it.runTransaction { statsColumns(data) } }
     }
+
+@Composable
+private fun previewModelProducer(data: CountData) =
+    remember { CartesianChartModelProducer() }.also {
+        runBlocking { it.runTransaction { learnedItemsLine(data) } }
+    }
+
+@Composable
+private fun previewStatsModels(stats: Stats) = StatsModels(
+    previewModelProducer(stats.answers),
+    previewModelProducer(stats.uniqueItems),
+    previewModelProducer(stats.learnedKanji),
+    previewModelProducer(stats.learnedWords)
+)
 
 @Composable
 private fun StatsChartPreview(
@@ -409,28 +635,48 @@ private fun StatsChartPreview(
     }
 }
 
+@Composable
+private fun LearnedItemsChartPreview(data: CountData) {
+    val modelProducer = previewModelProducer(data)
+
+    KakugoTheme {
+        LearnedItemsChart(
+            modelProducer = modelProducer,
+            data = data,
+            color = LocalThemeAttributes.current.statsLearnedItems,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ChartHeight)
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenWithDataPreview() {
-    val stats = Stats(previewStatsData(30), previewUniqueStatsData(30))
-    StatsScreen(
-        stats,
-        previewModelProducer(stats.answers),
-        previewModelProducer(stats.uniqueItems),
-        onBackClick = {}
+    val stats = Stats(
+        previewStatsData(30),
+        previewUniqueStatsData(30),
+        previewCountData(30, 8),
+        previewCountData(30, 3)
     )
+    StatsScreen(stats, previewStatsModels(stats), onBackClick = {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun StatsScreenNoDataPreview() {
     val empty = StatsData(days = emptyList(), nextDay = nextDayTimestamp())
-    StatsScreen(
-        Stats(empty, empty),
-        remember { CartesianChartModelProducer() },
-        remember { CartesianChartModelProducer() },
-        onBackClick = {}
-    )
+    val emptyCounts = CountData(days = emptyList(), nextDay = nextDayTimestamp())
+    val models = remember {
+        StatsModels(
+            CartesianChartModelProducer(),
+            CartesianChartModelProducer(),
+            CartesianChartModelProducer(),
+            CartesianChartModelProducer()
+        )
+    }
+    StatsScreen(Stats(empty, empty, emptyCounts, emptyCounts), models, onBackClick = {})
 }
 
 @Preview(showBackground = true)
@@ -443,4 +689,16 @@ fun StatsChartShortHistoryPreview() {
 @Composable
 fun StatsChartLongHistoryPreview() {
     StatsChartPreview(previewStatsData(60))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LearnedItemsChartShortHistoryPreview() {
+    LearnedItemsChartPreview(previewCountData(10, 8))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LearnedItemsChartLongHistoryPreview() {
+    LearnedItemsChartPreview(previewCountData(60, 8))
 }

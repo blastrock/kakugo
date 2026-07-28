@@ -535,6 +535,23 @@ class Database constructor(context: Context, val database: SQLiteDatabase) {
         return stats
     }
 
+    data class LongScoreSnapshot(val timestamp: Long, val knowledgeType: KnowledgeType, val itemCount: Int)
+
+    // Snapshots only contain items whose long score is above 0, so summing all the partition
+    // buckets gives the number of items that have entered long term memory.
+    fun getLongScoreSnapshots(itemType: ItemType): List<LongScoreSnapshot> {
+        val snapshots = mutableListOf<LongScoreSnapshot>()
+        database.query(STATS_SNAPSHOT_TABLE_NAME, arrayOf("time", "knowledge_type", "long_score_partition"),
+                "item_type = ?", arrayOf(itemType.value.toString()), null, null, "time").use { cursor ->
+            while (cursor.moveToNext())
+                snapshots.add(LongScoreSnapshot(
+                        cursor.getLong(0),
+                        KnowledgeType.fromInt(cursor.getInt(1)),
+                        cursor.getString(2).split(",").sumOf { it.toInt() }))
+        }
+        return snapshots
+    }
+
     fun getMaxFreq(whereCondition: String): Int {
         database.rawQuery("SELECT MAX(freq) FROM $WORDS_TABLE_NAME WHERE $whereCondition", null).use { cursor ->
             return if (cursor.moveToNext()) cursor.getInt(0) else 0
