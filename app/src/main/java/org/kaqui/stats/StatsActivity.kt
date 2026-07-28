@@ -270,6 +270,18 @@ private fun StatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
+            LearnedItemsSection(
+                title = stringResource(R.string.stats_learned_kanji),
+                countData = stats.learnedKanji,
+                modelProducer = models.learnedKanji
+            )
+
+            LearnedItemsSection(
+                title = stringResource(R.string.stats_learned_words),
+                countData = stats.learnedWords,
+                modelProducer = models.learnedWords
+            )
+
             AnswersSection(
                 title = stringResource(R.string.stats_items_answered),
                 statsData = stats.answers,
@@ -284,18 +296,6 @@ private fun StatsScreen(
                 modelProducer = models.uniqueItems,
                 correctLabel = stringResource(R.string.stats_correct_items),
                 wrongLabel = stringResource(R.string.stats_wrong_items)
-            )
-
-            LearnedItemsSection(
-                title = stringResource(R.string.stats_learned_kanji),
-                countData = stats.learnedKanji,
-                modelProducer = models.learnedKanji
-            )
-
-            LearnedItemsSection(
-                title = stringResource(R.string.stats_learned_words),
-                countData = stats.learnedWords,
-                modelProducer = models.learnedWords
             )
         }
     }
