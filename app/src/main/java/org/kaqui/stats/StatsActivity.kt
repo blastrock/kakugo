@@ -81,8 +81,8 @@ private const val YStepRounding = 10
 private const val AreaFillAlpha = 0.25f
 
 // Beyond this many days, date labels are too dense to be readable one per day
-private const val DailyLabelDayLimit = 14
-private const val SparseLabelSpacing = 7
+private const val DailyLabelDayLimit = 4
+private const val SparseLabelSpacing = 14
 
 // Charts that start fully zoomed out show their whole history at once, so their labels have to be
 // spread over it instead of using a fixed spacing
@@ -399,7 +399,7 @@ private fun rememberDayFormatter(nextDay: Long) = remember(nextDay) {
 }
 
 private fun labelSpacing(dayCount: Int) =
-    if (dayCount > DailyLabelDayLimit) SparseLabelSpacing else 1
+    if (dayCount > DailyLabelDayLimit) SparseLabelSpacing else DailyLabelDayLimit
 
 // Kept at 2 at the least so that the labels can be offset by half a spacing, see LearnedItemsChart
 private fun fittedLabelSpacing(dayCount: Int) =
