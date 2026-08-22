@@ -309,6 +309,14 @@ class TestViewModel : ViewModel() {
         }
     }
 
+    fun restoreFragmentRefreshCounter(counter: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                forceFragmentRefresh = counter
+            )
+        }
+    }
+
     fun setFragmentClass(testFragment: Class<out Fragment>) {
         _uiState.update { currentState ->
             currentState.copy(
@@ -373,6 +381,7 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
             nextQuestion()
         } else {
             testEngine.loadState(savedInstanceState)
+            viewModel.restoreFragmentRefreshCounter(savedInstanceState.getInt("forceFragmentRefresh"))
             localTestType = testEngine.testType
             refreshFragment()
         }
@@ -422,6 +431,15 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 
     override fun onSaveInstanceState(outState: Bundle) {
         testEngine.saveState(outState)
+        // AndroidFragment uses the compose composite key hash as the id of the container it adds
+        // the fragment to, so the key() wrapping it makes this counter part of that id. The
+        // counter lives in the view model and would restart from zero after a process death,
+        // while the fragment manager restores from the bundle the fragments of the previous
+        // process under the ids they had there. The composition would then adopt one of those
+        // leftover fragments instead of creating a new one, and it can still be displaying a
+        // question the engine has long left behind, which gets answered in place of the current
+        // one. Saving the counter keeps the ids unique across processes.
+        outState.putInt("forceFragmentRefresh", viewModel.uiState.value.forceFragmentRefresh)
         super.onSaveInstanceState(outState)
     }
 
