@@ -50,6 +50,9 @@
         <activity
             android:name=".testactivities.TestActivity"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".testactivities.NewTestActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".itemdetails.WordDisplayActivity" />
         <activity android:name=".itemdetails.KanjiDisplayActivity" />
         <activity android:name=".settings.SavedSelectionsActivity" />

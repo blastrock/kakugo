@@ -132,9 +132,17 @@ data class HistoryState(
     val lastProbabilityData: TestEngine.DebugData? = null,
 )
 
+data class TestQuestion(
+    val testType: TestType,
+    val item: Item,
+    val answers: List<Item>,
+    val debugData: TestEngine.DebugData?,
+)
+
 data class TestActivityUiState(
     val fragment: Class<out Fragment>? = null,
     val forceFragmentRefresh: Int = 0,
+    val question: TestQuestion? = null,
     val correctCount: Int = 0,
     val questionCount: Int = 0,
     val uniqueCorrectCount: Int = 0,
@@ -313,6 +321,19 @@ class TestViewModel : ViewModel() {
         _uiState.update { currentState ->
             currentState.copy(
                 forceFragmentRefresh = counter
+            )
+        }
+    }
+
+    fun setQuestion(engine: TestEngine) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                question = TestQuestion(
+                    engine.testType,
+                    engine.currentQuestion,
+                    engine.currentAnswers,
+                    engine.currentDebugData,
+                )
             )
         }
     }

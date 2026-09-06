@@ -90,6 +90,7 @@ import org.kaqui.model.TestType
 import org.kaqui.model.Word
 import org.kaqui.model.description
 import org.kaqui.model.text
+import org.kaqui.testactivities.NewTestActivity
 import org.kaqui.testactivities.TestActivity
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
@@ -282,7 +283,7 @@ fun startTest(activity: Context, types: List<TestType>) {
                     sharedPrefs.edit(true) {
                         putStringSet("custom_test_types", selected.map { it.name }.toSet())
                     }
-                    activity.startActivity<TestActivity>("test_types" to selected)
+                    launchTest(activity, selected)
                 }
             }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
@@ -295,7 +296,31 @@ fun startTest(activity: Context, type: TestType) {
         Toast.makeText(activity, R.string.enable_a_few_items, Toast.LENGTH_LONG).show()
         return
     }
-    activity.startActivity<TestActivity>("test_types" to listOf(type))
+    launchTest(activity, listOf(type))
+}
+
+// Test types whose screen has been migrated off fragments. Only they can run in NewTestActivity,
+// and only alone, because the engine picks a new test type out of the list for every question.
+private val COMPOSE_TEST_TYPES = setOf(
+    TestType.WORD_TO_READING,
+    TestType.WORD_TO_MEANING,
+    TestType.KANJI_TO_READING,
+    TestType.KANJI_TO_MEANING,
+    TestType.READING_TO_WORD,
+    TestType.MEANING_TO_WORD,
+    TestType.READING_TO_KANJI,
+    TestType.MEANING_TO_KANJI,
+    TestType.HIRAGANA_TO_ROMAJI,
+    TestType.ROMAJI_TO_HIRAGANA,
+    TestType.KATAKANA_TO_ROMAJI,
+    TestType.ROMAJI_TO_KATAKANA,
+)
+
+private fun launchTest(activity: Context, types: List<TestType>) {
+    if (types.size == 1 && types[0] in COMPOSE_TEST_TYPES)
+        activity.startActivity<NewTestActivity>("test_types" to ArrayList(types))
+    else
+        activity.startActivity<TestActivity>("test_types" to ArrayList(types))
 }
 
 @ColorInt
