@@ -395,11 +395,6 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 
             TestScreen(
                 title = uiState.title,
-                testFragment = uiState.fragment,
-                forceFragmentRefresh = uiState.forceFragmentRefresh,
-                onFragmentUpdated = { fragment ->
-                    testFragment = fragment as TestFragment
-                },
                 stats = uiState.stats,
                 correctCount = uiState.correctCount,
                 questionCount = uiState.questionCount,
@@ -412,7 +407,26 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
                 onItemClick = this::openItemInDictionary,
                 onBackClick = { confirmActivityClose() },
                 onSwapLastAnswer = { viewModel.swapLastAnswer() },
-            )
+            ) {
+                val fragmentClass = uiState.fragment
+                if (fragmentClass != null) {
+                    key(uiState.forceFragmentRefresh) {
+                        AndroidFragment(
+                            fragmentClass,
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            onUpdate = { fragment ->
+                                testFragment = fragment as TestFragment
+                            },
+                        )
+                    }
+                } else {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
+            }
         }
     }
 
@@ -490,9 +504,6 @@ class TestActivity : FragmentActivity(), TestFragmentHolder {
 @Composable
 fun TestScreen(
     title: String,
-    testFragment: Class<out Fragment>?,
-    forceFragmentRefresh: Int,
-    onFragmentUpdated: (Fragment) -> Unit,
     stats: LearningDbView.Stats,
     correctCount: Int,
     questionCount: Int,
@@ -505,6 +516,7 @@ fun TestScreen(
     onItemClick: (Item) -> Unit,
     onBackClick: () -> Unit,
     onSwapLastAnswer: () -> Unit = {},
+    content: @Composable () -> Unit,
 ) {
     val themeAttrs = LocalThemeAttributes.current
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -622,21 +634,7 @@ fun TestScreen(
                             .weight(1f),
                     )
                     {
-                        if (testFragment != null) {
-                            key(forceFragmentRefresh) {
-                                AndroidFragment(
-                                    testFragment,
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    onUpdate = onFragmentUpdated,
-                                )
-                            }
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                            )
-                        }
+                        content()
                     }
 
                     LastItemRow(
@@ -844,9 +842,6 @@ fun TestScreenPreviewCollapsed() {
     KakugoTheme {
         TestScreen(
             title = "Test",
-            testFragment = null,
-            forceFragmentRefresh = 0,
-            onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
             uniqueCorrectCount = 8,
@@ -863,7 +858,7 @@ fun TestScreenPreviewCollapsed() {
                 bad = 2,
                 disabled = 0
             ),
-        )
+        ) {}
     }
 }
 
@@ -923,9 +918,6 @@ fun TestScreenPreviewWrong() {
     KakugoTheme {
         TestScreen(
             title = "Test",
-            testFragment = null,
-            forceFragmentRefresh = 0,
-            onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
             uniqueCorrectCount = 8,
@@ -942,7 +934,7 @@ fun TestScreenPreviewWrong() {
                 bad = 2,
                 disabled = 0
             ),
-        )
+        ) {}
     }
 }
 
@@ -1001,9 +993,6 @@ fun TestScreenPreviewLongText() {
     KakugoTheme {
         TestScreen(
             title = "Test",
-            testFragment = null,
-            forceFragmentRefresh = 0,
-            onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
             uniqueCorrectCount = 8,
@@ -1020,7 +1009,7 @@ fun TestScreenPreviewLongText() {
                 bad = 2,
                 disabled = 0
             ),
-        )
+        ) {}
     }
 }
 
@@ -1085,9 +1074,6 @@ fun TestScreenPreviewWrongHistory() {
     KakugoTheme {
         TestScreen(
             title = "Test",
-            testFragment = null,
-            forceFragmentRefresh = 0,
-            onFragmentUpdated = {},
             correctCount = 10,
             questionCount = 15,
             uniqueCorrectCount = 8,
@@ -1104,6 +1090,6 @@ fun TestScreenPreviewWrongHistory() {
                 bad = 2,
                 disabled = 0
             ),
-        )
+        ) {}
     }
 }
