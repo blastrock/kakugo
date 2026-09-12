@@ -162,6 +162,9 @@ fun TestContent(
         TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT ->
             TextTest(question, kanaWords, onAnswer, onNextQuestion)
 
+        TestType.KANJI_COMPOSITION ->
+            CompositionTest(question, kanaWords, onAnswer, onNextQuestion)
+
         else ->
             QuizTest(question, kanaWords, onAnswer, onNextQuestion)
     }

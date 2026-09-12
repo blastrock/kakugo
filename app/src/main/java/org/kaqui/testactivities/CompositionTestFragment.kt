@@ -23,7 +23,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +57,7 @@ import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
 import org.kaqui.model.Certainty
+import org.kaqui.model.Item
 import org.kaqui.model.Kanji
 import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerText
@@ -275,6 +279,80 @@ class CompositionTestFragmentCompose : Fragment(), TestFragment {
 }
 
 const val COMPOSITION_COLUMNS = 3
+
+@Composable
+fun CompositionTest(
+    question: TestQuestion,
+    kanaWords: Boolean,
+    onAnswer: (Certainty, Item?) -> Unit,
+    onNextQuestion: () -> Unit,
+) {
+    val context = LocalContext.current
+
+    val selectedState = rememberSaveable(
+        question.item.id,
+        saver = listSaver<MutableState<Set<Int>>, Int>(
+            save = { it.value.toList() },
+            restore = { mutableStateOf(it.toSet()) },
+        ),
+    ) { mutableStateOf(emptySet<Int>()) }
+    var selected by selectedState
+    var isValidated by rememberSaveable(question.item.id) { mutableStateOf(false) }
+
+    val questionText = question.item.getQuestionText(question.testType, kanaWords)
+
+    val uiState = CompositionTestUiState(
+        questionText = questionText,
+        answerOptions = question.answers.map { it.getAnswerText(question.testType, kanaWords) },
+        selectedIndices = selected,
+        isValidated = isValidated,
+        validationResults =
+            if (isValidated) validateComposition(question, selected) else emptyMap(),
+        currentTestType = question.testType,
+    )
+
+    fun validate(selection: Set<Int>) {
+        selected = selection
+        isValidated = true
+        val allCorrect = validateComposition(question, selection).values.none {
+            it == ButtonValidationState.WRONG_SELECTED ||
+                    it == ButtonValidationState.WRONG_NOT_SELECTED
+        }
+        onAnswer(if (allCorrect) Certainty.SURE else Certainty.DONTKNOW, null)
+    }
+
+    CompositionTestScreenContent(
+        uiState = uiState,
+        onToggleAnswer = { index ->
+            if (!isValidated)
+                selected = if (index in selected) selected - index else selected + index
+        },
+        onDoneClicked = { validate(selected) },
+        onDontKnowClicked = { validate(emptySet()) },
+        onNextClicked = onNextQuestion,
+        onQuestionLongClick = {
+            question.debugData?.let { showItemProbabilityData(context, questionText, it) }
+        }
+    )
+}
+
+private fun validateComposition(
+    question: TestQuestion,
+    selected: Set<Int>,
+): Map<Int, ButtonValidationState> {
+    val correctPartIds = (question.item.contents as Kanji).parts.map { it.id }.toSet()
+
+    return question.answers.mapIndexed { index, answer ->
+        val isSelected = index in selected
+        val isCorrect = answer.id in correctPartIds
+        index to when {
+            isSelected && isCorrect -> ButtonValidationState.CORRECT
+            isSelected && !isCorrect -> ButtonValidationState.WRONG_SELECTED
+            !isSelected && isCorrect -> ButtonValidationState.WRONG_NOT_SELECTED
+            else -> ButtonValidationState.NONE
+        }
+    }.toMap()
+}
 
 @Composable
 fun CompositionTestScreenContent(
