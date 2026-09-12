@@ -2,9 +2,8 @@ package org.kaqui.testactivities
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import android.view.WindowManager
-import androidx.activity.OnBackPressedCallback
+import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -22,14 +21,12 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,23 +37,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -64,7 +57,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,31 +64,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
-import androidx.core.app.NavUtils
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.compose.AndroidFragment
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.kaqui.AppScaffold
-import org.kaqui.BetterButton
 import org.kaqui.HistoryItem
 import org.kaqui.HistoryItemRow
 import org.kaqui.HistoryItemStyle
@@ -105,7 +92,6 @@ import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
 import org.kaqui.TestEngine
-import org.kaqui.TypefaceManager
 import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.Item
@@ -115,15 +101,149 @@ import org.kaqui.model.TestType
 import org.kaqui.model.Word
 import org.kaqui.model.description
 import org.kaqui.model.text
-import org.kaqui.showItemProbabilityData
-import org.kaqui.showKanjiInDict
 import org.kaqui.startActivity
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import org.kaqui.toName
-import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.roundToInt
+
+class TestActivity : ComponentActivity() {
+    private lateinit var testEngine: TestEngine
+
+    private var kanaWords = false
+
+    private val viewModel: TestViewModel by viewModels()
+
+    @Suppress("DEPRECATION")
+    private val testTypes: List<TestType>
+        get() = (intent.extras?.getSerializable("test_types") as? List<*>)?.filterIsInstance<TestType>()
+            ?: emptyList()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                Color.TRANSPARENT
+            )
+        )
+
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+        kanaWords = sharedPrefs.getBoolean("kana_words", true)
+
+        if (sharedPrefs.getBoolean("keep_on", false)) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
+        testEngine = TestEngine(
+            this,
+            Database.getInstance(this),
+            testTypes,
+            viewModel::addGoodAnswerToHistory,
+            viewModel::addWrongAnswerToHistory,
+            viewModel::addUnknownAnswerToHistory
+        )
+
+        viewModel.resetHistory()
+
+        if (savedInstanceState == null) {
+            nextQuestion()
+        } else {
+            testEngine.loadState(savedInstanceState)
+            viewModel.setQuestion(testEngine)
+        }
+
+        viewModel.setStats(testEngine.itemView.getStats())
+
+        viewModel.initialize(testEngine)
+
+        setContent {
+            val uiState by viewModel.uiState.collectAsState()
+            val question = uiState.question
+
+            TestScreen(
+                title = if (question != null) stringResource(question.testType.toName()) else "",
+                stats = uiState.stats,
+                correctCount = uiState.correctCount,
+                questionCount = uiState.questionCount,
+                uniqueCorrectCount = uiState.uniqueCorrectCount,
+                uniqueItemCount = uiState.uniqueItemCount,
+                historyState = uiState.historyState,
+                sheetExpanded = uiState.sheetExpanded,
+                onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
+                kanaWords = kanaWords,
+                onItemClick = this::openItemInDictionary,
+                onBackClick = { confirmActivityClose() },
+                onSwapLastAnswer = { viewModel.swapLastAnswer() },
+            ) {
+                if (question != null) {
+                    TestContent(
+                        question = question,
+                        kanaWords = kanaWords,
+                        onAnswer = viewModel::onAnswer,
+                        onNextQuestion = this::nextQuestion,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun openItemInDictionary(item: Item) {
+        when (item.contents) {
+            is Kanji -> startActivity<org.kaqui.itemdetails.KanjiDisplayActivity>("kanji_id" to item.id)
+            is Word -> startActivity<org.kaqui.itemdetails.WordDisplayActivity>("word_id" to item.id)
+            else -> { /* do nothing */
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        testEngine.saveState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun confirmActivityClose() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirm_test_stop_title)
+            .setMessage(R.string.confirm_test_stop_message)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                finish()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun nextQuestion() {
+        testEngine.prepareNewQuestion()
+        viewModel.setQuestion(testEngine)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setStats(testEngine.itemView.getStats())
+    }
+}
+
+@Composable
+fun TestContent(
+    question: TestQuestion,
+    kanaWords: Boolean,
+    onAnswer: (Certainty, Item?) -> Unit,
+    onNextQuestion: () -> Unit,
+) {
+    when (question.testType) {
+        TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT ->
+            TextTest(question, kanaWords, onAnswer, onNextQuestion)
+
+        TestType.KANJI_COMPOSITION ->
+            CompositionTest(question, kanaWords, onAnswer, onNextQuestion)
+
+        TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING ->
+            DrawingTest(question, kanaWords, onAnswer, onNextQuestion)
+
+        else ->
+            QuizTest(question, kanaWords, onAnswer, onNextQuestion)
+    }
+}
 
 data class HistoryState(
     val items: List<HistoryItem> = listOf(),
@@ -140,8 +260,6 @@ data class TestQuestion(
 )
 
 data class TestActivityUiState(
-    val fragment: Class<out Fragment>? = null,
-    val forceFragmentRefresh: Int = 0,
     val question: TestQuestion? = null,
     val correctCount: Int = 0,
     val questionCount: Int = 0,
@@ -317,14 +435,6 @@ class TestViewModel : ViewModel() {
         }
     }
 
-    fun restoreFragmentRefreshCounter(counter: Int) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                forceFragmentRefresh = counter
-            )
-        }
-    }
-
     fun setQuestion(engine: TestEngine) {
         _uiState.update { currentState ->
             currentState.copy(
@@ -338,186 +448,12 @@ class TestViewModel : ViewModel() {
         }
     }
 
-    fun setFragmentClass(testFragment: Class<out Fragment>) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                fragment = testFragment,
-                forceFragmentRefresh = _uiState.value.forceFragmentRefresh + 1
-            )
-        }
-    }
-
     fun setTitle(title: String) {
         _uiState.update { currentState ->
             currentState.copy(
                 title = title
             )
         }
-    }
-}
-
-class TestActivity : FragmentActivity(), TestFragmentHolder {
-    override lateinit var testEngine: TestEngine
-
-    private lateinit var testFragment: TestFragment
-
-    private var localTestType: TestType? = null
-    private var kanaWords = false
-
-    private val viewModel: TestViewModel by viewModels()
-
-    @Suppress("DEPRECATION")
-    private val testTypes: List<TestType>
-        get() = (intent.extras?.getSerializable("test_types") as? List<*>)?.filterIsInstance<TestType>()
-            ?: emptyList()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(
-                Color.TRANSPARENT
-            )
-        )
-
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
-        kanaWords = sharedPrefs.getBoolean("kana_words", true)
-
-        if (sharedPrefs.getBoolean("keep_on", false)) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-
-        testEngine = TestEngine(
-            this,
-            Database.getInstance(this),
-            testTypes,
-            viewModel::addGoodAnswerToHistory,
-            viewModel::addWrongAnswerToHistory,
-            viewModel::addUnknownAnswerToHistory
-        )
-
-        viewModel.resetHistory()
-
-        if (savedInstanceState == null) {
-            nextQuestion()
-        } else {
-            testEngine.loadState(savedInstanceState)
-            viewModel.restoreFragmentRefreshCounter(savedInstanceState.getInt("forceFragmentRefresh"))
-            localTestType = testEngine.testType
-            refreshFragment()
-        }
-
-        viewModel.setStats(testEngine.itemView.getStats())
-
-        viewModel.initialize(testEngine)
-
-        setContent {
-            val uiState by viewModel.uiState.collectAsState()
-
-            TestScreen(
-                title = uiState.title,
-                stats = uiState.stats,
-                correctCount = uiState.correctCount,
-                questionCount = uiState.questionCount,
-                uniqueCorrectCount = uiState.uniqueCorrectCount,
-                uniqueItemCount = uiState.uniqueItemCount,
-                historyState = uiState.historyState,
-                sheetExpanded = uiState.sheetExpanded,
-                onSheetExpandedChange = { viewModel.setSheetExpanded(it) },
-                kanaWords = kanaWords,
-                onItemClick = this::openItemInDictionary,
-                onBackClick = { confirmActivityClose() },
-                onSwapLastAnswer = { viewModel.swapLastAnswer() },
-            ) {
-                val fragmentClass = uiState.fragment
-                if (fragmentClass != null) {
-                    key(uiState.forceFragmentRefresh) {
-                        AndroidFragment(
-                            fragmentClass,
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            onUpdate = { fragment ->
-                                testFragment = fragment as TestFragment
-                            },
-                        )
-                    }
-                } else {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
-            }
-        }
-    }
-
-    private fun openItemInDictionary(item: Item) {
-        when (item.contents) {
-            is Kanji -> startActivity<org.kaqui.itemdetails.KanjiDisplayActivity>("kanji_id" to item.id)
-            is Word -> startActivity<org.kaqui.itemdetails.WordDisplayActivity>("word_id" to item.id)
-            else -> { /* do nothing */
-            }
-        }
-    }
-
-    override fun onAnswer(button: View?, certainty: Certainty, wrong: Item?) {
-        viewModel.onAnswer(certainty, wrong)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        testEngine.saveState(outState)
-        // AndroidFragment uses the compose composite key hash as the id of the container it adds
-        // the fragment to, so the key() wrapping it makes this counter part of that id. The
-        // counter lives in the view model and would restart from zero after a process death,
-        // while the fragment manager restores from the bundle the fragments of the previous
-        // process under the ids they had there. The composition would then adopt one of those
-        // leftover fragments instead of creating a new one, and it can still be displaying a
-        // question the engine has long left behind, which gets answered in place of the current
-        // one. Saving the counter keeps the ids unique across processes.
-        outState.putInt("forceFragmentRefresh", viewModel.uiState.value.forceFragmentRefresh)
-        super.onSaveInstanceState(outState)
-    }
-
-    private fun confirmActivityClose() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.confirm_test_stop_title)
-            .setMessage(R.string.confirm_test_stop_message)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                finish()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    override fun nextQuestion() {
-        testEngine.prepareNewQuestion()
-
-        if (localTestType == testType) {
-            testFragment.startNewQuestion()
-            testFragment.refreshQuestion()
-        } else {
-            localTestType = testType
-            refreshFragment()
-            viewModel.setStats(testEngine.itemView.getStats())
-        }
-    }
-
-    private fun refreshFragment() {
-        val testFragmentClass: Class<out Fragment> =
-            when (testType) {
-                TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING, TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI, TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> QuizTestFragmentCompose::class.java
-                TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING -> DrawingTestFragmentCompose::class.java
-                TestType.KANJI_COMPOSITION -> CompositionTestFragmentCompose::class.java
-                TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT -> TextTestFragmentCompose::class.java
-            }
-
-        viewModel.setTitle(getString(testType.toName()))
-        viewModel.setFragmentClass(testFragmentClass)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.setStats(testEngine.itemView.getStats())
     }
 }
 

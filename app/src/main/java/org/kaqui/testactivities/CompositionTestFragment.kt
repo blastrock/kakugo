@@ -1,9 +1,5 @@
 package org.kaqui.testactivities
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,9 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.intl.Locale
@@ -41,20 +35,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.kaqui.R
-import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
 import org.kaqui.model.Certainty
 import org.kaqui.model.Item
@@ -83,199 +64,6 @@ data class CompositionTestUiState(
 ) {
     val showNextButton
         get() = isValidated
-}
-
-class CompositionViewModel : ViewModel() {
-    var uiState by mutableStateOf(CompositionTestUiState())
-        private set
-
-    private val _onAnswerProcessedEvent = MutableSharedFlow<OnAnswerProcessedEventParams>()
-    val onAnswerProcessedEvent = _onAnswerProcessedEvent.asSharedFlow()
-
-    private val _requestNextQuestionEvent = MutableSharedFlow<Unit>()
-    val requestNextQuestionEvent = _requestNextQuestionEvent.asSharedFlow()
-
-    private lateinit var testEngine: TestEngine
-    private lateinit var testType: TestType
-    private var kanaWordsPref: Boolean = false
-
-    fun initialize(
-        engine: TestEngine,
-        type: TestType,
-        kanaWordsPreference: Boolean
-    ) {
-        testEngine = engine
-        testType = type
-        kanaWordsPref = kanaWordsPreference
-        uiState = uiState.copy(currentTestType = type)
-        loadQuestionData()
-    }
-
-    private fun loadQuestionData() {
-        val currentQuestion = testEngine.currentQuestion
-        val currentAnswers = testEngine.currentAnswers
-
-        uiState = uiState.copy(
-            questionText = currentQuestion.getQuestionText(testType, kanaWordsPref),
-            answerOptions = currentAnswers.map { it.getAnswerText(testType, kanaWordsPref) },
-            selectedIndices = emptySet(),
-            isValidated = false,
-            validationResults = emptyMap()
-        )
-    }
-
-    fun onToggleAnswer(index: Int) {
-        if (uiState.isValidated) return
-
-        val newSelectedIndices = if (index in uiState.selectedIndices) {
-            uiState.selectedIndices - index
-        } else {
-            uiState.selectedIndices + index
-        }
-        uiState = uiState.copy(selectedIndices = newSelectedIndices)
-    }
-
-    fun onDoneClicked() {
-        val result = validateAnswer()
-
-        uiState = uiState.copy(isValidated = true)
-
-        viewModelScope.launch {
-            _onAnswerProcessedEvent.emit(OnAnswerProcessedEventParams(result, null))
-        }
-    }
-
-    fun onDontKnowClicked() {
-        // Clear all selections and then validate
-        uiState = uiState.copy(selectedIndices = emptySet())
-        onDoneClicked()
-    }
-
-    fun onNextClicked() {
-        viewModelScope.launch {
-            _requestNextQuestionEvent.emit(Unit)
-        }
-    }
-
-    private fun validateAnswer(): Certainty {
-        val currentKanji = testEngine.currentQuestion.contents as Kanji
-        val correctPartIds = currentKanji.parts.map { it.id }.toSet()
-        val currentAnswers = testEngine.currentAnswers
-
-        val validationResults = mutableMapOf<Int, ButtonValidationState>()
-        var allCorrect = true
-
-        currentAnswers.forEachIndexed { index, answer ->
-            val isSelected = index in uiState.selectedIndices
-            val isCorrect = answer.id in correctPartIds
-
-            validationResults[index] = when {
-                isSelected && isCorrect -> ButtonValidationState.CORRECT
-                isSelected && !isCorrect -> {
-                    allCorrect = false
-                    ButtonValidationState.WRONG_SELECTED
-                }
-                !isSelected && isCorrect -> {
-                    allCorrect = false
-                    ButtonValidationState.WRONG_NOT_SELECTED
-                }
-                else -> ButtonValidationState.NONE
-            }
-        }
-
-        uiState = uiState.copy(validationResults = validationResults)
-
-        return if (allCorrect) Certainty.SURE else Certainty.DONTKNOW
-    }
-
-    fun refreshQuestionViewFromExternal() {
-        loadQuestionData()
-    }
-
-    fun setTestEngine(testEngine: TestEngine) {
-        this.testEngine = testEngine
-    }
-}
-
-class CompositionTestFragmentCompose : Fragment(), TestFragment {
-    private val testFragmentHolderRef
-        get() = (requireActivity() as TestFragmentHolder)
-
-    private val viewModel: CompositionViewModel by viewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        if (viewModel.uiState.currentTestType == null) {
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            val kanaWordsPref = sharedPreferences.getBoolean("kana_words", false)
-
-            viewModel.initialize(
-                testFragmentHolderRef.testEngine,
-                testFragmentHolderRef.testType,
-                kanaWordsPref
-            )
-        } else {
-            viewModel.setTestEngine(testFragmentHolderRef.testEngine)
-        }
-
-        // Collect events from ViewModel
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.onAnswerProcessedEvent.collectLatest { params ->
-                        testFragmentHolderRef.onAnswer(
-                            null,
-                            params.certainty,
-                            params.questionItem
-                        )
-                    }
-                }
-                launch {
-                    viewModel.requestNextQuestionEvent.collectLatest {
-                        testFragmentHolderRef.nextQuestion()
-                    }
-                }
-            }
-        }
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val uiState = viewModel.uiState
-
-                CompositionTestScreenContent(
-                    uiState = uiState,
-                    onToggleAnswer = viewModel::onToggleAnswer,
-                    onDoneClicked = viewModel::onDoneClicked,
-                    onDontKnowClicked = viewModel::onDontKnowClicked,
-                    onNextClicked = viewModel::onNextClicked,
-                    onQuestionLongClick = {
-                        testFragmentHolderRef.testEngine.currentDebugData?.let { data ->
-                            showItemProbabilityData(
-                                requireContext(),
-                                testFragmentHolderRef.testEngine.currentQuestion.getQuestionText(
-                                    testFragmentHolderRef.testType,
-                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
-                                        .getBoolean("kana_words", true)
-                                ),
-                                data
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    }
-
-    override fun refreshQuestion() {
-        viewModel.refreshQuestionViewFromExternal()
-    }
-
-    override fun setSensible(e: Boolean) {
-        // Button state is handled by Compose UI state
-    }
 }
 
 const val COMPOSITION_COLUMNS = 3

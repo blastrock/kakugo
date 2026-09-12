@@ -1,9 +1,5 @@
 package org.kaqui.testactivities
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,10 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,20 +38,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.kaqui.R
-import org.kaqui.TestEngine
 import org.kaqui.model.Certainty
 import org.kaqui.model.Item
 import org.kaqui.model.Kana
@@ -76,193 +57,6 @@ data class TextTestUiState(
     val showCorrectAnswer: Boolean = false,
     val currentTestType: TestType? = null
 )
-
-class TextViewModel : ViewModel() {
-    var uiState by mutableStateOf(TextTestUiState())
-        private set
-
-    private val _onAnswerProcessedEvent = MutableSharedFlow<OnAnswerProcessedEventParams>()
-    val onAnswerProcessedEvent = _onAnswerProcessedEvent.asSharedFlow()
-
-    private val _requestNextQuestionEvent = MutableSharedFlow<Unit>()
-    val requestNextQuestionEvent = _requestNextQuestionEvent.asSharedFlow()
-
-    private lateinit var testEngine: TestEngine
-    private lateinit var testType: TestType
-    private var kanaWordsPref: Boolean = false
-
-    fun initialize(
-        engine: TestEngine,
-        type: TestType,
-        kanaWordsPreference: Boolean
-    ) {
-        testEngine = engine
-        testType = type
-        kanaWordsPref = kanaWordsPreference
-        uiState = uiState.copy(currentTestType = type)
-        loadQuestionData()
-    }
-
-    private fun loadQuestionData() {
-        val currentQuestion = testEngine.currentQuestion
-
-        uiState = uiState.copy(
-            questionText = currentQuestion.getQuestionText(testType, kanaWordsPref),
-            userInputText = "",
-            isAnswered = false,
-            correctAnswer = "",
-            showCorrectAnswer = false
-        )
-    }
-
-    fun onUserInputChanged(newInput: String) {
-        if (!uiState.isAnswered) {
-            uiState = uiState.copy(userInputText = newInput)
-        }
-    }
-
-    fun onAnswerSubmitted(certainty: Certainty) {
-        if (uiState.isAnswered) {
-            // If already answered, treat as next click
-            onNextClicked()
-            return
-        }
-
-        val currentKana = testEngine.currentQuestion.contents as Kana
-
-        val result = if (certainty == Certainty.DONTKNOW) {
-            // Clear input and show correct answer
-            uiState = uiState.copy(
-                userInputText = "",
-                isAnswered = true,
-                correctAnswer = currentKana.romaji,
-                showCorrectAnswer = true
-            )
-            Certainty.DONTKNOW
-        } else {
-            val userAnswer = uiState.userInputText.trim().lowercase(JavaLocale.ROOT)
-
-            if (userAnswer.isBlank()) {
-                return // Don't process empty answers
-            }
-
-            if (userAnswer == currentKana.romaji) {
-                // Correct answer - emit event and request next question
-                viewModelScope.launch {
-                    _onAnswerProcessedEvent.emit(OnAnswerProcessedEventParams(certainty, null))
-                    _requestNextQuestionEvent.emit(Unit)
-                }
-                return
-            } else {
-                // Wrong answer - show correct answer
-                uiState = uiState.copy(
-                    isAnswered = true,
-                    correctAnswer = currentKana.romaji,
-                    showCorrectAnswer = true
-                )
-                Certainty.DONTKNOW
-            }
-        }
-
-        viewModelScope.launch {
-            _onAnswerProcessedEvent.emit(OnAnswerProcessedEventParams(result, null))
-        }
-    }
-
-    fun onNextClicked() {
-        viewModelScope.launch {
-            _requestNextQuestionEvent.emit(Unit)
-        }
-    }
-
-    fun refreshQuestionViewFromExternal() {
-        loadQuestionData()
-    }
-
-    fun setTestEngine(testEngine: TestEngine) {
-        this.testEngine = testEngine
-    }
-}
-
-class TextTestFragmentCompose : Fragment(), TestFragment {
-    private val testFragmentHolderRef
-        get() = (requireActivity() as TestFragmentHolder)
-
-    private val viewModel: TextViewModel by viewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        if (viewModel.uiState.currentTestType == null) {
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            val kanaWordsPref = sharedPreferences.getBoolean("kana_words", true)
-
-            viewModel.initialize(
-                testFragmentHolderRef.testEngine,
-                testFragmentHolderRef.testType,
-                kanaWordsPref
-            )
-        } else {
-            viewModel.setTestEngine(testFragmentHolderRef.testEngine)
-        }
-
-        // Collect events from ViewModel
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.onAnswerProcessedEvent.collectLatest { params ->
-                        testFragmentHolderRef.onAnswer(
-                            null,
-                            params.certainty,
-                            params.questionItem
-                        )
-                    }
-                }
-                launch {
-                    viewModel.requestNextQuestionEvent.collectLatest {
-                        testFragmentHolderRef.nextQuestion()
-                    }
-                }
-            }
-        }
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val uiState = viewModel.uiState
-
-                TextTestScreenContent(
-                    uiState = uiState,
-                    onUserInputChanged = viewModel::onUserInputChanged,
-                    onAnswerSubmitted = viewModel::onAnswerSubmitted,
-                    onNextClicked = viewModel::onNextClicked,
-                    onQuestionLongClick = {
-                        testFragmentHolderRef.testEngine.currentDebugData?.let { data ->
-                            showItemProbabilityData(
-                                requireContext(),
-                                testFragmentHolderRef.testEngine.currentQuestion.getQuestionText(
-                                    testFragmentHolderRef.testType,
-                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
-                                        .getBoolean("kana_words", true)
-                                ),
-                                data
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    }
-
-    override fun refreshQuestion() {
-        viewModel.refreshQuestionViewFromExternal()
-    }
-
-    override fun setSensible(e: Boolean) {
-        // TODO: Implement if needed
-    }
-}
 
 @Composable
 fun TextTest(

@@ -1,9 +1,5 @@
 package org.kaqui.testactivities
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,9 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
@@ -35,9 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.intl.Locale
@@ -47,22 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.kaqui.BetterButton
 import org.kaqui.R
 import org.kaqui.Separator
-import org.kaqui.TestEngine
 import org.kaqui.TypefaceManager
 import org.kaqui.model.Certainty
 import org.kaqui.model.Item
@@ -76,7 +59,7 @@ import org.kaqui.theme.LocalThemeAttributes
 data class QuizScreenUiState(
     val questionText: String = "",
     val answerOptions: List<String> = emptyList(),
-    val answer: Int = QuizViewModel.NO_ANSWER,
+    val answer: Int = NO_ANSWER,
     val correctAnswerIndex: Int? = null,
     val answersCurrentlyVisible: Boolean = true,
     val initialHideAnswers: Boolean = false,
@@ -84,208 +67,75 @@ data class QuizScreenUiState(
     val currentTestType: TestType? = null,
 ) {
     val isAnswerGiven
-        get() = answer != QuizViewModel.NO_ANSWER
+        get() = answer != NO_ANSWER
 }
 
-data class OnAnswerProcessedEventParams(val certainty: Certainty, val questionItem: Item?)
+const val NO_ANSWER = 0x1000
+const val DONT_KNOW = 0x1001
 
-class QuizViewModel : ViewModel() {
-    companion object {
-        const val NO_ANSWER = 0x1000
-        const val DONT_KNOW = 0x1001
+@Composable
+fun QuizTest(
+    question: TestQuestion,
+    kanaWords: Boolean,
+    onAnswer: (Certainty, Item?) -> Unit,
+    onNextQuestion: () -> Unit,
+) {
+    val context = LocalContext.current
+    val sharedPreferences = remember { PreferenceManager.getDefaultSharedPreferences(context) }
+    val hideAnswers = remember { sharedPreferences.getBoolean("hide_answers", true) }
+    val singleButtonMode = remember { sharedPreferences.getBoolean("single_button_mode", false) }
+
+    // The engine never asks the same item twice in a row, so the item id identifies the question.
+    // It also survives a rotation, unlike the debug data, which loadState does not restore.
+    var answer by rememberSaveable(question.item.id) {
+        mutableIntStateOf(NO_ANSWER)
     }
+    var answersRevealed by rememberSaveable(question.item.id) { mutableStateOf(false) }
 
-    var uiState by mutableStateOf(QuizScreenUiState())
-        private set
+    val questionText = question.item.getQuestionText(question.testType, kanaWords)
+    val uiState = QuizScreenUiState(
+        questionText = questionText,
+        answerOptions = question.answers.map { it.getAnswerText(question.testType, kanaWords) },
+        answer = answer,
+        correctAnswerIndex = question.answers.indexOfFirst { it.id == question.item.id },
+        answersCurrentlyVisible = !hideAnswers || answersRevealed ||
+                answer != NO_ANSWER,
+        initialHideAnswers = hideAnswers,
+        singleButtonMode = singleButtonMode,
+        currentTestType = question.testType,
+    )
 
-    private val _onAnswerProcessedEvent = MutableSharedFlow<OnAnswerProcessedEventParams>()
-    val onAnswerProcessedEvent = _onAnswerProcessedEvent.asSharedFlow()
-
-    private val _requestNextQuestionEvent = MutableSharedFlow<Unit>()
-    val requestNextQuestionEvent = _requestNextQuestionEvent.asSharedFlow()
-
-    private lateinit var testEngine: TestEngine
-    private lateinit var testType: TestType
-    private var kanaWordsPref: Boolean = false
-
-    fun initialize(
-        engine: TestEngine,
-        type: TestType,
-        initialHideAnswersPref: Boolean,
-        singleButtonModePref: Boolean,
-        kanaWordsPreference: Boolean
-    ) {
-        testEngine = engine
-        testType = type
-        kanaWordsPref = kanaWordsPreference
-        uiState = uiState.copy(
-            initialHideAnswers = initialHideAnswersPref,
-            answersCurrentlyVisible = !initialHideAnswersPref,
-            singleButtonMode = singleButtonModePref,
-            currentTestType = type,
-        )
-        loadQuestionData()
-    }
-
-    private fun loadQuestionData() {
-        val currentQuestion = testEngine.currentQuestion
-        val currentAnswers = testEngine.currentAnswers
-
-        uiState = uiState.copy(
-            questionText = currentQuestion.getQuestionText(testType, kanaWordsPref),
-            answerOptions = currentAnswers.map { it.getAnswerText(testType, kanaWordsPref) },
-            answer = NO_ANSWER,
-            correctAnswerIndex = currentAnswers.indexOfFirst { it.id == testEngine.currentQuestion.id },
-            answersCurrentlyVisible = !uiState.initialHideAnswers || uiState.answer != NO_ANSWER
-        )
-    }
-
-    fun onAnswerSelected(selectedIndex: Int, certainty: Certainty) {
-        val currentQuestion = testEngine.currentQuestion
-        val currentAnswers = testEngine.currentAnswers
-
-        if (certainty != Certainty.DONTKNOW &&
-            (currentAnswers[selectedIndex].id == currentQuestion.id ||
-                    currentAnswers[selectedIndex].getAnswerText(
-                        testType,
-                        kanaWordsPref
-                    ) == currentQuestion.getAnswerText(testType, kanaWordsPref) ||
-                    currentAnswers[selectedIndex].getQuestionText(
-                        testType,
-                        kanaWordsPref
-                    ) == currentQuestion.getQuestionText(testType, kanaWordsPref))
-        ) {
-            viewModelScope.launch {
-                _onAnswerProcessedEvent.emit(OnAnswerProcessedEventParams(certainty, null))
-                _requestNextQuestionEvent.emit(Unit)
-            }
-        } else {
+    QuizTestScreenContent(
+        uiState = uiState,
+        onNextClicked = onNextQuestion,
+        onAnswerSelected = { selectedIndex, certainty ->
             if (certainty == Certainty.DONTKNOW) {
-                uiState = uiState.copy(answer = DONT_KNOW)
-                viewModelScope.launch {
-                    _onAnswerProcessedEvent.emit(
-                        OnAnswerProcessedEventParams(
-                            Certainty.DONTKNOW,
-                            null
-                        )
-                    )
-                }
-            } else { // Wrong answer selected
-                uiState = uiState.copy(answer = selectedIndex)
-                viewModelScope.launch {
-                    _onAnswerProcessedEvent.emit(
-                        OnAnswerProcessedEventParams(
-                            Certainty.DONTKNOW,
-                            currentAnswers[selectedIndex]
-                        )
-                    )
-                }
+                answer = DONT_KNOW
+                onAnswer(Certainty.DONTKNOW, null)
+            } else if (isCorrectAnswer(question, selectedIndex, kanaWords)) {
+                onAnswer(certainty, null)
+                onNextQuestion()
+            } else {
+                answer = selectedIndex
+                onAnswer(Certainty.DONTKNOW, question.answers[selectedIndex])
             }
+        },
+        onShowAnswersClicked = { answersRevealed = true },
+        onQuestionLongClick = {
+            question.debugData?.let { showItemProbabilityData(context, questionText, it) }
         }
-    }
-
-    fun onNextClicked() {
-        uiState = uiState.copy(answer = NO_ANSWER)
-        viewModelScope.launch {
-            _requestNextQuestionEvent.emit(Unit)
-        }
-    }
-
-    fun onShowAnswersClicked() {
-        uiState = uiState.copy(answersCurrentlyVisible = true)
-    }
-
-    fun refreshQuestionViewFromExternal() {
-        loadQuestionData()
-    }
-
-    fun setTestEngine(testEngine: TestEngine) {
-        this.testEngine = testEngine
-    }
+    )
 }
 
-class QuizTestFragmentCompose : Fragment(), TestFragment {
-    private val testFragmentHolderRef
-        get() = (requireActivity() as TestFragmentHolder)
-
-    private val viewModel: QuizViewModel by viewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        if (viewModel.uiState.currentTestType == null) {
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            val initialHideAnswersPref = sharedPreferences.getBoolean("hide_answers", true)
-            val singleButtonModePref = sharedPreferences.getBoolean("single_button_mode", false)
-            val kanaWordsPref = sharedPreferences.getBoolean("kana_words", false)
-
-            viewModel.initialize(
-                testFragmentHolderRef.testEngine,
-                testFragmentHolderRef.testType,
-                initialHideAnswersPref,
-                singleButtonModePref,
-                kanaWordsPref
-            )
-        } else {
-            viewModel.setTestEngine(testFragmentHolderRef.testEngine)
-        }
-
-        // Collect events from ViewModel
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.onAnswerProcessedEvent.collectLatest { params ->
-                        testFragmentHolderRef.onAnswer(
-                            null,
-                            params.certainty,
-                            params.questionItem
-                        )
-                    }
-                }
-                launch {
-                    viewModel.requestNextQuestionEvent.collectLatest {
-                        testFragmentHolderRef.nextQuestion()
-                    }
-                }
-            }
-        }
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val uiState = viewModel.uiState
-
-                QuizTestScreenContent(
-                    uiState = uiState,
-                    onNextClicked = viewModel::onNextClicked,
-                    onAnswerSelected = viewModel::onAnswerSelected,
-                    onShowAnswersClicked = viewModel::onShowAnswersClicked,
-                    onQuestionLongClick = {
-                        testFragmentHolderRef.testEngine.currentDebugData?.let { data ->
-                            showItemProbabilityData(
-                                requireContext(),
-                                testFragmentHolderRef.testEngine.currentQuestion.getQuestionText(
-                                    testFragmentHolderRef.testType,
-                                    PreferenceManager.getDefaultSharedPreferences(requireContext())
-                                        .getBoolean("kana_words", true)
-                                ),
-                                data
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    }
-
-    override fun refreshQuestion() {
-        viewModel.refreshQuestionViewFromExternal()
-    }
-
-    override fun setSensible(e: Boolean) {
-        // TODO
-    }
+// Answers that only look the same as the expected one still count as correct, otherwise items
+// sharing a reading or a meaning would be impossible to answer.
+private fun isCorrectAnswer(question: TestQuestion, selectedIndex: Int, kanaWords: Boolean): Boolean {
+    val selected = question.answers[selectedIndex]
+    return selected.id == question.item.id ||
+            selected.getAnswerText(question.testType, kanaWords) ==
+            question.item.getAnswerText(question.testType, kanaWords) ||
+            selected.getQuestionText(question.testType, kanaWords) ==
+            question.item.getQuestionText(question.testType, kanaWords)
 }
 
 const val COLUMNS = 2
@@ -421,7 +271,7 @@ fun QuizTestScreenContent(
                                 Button(
                                     onClick = {
                                         onAnswerSelected(
-                                            QuizViewModel.NO_ANSWER,
+                                            NO_ANSWER,
                                             Certainty.DONTKNOW
                                         )
                                     },
@@ -457,7 +307,7 @@ private fun getButtonBackgroundColor(
     themeColors: org.kaqui.theme.ThemeAttributes
 ): Color? {
     val backgroundColor = when {
-        uiState.answer == QuizViewModel.NO_ANSWER -> null
+        uiState.answer == NO_ANSWER -> null
         index == uiState.correctAnswerIndex -> themeColors.correctAnswerBackground
 
         index == uiState.answer -> themeColors.wrongAnswerBackground
@@ -664,7 +514,7 @@ fun PreviewQuizTestScreenContentAnswersVisible() {
         questionText = "犬は何ですか？",
         answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
         correctAnswerIndex = 0,
-        answer = QuizViewModel.NO_ANSWER,
+        answer = NO_ANSWER,
         answersCurrentlyVisible = true,
         initialHideAnswers = true,
         singleButtonMode = false,
@@ -686,7 +536,7 @@ fun PreviewQuizTestScreenContentMeaningToWord() {
         questionText = "test 123",
         answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
         correctAnswerIndex = 0,
-        answer = QuizViewModel.NO_ANSWER,
+        answer = NO_ANSWER,
         answersCurrentlyVisible = true,
         initialHideAnswers = true,
         singleButtonMode = false,
@@ -730,7 +580,7 @@ fun PreviewQuizTestScreenContentSingleButton() {
         questionText = "鳥は何ですか？",
         answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
         correctAnswerIndex = 2,
-        answer = QuizViewModel.NO_ANSWER,
+        answer = NO_ANSWER,
         answersCurrentlyVisible = true,
         initialHideAnswers = true,
         singleButtonMode = true,
@@ -774,7 +624,7 @@ fun PreviewQuizTestScreenContentGridNotAnswered() {
         questionText = "か",
         answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
         correctAnswerIndex = 2,
-        answer = QuizViewModel.NO_ANSWER,
+        answer = NO_ANSWER,
         answersCurrentlyVisible = true,
         initialHideAnswers = true,
         singleButtonMode = false,
