@@ -26,11 +26,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
@@ -57,6 +59,7 @@ import kotlinx.coroutines.launch
 import org.kaqui.R
 import org.kaqui.TestEngine
 import org.kaqui.model.Certainty
+import org.kaqui.model.Item
 import org.kaqui.model.Kana
 import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
@@ -259,6 +262,60 @@ class TextTestFragmentCompose : Fragment(), TestFragment {
     override fun setSensible(e: Boolean) {
         // TODO: Implement if needed
     }
+}
+
+@Composable
+fun TextTest(
+    question: TestQuestion,
+    kanaWords: Boolean,
+    onAnswer: (Certainty, Item?) -> Unit,
+    onNextQuestion: () -> Unit,
+) {
+    val context = LocalContext.current
+
+    var userInput by rememberSaveable(question.item.id) { mutableStateOf("") }
+    var isAnswered by rememberSaveable(question.item.id) { mutableStateOf(false) }
+
+    val questionText = question.item.getQuestionText(question.testType, kanaWords)
+    val correctAnswer = (question.item.contents as Kana).romaji
+
+    val uiState = TextTestUiState(
+        questionText = questionText,
+        userInputText = userInput,
+        isAnswered = isAnswered,
+        correctAnswer = if (isAnswered) correctAnswer else "",
+        showCorrectAnswer = isAnswered,
+        currentTestType = question.testType,
+    )
+
+    TextTestScreenContent(
+        uiState = uiState,
+        onUserInputChanged = { if (!isAnswered) userInput = it },
+        onAnswerSubmitted = { certainty ->
+            if (isAnswered) {
+                onNextQuestion()
+            } else if (certainty == Certainty.DONTKNOW) {
+                userInput = ""
+                isAnswered = true
+                onAnswer(Certainty.DONTKNOW, null)
+            } else {
+                val userAnswer = userInput.trim().lowercase(JavaLocale.ROOT)
+                if (userAnswer.isNotBlank()) {
+                    if (userAnswer == correctAnswer) {
+                        onAnswer(certainty, null)
+                        onNextQuestion()
+                    } else {
+                        isAnswered = true
+                        onAnswer(Certainty.DONTKNOW, null)
+                    }
+                }
+            }
+        },
+        onNextClicked = onNextQuestion,
+        onQuestionLongClick = {
+            question.debugData?.let { showItemProbabilityData(context, questionText, it) }
+        }
+    )
 }
 
 @Composable

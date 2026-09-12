@@ -104,7 +104,7 @@ class NewTestActivity : ComponentActivity() {
                 onSwapLastAnswer = { viewModel.swapLastAnswer() },
             ) {
                 if (question != null) {
-                    QuizTest(
+                    TestContent(
                         question = question,
                         kanaWords = kanaWords,
                         onAnswer = viewModel::onAnswer,
@@ -148,6 +148,22 @@ class NewTestActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.setStats(testEngine.itemView.getStats())
+    }
+}
+
+@Composable
+fun TestContent(
+    question: TestQuestion,
+    kanaWords: Boolean,
+    onAnswer: (Certainty, Item?) -> Unit,
+    onNextQuestion: () -> Unit,
+) {
+    when (question.testType) {
+        TestType.HIRAGANA_TO_ROMAJI_TEXT, TestType.KATAKANA_TO_ROMAJI_TEXT ->
+            TextTest(question, kanaWords, onAnswer, onNextQuestion)
+
+        else ->
+            QuizTest(question, kanaWords, onAnswer, onNextQuestion)
     }
 }
 
