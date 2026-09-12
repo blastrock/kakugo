@@ -11,9 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -109,19 +107,21 @@ fun CompositionTest(
         onAnswer(if (allCorrect) Certainty.SURE else Certainty.DONTKNOW, null)
     }
 
-    CompositionTestScreenContent(
-        uiState = uiState,
-        onToggleAnswer = { index ->
-            if (!isValidated)
-                selected = if (index in selected) selected - index else selected + index
-        },
-        onDoneClicked = { validate(selected) },
-        onDontKnowClicked = { validate(emptySet()) },
-        onNextClicked = onNextQuestion,
-        onQuestionLongClick = {
-            question.debugData?.let { showItemProbabilityData(context, questionText, it) }
-        }
-    )
+    KakugoTheme {
+        CompositionTestScreenContent(
+            uiState = uiState,
+            onToggleAnswer = { index ->
+                if (!isValidated)
+                    selected = if (index in selected) selected - index else selected + index
+            },
+            onDoneClicked = { validate(selected) },
+            onDontKnowClicked = { validate(emptySet()) },
+            onNextClicked = onNextQuestion,
+            onQuestionLongClick = {
+                question.debugData?.let { showItemProbabilityData(context, questionText, it) }
+            }
+        )
+    }
 }
 
 private fun validateComposition(
@@ -154,94 +154,90 @@ fun CompositionTestScreenContent(
     val questionMinSize = 10
     val themeColors = LocalThemeAttributes.current
 
-    KakugoTheme {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TestQuestionLayoutCompose(
+            question = uiState.questionText,
+            questionMinSizeSp = questionMinSize,
+            onQuestionLongClick = onQuestionLongClick
+        ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TestQuestionLayoutCompose(
-                    question = uiState.questionText,
-                    questionMinSizeSp = questionMinSize,
-                    onQuestionLongClick = onQuestionLongClick
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Grid of toggle buttons (3x3)
-                        uiState.answerOptions.chunked(COMPOSITION_COLUMNS)
-                            .forEachIndexed { rowIndex, rowItems ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    rowItems.forEachIndexed { columnIndex, answerText ->
-                                        val index = rowIndex * COMPOSITION_COLUMNS + columnIndex
-                                        val isSelected = index in uiState.selectedIndices
-                                        val validationState =
-                                            uiState.validationResults[index]
-                                                ?: ButtonValidationState.NONE
+                // Grid of toggle buttons (3x3)
+                uiState.answerOptions.chunked(COMPOSITION_COLUMNS)
+                    .forEachIndexed { rowIndex, rowItems ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowItems.forEachIndexed { columnIndex, answerText ->
+                                val index = rowIndex * COMPOSITION_COLUMNS + columnIndex
+                                val isSelected = index in uiState.selectedIndices
+                                val validationState =
+                                    uiState.validationResults[index]
+                                        ?: ButtonValidationState.NONE
 
-                                        CompositionToggleButton(
-                                            text = answerText,
-                                            isSelected = isSelected,
-                                            validationState = validationState,
-                                            enabled = !uiState.isValidated,
-                                            onClick = { onToggleAnswer(index) },
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                    }
-                                }
-                            }
-
-                        // Bottom buttons
-                        if (!uiState.showNextButton) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Button(
-                                    onClick = onDoneClicked,
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = themeColors.backgroundSure
-                                    )
-                                ) {
-                                    Text(stringResource(id = R.string.answerDone).toUpperCase(Locale.current))
-                                }
-
-                                Button(
-                                    onClick = onDontKnowClicked,
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = themeColors.backgroundDontKnow
-                                    )
-                                ) {
-                                    Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
-                                }
-                            }
-                        } else {
-                            Button(
-                                onClick = onNextClicked,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = themeColors.backgroundDontKnow,
-                                ),
-                            ) {
-                                Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
+                                CompositionToggleButton(
+                                    text = answerText,
+                                    isSelected = isSelected,
+                                    validationState = validationState,
+                                    enabled = !uiState.isValidated,
+                                    onClick = { onToggleAnswer(index) },
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
                         }
+                    }
+
+                // Bottom buttons
+                if (!uiState.showNextButton) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = onDoneClicked,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = themeColors.backgroundSure
+                            )
+                        ) {
+                            Text(stringResource(id = R.string.answerDone).toUpperCase(Locale.current))
+                        }
+
+                        Button(
+                            onClick = onDontKnowClicked,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = themeColors.backgroundDontKnow
+                            )
+                        ) {
+                            Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = onNextClicked,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = themeColors.backgroundDontKnow,
+                        ),
+                    ) {
+                        Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
                     }
                 }
             }
@@ -310,13 +306,15 @@ fun PreviewCompositionTestInitialState() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    CompositionTestScreenContent(
-        uiState = sampleUiState,
-        onToggleAnswer = {},
-        onDoneClicked = {},
-        onDontKnowClicked = {},
-        onNextClicked = {}
-    )
+    KakugoTheme {
+        CompositionTestScreenContent(
+            uiState = sampleUiState,
+            onToggleAnswer = {},
+            onDoneClicked = {},
+            onDontKnowClicked = {},
+            onNextClicked = {}
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Composition Test - Some Selected")
@@ -331,13 +329,15 @@ fun PreviewCompositionTestSomeSelected() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    CompositionTestScreenContent(
-        uiState = sampleUiState,
-        onToggleAnswer = {},
-        onDoneClicked = {},
-        onDontKnowClicked = {},
-        onNextClicked = {}
-    )
+    KakugoTheme {
+        CompositionTestScreenContent(
+            uiState = sampleUiState,
+            onToggleAnswer = {},
+            onDoneClicked = {},
+            onDontKnowClicked = {},
+            onNextClicked = {}
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Composition Test - Validated Correct")
@@ -354,13 +354,15 @@ fun PreviewCompositionTestValidatedCorrect() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    CompositionTestScreenContent(
-        uiState = sampleUiState,
-        onToggleAnswer = {},
-        onDoneClicked = {},
-        onDontKnowClicked = {},
-        onNextClicked = {}
-    )
+    KakugoTheme {
+        CompositionTestScreenContent(
+            uiState = sampleUiState,
+            onToggleAnswer = {},
+            onDoneClicked = {},
+            onDontKnowClicked = {},
+            onNextClicked = {}
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Composition Test - Validated With Errors")
@@ -380,11 +382,13 @@ fun PreviewCompositionTestValidatedWithErrors() {
         currentTestType = TestType.KANJI_COMPOSITION
     )
 
-    CompositionTestScreenContent(
-        uiState = sampleUiState,
-        onToggleAnswer = {},
-        onDoneClicked = {},
-        onDontKnowClicked = {},
-        onNextClicked = {}
-    )
+    KakugoTheme {
+        CompositionTestScreenContent(
+            uiState = sampleUiState,
+            onToggleAnswer = {},
+            onDoneClicked = {},
+            onDontKnowClicked = {},
+            onNextClicked = {}
+        )
+    }
 }

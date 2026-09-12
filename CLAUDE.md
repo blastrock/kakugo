@@ -75,25 +75,26 @@ Kakugo is an Android application for learning Japanese, focusing on Hiragana, Ka
 
 **TestActivity** (`testactivities/TestActivity.kt`)
 
-- Main activity for all quiz types
-- Uses Jetpack Compose for UI
-- Manages test fragments dynamically based on TestType
+- Main activity for all quiz types, pure Compose
+- Owns TestEngine and TestViewModel, and draws the shell around the test: stats bar, score
+  counters, history bottom sheet and the swipe-to-swap last-answer row
+- Publishes the current question as a `TestQuestion` (test type, item, answers, debug data) and
+  picks a test screen from it in `TestContent`
 - Handles process death/restoration (important for Android lifecycle)
-- Coordinates with TestEngine for question flow
 
-**Test Fragments** (in `testactivities/`)
+**Test screens** (in `testactivities/`)
 
-- `QuizTestFragment`: Multiple-choice questions
-- `TextTestFragment`: Text input answers
-- `DrawingTestFragment`: Draw characters (Kana/Kanji)
-- `CompositionTestFragment`: Kanji composition questions
+- `QuizTest`: Multiple-choice questions
+- `TextTest`: Text input answers
+- `DrawingTest`: Draw characters (Kana/Kanji)
+- `CompositionTest`: Kanji composition questions
 
-Each fragment:
-
-- Receives questions from TestActivity/TestEngine
-- Displays question and answer options
-- Reports user responses back to TestEngine
-- Handles different TestTypes (reading, meaning, drawing, etc.)
+Each is a composable taking `(question, kanaWords, onAnswer, onNextQuestion)`, wrapping a
+stateless `*ScreenContent` composable that the previews exercise directly. They own only
+ephemeral UI state, held in `rememberSaveable` keyed on the question so it resets on a new
+question and survives rotation and process death; everything else is derived from the
+`TestQuestion` rather than stored. Answers go back to the activity through the `onAnswer`
+lambda, which forwards to `TestEngine.markAnswer`.
 
 ### Data Models
 
@@ -120,7 +121,8 @@ The app uses a hybrid approach:
 
 - MainActivity and TestActivity: Full Compose
 - Settings/Stats screens: Mix of Compose and traditional Views
-- Test fragments: Embedded in Compose via AndroidFragment
+- A few legacy Views survive behind `AndroidView`: `DrawView` in the drawing test, and the
+  autosizing question label in `TestQuestionLayout`
 
 **Theme** (`theme/Theme.kt`)
 Material Design with KakugoTheme wrapper providing consistent styling.
@@ -145,7 +147,8 @@ TestActivity carefully manages state across configuration changes and process de
 
 - Saves current question, answers, history, scores
 - Restores TestEngine state from Bundle
-- Handles fragment restoration
+- Per-question UI state lives in `rememberSaveable` inside each test screen, so it rides along
+  in the same saved instance state
 
 ### SRS Score Updates
 
@@ -164,7 +167,7 @@ Don't make commits unless asked to. Don't bother with the fact that the worktree
 ## Package Organization
 
 - `org.kaqui.mainmenu`: Main menu and category menu activities
-- `org.kaqui.testactivities`: Test execution (TestActivity, fragments, drawing)
+- `org.kaqui.testactivities`: Test execution (TestActivity, test screens, drawing)
 - `org.kaqui.settings`: Settings, item selection, search activities
 - `org.kaqui.stats`: Statistics and progress tracking
 - `org.kaqui.model`: Data models, database, test/item types

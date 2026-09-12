@@ -67,7 +67,6 @@ dependencies {
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.fragment.compose)
 
     // Kotlin
     implementation(libs.kotlin.stdlib.jdk8)

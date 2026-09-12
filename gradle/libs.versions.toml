@@ -5,7 +5,6 @@ kotlin = "2.3.0"
 # AndroidX Core
 androidx-appcompat = "1.7.1"
 androidx-fragment-ktx = "1.8.9"
-androidx-fragment-compose = "1.8.9"
 androidx-legacy-support-v4 = "1.0.0"
 androidx-preference-ktx = "1.2.1"
 androidx-lifecycle-viewmodel-compose = "2.9.4"
@@ -35,7 +34,6 @@ androidx-test-runner = "1.7.0"
 # AndroidX
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidx-fragment-ktx" }
-androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "androidx-fragment-compose" }
 androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "androidx-legacy-support-v4" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidx-preference-ktx" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle-viewmodel-compose" }
