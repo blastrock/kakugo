@@ -317,6 +317,9 @@ private val COMPOSE_TEST_TYPES = setOf(
     TestType.HIRAGANA_TO_ROMAJI_TEXT,
     TestType.KATAKANA_TO_ROMAJI_TEXT,
     TestType.KANJI_COMPOSITION,
+    TestType.HIRAGANA_DRAWING,
+    TestType.KATAKANA_DRAWING,
+    TestType.KANJI_DRAWING,
 )
 
 private fun launchTest(activity: Context, types: List<TestType>) {

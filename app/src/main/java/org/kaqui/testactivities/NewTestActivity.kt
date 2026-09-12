@@ -165,6 +165,9 @@ fun TestContent(
         TestType.KANJI_COMPOSITION ->
             CompositionTest(question, kanaWords, onAnswer, onNextQuestion)
 
+        TestType.HIRAGANA_DRAWING, TestType.KATAKANA_DRAWING, TestType.KANJI_DRAWING ->
+            DrawingTest(question, kanaWords, onAnswer, onNextQuestion)
+
         else ->
             QuizTest(question, kanaWords, onAnswer, onNextQuestion)
     }
