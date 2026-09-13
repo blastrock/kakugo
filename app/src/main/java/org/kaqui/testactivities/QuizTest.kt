@@ -133,7 +133,11 @@ fun QuizTest(
 
 // Answers that only look the same as the expected one still count as correct, otherwise items
 // sharing a reading or a meaning would be impossible to answer.
-private fun isCorrectAnswer(question: TestQuestion, selectedIndex: Int, kanaWords: Boolean): Boolean {
+private fun isCorrectAnswer(
+    question: TestQuestion,
+    selectedIndex: Int,
+    kanaWords: Boolean,
+): Boolean {
     val selected = question.answers[selectedIndex]
     return selected.id == question.item.id ||
             selected.getAnswerText(question.testType, kanaWords) ==
@@ -176,7 +180,7 @@ fun QuizTestScreenContent(
     onNextClicked: () -> Unit,
     onAnswerSelected: (answerIndex: Int, certainty: Certainty) -> Unit,
     onShowAnswersClicked: () -> Unit,
-    onQuestionLongClick: (() -> Unit)? = null
+    onQuestionLongClick: (() -> Unit)? = null,
 ) {
     val singleButtonMode = uiState.singleButtonMode
     val initialHideAnswers = uiState.initialHideAnswers
@@ -286,7 +290,7 @@ fun QuizTestScreenContent(
 private fun getButtonBackgroundColor(
     uiState: QuizScreenUiState,
     index: Int,
-    themeColors: org.kaqui.theme.ThemeAttributes
+    themeColors: org.kaqui.theme.ThemeAttributes,
 ): Color? {
     val backgroundColor = when {
         uiState.answer == NO_ANSWER -> null
@@ -348,10 +352,9 @@ private fun SingleButtonAnswer(
             colors =
                 ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.surface,
-                    disabledBackgroundColor = highlight ?:
-                        MaterialTheme.colors.onSurface
-                            .copy(alpha = 0.12f)
-                            .compositeOver(MaterialTheme.colors.surface),
+                    disabledBackgroundColor = highlight ?: MaterialTheme.colors.onSurface
+                        .copy(alpha = 0.12f)
+                        .compositeOver(MaterialTheme.colors.surface),
                 ),
         ) {
             Text(
@@ -360,7 +363,8 @@ private fun SingleButtonAnswer(
                 textAlign = textAlign,
                 fontSize = fontSize,
                 lineHeight = 1.2.em,
-                fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
+                fontFamily = TypefaceManager.getTypeface(LocalContext.current)
+                    ?.let { FontFamily(it) }
             )
         }
     }
