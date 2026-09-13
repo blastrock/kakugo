@@ -25,6 +25,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -262,7 +263,7 @@ fun QuizTestScreenContent(
                     Separator()
 
                     if (!uiState.isAnswerGiven)
-                        Button(
+                        OutlinedButton(
                             onClick = {
                                 onAnswerSelected(
                                     NO_ANSWER,
@@ -271,17 +272,17 @@ fun QuizTestScreenContent(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = themeColors.backgroundDontKnow,
+                                backgroundColor = Color.Transparent,
                             ),
                         ) {
                             Text(stringResource(id = R.string.dont_know).toUpperCase(Locale.current))
                         }
                     else
-                        Button(
+                        OutlinedButton(
                             onClick = onNextClicked,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = themeColors.backgroundDontKnow,
+                                backgroundColor = Color.Transparent,
                             ),
                         ) {
                             Text(stringResource(id = R.string.next).toUpperCase(Locale.current))
