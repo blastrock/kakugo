@@ -160,9 +160,9 @@ All strings must be translated in all supported languages.
 
 ### Commit messages
 
-Commit messages are concise, with a subject (usually the class) and a small message explaining the change. For example: "KanjiDisplayactivity: add Words tab". Do not sign commits.
+Commit messages are concise, with a subject (usually the class) and a small message explaining the change. For example: "KanjiDisplayactivity: add Words tab".
 
-Don't make commits unless asked to. Don't bother with the fact that the worktree is usually in detached HEAD.
+Don't make commits unless asked to.
 
 ## Package Organization
 
