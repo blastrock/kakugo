@@ -597,7 +597,7 @@ fun PreviewQuizTestScreenContentSingleButtonAnsweredWrongly() {
 fun PreviewQuizTestScreenContentGridNotAnswered() {
     val sampleUiState = QuizScreenUiState(
         questionText = "か",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
+        answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
         correctAnswerIndex = 2,
         answer = NO_ANSWER,
         answersCurrentlyVisible = true,
@@ -621,7 +621,7 @@ fun PreviewQuizTestScreenContentGridNotAnswered() {
 fun PreviewQuizTestScreenContentGridAnsweredWrongly() {
     val sampleUiState = QuizScreenUiState(
         questionText = "か",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
+        answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
         correctAnswerIndex = 2,
         answer = 3,
         answersCurrentlyVisible = true,
