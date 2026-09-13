@@ -1,9 +1,7 @@
 package org.kaqui.testactivities
 
 import android.content.res.Configuration
-import android.util.TypedValue
-import android.view.Gravity
-import android.widget.TextView
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,19 +11,60 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.widget.TextViewCompat
+import androidx.compose.ui.unit.sp
 import org.kaqui.TypefaceManager
+
+@Composable
+private fun QuestionText(
+    question: String,
+    questionMinSizeSp: Int,
+    onQuestionLongClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
+
+    BasicText(
+        text = question,
+        modifier = modifier
+            .let { base ->
+                if (onQuestionLongClick != null)
+                    base.pointerInput(onQuestionLongClick) {
+                        detectTapGestures(onLongPress = { onQuestionLongClick() })
+                    }
+                else
+                    base
+            }
+            .fillMaxSize()
+            .wrapContentHeight(Alignment.CenterVertically),
+        style = TextStyle(
+            color = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current),
+            fontFamily = fontFamily,
+            textAlign = TextAlign.Center,
+        ),
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = questionMinSizeSp.sp,
+            maxFontSize = 200.sp,
+            stepSize = 10.sp,
+        ),
+    )
+}
 
 @Composable
 fun TestQuestionLayoutCompose(
@@ -41,43 +80,21 @@ fun TestQuestionLayoutCompose(
     val density = LocalDensity.current
     val screenWidthDp = with(density) { (windowInfo.containerSize.width / this.density).toInt() }
     val screenHeightDp = with(density) { (windowInfo.containerSize.height / this.density).toInt() }
-    val onBackgroundColor = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current).toArgb()
 
     if (forceLandscape || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AndroidView(
+            QuestionText(
+                question = question,
+                questionMinSizeSp = questionMinSizeSp,
+                onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .weight(0.5f)
                     .fillMaxHeight()
                     .padding(bottom = 8.dp),
-                factory = { context ->
-                    androidx.appcompat.widget.AppCompatTextView(context).apply {
-                        text = question
-                        typeface = TypefaceManager.getTypeface(context)
-                        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-                            this,
-                            questionMinSizeSp,
-                            200,
-                            10,
-                            TypedValue.COMPLEX_UNIT_SP
-                        )
-                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                        gravity = Gravity.CENTER
-                        onQuestionLongClick?.let { callback ->
-                            setOnLongClickListener {
-                                callback()
-                                true
-                            }
-                        }
-                        setTextColor(onBackgroundColor)
-                    }
-                },
-                update = { view ->
-                    view.text = question
-                })
+            )
 
             val answerHeightMod = { modifier: Modifier ->
                 if (screenWidthDp >= 1000)
@@ -110,36 +127,15 @@ fun TestQuestionLayoutCompose(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            AndroidView(
+            QuestionText(
+                question = question,
+                questionMinSizeSp = questionMinSizeSp,
+                onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .weight(weightQuestion)
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                factory = { context ->
-                    androidx.appcompat.widget.AppCompatTextView(context).apply {
-                        text = question
-                        typeface = TypefaceManager.getTypeface(context)
-                        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-                            this,
-                            questionMinSizeSp,
-                            200,
-                            10,
-                            TypedValue.COMPLEX_UNIT_SP
-                        )
-                        textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                        gravity = Gravity.CENTER
-                        onQuestionLongClick?.let { callback ->
-                            setOnLongClickListener {
-                                callback()
-                                true
-                            }
-                        }
-                        setTextColor(onBackgroundColor)
-                    }
-                },
-                update = { view ->
-                    view.text = question
-                })
+            )
 
             val answerWidthMod = { modifier: Modifier ->
                 if (screenWidthDp >= 500)
