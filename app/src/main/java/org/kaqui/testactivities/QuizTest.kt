@@ -39,6 +39,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.preference.PreferenceManager
 import org.kaqui.BetterButton
@@ -351,6 +352,7 @@ private fun SingleButtonAnswer(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = textAlign,
                 fontSize = fontSize,
+                lineHeight = 1.2.em,
                 fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
             )
         }
@@ -438,6 +440,7 @@ private fun TwoButtonAnswer(
         Text(
             text = answerText,
             fontSize = layout.answerFontSize,
+            lineHeight = 1.2.em,
             textAlign = layout.answerTextAlign,
             fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) },
             modifier = Modifier.weight(1f),
