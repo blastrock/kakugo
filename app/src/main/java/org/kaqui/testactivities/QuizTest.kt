@@ -240,7 +240,8 @@ fun QuizTestScreenContent(
                                         answerText = answerText,
                                         layout = layout,
                                         singleButtonMode = singleButtonMode,
-                                        enabled = !uiState.isAnswerGiven,
+                                        enabled = !uiState.isAnswerGiven ||
+                                                index == uiState.correctAnswerIndex,
                                         highlight = getButtonBackgroundColor(
                                             uiState,
                                             index,
@@ -248,7 +249,10 @@ fun QuizTestScreenContent(
                                         ),
                                         modifier = Modifier.weight(1f),
                                         onClick = { certainty ->
-                                            onAnswerSelected(index, certainty)
+                                            if (uiState.isAnswerGiven)
+                                                onNextClicked()
+                                            else
+                                                onAnswerSelected(index, certainty)
                                         }
                                     )
                                 }
@@ -355,7 +359,10 @@ private fun SingleButtonAnswer(
                 if (highlight == null)
                     ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent)
                 else
-                    ButtonDefaults.buttonColors(disabledBackgroundColor = highlight),
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = highlight,
+                        disabledBackgroundColor = highlight,
+                    ),
             border = if (highlight == null) ButtonDefaults.outlinedBorder else null,
             elevation = if (highlight == null) null else ButtonDefaults.elevation(),
         ) {
