@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ScrollState
@@ -350,12 +352,12 @@ private fun SingleButtonAnswer(
             enabled = enabled,
             contentPadding = PaddingValues(8.dp),
             colors =
-                ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.surface,
-                    disabledBackgroundColor = highlight ?: MaterialTheme.colors.onSurface
-                        .copy(alpha = 0.12f)
-                        .compositeOver(MaterialTheme.colors.surface),
-                ),
+                if (highlight == null)
+                    ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent)
+                else
+                    ButtonDefaults.buttonColors(disabledBackgroundColor = highlight),
+            border = if (highlight == null) ButtonDefaults.outlinedBorder else null,
+            elevation = if (highlight == null) null else ButtonDefaults.elevation(),
         ) {
             Text(
                 text = answerText,
@@ -652,6 +654,68 @@ fun PreviewQuizTestScreenContentGridSingleButtonAnsweredWrongly() {
         initialHideAnswers = true,
         singleButtonMode = true,
         currentTestType = TestType.HIRAGANA_TO_ROMAJI,
+    )
+
+    KakugoTheme {
+        QuizTestScreenContent(
+            uiState = sampleUiState,
+            onNextClicked = { },
+            onAnswerSelected = { index, certainty -> },
+            onShowAnswersClicked = { }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Quiz Screen Preview - Word to reading")
+@Composable
+fun PreviewQuizTestScreenContentWordToReading() {
+    val sampleUiState = QuizScreenUiState(
+        questionText = "華やか",
+        answerOptions = listOf(
+            "こやか",
+            "さわやか",
+            "にぎやか",
+            "おだやか",
+            "しとやか",
+            "はなやか"
+        ),
+        correctAnswerIndex = 5,
+        answer = NO_ANSWER,
+        answersCurrentlyVisible = true,
+        initialHideAnswers = true,
+        singleButtonMode = false,
+        currentTestType = TestType.WORD_TO_READING,
+    )
+
+    KakugoTheme {
+        QuizTestScreenContent(
+            uiState = sampleUiState,
+            onNextClicked = { },
+            onAnswerSelected = { index, certainty -> },
+            onShowAnswersClicked = { }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Quiz Screen Preview - Word to reading")
+@Composable
+fun PreviewQuizTestScreenContentWordToReadingSingleButton() {
+    val sampleUiState = QuizScreenUiState(
+        questionText = "根掘り葉掘り",
+        answerOptions = listOf(
+            "ねほりはほり",
+            "さわやか",
+            "にぎやか",
+            "おだやか",
+            "しとやか",
+            "はなやか"
+        ),
+        correctAnswerIndex = 5,
+        answer = NO_ANSWER,
+        answersCurrentlyVisible = true,
+        initialHideAnswers = true,
+        singleButtonMode = true,
+        currentTestType = TestType.WORD_TO_READING,
     )
 
     KakugoTheme {

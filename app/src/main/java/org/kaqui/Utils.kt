@@ -14,6 +14,7 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.net.toUri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -397,6 +398,7 @@ fun BetterButton(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     shape: Shape = MaterialTheme.shapes.small,
+    border: BorderStroke? = null,
     elevation: ButtonElevation? = ButtonDefaults.elevation(),
     content: @Composable RowScope.() -> Unit
 ) {
@@ -437,6 +439,7 @@ fun BetterButton(
         colors = colors,
         contentPadding = contentPadding,
         shape = shape,
+        border = border,
         elevation = elevation,
     )
 }
