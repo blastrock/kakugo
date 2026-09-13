@@ -2,6 +2,7 @@ package org.kaqui.testactivities
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -219,7 +222,11 @@ fun QuizTestScreenContent(
                                 Separator()
 
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                // Measuring at the tallest answer's height lets the single
+                                // buttons of a row stretch to match each other.
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(IntrinsicSize.Min),
                             ) {
                                 rowAnswers.forEachIndexed { columnIndex, answerText ->
                                     val index = rowIndex * layout.columns + columnIndex
@@ -377,9 +384,11 @@ private fun AnswerCell(
             answerText = answerText,
             textAlign = layout.answerTextAlign,
             fontSize = layout.answerFontSize,
-            modifier = modifier.padding(
-                if (layout.isGrid) PaddingValues(4.dp) else PaddingValues(vertical = 4.dp)
-            ),
+            modifier = modifier
+                .fillMaxHeight()
+                .padding(
+                    if (layout.isGrid) PaddingValues(4.dp) else PaddingValues(vertical = 4.dp)
+                ),
         )
     } else {
         TwoButtonAnswer(
