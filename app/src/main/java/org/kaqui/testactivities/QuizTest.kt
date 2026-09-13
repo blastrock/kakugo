@@ -138,7 +138,33 @@ private fun isCorrectAnswer(question: TestQuestion, selectedIndex: Int, kanaWord
             question.item.getQuestionText(question.testType, kanaWords)
 }
 
-const val COLUMNS = 2
+private data class QuizLayout(
+    val questionMinSizeSp: Int,
+    val columns: Int,
+    val answerFontSize: TextUnit,
+    val answerTextAlign: TextAlign,
+) {
+    val isGrid get() = columns > 1
+}
+
+// Questions whose answer is a reading or a meaning show prose, which needs a full-width row,
+// the others show a single word or character, which fits two per row at a large font size.
+private fun quizLayout(testType: TestType?) =
+    when (testType) {
+        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING ->
+            QuizLayout(50, 1, TextUnit.Unspecified, TextAlign.Start)
+
+        TestType.READING_TO_WORD, TestType.MEANING_TO_WORD ->
+            QuizLayout(10, 2, 30.sp, TextAlign.Center)
+
+        TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI ->
+            QuizLayout(10, 2, 50.sp, TextAlign.Center)
+
+        TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA ->
+            QuizLayout(50, 2, 50.sp, TextAlign.Center)
+
+        else -> throw RuntimeException("unsupported test type $testType for QuizTest")
+    }
 
 @Composable
 fun QuizTestScreenContent(
@@ -153,13 +179,7 @@ fun QuizTestScreenContent(
     val answersCurrentlyVisible = uiState.answersCurrentlyVisible
     val themeColors = LocalThemeAttributes.current
 
-    val questionMinSize =
-        when (uiState.currentTestType) {
-            TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> 50
-            TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI -> 10
-            TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA -> 50
-            else -> throw RuntimeException("unsupported test type for TestActivity")
-        }
+    val layout = quizLayout(uiState.currentTestType)
 
     Column(
         modifier = Modifier
@@ -169,7 +189,7 @@ fun QuizTestScreenContent(
     ) {
         TestQuestionLayoutCompose(
             question = uiState.questionText,
-            questionMinSizeSp = questionMinSize,
+            questionMinSizeSp = layout.questionMinSizeSp,
             onQuestionLongClick = onQuestionLongClick
         ) {
             if (initialHideAnswers && !answersCurrentlyVisible && !uiState.isAnswerGiven) {
@@ -192,76 +212,34 @@ fun QuizTestScreenContent(
                         .fillMaxWidth()
                         .verticalScroll(scrollState),
                 ) {
-                    when (val testType = uiState.currentTestType) {
-                        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING -> {
-                            uiState.answerOptions.forEachIndexed { index, answerText ->
-                                val backgroundColor =
-                                    getButtonBackgroundColor(uiState, index, themeColors)
+                    uiState.answerOptions.chunked(layout.columns)
+                        .forEachIndexed { rowIndex, rowAnswers ->
+                            if (!singleButtonMode)
+                                Separator()
 
-                                if (!singleButtonMode) {
-                                    Separator()
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                rowAnswers.forEachIndexed { columnIndex, answerText ->
+                                    val index = rowIndex * layout.columns + columnIndex
+                                    AnswerCell(
+                                        answerText = answerText,
+                                        layout = layout,
+                                        singleButtonMode = singleButtonMode,
+                                        enabled = !uiState.isAnswerGiven,
+                                        highlight = getButtonBackgroundColor(
+                                            uiState,
+                                            index,
+                                            themeColors
+                                        ),
+                                        modifier = Modifier.weight(1f),
+                                        onClick = { certainty ->
+                                            onAnswerSelected(index, certainty)
+                                        }
+                                    )
                                 }
-
-                                AnswerRow(
-                                    answerText = answerText,
-                                    singleButtonMode = singleButtonMode,
-                                    enabled = !uiState.isAnswerGiven,
-                                    highlight = backgroundColor,
-                                    onClick = { certainty ->
-                                        onAnswerSelected(index, certainty)
-                                    }
-                                )
                             }
                         }
-
-                        TestType.READING_TO_WORD, TestType.MEANING_TO_WORD, TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI,
-                        TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA
-                            -> {
-                            uiState.answerOptions.chunked(COLUMNS)
-                                .forEachIndexed { rowIndex, rowItems ->
-                                    if (!singleButtonMode)
-                                        Separator()
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                    ) {
-                                        rowItems.forEachIndexed { columnIndex, answerText ->
-                                            val originalIndex =
-                                                uiState.answerOptions.indexOf(answerText)
-                                            val fontSize = when (testType) {
-                                                TestType.READING_TO_WORD, TestType.MEANING_TO_WORD -> 30.sp
-                                                else -> 50.sp
-                                            }
-                                            val index = rowIndex * COLUMNS + columnIndex
-                                            val backgroundColor =
-                                                getButtonBackgroundColor(
-                                                    uiState,
-                                                    index,
-                                                    themeColors
-                                                )
-                                            AnswerGridItem(
-                                                answerText = answerText,
-                                                singleButtonMode = singleButtonMode,
-                                                fontSize = fontSize,
-                                                enabled = !uiState.isAnswerGiven,
-                                                modifier = Modifier.weight(1f),
-                                                highlight = backgroundColor,
-                                                onClick = { certainty ->
-                                                    if (!uiState.isAnswerGiven) {
-                                                        onAnswerSelected(
-                                                            originalIndex,
-                                                            certainty
-                                                        )
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                        }
-
-                        else -> throw RuntimeException("unsupported test type $testType for QuizTest")
-                    }
 
                     Separator()
 
@@ -380,69 +358,43 @@ private fun SingleButtonAnswer(
 }
 
 @Composable
-fun AnswerRow(
+private fun AnswerCell(
     answerText: String,
+    layout: QuizLayout,
     singleButtonMode: Boolean,
     enabled: Boolean,
     highlight: Color?,
-    onClick: (Certainty) -> Unit
+    modifier: Modifier,
+    onClick: (Certainty) -> Unit,
 ) {
-    val themeColors = LocalThemeAttributes.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (!singleButtonMode && highlight != null)
-                    Modifier.background(highlight)
-                else
-                    Modifier
+    if (singleButtonMode) {
+        SingleButtonAnswer(
+            onClick = onClick,
+            enabled = enabled,
+            highlight = highlight,
+            answerText = answerText,
+            textAlign = layout.answerTextAlign,
+            fontSize = layout.answerFontSize,
+            modifier = modifier.padding(
+                if (layout.isGrid) PaddingValues(4.dp) else PaddingValues(vertical = 4.dp)
             ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (singleButtonMode) {
-            SingleButtonAnswer(
-                onClick,
-                enabled,
-                highlight,
-                answerText,
-                TextAlign.Start,
-                Modifier.fillMaxWidth().padding(vertical = 4.dp)
-            )
-        } else {
-            Text(
-                text = answerText,
-                modifier = Modifier.weight(1f),
-                fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            AnswerButton(
-                onClick = { onClick(Certainty.MAYBE) },
-                enabled = enabled,
-                backgroundColor = themeColors.backgroundMaybe,
-                textResId = R.string.maybe,
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 0.dp)
-                    .padding(4.dp)
-            )
-            AnswerButton(
-                onClick = { onClick(Certainty.SURE) },
-                enabled = enabled,
-                backgroundColor = themeColors.backgroundSure,
-                textResId = R.string.sure,
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 0.dp)
-                    .padding(4.dp)
-            )
-        }
+        )
+    } else {
+        TwoButtonAnswer(
+            answerText = answerText,
+            layout = layout,
+            enabled = enabled,
+            highlight = highlight,
+            modifier = modifier,
+            onClick = onClick,
+        )
     }
 }
 
 @Composable
-fun AnswerGridItem(
+private fun TwoButtonAnswer(
     answerText: String,
-    singleButtonMode: Boolean,
-    fontSize: TextUnit,
+    layout: QuizLayout,
     enabled: Boolean,
     highlight: Color?,
     modifier: Modifier,
@@ -450,55 +402,56 @@ fun AnswerGridItem(
 ) {
     val themeColors = LocalThemeAttributes.current
 
-    if (singleButtonMode) {
-        SingleButtonAnswer(
-            onClick = { certainty -> onClick(certainty) },
+    val maybeButton: @Composable () -> Unit = {
+        AnswerButton(
+            onClick = { onClick(Certainty.MAYBE) },
             enabled = enabled,
-            fontSize = fontSize,
-            highlight = highlight,
-            answerText = answerText,
-            textAlign = TextAlign.Center,
-            modifier = modifier.padding(4.dp),
+            backgroundColor = themeColors.backgroundMaybe,
+            textResId = R.string.maybe,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 0.dp, minHeight = 0.dp)
+                .padding(4.dp)
         )
-    } else {
-        Row(
-            modifier = modifier
-                .fillMaxSize()
-                .then(
-                    if (highlight != null)
-                        Modifier.background(highlight)
-                    else
-                        Modifier
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = answerText,
-                fontSize = fontSize,
-                textAlign = TextAlign.Center,
-                fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) },
-                modifier = Modifier.weight(1f),
-            )
+    }
+    val sureButton: @Composable () -> Unit = {
+        AnswerButton(
+            onClick = { onClick(Certainty.SURE) },
+            enabled = enabled,
+            backgroundColor = themeColors.backgroundSure,
+            textResId = R.string.sure,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 0.dp, minHeight = 0.dp)
+                .padding(4.dp)
+        )
+    }
+
+    Row(
+        modifier = modifier
+            .then(
+                if (highlight != null)
+                    Modifier.background(highlight)
+                else
+                    Modifier
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = answerText,
+            fontSize = layout.answerFontSize,
+            textAlign = layout.answerTextAlign,
+            fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) },
+            modifier = Modifier.weight(1f),
+        )
+        // A grid cell is too narrow to fit both buttons side by side.
+        if (layout.isGrid) {
             Column {
-                AnswerButton(
-                    onClick = { onClick(Certainty.SURE) },
-                    enabled = enabled,
-                    backgroundColor = themeColors.backgroundSure,
-                    textResId = R.string.sure,
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = 0.dp, minHeight = 0.dp)
-                        .padding(4.dp)
-                )
-                AnswerButton(
-                    onClick = { onClick(Certainty.MAYBE) },
-                    enabled = enabled,
-                    backgroundColor = themeColors.backgroundMaybe,
-                    textResId = R.string.maybe,
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = 0.dp, minHeight = 0.dp)
-                        .padding(4.dp)
-                )
+                sureButton()
+                maybeButton()
             }
+        } else {
+            Spacer(modifier = Modifier.width(8.dp))
+            maybeButton()
+            sureButton()
         }
     }
 }
