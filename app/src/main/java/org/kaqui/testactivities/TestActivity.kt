@@ -618,6 +618,7 @@ private fun LastItemRow(
     onSwap: () -> Unit = {},
 ) {
     val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
+    val startPadding = safeDrawing.calculateStartPadding(LocalLayoutDirection.current)
     val canSwap = lastCorrect != null || lastWrong != null
     val offsetX = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
@@ -650,6 +651,7 @@ private fun LastItemRow(
                     .matchParentSize()
                     .background(if (toCorrect) themeAttrs.itemGood else themeAttrs.itemBad)
                     .padding(bottom = safeDrawing.calculateBottomPadding())
+                    .padding(start = startPadding)
                     .padding(horizontal = 24.dp)
                     .padding(end = 36.dp),
                 horizontalArrangement =
@@ -670,6 +672,7 @@ private fun LastItemRow(
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .background(MaterialTheme.colors.surface)
                 .padding(bottom = safeDrawing.calculateBottomPadding())
+                .padding(start = startPadding)
                 .then(
                     if (canSwap)
                         Modifier.pointerInput(lastCorrect, lastWrong) {
