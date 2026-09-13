@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -39,31 +41,32 @@ private fun QuestionText(
     modifier: Modifier = Modifier,
 ) {
     val fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
-
-    BasicText(
-        text = question,
-        modifier = modifier
-            .let { base ->
-                if (onQuestionLongClick != null)
-                    base.pointerInput(onQuestionLongClick) {
-                        detectTapGestures(onLongPress = { onQuestionLongClick() })
-                    }
-                else
-                    base
-            }
-            .fillMaxSize()
-            .wrapContentHeight(Alignment.CenterVertically),
-        style = TextStyle(
-            color = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current),
-            fontFamily = fontFamily,
-            textAlign = TextAlign.Center,
-        ),
-        autoSize = TextAutoSize.StepBased(
-            minFontSize = questionMinSizeSp.sp,
-            maxFontSize = 200.sp,
-            stepSize = 10.sp,
-        ),
-    )
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        BasicText(
+            text = question,
+            modifier = modifier
+                .let { base ->
+                    if (onQuestionLongClick != null)
+                        base.pointerInput(onQuestionLongClick) {
+                            detectTapGestures(onLongPress = { onQuestionLongClick() })
+                        }
+                    else
+                        base
+                }
+                .fillMaxSize()
+                .wrapContentHeight(Alignment.CenterVertically),
+            style = TextStyle(
+                color = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current),
+                fontFamily = fontFamily,
+                textAlign = TextAlign.Center,
+            ),
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = questionMinSizeSp.sp,
+                maxFontSize = 120.sp,
+                stepSize = 10.sp,
+            ),
+        )
+    }
 }
 
 @Composable
