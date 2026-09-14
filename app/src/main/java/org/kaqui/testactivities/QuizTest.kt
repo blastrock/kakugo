@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toUpperCase
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -58,6 +57,7 @@ import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerText
 import org.kaqui.model.getQuestionText
 import org.kaqui.showItemProbabilityData
+import org.kaqui.theme.KakugoPreview
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 
@@ -482,7 +482,7 @@ private fun TwoButtonAnswer(
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Answers Shown")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentAnswersVisible() {
     val sampleUiState = QuizScreenUiState(
@@ -506,7 +506,7 @@ fun PreviewQuizTestScreenContentAnswersVisible() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Meaning to word")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentMeaningToWord() {
     val sampleUiState = QuizScreenUiState(
@@ -530,7 +530,7 @@ fun PreviewQuizTestScreenContentMeaningToWord() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Answered Wrongly")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentAnsweredWrongly() {
     val sampleUiState = QuizScreenUiState(
@@ -554,7 +554,7 @@ fun PreviewQuizTestScreenContentAnsweredWrongly() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Single Button")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentSingleButton() {
     val sampleUiState = QuizScreenUiState(
@@ -578,7 +578,7 @@ fun PreviewQuizTestScreenContentSingleButton() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Single Button - Answered Wrongly")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentSingleButtonAnsweredWrongly() {
     val sampleUiState = QuizScreenUiState(
@@ -602,7 +602,7 @@ fun PreviewQuizTestScreenContentSingleButtonAnsweredWrongly() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Grid - Not Answered")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentGridNotAnswered() {
     val sampleUiState = QuizScreenUiState(
@@ -626,7 +626,7 @@ fun PreviewQuizTestScreenContentGridNotAnswered() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Grid - Answered Wrongly")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentGridAnsweredWrongly() {
     val sampleUiState = QuizScreenUiState(
@@ -650,7 +650,7 @@ fun PreviewQuizTestScreenContentGridAnsweredWrongly() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Single Button - Answered Wrongly")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentGridSingleButtonAnsweredWrongly() {
     val sampleUiState = QuizScreenUiState(
@@ -674,7 +674,7 @@ fun PreviewQuizTestScreenContentGridSingleButtonAnsweredWrongly() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Word to reading")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentWordToReading() {
     val sampleUiState = QuizScreenUiState(
@@ -705,7 +705,7 @@ fun PreviewQuizTestScreenContentWordToReading() {
     }
 }
 
-@Preview(showBackground = true, name = "Quiz Screen Preview - Word to reading")
+@KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentWordToReadingSingleButton() {
     val sampleUiState = QuizScreenUiState(
