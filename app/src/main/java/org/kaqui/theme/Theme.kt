@@ -1,11 +1,14 @@
 package org.kaqui.theme
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColors(
@@ -123,7 +126,14 @@ fun KakugoTheme(
     ) {
         MaterialTheme(
             colors = materialColors,
-            content = content
-        )
+        ) {
+            // The surface is what paints the background and, through it, sets the
+            // content color; without one the text defaults to black in both themes.
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background,
+                content = content
+            )
+        }
     }
 }

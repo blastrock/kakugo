@@ -219,37 +219,35 @@ fun AppScaffold(
     content: @Composable (PaddingValues) -> Unit
 ) {
     KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    TopBar(
-                        title = title,
-                        onBackClick = onBackClick,
-                        actions = actions,
-                        belowAppBar = belowAppBar
-                    )
-                },
-                content = { paddingValues ->
-                    val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
-                    val layoutDirection = LocalLayoutDirection.current
+        Scaffold(
+            topBar = {
+                TopBar(
+                    title = title,
+                    onBackClick = onBackClick,
+                    actions = actions,
+                    belowAppBar = belowAppBar
+                )
+            },
+            content = { paddingValues ->
+                val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
+                val layoutDirection = LocalLayoutDirection.current
 
-                    val combinedPadding = PaddingValues(
-                        start = paddingValues.calculateStartPadding(layoutDirection),
-                        top = paddingValues.calculateTopPadding(),
-                        end = paddingValues.calculateEndPadding(layoutDirection),
-                        bottom = paddingValues.calculateBottomPadding() + navigationBarInsets.calculateBottomPadding()
-                    )
+                val combinedPadding = PaddingValues(
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                    bottom = paddingValues.calculateBottomPadding() + navigationBarInsets.calculateBottomPadding()
+                )
 
-                    Column(
-                        modifier = Modifier
-                            .consumeWindowInsets(WindowInsets.statusBars)
-                            .consumeWindowInsets(WindowInsets.navigationBars)
-                    ) {
-                        content(combinedPadding)
-                    }
-                },
-            )
-        }
+                Column(
+                    modifier = Modifier
+                        .consumeWindowInsets(WindowInsets.statusBars)
+                        .consumeWindowInsets(WindowInsets.navigationBars)
+                ) {
+                    content(combinedPadding)
+                }
+            },
+        )
     }
 }
 

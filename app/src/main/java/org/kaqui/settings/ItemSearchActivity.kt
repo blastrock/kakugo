@@ -216,104 +216,102 @@ fun ItemSearchScreen(
     }
 
     KakugoTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Scaffold(
-                topBar = {
-                    Surface(
-                        color = MaterialTheme.colors.primary,
-                        elevation = 4.dp
-                    ) {
-                        Column {
-                            Spacer(
-                                Modifier
-                                    .windowInsetsTopHeight(WindowInsets.statusBars)
-                                    .fillMaxWidth()
-                                    .background(Color.Black.copy(alpha = 0.3f))
-                            )
-                            TopAppBar(
-                                navigationIcon = {
-                                    IconButton(onClick = onBackClick) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = stringResource(R.string.back)
-                                        )
-                                    }
-                                },
-                                title = {
-                                    TextField(
-                                        state = searchState,
-                                        placeholder = {
-                                            Text(
-                                                text = stringResource(R.string.search)
-                                            )
-                                        },
-                                        trailingIcon = {
-                                            if (searchState.text.isNotEmpty()) {
-                                                IconButton(onClick = {
-                                                    searchState.clearText()
-                                                    focusRequester.requestFocus()
-                                                    keyboardController?.show()
-                                                }) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Clear,
-                                                        contentDescription = stringResource(R.string.clear_search),
-                                                        tint = MaterialTheme.colors.onPrimary
-                                                    )
-                                                }
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .focusRequester(focusRequester),
-                                        lineLimits = TextFieldLineLimits.SingleLine,
-                                        colors = TextFieldDefaults.textFieldColors(
-                                            backgroundColor = MaterialTheme.colors.primary,
-                                            textColor = MaterialTheme.colors.onPrimary,
-                                            placeholderColor = MaterialTheme.colors.onPrimary.copy(
-                                                alpha = 0.6f
-                                            ),
-                                            focusedIndicatorColor = MaterialTheme.colors.onPrimary,
-                                            unfocusedIndicatorColor = MaterialTheme.colors.onPrimary.copy(
-                                                alpha = 0.4f
-                                            ),
-                                            cursorColor = MaterialTheme.colors.onPrimary
-                                        )
+        Scaffold(
+            topBar = {
+                Surface(
+                    color = MaterialTheme.colors.primary,
+                    elevation = 4.dp
+                ) {
+                    Column {
+                        Spacer(
+                            Modifier
+                                .windowInsetsTopHeight(WindowInsets.statusBars)
+                                .fillMaxWidth()
+                                .background(Color.Black.copy(alpha = 0.3f))
+                        )
+                        TopAppBar(
+                            navigationIcon = {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = stringResource(R.string.back)
                                     )
-                                },
-                                backgroundColor = MaterialTheme.colors.primary,
-                                contentColor = MaterialTheme.colors.onPrimary,
-                                elevation = 4.dp
-                            )
-                        }
+                                }
+                            },
+                            title = {
+                                TextField(
+                                    state = searchState,
+                                    placeholder = {
+                                        Text(
+                                            text = stringResource(R.string.search)
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        if (searchState.text.isNotEmpty()) {
+                                            IconButton(onClick = {
+                                                searchState.clearText()
+                                                focusRequester.requestFocus()
+                                                keyboardController?.show()
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Clear,
+                                                    contentDescription = stringResource(R.string.clear_search),
+                                                    tint = MaterialTheme.colors.onPrimary
+                                                )
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(focusRequester),
+                                    lineLimits = TextFieldLineLimits.SingleLine,
+                                    colors = TextFieldDefaults.textFieldColors(
+                                        backgroundColor = MaterialTheme.colors.primary,
+                                        textColor = MaterialTheme.colors.onPrimary,
+                                        placeholderColor = MaterialTheme.colors.onPrimary.copy(
+                                            alpha = 0.6f
+                                        ),
+                                        focusedIndicatorColor = MaterialTheme.colors.onPrimary,
+                                        unfocusedIndicatorColor = MaterialTheme.colors.onPrimary.copy(
+                                            alpha = 0.4f
+                                        ),
+                                        cursorColor = MaterialTheme.colors.onPrimary
+                                    )
+                                )
+                            },
+                            backgroundColor = MaterialTheme.colors.primary,
+                            contentColor = MaterialTheme.colors.onPrimary,
+                            elevation = 4.dp
+                        )
                     }
                 }
-            ) { paddingValues ->
-                // This is normally handled by AppScaffold, but this activity uses a manual Scaffold
-                val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
-                val layoutDirection = LocalLayoutDirection.current
-                val combinedPadding = PaddingValues(
-                    start = paddingValues.calculateStartPadding(layoutDirection),
-                    top = paddingValues.calculateTopPadding(),
-                    end = paddingValues.calculateEndPadding(layoutDirection),
-                    bottom = paddingValues.calculateBottomPadding() + navigationBarInsets.calculateBottomPadding()
-                )
+            }
+        ) { paddingValues ->
+            // This is normally handled by AppScaffold, but this activity uses a manual Scaffold
+            val navigationBarInsets = WindowInsets.navigationBars.asPaddingValues()
+            val layoutDirection = LocalLayoutDirection.current
+            val combinedPadding = PaddingValues(
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                top = paddingValues.calculateTopPadding(),
+                end = paddingValues.calculateEndPadding(layoutDirection),
+                bottom = paddingValues.calculateBottomPadding() + navigationBarInsets.calculateBottomPadding()
+            )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .consumeWindowInsets(combinedPadding)
-                        .imePadding()
-                ) {
-                    ItemListWithStats(
-                        itemIds = uiState.itemIds,
-                        stats = uiState.stats,
-                        cacheVersion = uiState.cacheVersion,
-                        getItemData = getItemData,
-                        onItemEnabledChange = onItemEnabledChange,
-                        onItemClick = onItemClick,
-                        contentPadding = combinedPadding,
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .consumeWindowInsets(combinedPadding)
+                    .imePadding()
+            ) {
+                ItemListWithStats(
+                    itemIds = uiState.itemIds,
+                    stats = uiState.stats,
+                    cacheVersion = uiState.cacheVersion,
+                    getItemData = getItemData,
+                    onItemEnabledChange = onItemEnabledChange,
+                    onItemClick = onItemClick,
+                    contentPadding = combinedPadding,
+                )
             }
         }
     }
