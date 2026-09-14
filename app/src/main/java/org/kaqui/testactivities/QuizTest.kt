@@ -48,12 +48,16 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.preference.PreferenceManager
 import org.kaqui.BetterButton
+import org.kaqui.HistoryItem
+import org.kaqui.HistoryItemStyle
 import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.TypefaceManager
 import org.kaqui.model.Certainty
 import org.kaqui.model.Item
+import org.kaqui.model.LearningDbView
 import org.kaqui.model.TestType
+import org.kaqui.model.Word
 import org.kaqui.model.getAnswerText
 import org.kaqui.model.getQuestionText
 import org.kaqui.showItemProbabilityData
@@ -482,256 +486,255 @@ private fun TwoButtonAnswer(
     }
 }
 
-@KakugoPreview
+// The quiz only fills the content area of the test screen, so the previews show it inside the
+// same shell as the real test.
 @Composable
-fun PreviewQuizTestScreenContentAnswersVisible() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "犬は何ですか？",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
-        correctAnswerIndex = 0,
-        answer = NO_ANSWER,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = false,
-        currentTestType = TestType.WORD_TO_MEANING,
+private fun PreviewQuizInTestScreen(uiState: QuizScreenUiState) {
+    val lastCorrect = Item(
+        0,
+        Word("好き", "すき", listOf("fond", "pleasing", "like something"), listOf(), false, ""),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val lastWrong = Item(
+        0,
+        Word("人", "ひと", listOf("person"), listOf(), false, ""),
+        0.0,
+        0.0,
+        0,
+        true
     )
 
     KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
-        )
+        TestScreen(
+            title = "Test",
+            stats = LearningDbView.Stats(good = 5, meh = 3, bad = 2, disabled = 0),
+            correctCount = 10,
+            questionCount = 15,
+            uniqueCorrectCount = 8,
+            uniqueItemCount = 10,
+            historyState = HistoryState(
+                items = listOf(
+                    HistoryItem(
+                        item = lastCorrect,
+                        probabilityData = null,
+                        style = HistoryItemStyle.GOOD,
+                    ),
+                    HistoryItem(
+                        item = lastWrong,
+                        probabilityData = null,
+                        style = HistoryItemStyle.BAD,
+                        prependSeparator = true,
+                    ),
+                ),
+                lastCorrect = lastCorrect,
+                lastWrong = lastWrong,
+            ),
+            sheetExpanded = false,
+            onSheetExpandedChange = {},
+            kanaWords = true,
+            onItemClick = {},
+            onBackClick = {},
+        ) {
+            QuizTestScreenContent(
+                uiState = uiState,
+                onNextClicked = { },
+                onAnswerSelected = { index, certainty -> },
+                onShowAnswersClicked = { }
+            )
+        }
     }
+}
+
+@KakugoPreview
+@Composable
+fun PreviewQuizTestScreenContentAnswersVisible() {
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "犬",
+            answerOptions = listOf("Dog", "Cat", "Bird", "Fish", "Horse", "Cow"),
+            correctAnswerIndex = 0,
+            answer = NO_ANSWER,
+            singleButtonMode = false,
+            currentTestType = TestType.WORD_TO_MEANING,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
+        )
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentMeaningToWord() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "test 123",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
-        correctAnswerIndex = 0,
-        answer = NO_ANSWER,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = false,
-        currentTestType = TestType.MEANING_TO_WORD,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "showy, brilliant, gorgeous",
+            answerOptions = listOf(
+                "華やか",
+                "爽やか",
+                "賑やか",
+                "穏やか",
+                "淑やか",
+                "細やか"
+            ),
+            correctAnswerIndex = 0,
+            answer = NO_ANSWER,
+            singleButtonMode = false,
+            currentTestType = TestType.MEANING_TO_WORD,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentAnsweredWrongly() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "鳥は何ですか？",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
-        correctAnswerIndex = 2,
-        answer = 3,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = false,
-        currentTestType = TestType.WORD_TO_MEANING,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "鳥",
+            answerOptions = listOf("Dog", "Cat", "Bird", "Fish", "Horse", "Cow"),
+            correctAnswerIndex = 2,
+            answer = 3,
+            singleButtonMode = false,
+            currentTestType = TestType.WORD_TO_MEANING,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentSingleButton() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "鳥は何ですか？",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
-        correctAnswerIndex = 2,
-        answer = NO_ANSWER,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = true,
-        currentTestType = TestType.WORD_TO_MEANING,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "鳥",
+            answerOptions = listOf("Dog", "Cat", "Bird", "Fish", "Horse", "Cow"),
+            correctAnswerIndex = 2,
+            answer = NO_ANSWER,
+            singleButtonMode = true,
+            currentTestType = TestType.WORD_TO_MEANING,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentSingleButtonAnsweredWrongly() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "鳥は何ですか？",
-        answerOptions = listOf("Dog\nBob", "Cat\nJam", "Bird", "Fish"),
-        correctAnswerIndex = 2,
-        answer = 3,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = true,
-        currentTestType = TestType.WORD_TO_MEANING,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "鳥",
+            answerOptions = listOf("Dog\nBob", "Cat\nJam", "Bird", "Fish", "Horse", "Cow"),
+            correctAnswerIndex = 2,
+            answer = 3,
+            singleButtonMode = true,
+            currentTestType = TestType.WORD_TO_MEANING,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentGridNotAnswered() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "か",
-        answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
-        correctAnswerIndex = 2,
-        answer = NO_ANSWER,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = false,
-        currentTestType = TestType.HIRAGANA_TO_ROMAJI,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "か",
+            answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
+            correctAnswerIndex = 0,
+            answer = NO_ANSWER,
+            singleButtonMode = false,
+            currentTestType = TestType.HIRAGANA_TO_ROMAJI,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentGridAnsweredWrongly() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "か",
-        answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
-        correctAnswerIndex = 2,
-        answer = 3,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = false,
-        currentTestType = TestType.HIRAGANA_TO_ROMAJI,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "か",
+            answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
+            correctAnswerIndex = 0,
+            answer = 3,
+            singleButtonMode = false,
+            currentTestType = TestType.HIRAGANA_TO_ROMAJI,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentGridSingleButtonAnsweredWrongly() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "鳥は何ですか？",
-        answerOptions = listOf("Dog", "Cat", "Bird", "Fish"),
-        correctAnswerIndex = 2,
-        answer = 3,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = true,
-        currentTestType = TestType.HIRAGANA_TO_ROMAJI,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "か",
+            answerOptions = listOf("ka", "ko", "ke", "ki", "ku", "sa"),
+            correctAnswerIndex = 0,
+            answer = 3,
+            singleButtonMode = true,
+            currentTestType = TestType.HIRAGANA_TO_ROMAJI,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentWordToReading() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "華やか",
-        answerOptions = listOf(
-            "こやか",
-            "さわやか",
-            "にぎやか",
-            "おだやか",
-            "しとやか",
-            "はなやか"
-        ),
-        correctAnswerIndex = 5,
-        answer = NO_ANSWER,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = false,
-        currentTestType = TestType.WORD_TO_READING,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "華やか",
+            answerOptions = listOf(
+                "こやか",
+                "さわやか",
+                "にぎやか",
+                "おだやか",
+                "しとやか",
+                "はなやか"
+            ),
+            correctAnswerIndex = 5,
+            answer = NO_ANSWER,
+            singleButtonMode = false,
+            currentTestType = TestType.WORD_TO_READING,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
 
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentWordToReadingSingleButton() {
-    val sampleUiState = QuizScreenUiState(
-        questionText = "根掘り葉掘り",
-        answerOptions = listOf(
-            "ねほりはほり",
-            "さわやか",
-            "にぎやか",
-            "おだやか",
-            "しとやか",
-            "はなやか"
-        ),
-        correctAnswerIndex = 5,
-        answer = NO_ANSWER,
-        answersCurrentlyVisible = true,
-        initialHideAnswers = true,
-        singleButtonMode = true,
-        currentTestType = TestType.WORD_TO_READING,
-    )
-
-    KakugoTheme {
-        QuizTestScreenContent(
-            uiState = sampleUiState,
-            onNextClicked = { },
-            onAnswerSelected = { index, certainty -> },
-            onShowAnswersClicked = { }
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "根掘り葉掘り",
+            answerOptions = listOf(
+                "ねほりはほり",
+                "さわやか",
+                "にぎやか",
+                "おだやか",
+                "しとやか",
+                "はなやか"
+            ),
+            correctAnswerIndex = 5,
+            answer = NO_ANSWER,
+            singleButtonMode = true,
+            currentTestType = TestType.WORD_TO_READING,
+            answersCurrentlyVisible = true,
+            initialHideAnswers = true,
         )
-    }
+    )
 }
