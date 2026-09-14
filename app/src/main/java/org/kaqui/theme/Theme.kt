@@ -37,6 +37,7 @@ private val DarkColors = darkColors(
 
 // Light theme colors from XML
 private val LightThemeColors = ThemeAttributes(
+    answerButtonText = Color(0xFF3F51B5),
     itemBad = Color(0xFFFFC9C9),
     itemBad2 = Color(0xFFEF9A9A),
     itemMeh = Color(0xFFFFE8C4),
@@ -58,6 +59,7 @@ private val LightThemeColors = ThemeAttributes(
 
 // Dark theme colors from XML
 private val DarkThemeColors = ThemeAttributes(
+    answerButtonText = Color(0xFF7986CB),
     itemBad = Color(0xFF500000),
     itemBad2 = Color(0xFF350000),
     itemMeh = Color(0xFF894E16),
@@ -80,6 +82,7 @@ private val DarkThemeColors = ThemeAttributes(
 val LocalThemeAttributes = staticCompositionLocalOf { LightThemeColors }
 
 data class ThemeAttributes(
+    val answerButtonText: Color,
     val itemGood: Color,
     val itemMaybe: Color,
     val itemMeh: Color,

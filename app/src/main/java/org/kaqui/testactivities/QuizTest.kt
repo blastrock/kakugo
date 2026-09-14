@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.verticalScroll
@@ -200,7 +201,7 @@ fun QuizTestScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TestQuestionLayoutCompose(
             question = uiState.questionText,
@@ -227,17 +228,18 @@ fun QuizTestScreenContent(
                         .fillMaxWidth()
                         .verticalScroll(scrollState),
                 ) {
+                    if (!singleButtonMode)
+                        Separator()
+
                     uiState.answerOptions.chunked(layout.columns)
                         .forEachIndexed { rowIndex, rowAnswers ->
-                            if (!singleButtonMode)
-                                Separator()
-
                             Row(
                                 // Measuring at the tallest answer's height lets the single
                                 // buttons of a row stretch to match each other.
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(IntrinsicSize.Min),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 rowAnswers.forEachIndexed { columnIndex, answerText ->
                                     val index = rowIndex * layout.columns + columnIndex
@@ -262,9 +264,10 @@ fun QuizTestScreenContent(
                                     )
                                 }
                             }
-                        }
 
-                    Separator()
+                            if (!singleButtonMode)
+                                Separator()
+                        }
 
                     if (!uiState.isAnswerGiven)
                         OutlinedButton(
@@ -352,35 +355,37 @@ private fun SingleButtonAnswer(
     modifier: Modifier,
     fontSize: TextUnit = TextUnit.Unspecified,
 ) {
-    // Allows buttons to be thinner than the minimum height
-    CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-        BetterButton(
-            onClick = { onClick(Certainty.SURE) },
-            onLongPress = { onClick(Certainty.MAYBE) },
-            modifier = modifier,
-            enabled = enabled,
-            contentPadding = PaddingValues(8.dp),
-            colors =
-                if (highlight == null)
-                    ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent)
-                else
-                    ButtonDefaults.buttonColors(
-                        backgroundColor = highlight,
-                        disabledBackgroundColor = highlight,
-                    ),
-            border = if (highlight == null) ButtonDefaults.outlinedBorder else null,
-            elevation = if (highlight == null) null else ButtonDefaults.elevation(),
-        ) {
-            Text(
-                text = answerText,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = textAlign,
-                fontSize = fontSize,
-                lineHeight = 1.2.em,
-                fontFamily = TypefaceManager.getTypeface(LocalContext.current)
-                    ?.let { FontFamily(it) }
-            )
-        }
+    val themeColors = LocalThemeAttributes.current
+
+    BetterButton(
+        onClick = { onClick(Certainty.SURE) },
+        onLongPress = { onClick(Certainty.MAYBE) },
+        modifier = modifier,
+        enabled = enabled,
+        contentPadding = PaddingValues(8.dp),
+        colors =
+            if (highlight == null)
+                ButtonDefaults.outlinedButtonColors(
+                    backgroundColor = Color.Transparent,
+                    contentColor = themeColors.answerButtonText,
+                )
+            else
+                ButtonDefaults.buttonColors(
+                    backgroundColor = highlight,
+                    disabledBackgroundColor = highlight,
+                ),
+        border = if (highlight == null) ButtonDefaults.outlinedBorder else null,
+        elevation = if (highlight == null) null else ButtonDefaults.elevation(),
+    ) {
+        Text(
+            text = answerText,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = textAlign,
+            fontSize = fontSize,
+            lineHeight = 1.2.em,
+            fontFamily = TypefaceManager.getTypeface(LocalContext.current)
+                ?.let { FontFamily(it) }
+        )
     }
 }
 
@@ -404,9 +409,7 @@ private fun AnswerCell(
             fontSize = layout.answerFontSize,
             modifier = modifier
                 .fillMaxHeight()
-                .padding(
-                    if (layout.isGrid) PaddingValues(4.dp) else PaddingValues(vertical = 4.dp)
-                ),
+                .padding(vertical = 4.dp),
         )
     } else {
         TwoButtonAnswer(

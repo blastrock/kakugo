@@ -53,32 +53,29 @@ private fun QuestionText(
     modifier: Modifier = Modifier,
 ) {
     val fontFamily = TypefaceManager.getTypeface(LocalContext.current)?.let { FontFamily(it) }
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-        BasicText(
-            text = question,
-            modifier = modifier
-                .let { base ->
-                    if (onQuestionLongClick != null)
-                        base.pointerInput(onQuestionLongClick) {
-                            detectTapGestures(onLongPress = { onQuestionLongClick() })
-                        }
-                    else
-                        base
-                }
-                .fillMaxSize()
-                .wrapContentHeight(Alignment.CenterVertically),
-            style = TextStyle(
-                color = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current),
-                fontFamily = fontFamily,
-                textAlign = TextAlign.Center,
-            ),
-            autoSize = TextAutoSize.StepBased(
-                minFontSize = questionMinSizeSp.sp,
-                maxFontSize = 120.sp,
-                stepSize = 10.sp,
-            ),
-        )
-    }
+    BasicText(
+        text = question,
+        modifier = modifier
+            .let { base ->
+                if (onQuestionLongClick != null)
+                    base.pointerInput(onQuestionLongClick) {
+                        detectTapGestures(onLongPress = { onQuestionLongClick() })
+                    }
+                else
+                    base
+            }
+            .fillMaxWidth(),
+        style = TextStyle(
+            color = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current),
+            fontFamily = fontFamily,
+            textAlign = TextAlign.Center,
+        ),
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = questionMinSizeSp.sp,
+            maxFontSize = 120.sp,
+            stepSize = 10.sp,
+        ),
+    )
 }
 
 @Composable
@@ -107,8 +104,7 @@ fun TestQuestionLayoutCompose(
                 onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .weight(0.5f)
-                    .fillMaxHeight()
-                    .padding(bottom = 8.dp),
+                    .fillMaxHeight(),
             )
 
             val answerHeightMod = { modifier: Modifier ->
@@ -130,13 +126,6 @@ fun TestQuestionLayoutCompose(
             }
         }
     } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-        val (weightQuestion, weightAnswers) =
-            when {
-                screenHeightDp < 800 -> Pair(.25f, .75f)
-                screenHeightDp < 1000 -> Pair(.4f, .6f)
-                else -> Pair(.5f, .5f)
-            }
-
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -147,9 +136,8 @@ fun TestQuestionLayoutCompose(
                 questionMinSizeSp = questionMinSizeSp,
                 onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
-                    .weight(weightQuestion)
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .padding(vertical = 32.dp),
             )
 
             val answerWidthMod = { modifier: Modifier ->
@@ -161,7 +149,6 @@ fun TestQuestionLayoutCompose(
 
             Column(
                 modifier = Modifier
-                    .weight(weightAnswers)
                     .let(answerWidthMod),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
