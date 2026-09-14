@@ -23,10 +23,13 @@
 
     <PreferenceCategory app:title="@string/pref_cat_appearance">
 
-        <SwitchPreferenceCompat
-            app:key="dark_theme"
-            app:summary="@string/will_update_later"
-            app:title="@string/enable_dark_theme" />
+        <ListPreference
+            app:defaultValue="system"
+            app:entries="@array/theme_mode_strings"
+            app:entryValues="@array/theme_mode_ids"
+            app:key="theme_mode"
+            app:summary="%s"
+            app:title="@string/theme_mode" />
 
         <ListPreference
             app:defaultValue="gothic"

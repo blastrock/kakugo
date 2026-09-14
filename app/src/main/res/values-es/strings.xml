@@ -92,7 +92,10 @@
     <string name="rtk6_index_range">Índices %1$s+</string>
     <string name="word_title">Vocabulario</string>
     
-    <string name="enable_dark_theme">Activar modo oscuro</string>
+    <string name="theme_mode">Tema</string>
+    <string name="theme_system_default">Seguir el sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
     <string name="settings"><font size="30">設定</font>\nAJUSTES</string>
     <string name="title_activity_main_settings">Ajustes</string>
     <string name="pref_cat_appearance">Apariencia</string>
@@ -101,7 +104,6 @@
     <string name="pref_cat_classification">Clasificación</string>
     <string name="pref_cat_backup">Copia de seguridad</string>
     <string name="pref_cat_about">Acerca de</string>
-    <string name="will_update_later">Se aplicarán al salir de los ajustes</string>
     <string name="dictionary_language">Idioma del diccionario</string>
     <string name="lang_system_default">Idioma del sistema</string>
     <string name="kanji_classification">Clasificación de los kanji</string>

@@ -97,8 +97,10 @@
     <string name="single_button_off_summary">Zwei Schaltflächen \"sicher\" und \"möglich\" werden angezeigt</string>
     <string name="single_button_on_summary">Langer Klick auf eine Antwort wird als \"möglich\" gewertet</string>
     <string name="kanji_classification">Kanji Klassifizierung</string>
-    <string name="enable_dark_theme">Dunkles Erscheinungsbild aktivieren</string>
-    <string name="will_update_later">Wird beim Verlassen der Einstellungen aktualisiert</string>
+    <string name="theme_mode">Erscheinungsbild</string>
+    <string name="theme_system_default">System folgen</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
     <string name="dictionary_language">Wörterbuch Sprache</string>
     <string name="lang_system_default">System Standard</string>
     <string name="enable_a_few_items">Sie müssen mindestens 10 Objekte auswählen um eine Lerneinheit zu starten</string>

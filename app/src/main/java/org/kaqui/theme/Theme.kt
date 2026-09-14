@@ -8,7 +8,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.preference.PreferenceManager
 
 private val LightColors = lightColors(
     primary = Color(0xFF3F51B5),
@@ -116,9 +115,7 @@ data class ThemeAttributes(
 fun KakugoTheme(
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
-    val darkTheme = PreferenceManager.getDefaultSharedPreferences(context)
-        .getBoolean("dark_theme", false)
+    val darkTheme = isDarkTheme(LocalContext.current)
 
     val themeAttributes = if (darkTheme) DarkThemeColors else LightThemeColors
     val materialColors = if (darkTheme) DarkColors else LightColors

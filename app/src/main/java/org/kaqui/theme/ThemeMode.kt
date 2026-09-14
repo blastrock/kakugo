@@ -1,0 +1,58 @@
+package org.kaqui.theme
+
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
+
+private const val THEME_MODE_KEY = "theme_mode"
+private const val LEGACY_DARK_THEME_KEY = "dark_theme"
+
+enum class ThemeMode(val id: String) {
+    SYSTEM("system"),
+    LIGHT("light"),
+    DARK("dark");
+
+    companion object {
+        fun fromId(id: String?) = entries.find { it.id == id } ?: SYSTEM
+    }
+}
+
+fun getThemeMode(context: Context): ThemeMode {
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    migrateDarkThemePreference(context, prefs)
+    return ThemeMode.fromId(prefs.getString(THEME_MODE_KEY, null))
+}
+
+fun isDarkTheme(context: Context): Boolean =
+        when (getThemeMode(context)) {
+            ThemeMode.SYSTEM -> isSystemInDarkMode(context)
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+        }
+
+fun isSystemInDarkMode(context: Context): Boolean =
+        context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                Configuration.UI_MODE_NIGHT_YES
+
+// Migrate from the old dark_theme boolean preference. Users whose choice already
+// matched the system are moved to SYSTEM so that the app starts following the
+// system for them, the others keep the appearance they picked.
+private fun migrateDarkThemePreference(context: Context, prefs: SharedPreferences) {
+    if (!prefs.contains(LEGACY_DARK_THEME_KEY))
+        return
+
+    val dark = prefs.getBoolean(LEGACY_DARK_THEME_KEY, false)
+    val mode = when {
+        dark == isSystemInDarkMode(context) -> ThemeMode.SYSTEM
+        dark -> ThemeMode.DARK
+        else -> ThemeMode.LIGHT
+    }
+
+    prefs.edit {
+        if (!prefs.contains(THEME_MODE_KEY))
+            putString(THEME_MODE_KEY, mode.id)
+        remove(LEGACY_DARK_THEME_KEY)
+    }
+}

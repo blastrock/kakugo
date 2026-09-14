@@ -26,6 +26,17 @@
         <item>rtk6</item>
     </string-array>
 
+    <string-array name="theme_mode_strings">
+        <item>@string/theme_system_default</item>
+        <item>@string/theme_light</item>
+        <item>@string/theme_dark</item>
+    </string-array>
+    <string-array name="theme_mode_ids">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
     <string-array name="font_strings">
         <item>@string/font_gothic</item>
         <item>@string/font_mincho</item>

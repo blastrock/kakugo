@@ -2,7 +2,7 @@ package org.kaqui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
+import org.kaqui.theme.isDarkTheme
 
 abstract class BaseActivity : AppCompatActivity() {
     private var currentTheme: Int = 0
@@ -28,7 +28,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     private fun getPrefTheme() =
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false))
+            if (isDarkTheme(this))
                 R.style.AppThemeDark
             else
                 R.style.AppThemeLight
