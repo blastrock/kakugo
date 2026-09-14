@@ -3,6 +3,14 @@ package org.kaqui.theme
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 
@@ -28,6 +36,35 @@ fun getThemeMode(context: Context): ThemeMode {
 fun isDarkTheme(context: Context): Boolean =
         when (getThemeMode(context)) {
             ThemeMode.SYSTEM -> isSystemInDarkMode(context)
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+        }
+
+@Composable
+fun rememberThemeMode(): ThemeMode {
+    val context = LocalContext.current
+    val prefs = remember(context) { PreferenceManager.getDefaultSharedPreferences(context) }
+    var themeMode by remember(context) { mutableStateOf(getThemeMode(context)) }
+
+    DisposableEffect(prefs) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == THEME_MODE_KEY)
+                themeMode = getThemeMode(context)
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    return themeMode
+}
+
+// Resolving SYSTEM through isSystemInDarkTheme() is what makes @PreviewLightDark
+// work: previews have no stored preference, so they fall back to the uiMode of
+// the preview configuration.
+@Composable
+fun isDarkTheme(): Boolean =
+        when (rememberThemeMode()) {
+            ThemeMode.SYSTEM -> isSystemInDarkTheme()
             ThemeMode.LIGHT -> false
             ThemeMode.DARK -> true
         }
