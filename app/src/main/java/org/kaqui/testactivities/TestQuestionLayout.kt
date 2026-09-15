@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.kaqui.TypefaceManager
@@ -48,7 +49,8 @@ import org.kaqui.theme.KakugoTheme
 @Composable
 private fun QuestionText(
     question: String,
-    questionMinSizeSp: Int,
+    minFontSize: TextUnit,
+    maxFontSize: TextUnit,
     onQuestionLongClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -71,8 +73,8 @@ private fun QuestionText(
             textAlign = TextAlign.Center,
         ),
         autoSize = TextAutoSize.StepBased(
-            minFontSize = questionMinSizeSp.sp,
-            maxFontSize = 120.sp,
+            minFontSize = minFontSize,
+            maxFontSize = maxFontSize,
             stepSize = 10.sp,
         ),
     )
@@ -81,7 +83,8 @@ private fun QuestionText(
 @Composable
 fun TestQuestionLayoutCompose(
     question: String,
-    questionMinSizeSp: Int,
+    questionMinFontSize: TextUnit,
+    questionMaxFontSize: TextUnit,
     forceLandscape: Boolean = false,
     onQuestionLongClick: (() -> Unit)? = null,
     answersBlock: @Composable ColumnScope.() -> Unit
@@ -100,7 +103,8 @@ fun TestQuestionLayoutCompose(
         ) {
             QuestionText(
                 question = question,
-                questionMinSizeSp = questionMinSizeSp,
+                minFontSize = questionMinFontSize,
+                maxFontSize = questionMaxFontSize,
                 onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .weight(0.5f)
@@ -133,7 +137,8 @@ fun TestQuestionLayoutCompose(
         ) {
             QuestionText(
                 question = question,
-                questionMinSizeSp = questionMinSizeSp,
+                minFontSize = questionMinFontSize,
+                maxFontSize = questionMaxFontSize,
                 onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -199,7 +204,11 @@ private fun PreviewAnswer(text: String) {
 @Composable
 fun PreviewTestQuestionLayoutBlocks() {
     KakugoTheme {
-        TestQuestionLayoutCompose(question = "質問", questionMinSizeSp = 50) {
+        TestQuestionLayoutCompose(
+            question = "質問",
+            questionMinFontSize = 50.sp,
+            questionMaxFontSize = 120.sp,
+        ) {
             PreviewBlock(Color(0xFFE57373), 100.dp)
             PreviewBlock(Color(0xFF81C784), 100.dp)
             PreviewBlock(Color(0xFF64B5F6), 100.dp)
@@ -218,7 +227,11 @@ fun PreviewTestQuestionLayoutBlocks() {
 @Composable
 fun PreviewTestQuestionLayoutAnswers() {
     KakugoTheme {
-        TestQuestionLayoutCompose(question = "華やか", questionMinSizeSp = 10) {
+        TestQuestionLayoutCompose(
+            question = "華やか",
+            questionMinFontSize = 10.sp,
+            questionMaxFontSize = 120.sp,
+        ) {
             for (answer in listOf("はなやか", "さわやか", "にぎやか", "おだやか"))
                 PreviewAnswer(answer)
         }
@@ -236,7 +249,11 @@ fun PreviewTestQuestionLayoutAnswers() {
 @Composable
 fun PreviewTestQuestionLayoutManyAnswers() {
     KakugoTheme {
-        TestQuestionLayoutCompose(question = "華やか", questionMinSizeSp = 10) {
+        TestQuestionLayoutCompose(
+            question = "華やか",
+            questionMinFontSize = 10.sp,
+            questionMaxFontSize = 120.sp,
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

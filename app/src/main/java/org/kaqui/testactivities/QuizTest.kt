@@ -155,7 +155,8 @@ private fun isCorrectAnswer(
 }
 
 private data class QuizLayout(
-    val questionMinSizeSp: Int,
+    val questionMinFontSize: TextUnit,
+    val questionMaxFontSize: TextUnit,
     val columns: Int,
     val answerFontSize: TextUnit,
     val answerTextAlign: TextAlign,
@@ -168,19 +169,19 @@ private data class QuizLayout(
 private fun quizLayout(testType: TestType?) =
     when (testType) {
         TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING ->
-            QuizLayout(50, 1, TextUnit.Unspecified, TextAlign.Start)
+            QuizLayout(50.sp, 120.sp, 1, TextUnit.Unspecified, TextAlign.Start)
 
         TestType.WORD_TO_READING ->
-            QuizLayout(50, 1, 30.sp, TextAlign.Start)
+            QuizLayout(50.sp, 120.sp, 1, 30.sp, TextAlign.Start)
 
         TestType.READING_TO_WORD, TestType.MEANING_TO_WORD ->
-            QuizLayout(10, 2, 30.sp, TextAlign.Center)
+            QuizLayout(10.sp, 120.sp, 2, 30.sp, TextAlign.Center)
 
         TestType.READING_TO_KANJI, TestType.MEANING_TO_KANJI ->
-            QuizLayout(10, 2, 50.sp, TextAlign.Center)
+            QuizLayout(10.sp, 120.sp, 2, 50.sp, TextAlign.Center)
 
         TestType.HIRAGANA_TO_ROMAJI, TestType.ROMAJI_TO_HIRAGANA, TestType.KATAKANA_TO_ROMAJI, TestType.ROMAJI_TO_KATAKANA ->
-            QuizLayout(50, 2, 50.sp, TextAlign.Center)
+            QuizLayout(50.sp, 120.sp, 2, 50.sp, TextAlign.Center)
 
         else -> throw RuntimeException("unsupported test type $testType for QuizTest")
     }
@@ -208,7 +209,8 @@ fun QuizTestScreenContent(
     ) {
         TestQuestionLayoutCompose(
             question = uiState.questionText,
-            questionMinSizeSp = layout.questionMinSizeSp,
+            questionMinFontSize = layout.questionMinFontSize,
+            questionMaxFontSize = layout.questionMaxFontSize,
             onQuestionLongClick = onQuestionLongClick
         ) {
             if (initialHideAnswers && !answersCurrentlyVisible && !uiState.isAnswerGiven) {

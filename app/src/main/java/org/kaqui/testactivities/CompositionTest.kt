@@ -151,7 +151,6 @@ fun CompositionTestScreenContent(
     onNextClicked: () -> Unit,
     onQuestionLongClick: (() -> Unit)? = null
 ) {
-    val questionMinSize = 10
     val themeColors = LocalThemeAttributes.current
 
     Column(
@@ -162,7 +161,8 @@ fun CompositionTestScreenContent(
     ) {
         TestQuestionLayoutCompose(
             question = uiState.questionText,
-            questionMinSizeSp = questionMinSize,
+            questionMinFontSize = 10.sp,
+            questionMaxFontSize = 120.sp,
             onQuestionLongClick = onQuestionLongClick
         ) {
             Column(

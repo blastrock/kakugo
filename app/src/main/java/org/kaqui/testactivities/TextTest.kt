@@ -119,7 +119,6 @@ fun TextTestScreenContent(
     onNextClicked: () -> Unit,
     onQuestionLongClick: (() -> Unit)? = null
 ) {
-    val questionMinSize = 30
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val themeColors = LocalThemeAttributes.current
@@ -135,7 +134,8 @@ fun TextTestScreenContent(
 
     TestQuestionLayoutCompose(
         question = uiState.questionText,
-        questionMinSizeSp = questionMinSize,
+        questionMinFontSize = 30.sp,
+        questionMaxFontSize = 120.sp,
         forceLandscape = true,
         onQuestionLongClick = onQuestionLongClick
     ) {
