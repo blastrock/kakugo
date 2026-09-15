@@ -237,7 +237,6 @@ fun QuizTestScreenContent(
                 val scrollState = remember(uiState.questionText) { ScrollState(0) }
                 Column(
                     modifier = Modifier
-                        .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(scrollState),
                 ) {

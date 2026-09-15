@@ -31,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -55,6 +56,9 @@ import kotlin.math.floor
 
 private val QUESTION_FONT_STEP = 10.sp
 private const val QUESTION_MAX_HEIGHT_FRACTION = 0.4f
+
+// -1 is against the top, 0 is centered, 1 is against the bottom
+private val PORTRAIT_CONTENT_ALIGNMENT = BiasAlignment.Vertical(-0.4f)
 
 enum class QuestionAutoSize {
     FitBounds,
@@ -201,9 +205,10 @@ fun TestQuestionLayoutCompose(
         }
     } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentHeight(PORTRAIT_CONTENT_ALIGNMENT),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 QuestionText(
