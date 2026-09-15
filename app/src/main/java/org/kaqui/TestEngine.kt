@@ -59,8 +59,8 @@ class TestEngine(
 
     data class PickedQuestion(val item: Item, val probabilityData: SrsCalculator.ProbabilityData, val totalWeight: Double)
 
-    // In-memory record of the last marked answer, used to let the user swap it between
-    // correct and wrong. Not serialized: surviving background/resume is not a requirement.
+    // In-memory record of the last marked answer, used to let the user swap it to another
+    // certainty. Not serialized: surviving background/resume is not a requirement.
     // The Item references retain their pre-answer (baseline) scores because applyScoreUpdate
     // only writes the DB and never mutates the Item.
     data class LastAnswer(
@@ -70,16 +70,34 @@ class TestEngine(
             val originalWrongUpdate: SrsCalculator.ScoreUpdate?,
             val minLastAsked: Long,
             val answeredAt: Long,
-            val originalWasCorrect: Boolean,
             val logRowId: Long,
             val originalCertainty: Certainty,
             val debugData: DebugData?,
-            var currentlyCorrect: Boolean,
+            var swapped: Boolean,
             // Whether the answered item was already counted as a unique correct item
-            // before this answer was applied, so toggling can decide whether removing
+            // before this answer was applied, so swapping can decide whether removing
             // it from the correct set is safe (only when this answer was its sole source).
             val wasCorrectBeforeThisAnswer: Boolean,
-    )
+    ) {
+        // Swapping moves the answer one step down the certainty scale, wrapping around from
+        // DONTKNOW to SURE, so that swapping twice restores the original answer.
+        val swappedCertainty
+            get() = when (originalCertainty) {
+                Certainty.SURE -> Certainty.MAYBE
+                Certainty.MAYBE -> Certainty.DONTKNOW
+                Certainty.DONTKNOW -> Certainty.SURE
+            }
+
+        val currentCertainty
+            get() = if (swapped) swappedCertainty else originalCertainty
+
+        val currentlyCorrect
+            get() = currentCertainty != Certainty.DONTKNOW
+
+        // The answer the user picked only stands as long as the answer is not swapped.
+        val currentWrongItem
+            get() = if (swapped) null else wrongItem
+    }
 
     var lastAnswer: LastAnswer? = null
         private set
@@ -352,7 +370,7 @@ class TestEngine(
             itemView.applyScoreUpdate(scoreUpdateBad)
         }
 
-        val wasCorrect = certainty != Certainty.DONTKNOW && wrong == null
+        val wasCorrect = certainty != Certainty.DONTKNOW
 
         val wasCorrectBefore = answeredItem.id in correctItemIds
         askedItemIds.add(answeredItem.id)
@@ -366,60 +384,82 @@ class TestEngine(
                 originalWrongUpdate = scoreUpdateBad,
                 minLastAsked = minLastCorrect,
                 answeredAt = scoreUpdate.lastAsked,
-                originalWasCorrect = wasCorrect,
                 logRowId = logRowId,
                 originalCertainty = certainty,
                 debugData = currentDebugData,
-                currentlyCorrect = wasCorrect,
+                swapped = false,
                 wasCorrectBeforeThisAnswer = wasCorrectBefore,
         )
 
         questionCount += 1
     }
 
-    // Swap the last answer between correct and wrong, reverting and re-applying scores
-    // accordingly. Returns the updated LastAnswer, or null if there is no last answer.
+    // Swap the last answer to its swapped certainty, or back to the original one, reverting
+    // and re-applying scores accordingly. Returns the updated LastAnswer, or null if there
+    // is no last answer.
     fun toggleLastAnswer(): LastAnswer? {
         val la = lastAnswer ?: return null
-        la.currentlyCorrect = !la.currentlyCorrect
+        val wasCorrect = la.currentlyCorrect
+        la.swapped = !la.swapped
+
         val correctScoreUpdate: SrsCalculator.ScoreUpdate
-        if (la.currentlyCorrect == la.originalWasCorrect) {
-            // Back to the original side: re-apply the exact original updates and log row.
+        if (!la.swapped) {
+            // Back to the original answer: re-apply the exact original updates and log row.
             correctScoreUpdate = la.originalCorrectUpdate
             itemView.applyScoreUpdate(correctScoreUpdate)
             la.originalWrongUpdate?.let { itemView.applyScoreUpdate(it) }
             itemView.updateTestItem(la.logRowId, la.originalCertainty, la.wrongItem?.id)
-        } else if (la.currentlyCorrect) {
-            // wrong -> correct: reward short score only (SURE), leave long at baseline.
-            val sure = SrsCalculator.getScoreUpdate(la.minLastAsked, la.correctItem, Certainty.SURE)
-            correctScoreUpdate = sure.copy(longScore = la.correctItem.longScore.toFloat(), lastAsked = la.answeredAt)
+        } else {
+            // The item still holds its pre-answer scores, so recomputing an update from it
+            // gives the scores the swapped certainty would have produced in the first place.
+            val update = SrsCalculator.getScoreUpdate(la.minLastAsked, la.correctItem, la.swappedCertainty)
+            correctScoreUpdate =
+                    if (la.originalCertainty == Certainty.DONTKNOW)
+                        // Recovering from a wrong answer rewards the short score only, the
+                        // long score stays at its baseline.
+                        update.copy(longScore = la.correctItem.longScore.toFloat(), lastAsked = la.answeredAt)
+                    else
+                        update.copy(lastAsked = la.answeredAt)
             itemView.applyScoreUpdate(correctScoreUpdate)
             // Cancel the penalty on the picked wrong item by restoring its baseline scores.
             la.wrongItem?.let { w ->
                 itemView.applyScoreUpdate(SrsCalculator.ScoreUpdate(
                         w.id, w.shortScore.toFloat(), w.longScore.toFloat(), w.lastAsked, la.minLastAsked))
             }
-            itemView.updateTestItem(la.logRowId, Certainty.SURE, null)
-        } else {
-            // correct -> wrong: revert the increase and apply the MAYBE penalty
-            val dk = SrsCalculator.getScoreUpdate(la.minLastAsked, la.correctItem, Certainty.MAYBE)
-            correctScoreUpdate = dk.copy(lastAsked = la.answeredAt)
-            itemView.applyScoreUpdate(correctScoreUpdate)
-            itemView.updateTestItem(la.logRowId, Certainty.MAYBE, null)
+            itemView.updateTestItem(la.logRowId, la.swappedCertainty, la.currentWrongItem?.id)
         }
-        // Keep the debug overlay in sync with the swapped state.
+        // Keep the debug overlay and the serialized history in sync with the swapped state.
         la.debugData?.scoreUpdate = correctScoreUpdate
-        correctCount += if (la.currentlyCorrect) 1 else -1
+        replaceLastHistoryLine(la)
 
-        // Keep the unique-correct set in sync. Toggling to correct always counts the
-        // item; toggling to wrong only uncounts it when this answer was its sole source
-        // of correctness (an earlier committed question keeps it sticky).
-        if (la.currentlyCorrect)
-            correctItemIds.add(la.correctItem.id)
-        else if (!la.wasCorrectBeforeThisAnswer)
-            correctItemIds.remove(la.correctItem.id)
+        // Swapping between two certainties that are both correct leaves the counters alone.
+        if (la.currentlyCorrect != wasCorrect) {
+            correctCount += if (la.currentlyCorrect) 1 else -1
+
+            // Keep the unique-correct set in sync. Swapping to correct always counts the
+            // item; swapping to wrong only uncounts it when this answer was its sole source
+            // of correctness (an earlier committed question keeps it sticky).
+            if (la.currentlyCorrect)
+                correctItemIds.add(la.correctItem.id)
+            else if (!la.wasCorrectBeforeThisAnswer)
+                correctItemIds.remove(la.correctItem.id)
+        }
 
         return la
+    }
+
+    // Rewrite the history line the last answer added, without notifying the callbacks: the
+    // caller rebuilds the displayed history itself.
+    private fun replaceLastHistoryLine(la: LastAnswer) {
+        if (history.isEmpty())
+            return
+
+        val wrong = la.currentWrongItem
+        history[history.size - 1] = when {
+            la.currentlyCorrect -> HistoryLine.Correct(la.correctItem.id)
+            wrong != null -> HistoryLine.Incorrect(la.correctItem.id, wrong.id)
+            else -> HistoryLine.Unknown(la.correctItem.id)
+        }
     }
 
     private fun addGoodAnswerToHistory(correct: Item) {

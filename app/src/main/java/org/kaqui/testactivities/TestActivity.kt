@@ -410,10 +410,11 @@ class TestViewModel : ViewModel() {
                 )
             )
         }
+        val wrong = la.currentWrongItem
         if (la.currentlyCorrect)
             addGoodAnswerToHistory(la.correctItem, probabilityData)
-        else if (la.wrongItem != null)
-            addWrongAnswerToHistory(la.correctItem, probabilityData, la.wrongItem)
+        else if (wrong != null)
+            addWrongAnswerToHistory(la.correctItem, probabilityData, wrong)
         else
             addUnknownAnswerToHistory(la.correctItem, probabilityData)
 
