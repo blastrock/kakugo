@@ -32,7 +32,7 @@ private val DarkColors = darkColors(
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onSurface = Color.White,
-    onBackground = Color.White
+    onBackground = Color(0xE0FFFFFF)
 )
 
 // Light theme colors from XML
@@ -43,7 +43,7 @@ private val LightThemeColors = ThemeAttributes(
     itemMeh = Color(0xFFFFE8C4),
     itemLearn = Color(0xFFF9FFC4),
     itemGood = Color(0xFFB5DA8F),
-    itemMaybe = Color(0xFFD4EDC0),
+    itemMaybe = Color(0xFFFFE8C4),
     itemPerfect = Color(0xFFB3E5FC),
     historyBackground = Color(0xFFDDDDDD),
     wrongAnswerBackground = Color(0xFFFFDDDD),
@@ -54,18 +54,19 @@ private val LightThemeColors = ThemeAttributes(
     statsItemsGood = Color(0xFF9CCC65),
     statsItemsBad = Color(0xFFEF9A9A),
     statsLearnedItems = Color(0xFF3F51B5),
-    drawingDontKnow = Color(0xFFFF7F7F)
+    drawingDontKnow = Color(0xFFFF7F7F),
+    separator = Color(0xFFCCCCCC),
 )
 
 // Dark theme colors from XML
 private val DarkThemeColors = ThemeAttributes(
-    answerButtonText = Color(0xFF7986CB),
+    answerButtonText = Color(0xFFC2CEFF),
     itemBad = Color(0xFF500000),
     itemBad2 = Color(0xFF350000),
     itemMeh = Color(0xFF894E16),
     itemLearn = Color(0xFF937F1B),
     itemGood = Color(0xFF085300),
-    itemMaybe = Color(0xFF0C7A00),
+    itemMaybe = Color(0xFF894E16),
     itemPerfect = Color(0xFF01579B),
     historyBackground = Color(0xFF222222),
     wrongAnswerBackground = Color(0xFF350000),
@@ -76,7 +77,8 @@ private val DarkThemeColors = ThemeAttributes(
     statsItemsGood = Color(0xFF085300),
     statsItemsBad = Color(0xFF650000),
     statsLearnedItems = Color(0xFF7986CB),
-    drawingDontKnow = Color(0xFFFF7F7F)
+    drawingDontKnow = Color(0xFFFF7F7F),
+    separator = Color(0xFF444444),
 )
 
 val LocalThemeAttributes = staticCompositionLocalOf { LightThemeColors }
@@ -99,7 +101,8 @@ data class ThemeAttributes(
     val statsItemsGood: Color,
     val statsItemsBad: Color,
     val statsLearnedItems: Color,
-    val drawingDontKnow: Color
+    val drawingDontKnow: Color,
+    val separator: Color,
 ) {
     /**
      * Get color based on score value

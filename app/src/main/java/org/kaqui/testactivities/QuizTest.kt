@@ -1,5 +1,6 @@
 package org.kaqui.testactivities
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -168,13 +170,14 @@ private data class QuizLayout(
 
 // Questions whose answer is a reading or a meaning show prose, which needs a full-width row,
 // the others show a single word or character, which fits two per row at a large font size.
-private fun quizLayout(testType: TestType?) =
+private fun quizLayout(testType: TestType?, landscape: Boolean) =
     when (testType) {
         TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING ->
             QuizLayout(50.sp, 120.sp, QuestionAutoSize.AvoidWrapping, 1, TextUnit.Unspecified, TextAlign.Start)
 
+        // Readings are short enough to fit two per row on the wider landscape answer column.
         TestType.WORD_TO_READING ->
-            QuizLayout(50.sp, 120.sp, QuestionAutoSize.AvoidWrapping, 1, 30.sp, TextAlign.Start)
+            QuizLayout(50.sp, 120.sp, QuestionAutoSize.AvoidWrapping, if (landscape) 2 else 1, 20.sp, TextAlign.Start)
 
         TestType.READING_TO_WORD ->
             QuizLayout(10.sp, 120.sp, QuestionAutoSize.AvoidWrapping, 2, 30.sp, TextAlign.Center)
@@ -207,7 +210,9 @@ fun QuizTestScreenContent(
     val answersCurrentlyVisible = uiState.answersCurrentlyVisible
     val themeColors = LocalThemeAttributes.current
 
-    val layout = quizLayout(uiState.currentTestType)
+    val landscape =
+        LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val layout = quizLayout(uiState.currentTestType, landscape)
 
     Column(
         modifier = Modifier
@@ -375,7 +380,7 @@ private fun SingleButtonAnswer(
         onLongPress = { onClick(Certainty.MAYBE) },
         modifier = modifier,
         enabled = enabled,
-        contentPadding = PaddingValues(8.dp),
+        contentPadding = PaddingValues(12.dp),
         colors =
             if (highlight == null)
                 ButtonDefaults.outlinedButtonColors(

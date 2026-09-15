@@ -134,11 +134,13 @@ fun Calendar.roundToPreviousDay() {
 fun Separator(
     modifier: Modifier = Modifier,
 ) {
+    val themeAttributes = LocalThemeAttributes.current
+
     Box(
         modifier = modifier
             .height(1.dp)
             .fillMaxWidth()
-            .background(color = colorResource(id = R.color.separator))
+            .background(color = themeAttributes.separator)
     )
 }
 

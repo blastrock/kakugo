@@ -57,6 +57,7 @@ import kotlin.math.floor
 
 private val QUESTION_FONT_STEP = 10.sp
 private const val QUESTION_MAX_HEIGHT_FRACTION = 0.4f
+private const val TALL_SCREEN_HEIGHT_DP = 1000
 
 // -1 is against the top, 0 is centered, 1 is against the bottom
 private val PORTRAIT_CONTENT_ALIGNMENT = BiasAlignment.Vertical(-0.4f)
@@ -137,9 +138,10 @@ private fun QuestionText(
                 else
                     base
             }
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .wrapContentHeight(Alignment.CenterVertically),
         style = TextStyle(
-            color = MaterialTheme.colors.onBackground.copy(alpha = LocalContentAlpha.current),
+            color = MaterialTheme.colors.onBackground.copy(alpha = 0.9f),
             fontFamily = fontFamily,
             textAlign = TextAlign.Center,
         ),
@@ -204,13 +206,15 @@ fun TestQuestionLayoutCompose(
                 answersBlock()
             }
         }
-    } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentHeight(PORTRAIT_CONTENT_ALIGNMENT),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val extraQuestionPadding = if (screenHeightDp > TALL_SCREEN_HEIGHT_DP) 64.dp else 0.dp
+
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 QuestionText(
                     question = question,
@@ -221,7 +225,7 @@ fun TestQuestionLayoutCompose(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = maxHeight * QUESTION_MAX_HEIGHT_FRACTION)
-                        .padding(vertical = 32.dp),
+                        .padding(vertical = 32.dp + extraQuestionPadding),
                 )
             }
 

@@ -508,7 +508,6 @@ fun TestScreen(
         title = title,
         onBackClick = onBackClick
     ) { paddingValues ->
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             BottomSheetScaffold(
                 scaffoldState = scaffoldState,
                 sheetContent = {
@@ -603,7 +602,6 @@ fun TestScreen(
                         onSwap = onSwapLastAnswer,
                     )
                 }
-            }
         }
     }
 }

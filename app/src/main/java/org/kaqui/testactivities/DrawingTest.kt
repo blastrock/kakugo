@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -233,25 +234,25 @@ fun DrawingTestScreen(
             questionAutoSize = questionAutoSize,
             onQuestionLongClick = onQuestionLongClick,
         ) {
-                AndroidView(
-                    factory = { context -> DrawView(context) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .aspectRatio(1f),
-                    update = { view ->
-                        view.strokeCallback = onStrokeFinished
-                        view.sizeChangedCallback = { w, h ->
-                            onSizeChanged(w, h)
-                            view.setBoundingBox(RectF(1f, 1f, w.toFloat() - 1f, w.toFloat() - 1f))
-                        }
-                        if (hintPathForDrawView != null)
-                            view.setHint(hintPathForDrawView)
-                        view.setStrokes(pathsToDraw)
-                        view.setAnswerPaths(pathsForAnswer)
-                        view.paintColor = paintColor
-                        view.answerPaintColor = themeColors.drawingDontKnow.toArgb()
+            AndroidView(
+                factory = { context -> DrawView(context) },
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .aspectRatio(1f),
+                update = { view ->
+                    view.strokeCallback = onStrokeFinished
+                    view.sizeChangedCallback = { w, h ->
+                        onSizeChanged(w, h)
+                        view.setBoundingBox(RectF(1f, 1f, w.toFloat() - 1f, w.toFloat() - 1f))
                     }
-                )
+                    if (hintPathForDrawView != null)
+                        view.setHint(hintPathForDrawView)
+                    view.setStrokes(pathsToDraw)
+                    view.setAnswerPaths(pathsForAnswer)
+                    view.paintColor = paintColor
+                    view.answerPaintColor = themeColors.drawingDontKnow.toArgb()
+                }
+            )
 
             Row(
                 modifier = Modifier
