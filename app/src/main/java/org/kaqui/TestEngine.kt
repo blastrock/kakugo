@@ -25,10 +25,12 @@ class TestEngine(
         private val db: Database,
         private val testTypes: List<TestType>,
         private val goodAnswerCallback: (correct: Item, probabilityData: DebugData?) -> Unit,
+        private val maybeAnswerCallback: (correct: Item, probabilityData: DebugData?) -> Unit,
         private val wrongAnswerCallback: (correct: Item, probabilityData: DebugData?, wrong: Item) -> Unit,
         private val unknownAnswerCallback: (correct: Item, probabilityData: DebugData?) -> Unit) {
     private sealed class HistoryLine {
         data class Correct(val itemId: Int) : HistoryLine()
+        data class Maybe(val itemId: Int) : HistoryLine()
         data class Unknown(val itemId: Int) : HistoryLine()
         data class Incorrect(val correctItemId: Int, val answerItemId: Int) : HistoryLine()
     }
@@ -93,6 +95,10 @@ class TestEngine(
 
         val currentlyCorrect
             get() = currentCertainty != Certainty.DONTKNOW
+
+        // The certainty the answer would take if it was swapped once more.
+        val nextCertainty
+            get() = if (swapped) originalCertainty else swappedCertainty
 
         // The answer the user picked only stands as long as the answer is not swapped.
         val currentWrongItem
@@ -176,6 +182,10 @@ class TestEngine(
                     parcel.writeByte(0)
                     parcel.writeInt(line.itemId)
                 }
+                is HistoryLine.Maybe -> {
+                    parcel.writeByte(3)
+                    parcel.writeInt(line.itemId)
+                }
                 is HistoryLine.Unknown -> {
                     parcel.writeByte(1)
                     parcel.writeInt(line.itemId)
@@ -210,6 +220,9 @@ class TestEngine(
                 }
                 2 -> {
                     addWrongAnswerToHistory(getItem(parcel.readInt()), getItem(parcel.readInt()))
+                }
+                3 -> {
+                    addMaybeAnswerToHistory(getItem(parcel.readInt()))
                 }
             }
         }
@@ -360,7 +373,10 @@ class TestEngine(
             itemView.applyScoreUpdate(scoreUpdate)
             logRowId = itemView.logTestItem(testType, scoreUpdate, certainty, wrong?.id)
             currentDebugData?.scoreUpdate = scoreUpdate
-            addGoodAnswerToHistory(answeredItem)
+            if (certainty == Certainty.SURE)
+                addGoodAnswerToHistory(answeredItem)
+            else
+                addMaybeAnswerToHistory(answeredItem)
             correctCount += 1
         }
 
@@ -456,7 +472,8 @@ class TestEngine(
 
         val wrong = la.currentWrongItem
         history[history.size - 1] = when {
-            la.currentlyCorrect -> HistoryLine.Correct(la.correctItem.id)
+            la.currentCertainty == Certainty.SURE -> HistoryLine.Correct(la.correctItem.id)
+            la.currentCertainty == Certainty.MAYBE -> HistoryLine.Maybe(la.correctItem.id)
             wrong != null -> HistoryLine.Incorrect(la.correctItem.id, wrong.id)
             else -> HistoryLine.Unknown(la.correctItem.id)
         }
@@ -467,6 +484,13 @@ class TestEngine(
         discardOldHistory()
 
         goodAnswerCallback(correct, currentDebugData)
+    }
+
+    private fun addMaybeAnswerToHistory(correct: Item) {
+        history.add(HistoryLine.Maybe(correct.id))
+        discardOldHistory()
+
+        maybeAnswerCallback(correct, currentDebugData)
     }
 
     private fun addWrongAnswerToHistory(correct: Item, wrong: Item) {

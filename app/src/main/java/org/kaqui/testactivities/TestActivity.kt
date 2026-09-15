@@ -92,6 +92,7 @@ import org.kaqui.R
 import org.kaqui.Separator
 import org.kaqui.StatsBar
 import org.kaqui.TestEngine
+import org.kaqui.historyItemColor
 import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.Item
@@ -139,6 +140,7 @@ class TestActivity : ComponentActivity() {
             Database.getInstance(this),
             testTypes,
             viewModel::addGoodAnswerToHistory,
+            viewModel::addMaybeAnswerToHistory,
             viewModel::addWrongAnswerToHistory,
             viewModel::addUnknownAnswerToHistory
         )
@@ -248,8 +250,11 @@ fun TestContent(
 data class HistoryState(
     val items: List<HistoryItem> = listOf(),
     val lastCorrect: Item? = null,
+    val lastCorrectStyle: HistoryItemStyle = HistoryItemStyle.GOOD,
     val lastWrong: Item? = null,
     val lastProbabilityData: TestEngine.DebugData? = null,
+    // Style the last answer would take if it was swapped, or null if it cannot be swapped.
+    val swapTargetStyle: HistoryItemStyle? = null,
 )
 
 data class TestQuestion(
@@ -302,20 +307,28 @@ class TestViewModel : ViewModel() {
         }
     }
 
-    fun addGoodAnswerToHistory(
+    fun addGoodAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?) =
+        addCorrectAnswerToHistory(correct, probabilityData, HistoryItemStyle.GOOD)
+
+    fun addMaybeAnswerToHistory(correct: Item, probabilityData: TestEngine.DebugData?) =
+        addCorrectAnswerToHistory(correct, probabilityData, HistoryItemStyle.MAYBE)
+
+    private fun addCorrectAnswerToHistory(
         correct: Item,
         probabilityData: TestEngine.DebugData?,
+        style: HistoryItemStyle,
     ) {
         lastAnswerItemCount = 1
         lastAnswerProbabilityData = probabilityData
         _uiState.update { currentState ->
             val newHistoryItems =
-                listOf(HistoryItem(correct, probabilityData, HistoryItemStyle.GOOD, true)) +
+                listOf(HistoryItem(correct, probabilityData, style, true)) +
                         currentState.historyState.items.take(49)
             currentState.copy(
                 historyState = currentState.historyState.copy(
                     items = newHistoryItems,
                     lastCorrect = correct,
+                    lastCorrectStyle = style,
                     lastWrong = null,
                     lastProbabilityData = probabilityData
                 )
@@ -339,6 +352,7 @@ class TestViewModel : ViewModel() {
                 historyState = currentState.historyState.copy(
                     items = newHistoryItems,
                     lastCorrect = correct,
+                    lastCorrectStyle = HistoryItemStyle.GOOD,
                     lastWrong = wrong,
                     lastProbabilityData = probabilityData
                 )
@@ -360,6 +374,7 @@ class TestViewModel : ViewModel() {
                 historyState = currentState.historyState.copy(
                     items = newHistoryItems,
                     lastCorrect = correct,
+                    lastCorrectStyle = HistoryItemStyle.GOOD,
                     lastWrong = correct,
                     lastProbabilityData = probabilityData
                 )
@@ -392,9 +407,20 @@ class TestViewModel : ViewModel() {
                 uniqueCorrectCount = testEngine.uniqueCorrectCount,
                 uniqueItemCount = testEngine.uniqueItemCount,
                 stats = testEngine.itemView.getStats(),
+                historyState = it.historyState.copy(swapTargetStyle = swapTargetStyle()),
             )
         }
     }
+
+    private fun swapTargetStyle(): HistoryItemStyle? =
+        testEngine.lastAnswer?.let { styleOf(it.nextCertainty) }
+
+    private fun styleOf(certainty: Certainty) =
+        when (certainty) {
+            Certainty.SURE -> HistoryItemStyle.GOOD
+            Certainty.MAYBE -> HistoryItemStyle.MAYBE
+            Certainty.DONTKNOW -> HistoryItemStyle.BAD
+        }
 
     fun swapLastAnswer() {
         val la = testEngine.toggleLastAnswer() ?: return
@@ -411,12 +437,15 @@ class TestViewModel : ViewModel() {
             )
         }
         val wrong = la.currentWrongItem
-        if (la.currentlyCorrect)
-            addGoodAnswerToHistory(la.correctItem, probabilityData)
-        else if (wrong != null)
-            addWrongAnswerToHistory(la.correctItem, probabilityData, wrong)
-        else
-            addUnknownAnswerToHistory(la.correctItem, probabilityData)
+        when (la.currentCertainty) {
+            Certainty.SURE -> addGoodAnswerToHistory(la.correctItem, probabilityData)
+            Certainty.MAYBE -> addMaybeAnswerToHistory(la.correctItem, probabilityData)
+            Certainty.DONTKNOW ->
+                if (wrong != null)
+                    addWrongAnswerToHistory(la.correctItem, probabilityData, wrong)
+                else
+                    addUnknownAnswerToHistory(la.correctItem, probabilityData)
+        }
 
         _uiState.update {
             it.copy(
@@ -424,6 +453,7 @@ class TestViewModel : ViewModel() {
                 uniqueCorrectCount = testEngine.uniqueCorrectCount,
                 uniqueItemCount = testEngine.uniqueItemCount,
                 stats = testEngine.itemView.getStats(),
+                historyState = it.historyState.copy(swapTargetStyle = swapTargetStyle()),
             )
         }
     }
@@ -596,8 +626,10 @@ fun TestScreen(
 
                     LastItemRow(
                         lastCorrect = historyState.lastCorrect,
+                        lastCorrectStyle = historyState.lastCorrectStyle,
                         lastWrong = historyState.lastWrong,
                         lastProbabilityData = historyState.lastProbabilityData,
+                        swapTargetStyle = historyState.swapTargetStyle,
                         kanaWords = kanaWords,
                         onItemClick = onItemClick,
                         onSwap = onSwapLastAnswer,
@@ -610,26 +642,27 @@ fun TestScreen(
 @Composable
 private fun LastItemRow(
     lastCorrect: Item?,
+    lastCorrectStyle: HistoryItemStyle,
     lastWrong: Item?,
     lastProbabilityData: TestEngine.DebugData?,
+    swapTargetStyle: HistoryItemStyle?,
     kanaWords: Boolean,
     onItemClick: (Item) -> Unit,
     onSwap: () -> Unit = {},
 ) {
     val safeDrawing = WindowInsets.safeDrawing.asPaddingValues()
     val startPadding = safeDrawing.calculateStartPadding(LocalLayoutDirection.current)
-    val canSwap = lastCorrect != null || lastWrong != null
+    val canSwap = swapTargetStyle != null
     val offsetX = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
-    val themeAttrs = LocalThemeAttributes.current
-    // Captured when a drag starts so the hint keeps the color of the action being performed.
-    // Deriving it live would invert it for one frame after the swap flips the content.
-    var hintToCorrect by remember { mutableStateOf(false) }
+    // Captured when a drag starts so the hint keeps the style of the action being performed.
+    // Deriving it live would change it for one frame after the swap flips the content.
+    var hintStyle by remember { mutableStateOf(HistoryItemStyle.GOOD) }
 
     // After a swap, recenter the row once the new content is shown. We wait one extra frame
     // before snapping back because AnimatedContent still draws the outgoing content for the
     // frame on which the content changes; recentering on that frame would flash the old row.
-    LaunchedEffect(lastCorrect, lastWrong) {
+    LaunchedEffect(lastCorrect, lastCorrectStyle, lastWrong) {
         if (offsetX.value != 0f) {
             withFrameNanos { }
             offsetX.snapTo(0f)
@@ -642,13 +675,14 @@ private fun LastItemRow(
             .height(50.dp + safeDrawing.calculateBottomPadding())
     ) {
         // While dragging, reveal a colored hint behind the row showing what releasing
-        // would do: green + check to mark correct, red + cross to mark wrong.
+        // would do: the color the answer would take, with a check when it stays correct
+        // and a cross when it becomes wrong.
         if (offsetX.value != 0f) {
-            val toCorrect = hintToCorrect
+            val staysCorrect = hintStyle != HistoryItemStyle.BAD
             Row(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(if (toCorrect) themeAttrs.itemGood else themeAttrs.itemBad)
+                    .background(historyItemColor(hintStyle))
                     .padding(bottom = safeDrawing.calculateBottomPadding())
                     .padding(start = startPadding)
                     .padding(horizontal = 24.dp)
@@ -658,7 +692,7 @@ private fun LastItemRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = if (toCorrect) Icons.Default.Check else Icons.Default.Close,
+                    imageVector = if (staysCorrect) Icons.Default.Check else Icons.Default.Close,
                     contentDescription = null,
                     tint = MaterialTheme.colors.onBackground,
                 )
@@ -674,10 +708,12 @@ private fun LastItemRow(
                 .padding(start = startPadding)
                 .then(
                     if (canSwap)
-                        Modifier.pointerInput(lastCorrect, lastWrong) {
+                        Modifier.pointerInput(lastCorrect, lastCorrectStyle, lastWrong) {
                             val threshold = 64.dp.toPx()
                             detectHorizontalDragGestures(
-                                onDragStart = { hintToCorrect = lastWrong != null },
+                                onDragStart = {
+                                    hintStyle = swapTargetStyle ?: HistoryItemStyle.GOOD
+                                },
                                 onHorizontalDrag = { change, dragAmount ->
                                     change.consume()
                                     scope.launch { offsetX.snapTo(offsetX.value + dragAmount) }
@@ -706,7 +742,7 @@ private fun LastItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AnimatedContent(
-                targetState = lastCorrect to lastWrong,
+                targetState = Triple(lastCorrect, lastCorrectStyle, lastWrong),
                 transitionSpec = {
                     slideInVertically(
                         animationSpec = tween(100),
@@ -714,7 +750,7 @@ private fun LastItemRow(
                     ) togetherWith ExitTransition.None
                 },
                 label = "LastItemAnimation"
-            ) { (animatedCorrect, animatedWrong) ->
+            ) { (animatedCorrect, animatedCorrectStyle, animatedWrong) ->
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
@@ -740,7 +776,7 @@ private fun LastItemRow(
                         ItemButton(
                             item = animatedCorrect,
                             probabilityData = lastProbabilityData,
-                            style = HistoryItemStyle.GOOD,
+                            style = animatedCorrectStyle,
                             showInfo = animatedCorrect.contents is Kanji || animatedCorrect.contents is Word,
                             kanaWords = kanaWords,
                             onClick = { onItemClick(animatedCorrect) }

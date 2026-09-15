@@ -483,6 +483,17 @@ enum class HistoryItemStyle {
     GOOD, MAYBE, BAD, DONT_KNOW
 }
 
+@Composable
+fun historyItemColor(style: HistoryItemStyle): Color {
+    val themeAttrs = LocalThemeAttributes.current
+    return when (style) {
+        HistoryItemStyle.GOOD -> themeAttrs.itemGood
+        HistoryItemStyle.MAYBE -> themeAttrs.itemMaybe
+        HistoryItemStyle.BAD -> themeAttrs.itemBad
+        HistoryItemStyle.DONT_KNOW -> themeAttrs.itemBad2
+    }
+}
+
 data class HistoryItem(
     val item: Item,
     val probabilityData: TestEngine.DebugData?,
@@ -533,13 +544,7 @@ fun ItemButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val themeAttrs = LocalThemeAttributes.current
-    val backgroundColor = when (style) {
-        HistoryItemStyle.GOOD -> themeAttrs.itemGood
-        HistoryItemStyle.MAYBE -> themeAttrs.itemMaybe
-        HistoryItemStyle.BAD -> themeAttrs.itemBad
-        HistoryItemStyle.DONT_KNOW -> themeAttrs.itemBad2
-    }
+    val backgroundColor = historyItemColor(style)
     val context = LocalContext.current
 
     Box(
