@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.text.modifiers.TextAutoSizeLayoutScope
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
@@ -35,22 +36,84 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.kaqui.TypefaceManager
 import org.kaqui.theme.KakugoTheme
+import kotlin.math.floor
+
+private val QUESTION_FONT_STEP = 10.sp
+
+enum class QuestionAutoSize {
+    FitBounds,
+    AvoidWrapping,
+}
+
+// Sizes the text on the lines it already has, so it only wraps once even the smallest font size
+// cannot keep it unwrapped, in which case it is sized like FitBounds.
+private data class AvoidWrappingAutoSize(
+    private val minFontSize: TextUnit,
+    private val maxFontSize: TextUnit,
+    private val stepSize: TextUnit,
+) : TextAutoSize {
+    private val wrappingAutoSize = TextAutoSize.StepBased(minFontSize, maxFontSize, stepSize)
+
+    override fun TextAutoSizeLayoutScope.getFontSize(
+        constraints: Constraints,
+        text: AnnotatedString,
+    ): TextUnit {
+        val unwrappedLineCount = text.text.count { it == '\n' } + 1
+
+        fun fitsUnwrapped(fontSize: Float) =
+            performLayout(constraints, text, fontSize.toSp()).fitsUnwrapped(unwrappedLineCount)
+
+        val stepSize = stepSize.toPx()
+        val smallest = minFontSize.toPx()
+        val largest = maxFontSize.toPx()
+
+        if (!fitsUnwrapped(smallest))
+            return with(wrappingAutoSize) { getFontSize(constraints, text) }
+
+        var min = smallest
+        var max = largest
+        var current = (min + max) / 2
+
+        while ((max - min) >= stepSize) {
+            if (fitsUnwrapped(current))
+                min = current
+            else
+                max = current
+            current = (min + max) / 2
+        }
+        // used size minus minFontSize must be divisible by stepSize
+        current = floor((min - smallest) / stepSize) * stepSize + smallest
+
+        // We have found a size that fits, but we can still try one step up
+        if ((current + stepSize) <= largest && fitsUnwrapped(current + stepSize))
+            current += stepSize
+
+        return current.toSp()
+    }
+
+    private fun TextLayoutResult.fitsUnwrapped(unwrappedLineCount: Int) =
+        !hasVisualOverflow && lineCount <= unwrappedLineCount
+}
 
 @Composable
 private fun QuestionText(
     question: String,
     minFontSize: TextUnit,
     maxFontSize: TextUnit,
+    autoSize: QuestionAutoSize,
     onQuestionLongClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -72,11 +135,13 @@ private fun QuestionText(
             fontFamily = fontFamily,
             textAlign = TextAlign.Center,
         ),
-        autoSize = TextAutoSize.StepBased(
-            minFontSize = minFontSize,
-            maxFontSize = maxFontSize,
-            stepSize = 10.sp,
-        ),
+        autoSize = when (autoSize) {
+            QuestionAutoSize.FitBounds ->
+                TextAutoSize.StepBased(minFontSize, maxFontSize, QUESTION_FONT_STEP)
+
+            QuestionAutoSize.AvoidWrapping ->
+                AvoidWrappingAutoSize(minFontSize, maxFontSize, QUESTION_FONT_STEP)
+        },
     )
 }
 
@@ -85,6 +150,7 @@ fun TestQuestionLayoutCompose(
     question: String,
     questionMinFontSize: TextUnit,
     questionMaxFontSize: TextUnit,
+    questionAutoSize: QuestionAutoSize,
     forceLandscape: Boolean = false,
     onQuestionLongClick: (() -> Unit)? = null,
     answersBlock: @Composable ColumnScope.() -> Unit
@@ -105,6 +171,7 @@ fun TestQuestionLayoutCompose(
                 question = question,
                 minFontSize = questionMinFontSize,
                 maxFontSize = questionMaxFontSize,
+                autoSize = questionAutoSize,
                 onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .weight(0.5f)
@@ -139,6 +206,7 @@ fun TestQuestionLayoutCompose(
                 question = question,
                 minFontSize = questionMinFontSize,
                 maxFontSize = questionMaxFontSize,
+                autoSize = questionAutoSize,
                 onQuestionLongClick = onQuestionLongClick,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -208,6 +276,7 @@ fun PreviewTestQuestionLayoutBlocks() {
             question = "質問",
             questionMinFontSize = 50.sp,
             questionMaxFontSize = 120.sp,
+            questionAutoSize = QuestionAutoSize.AvoidWrapping,
         ) {
             PreviewBlock(Color(0xFFE57373), 100.dp)
             PreviewBlock(Color(0xFF81C784), 100.dp)
@@ -231,6 +300,7 @@ fun PreviewTestQuestionLayoutAnswers() {
             question = "華やか",
             questionMinFontSize = 10.sp,
             questionMaxFontSize = 120.sp,
+            questionAutoSize = QuestionAutoSize.AvoidWrapping,
         ) {
             for (answer in listOf("はなやか", "さわやか", "にぎやか", "おだやか"))
                 PreviewAnswer(answer)
@@ -253,6 +323,7 @@ fun PreviewTestQuestionLayoutManyAnswers() {
             question = "華やか",
             questionMinFontSize = 10.sp,
             questionMaxFontSize = 120.sp,
+            questionAutoSize = QuestionAutoSize.AvoidWrapping,
         ) {
             Column(
                 modifier = Modifier

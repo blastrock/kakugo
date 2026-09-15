@@ -136,6 +136,7 @@ fun TextTestScreenContent(
         question = uiState.questionText,
         questionMinFontSize = 30.sp,
         questionMaxFontSize = 120.sp,
+        questionAutoSize = QuestionAutoSize.AvoidWrapping,
         forceLandscape = true,
         onQuestionLongClick = onQuestionLongClick
     ) {

@@ -40,6 +40,7 @@ import org.kaqui.R
 import org.kaqui.model.Certainty
 import org.kaqui.model.Database
 import org.kaqui.model.Item
+import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
 import org.kaqui.showItemProbabilityData
@@ -88,6 +89,11 @@ fun DrawingTest(
 
     DrawingTestScreen(
         questionText = question.item.getQuestionText(question.testType, kanaWords),
+        questionAutoSize =
+            if (question.testType == TestType.KANJI_DRAWING)
+                QuestionAutoSize.FitBounds
+            else
+                QuestionAutoSize.AvoidWrapping,
         isFinished = finished,
         onSizeChanged = { w, _ -> if (w > 0) drawViewWidth = w },
         onHintClick = {
@@ -198,6 +204,7 @@ private fun PointF.squaredDistanceTo(other: PointF): Float {
 @Composable
 fun DrawingTestScreen(
     questionText: String,
+    questionAutoSize: QuestionAutoSize,
     isFinished: Boolean,
     onSizeChanged: (Int, Int) -> Unit,
     onHintClick: () -> Unit,
@@ -222,6 +229,7 @@ fun DrawingTestScreen(
             question = questionText,
             questionMinFontSize = 10.sp,
             questionMaxFontSize = 120.sp,
+            questionAutoSize = questionAutoSize,
             onQuestionLongClick = onQuestionLongClick,
         ) {
                 AndroidView(
@@ -298,6 +306,7 @@ fun PreviewDrawingTestScreen() {
     KakugoTheme {
         DrawingTestScreen(
             questionText = "漢",
+            questionAutoSize = QuestionAutoSize.AvoidWrapping,
             isFinished = false,
             onSizeChanged = { _, _ -> },
             onHintClick = {},
@@ -318,6 +327,7 @@ fun PreviewDrawingTestScreenTall() {
     KakugoTheme {
         DrawingTestScreen(
             questionText = "漢",
+            questionAutoSize = QuestionAutoSize.AvoidWrapping,
             isFinished = false,
             onSizeChanged = { _, _ -> },
             onHintClick = {},

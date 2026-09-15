@@ -163,6 +163,7 @@ fun CompositionTestScreenContent(
             question = uiState.questionText,
             questionMinFontSize = 10.sp,
             questionMaxFontSize = 120.sp,
+            questionAutoSize = QuestionAutoSize.FitBounds,
             onQuestionLongClick = onQuestionLongClick
         ) {
             Column(
