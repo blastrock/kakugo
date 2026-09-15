@@ -42,6 +42,7 @@ import org.kaqui.model.TestType
 import org.kaqui.model.getAnswerText
 import org.kaqui.model.getQuestionText
 import org.kaqui.showItemProbabilityData
+import org.kaqui.theme.KakugoPreview
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 
@@ -318,7 +319,7 @@ fun PreviewCompositionTestInitialState() {
     }
 }
 
-@Preview(showBackground = true, name = "Composition Test - Some Selected")
+@KakugoPreview
 @Composable
 fun PreviewCompositionTestSomeSelected() {
     val sampleUiState = CompositionTestUiState(
@@ -366,7 +367,7 @@ fun PreviewCompositionTestValidatedCorrect() {
     }
 }
 
-@Preview(showBackground = true, name = "Composition Test - Validated With Errors")
+@KakugoPreview
 @Composable
 fun PreviewCompositionTestValidatedWithErrors() {
     val sampleUiState = CompositionTestUiState(

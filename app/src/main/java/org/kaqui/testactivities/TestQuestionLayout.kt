@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.kaqui.TypefaceManager
+import org.kaqui.theme.KakugoLandscapePreview
 import org.kaqui.theme.KakugoTheme
 import kotlin.math.floor
 
@@ -296,6 +297,21 @@ fun PreviewTestQuestionLayoutBlocks() {
     }
 }
 
+@Composable
+private fun PreviewTestQuestionLayoutAnswersContent() {
+    KakugoTheme {
+        TestQuestionLayoutCompose(
+            question = "華やか",
+            questionMinFontSize = 10.sp,
+            questionMaxFontSize = 120.sp,
+            questionAutoSize = QuestionAutoSize.AvoidWrapping,
+        ) {
+            for (answer in listOf("はなやか", "さわやか", "にぎやか", "おだやか", "しずやか", "あざやか"))
+                PreviewAnswer(answer)
+        }
+    }
+}
+
 @Preview(name = "light", showBackground = true, widthDp = 400, heightDp = 700)
 @Preview(
     name = "dark",
@@ -306,17 +322,13 @@ fun PreviewTestQuestionLayoutBlocks() {
 )
 @Composable
 fun PreviewTestQuestionLayoutAnswers() {
-    KakugoTheme {
-        TestQuestionLayoutCompose(
-            question = "華やか",
-            questionMinFontSize = 10.sp,
-            questionMaxFontSize = 120.sp,
-            questionAutoSize = QuestionAutoSize.AvoidWrapping,
-        ) {
-            for (answer in listOf("はなやか", "さわやか", "にぎやか", "おだやか"))
-                PreviewAnswer(answer)
-        }
-    }
+    PreviewTestQuestionLayoutAnswersContent()
+}
+
+@KakugoLandscapePreview
+@Composable
+fun PreviewTestQuestionLayoutAnswersLandscape() {
+    PreviewTestQuestionLayoutAnswersContent()
 }
 
 @Preview(name = "light", showBackground = true, widthDp = 400, heightDp = 700)

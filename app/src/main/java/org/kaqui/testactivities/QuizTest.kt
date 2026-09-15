@@ -62,6 +62,7 @@ import org.kaqui.model.Word
 import org.kaqui.model.getAnswerText
 import org.kaqui.model.getQuestionText
 import org.kaqui.showItemProbabilityData
+import org.kaqui.theme.KakugoLandscapePreview
 import org.kaqui.theme.KakugoPreview
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
@@ -730,26 +731,32 @@ fun PreviewQuizTestScreenContentWordToReading() {
     )
 }
 
+private val wordToReadingSingleButtonUiState = QuizScreenUiState(
+    questionText = "根掘り葉掘り",
+    answerOptions = listOf(
+        "ねほりはほり",
+        "さわやか",
+        "にぎやか",
+        "おだやか",
+        "しとやか",
+        "はなやか"
+    ),
+    correctAnswerIndex = 5,
+    answer = NO_ANSWER,
+    singleButtonMode = true,
+    currentTestType = TestType.WORD_TO_READING,
+    answersCurrentlyVisible = true,
+    initialHideAnswers = true,
+)
+
 @KakugoPreview
 @Composable
 fun PreviewQuizTestScreenContentWordToReadingSingleButton() {
-    PreviewQuizInTestScreen(
-        QuizScreenUiState(
-            questionText = "根掘り葉掘り",
-            answerOptions = listOf(
-                "ねほりはほり",
-                "さわやか",
-                "にぎやか",
-                "おだやか",
-                "しとやか",
-                "はなやか"
-            ),
-            correctAnswerIndex = 5,
-            answer = NO_ANSWER,
-            singleButtonMode = true,
-            currentTestType = TestType.WORD_TO_READING,
-            answersCurrentlyVisible = true,
-            initialHideAnswers = true,
-        )
-    )
+    PreviewQuizInTestScreen(wordToReadingSingleButtonUiState)
+}
+
+@KakugoLandscapePreview
+@Composable
+fun PreviewQuizTestScreenContentWordToReadingSingleButtonLandscape() {
+    PreviewQuizInTestScreen(wordToReadingSingleButtonUiState)
 }

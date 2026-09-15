@@ -44,6 +44,7 @@ import org.kaqui.model.TestType
 import org.kaqui.model.getQuestionText
 import org.kaqui.model.text
 import org.kaqui.showItemProbabilityData
+import org.kaqui.theme.KakugoPreview
 import org.kaqui.theme.KakugoTheme
 import org.kaqui.theme.LocalThemeAttributes
 import kotlin.math.pow
@@ -321,7 +322,7 @@ fun PreviewDrawingTestScreen() {
     }
 }
 
-@Preview(showBackground = true)
+@KakugoPreview
 @Composable
 fun PreviewDrawingTestScreenTall() {
     KakugoTheme {

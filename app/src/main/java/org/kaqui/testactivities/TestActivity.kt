@@ -898,6 +898,63 @@ fun TestScreenPreviewWrong() {
     }
 }
 
+@Preview(showBackground = true, name = "TestScreen Preview - Maybe")
+@Composable
+fun TestScreenPreviewMaybe() {
+    val maybe = Item(
+        0,
+        Kanji(
+            "好",
+            listOf("コウ"),
+            listOf("この.む", "す.く", "よ.い", "い.い"),
+            listOf("fond", "pleasing", "like something"),
+            listOf(),
+            listOf(),
+            1
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
+    val sampleHistoryState = HistoryState(
+        items = listOf(
+            HistoryItem(
+                item = maybe,
+                probabilityData = null,
+                style = HistoryItemStyle.MAYBE
+            ),
+        ),
+        lastCorrect = maybe,
+        lastCorrectStyle = HistoryItemStyle.MAYBE,
+        lastWrong = null,
+        lastProbabilityData = null,
+        swapTargetStyle = HistoryItemStyle.BAD,
+    )
+
+    KakugoTheme {
+        TestScreen(
+            title = "Test",
+            correctCount = 10,
+            questionCount = 15,
+            uniqueCorrectCount = 8,
+            uniqueItemCount = 10,
+            historyState = sampleHistoryState,
+            sheetExpanded = false,
+            onSheetExpandedChange = {},
+            kanaWords = true,
+            onItemClick = {},
+            onBackClick = {},
+            stats = LearningDbView.Stats(
+                good = 5,
+                meh = 3,
+                bad = 2,
+                disabled = 0
+            ),
+        ) {}
+    }
+}
+
 @Preview(showBackground = true, name = "TestScreen Preview - Long text")
 @Composable
 fun TestScreenPreviewLongText() {
@@ -1006,12 +1063,33 @@ fun TestScreenPreviewWrongHistory() {
         0,
         true
     )
+    val maybe = Item(
+        0,
+        Word(
+            "猫",
+            "ねこ",
+            listOf("cat"),
+            listOf(),
+            false,
+            ""
+        ),
+        0.0,
+        0.0,
+        0,
+        true
+    )
     val sampleHistoryState = HistoryState(
         items = listOf(
             HistoryItem(
                 item = good,
                 probabilityData = null,
                 style = HistoryItemStyle.GOOD,
+            ),
+            HistoryItem(
+                item = maybe,
+                probabilityData = null,
+                style = HistoryItemStyle.MAYBE,
+                prependSeparator = true,
             ),
             HistoryItem(
                 item = bad,
