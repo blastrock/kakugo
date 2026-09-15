@@ -167,8 +167,11 @@ private data class QuizLayout(
 // the others show a single word or character, which fits two per row at a large font size.
 private fun quizLayout(testType: TestType?) =
     when (testType) {
-        TestType.WORD_TO_READING, TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING ->
+        TestType.WORD_TO_MEANING, TestType.KANJI_TO_READING, TestType.KANJI_TO_MEANING ->
             QuizLayout(50, 1, TextUnit.Unspecified, TextAlign.Start)
+
+        TestType.WORD_TO_READING ->
+            QuizLayout(50, 1, 30.sp, TextAlign.Start)
 
         TestType.READING_TO_WORD, TestType.MEANING_TO_WORD ->
             QuizLayout(10, 2, 30.sp, TextAlign.Center)
