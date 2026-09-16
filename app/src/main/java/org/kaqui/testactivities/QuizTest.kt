@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -75,7 +76,6 @@ data class QuizScreenUiState(
     val answer: Int = NO_ANSWER,
     val correctAnswerIndex: Int? = null,
     val answersCurrentlyVisible: Boolean = true,
-    val initialHideAnswers: Boolean = false,
     val singleButtonMode: Boolean = false,
     val currentTestType: TestType? = null,
 ) {
@@ -113,7 +113,6 @@ fun QuizTest(
         correctAnswerIndex = question.answers.indexOfFirst { it.id == question.item.id },
         answersCurrentlyVisible = !hideAnswers || answersRevealed ||
                 answer != NO_ANSWER,
-        initialHideAnswers = hideAnswers,
         singleButtonMode = singleButtonMode,
         currentTestType = question.testType,
     )
@@ -206,8 +205,7 @@ fun QuizTestScreenContent(
     onQuestionLongClick: (() -> Unit)? = null,
 ) {
     val singleButtonMode = uiState.singleButtonMode
-    val initialHideAnswers = uiState.initialHideAnswers
-    val answersCurrentlyVisible = uiState.answersCurrentlyVisible
+    val answersHidden = !uiState.answersCurrentlyVisible
     val themeColors = LocalThemeAttributes.current
 
     val landscape =
@@ -227,19 +225,20 @@ fun QuizTestScreenContent(
             questionAutoSize = layout.questionAutoSize,
             onQuestionLongClick = onQuestionLongClick
         ) {
-            if (initialHideAnswers && !answersCurrentlyVisible && !uiState.isAnswerGiven) {
-                Button(
-                    onClick = onShowAnswersClicked,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = themeColors.backgroundDontKnow,
-                    ),
-                ) {
-                    Text(stringResource(id = R.string.show_answers).uppercase())
-                }
-            }
-
-            if (answersCurrentlyVisible) {
+            AnswersBlock(
+                answersHidden = answersHidden,
+                showAnswersButton = {
+                    Button(
+                        onClick = onShowAnswersClicked,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = themeColors.backgroundDontKnow,
+                        ),
+                    ) {
+                        Text(stringResource(id = R.string.show_answers).uppercase())
+                    }
+                },
+            ) {
                 val scrollState = remember(uiState.questionText) { ScrollState(0) }
                 Column(
                     modifier = Modifier
@@ -314,6 +313,40 @@ fun QuizTestScreenContent(
                         }
                 }
             }
+        }
+    }
+}
+
+// The answers are measured even while hidden, so that the block keeps the size it will have once
+// they are shown and revealing them does not shift the rest of the screen. The hidden answers are
+// never placed, so they are neither drawn nor clickable.
+@Composable
+private fun AnswersBlock(
+    answersHidden: Boolean,
+    showAnswersButton: @Composable () -> Unit,
+    answers: @Composable () -> Unit,
+) {
+    Layout(
+        contents = listOf(answers, showAnswersButton),
+    ) { (answersMeasurables, buttonMeasurables), constraints ->
+        val answersPlaceable = answersMeasurables.single().measure(constraints)
+        val buttonPlaceable =
+            if (answersHidden)
+                buttonMeasurables.single().measure(constraints.copy(minHeight = 0))
+            else
+                null
+
+        val width = maxOf(answersPlaceable.width, buttonPlaceable?.width ?: 0)
+        val height = maxOf(answersPlaceable.height, buttonPlaceable?.height ?: 0)
+
+        layout(width, height) {
+            if (buttonPlaceable != null)
+                buttonPlaceable.place(
+                    (width - buttonPlaceable.width) / 2,
+                    (height - buttonPlaceable.height) / 2,
+                )
+            else
+                answersPlaceable.place(0, 0)
         }
     }
 }
@@ -581,7 +614,22 @@ fun PreviewQuizTestScreenContentAnswersVisible() {
             singleButtonMode = false,
             currentTestType = TestType.WORD_TO_MEANING,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
+        )
+    )
+}
+
+@KakugoPreview
+@Composable
+fun PreviewQuizTestScreenContentAnswersHidden() {
+    PreviewQuizInTestScreen(
+        QuizScreenUiState(
+            questionText = "犬",
+            answerOptions = listOf("Dog", "Cat", "Bird", "Fish", "Horse", "Cow"),
+            correctAnswerIndex = 0,
+            answer = NO_ANSWER,
+            singleButtonMode = false,
+            currentTestType = TestType.WORD_TO_MEANING,
+            answersCurrentlyVisible = false,
         )
     )
 }
@@ -605,7 +653,6 @@ fun PreviewQuizTestScreenContentMeaningToWord() {
             singleButtonMode = false,
             currentTestType = TestType.MEANING_TO_WORD,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -622,7 +669,6 @@ fun PreviewQuizTestScreenContentAnsweredWrongly() {
             singleButtonMode = false,
             currentTestType = TestType.WORD_TO_MEANING,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -639,7 +685,6 @@ fun PreviewQuizTestScreenContentSingleButton() {
             singleButtonMode = true,
             currentTestType = TestType.WORD_TO_MEANING,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -656,7 +701,6 @@ fun PreviewQuizTestScreenContentSingleButtonAnsweredWrongly() {
             singleButtonMode = true,
             currentTestType = TestType.WORD_TO_MEANING,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -673,7 +717,6 @@ fun PreviewQuizTestScreenContentGridNotAnswered() {
             singleButtonMode = false,
             currentTestType = TestType.HIRAGANA_TO_ROMAJI,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -690,7 +733,6 @@ fun PreviewQuizTestScreenContentGridAnsweredWrongly() {
             singleButtonMode = false,
             currentTestType = TestType.HIRAGANA_TO_ROMAJI,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -707,7 +749,6 @@ fun PreviewQuizTestScreenContentGridSingleButtonAnsweredWrongly() {
             singleButtonMode = true,
             currentTestType = TestType.HIRAGANA_TO_ROMAJI,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -731,7 +772,6 @@ fun PreviewQuizTestScreenContentWordToReading() {
             singleButtonMode = false,
             currentTestType = TestType.WORD_TO_READING,
             answersCurrentlyVisible = true,
-            initialHideAnswers = true,
         )
     )
 }
@@ -751,7 +791,6 @@ private val wordToReadingSingleButtonUiState = QuizScreenUiState(
     singleButtonMode = true,
     currentTestType = TestType.WORD_TO_READING,
     answersCurrentlyVisible = true,
-    initialHideAnswers = true,
 )
 
 @KakugoPreview
