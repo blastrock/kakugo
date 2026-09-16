@@ -121,12 +121,11 @@ fun KanjiMenuScreen(onBackClick: () -> Unit = {}) {
                         )
                     )
                 }
-                Separator(modifier = Modifier.padding(4.dp))
                 val intent = Intent(context, ClassSelectionActivity::class.java).putExtra(
                     "mode",
                     SelectionMode.KANJI as Serializable
                 )
-                MenuButton(R.string.kanji_selection) { context.startActivity(intent) }
+                MenuButton(R.string.kanji_selection, minor = true) { context.startActivity(intent) }
             }
         }
     }

@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +65,7 @@ import org.kaqui.model.DatabaseUpdater
 import org.kaqui.settings.MainSettingsActivity
 import org.kaqui.startActivity
 import org.kaqui.stats.StatsActivity
+import org.kaqui.theme.KakugoPreview
 import org.kaqui.theme.KakugoTheme
 import java.io.File
 import java.util.zip.GZIPInputStream
@@ -200,10 +203,10 @@ fun MainScreen(
                 MenuButton(R.string.word, R.string.word_japanese) {
                     context.startActivity<VocabularyMenuActivity>()
                 }
-                MenuButton(R.string.stats, R.string.stats_japanese) {
+                MenuButton(R.string.stats, R.string.stats_japanese, minor = true) {
                     context.startActivity<StatsActivity>()
                 }
-                MenuButton(R.string.settings, R.string.settings_japanese) {
+                MenuButton(R.string.settings, R.string.settings_japanese, minor = true) {
                     context.startActivity<MainSettingsActivity>()
                 }
             }
@@ -224,16 +227,28 @@ fun MainScreen(
 }
 
 @Composable
-fun MenuButton(textRes: Int, japaneseTextRes: Int? = null, onClick: () -> Unit) {
-    OutlinedButton(
+fun MenuButton(textRes: Int, japaneseTextRes: Int? = null, minor: Boolean = false, onClick: () -> Unit) {
+    Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colors.onSurface
+            contentColor = MaterialTheme.colors.onBackground,
+            backgroundColor = Color.Transparent,
         ),
-        contentPadding = PaddingValues(vertical = 8.dp, horizontal = 16.dp)
+        border =
+            if (minor)
+                ButtonDefaults.outlinedBorder
+            else
+                BorderStroke(2.dp, MaterialTheme.colors.primary),
+        elevation = null,
+        contentPadding = PaddingValues(
+            vertical =
+                if (japaneseTextRes != null) 8.dp
+                else 16.dp,
+            horizontal = 16.dp
+        )
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (japaneseTextRes != null) {
@@ -244,7 +259,7 @@ fun MenuButton(textRes: Int, japaneseTextRes: Int? = null, onClick: () -> Unit) 
                 )
             }
             Text(
-                text = stringResource(textRes),
+                text = stringResource(textRes).uppercase(),
                 textAlign = TextAlign.Center
             )
         }
@@ -324,7 +339,7 @@ fun ErrorDialog(
     )
 }
 
-@Preview(showBackground = true)
+@KakugoPreview
 @Composable
 fun MainScreenPreview() {
     MainScreen(

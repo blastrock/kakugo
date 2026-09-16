@@ -101,12 +101,11 @@ fun KatakanaMenuScreen(onBackClick: () -> Unit = {}) {
                         TestType.KATAKANA_DRAWING
                     )
                 }
-                Separator(modifier = Modifier.padding(4.dp))
                 val intent = Intent(context, ItemSelectionActivity::class.java).putExtra(
                     "mode",
                     SelectionMode.KATAKANA as Serializable
                 )
-                MenuButton(R.string.katakana_selection) { context.startActivity(intent) }
+                MenuButton(R.string.katakana_selection, minor = true) { context.startActivity(intent) }
             }
         }
     }

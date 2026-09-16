@@ -102,12 +102,11 @@ fun HiraganaMenuScreen(onBackClick: () -> Unit = {}) {
                         TestType.HIRAGANA_DRAWING
                     )
                 }
-                Separator(modifier = Modifier.padding(4.dp))
                 val intent = Intent(context, ItemSelectionActivity::class.java).putExtra(
                     "mode",
                     SelectionMode.HIRAGANA as Serializable
                 )
-                MenuButton(R.string.hiragana_selection) { context.startActivity(intent) }
+                MenuButton(R.string.hiragana_selection, minor = true) { context.startActivity(intent) }
             }
         }
     }

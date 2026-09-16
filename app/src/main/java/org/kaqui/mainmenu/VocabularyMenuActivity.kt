@@ -101,12 +101,11 @@ fun VocabularyMenuScreen(onBackClick: () -> Unit = {}) {
                         TestType.MEANING_TO_WORD
                     )
                 }
-                Separator(modifier = Modifier.padding(4.dp))
                 val intent = Intent(context, ClassSelectionActivity::class.java).putExtra(
                     "mode",
                     SelectionMode.WORD as Serializable
                 )
-                MenuButton(R.string.word_selection) { context.startActivity(intent) }
+                MenuButton(R.string.word_selection, minor = true) { context.startActivity(intent) }
             }
         }
     }
