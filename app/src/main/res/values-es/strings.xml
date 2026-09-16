@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="word"><font size="30">語彙</font>\nVOCABULARIO</string>
-    <string name="stats"><font size="30">進歩</font>\nPROGRESO</string>
+    <string name="word">VOCABULARIO</string>
+    <string name="stats">PROGRESO</string>
     <string name="hiragana_selection">Selección de hiragana</string>
     <string name="katakana_selection">Selección de katakana</string>
     <string name="kanji_selection">Selección de kanji</string>
@@ -96,7 +96,7 @@
     <string name="theme_system_default">Seguir el sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Oscuro</string>
-    <string name="settings"><font size="30">設定</font>\nAJUSTES</string>
+    <string name="settings">AJUSTES</string>
     <string name="title_activity_main_settings">Ajustes</string>
     <string name="pref_cat_appearance">Apariencia</string>
     <string name="pref_cat_behavior">Comportamiento</string>

@@ -1,11 +1,17 @@
 <resources>
     <string name="app_name" translatable="false">Kakugo</string>
-    <string name="hiragana" translatable="false"><font size="30">ひらがな</font>\nHIRAGANA</string>
-    <string name="katakana" translatable="false"><font size="30">カタカナ</font>\nKATAKANA</string>
-    <string name="kanji" translatable="false"><font size="30">漢字</font>\nKANJI</string>
-    <string name="word"><font size="30">語彙</font>\nVOCABULARY</string>
-    <string name="stats"><font size="30">進歩</font>\nPROGRESS</string>
-    <string name="settings"><font size="30">設定</font>\nSETTINGS</string>
+    <string name="hiragana_japanese" translatable="false">ひらがな</string>
+    <string name="hiragana" translatable="false">HIRAGANA</string>
+    <string name="katakana_japanese" translatable="false">カタカナ</string>
+    <string name="katakana" translatable="false">KATAKANA</string>
+    <string name="kanji_japanese" translatable="false">漢字</string>
+    <string name="kanji" translatable="false">KANJI</string>
+    <string name="word_japanese" translatable="false">語彙</string>
+    <string name="word">VOCABULARY</string>
+    <string name="stats_japanese" translatable="false">進歩</string>
+    <string name="stats">PROGRESS</string>
+    <string name="settings_japanese" translatable="false">設定</string>
+    <string name="settings">SETTINGS</string>
     <string name="hiragana_selection">Hiragana selection</string>
     <string name="katakana_selection">Katakana selection</string>
     <string name="kanji_selection">Kanji selection</string>

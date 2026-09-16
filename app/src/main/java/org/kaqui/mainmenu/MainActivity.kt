@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
 import androidx.core.text.HtmlCompat
@@ -187,12 +188,24 @@ fun MainScreen(
                         .padding(horizontal = 64.dp, vertical = 8.dp)
                 )
 
-                MenuButton(R.string.hiragana) { context.startActivity<HiraganaMenuActivity>() }
-                MenuButton(R.string.katakana) { context.startActivity<KatakanaMenuActivity>() }
-                MenuButton(R.string.kanji) { context.startActivity<KanjiMenuActivity>() }
-                MenuButton(R.string.word) { context.startActivity<VocabularyMenuActivity>() }
-                MenuButton(R.string.stats) { context.startActivity<StatsActivity>() }
-                MenuButton(R.string.settings) { context.startActivity<MainSettingsActivity>() }
+                MenuButton(R.string.hiragana, R.string.hiragana_japanese) {
+                    context.startActivity<HiraganaMenuActivity>()
+                }
+                MenuButton(R.string.katakana, R.string.katakana_japanese) {
+                    context.startActivity<KatakanaMenuActivity>()
+                }
+                MenuButton(R.string.kanji, R.string.kanji_japanese) {
+                    context.startActivity<KanjiMenuActivity>()
+                }
+                MenuButton(R.string.word, R.string.word_japanese) {
+                    context.startActivity<VocabularyMenuActivity>()
+                }
+                MenuButton(R.string.stats, R.string.stats_japanese) {
+                    context.startActivity<StatsActivity>()
+                }
+                MenuButton(R.string.settings, R.string.settings_japanese) {
+                    context.startActivity<MainSettingsActivity>()
+                }
             }
 
             if (showProgress) {
@@ -211,7 +224,7 @@ fun MainScreen(
 }
 
 @Composable
-fun MenuButton(textRes: Int, onClick: () -> Unit) {
+fun MenuButton(textRes: Int, japaneseTextRes: Int? = null, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier
@@ -222,10 +235,19 @@ fun MenuButton(textRes: Int, onClick: () -> Unit) {
         ),
         contentPadding = PaddingValues(vertical = 8.dp, horizontal = 16.dp)
     ) {
-        Text(
-            text = stringResource(textRes),
-            textAlign = TextAlign.Center
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (japaneseTextRes != null) {
+                Text(
+                    text = stringResource(japaneseTextRes),
+                    fontSize = 30.sp,
+                    lineHeight = 36.sp
+                )
+            }
+            Text(
+                text = stringResource(textRes),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

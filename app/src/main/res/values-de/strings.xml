@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="word"><font size="30">語彙</font>\nVOKABELN</string>
-    <string name="stats"><font size="30">進歩</font>\nFORTSCHRITT</string>
-    <string name="settings"><font size="30">設定</font>\nEINSTELLUNGEN</string>
+    <string name="word">VOKABELN</string>
+    <string name="stats">FORTSCHRITT</string>
+    <string name="settings">EINSTELLUNGEN</string>
     <string name="hiragana_selection">Hiragana Auswahl</string>
     <string name="katakana_selection">Katakana Auswahl</string>
     <string name="kanji_selection">Kanji Auswahl</string>
