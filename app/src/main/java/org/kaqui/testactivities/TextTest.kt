@@ -173,7 +173,7 @@ fun TextTestScreenContent(
                 } else {
                     TextFieldDefaults.outlinedTextFieldColors()
                 },
-                singleLine = false
+                singleLine = true
             )
 
             // Correct answer display (shown when wrong)
