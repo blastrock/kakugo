@@ -176,6 +176,7 @@
     <string name="reading_label">Lecture</string>
     <string name="definitions_label">Définitions</string>
     <string name="learning_status_label">État d\'apprentissage</string>
+    <string name="enabled_label">Activé</string>
     <string name="meaning_label">Sens</string>
     <string name="open_in_external_dictionary">Ouvrir dans le dictionnaire externe</string>
     <string name="copied_to_clipboard">Copié dans le presse-papiers</string>

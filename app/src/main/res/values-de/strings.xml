@@ -149,6 +149,7 @@
     <string name="reading_label">Lesung</string>
     <string name="definitions_label">Definitionen</string>
     <string name="learning_status_label">Lernstatus</string>
+    <string name="enabled_label">Aktiviert</string>
     <string name="meaning_label">Bedeutung</string>
     <string name="open_in_external_dictionary">Im externen Wörterbuch öffnen</string>
     <string name="copied_to_clipboard">In die Zwischenablage kopiert</string>
