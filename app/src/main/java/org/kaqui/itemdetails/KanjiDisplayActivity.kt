@@ -7,11 +7,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -20,6 +23,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
@@ -33,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -78,6 +83,7 @@ data class KanjiData(
     val strokesLongScore: Double,
     val kanjiObject: Kanji,
     val kanjiId: Int,
+    val enabled: Boolean,
 ) {
     companion object {
         fun default() = KanjiData(
@@ -93,7 +99,8 @@ data class KanjiData(
             strokesShortScore = 0.0,
             strokesLongScore = 0.0,
             kanjiObject = Kanji("", emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), 0),
-            kanjiId = -1
+            kanjiId = -1,
+            enabled = false
         )
     }
 }
@@ -131,7 +138,8 @@ class KanjiDisplayViewModel : ViewModel() {
             strokesShortScore = kanjiStrokes.shortScore,
             strokesLongScore = kanjiStrokes.longScore,
             kanjiObject = kanjiContents,
-            kanjiId = kanjiId
+            kanjiId = kanjiId,
+            enabled = kanjiReading.enabled
         )
 
         // Load words containing this kanji
@@ -152,6 +160,12 @@ class KanjiDisplayViewModel : ViewModel() {
 
     fun onTabSelected(tab: KanjiDisplayTab) {
         uiState = uiState.copy(selectedTab = tab)
+    }
+
+    fun setEnabled(context: Context, enabled: Boolean) {
+        val database = Database.getInstance(context)
+        database.getKanjiView().setItemEnabled(uiState.kanjiData.kanjiId, enabled)
+        uiState = uiState.copy(kanjiData = uiState.kanjiData.copy(enabled = enabled))
     }
 
     fun updateScore(context: Context, knowledgeType: KnowledgeType, increase: Boolean) {
@@ -205,6 +219,9 @@ class KanjiDisplayActivity : ComponentActivity() {
                 onUpdateScore = { knowledgeType, increase ->
                     viewModel.updateScore(this@KanjiDisplayActivity, knowledgeType, increase)
                 },
+                onEnabledChange = { enabled ->
+                    viewModel.setEnabled(this@KanjiDisplayActivity, enabled)
+                },
                 onWordClick = { wordItem ->
                     startActivity<WordDisplayActivity>("word_id" to wordItem.id)
                 },
@@ -222,6 +239,7 @@ fun KanjiDisplayScreen(
     onTabSelected: (KanjiDisplayTab) -> Unit,
     onBackClick: () -> Unit,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
+    onEnabledChange: (Boolean) -> Unit,
     onWordClick: (Item) -> Unit,
     onHistoryItemClick: (Item) -> Unit,
 ) {
@@ -293,7 +311,8 @@ fun KanjiDisplayScreen(
                 0 -> KanjiTabContent(
                     kanjiData = kanjiData,
                     contentPadding = paddingValues,
-                    onUpdateScore = onUpdateScore
+                    onUpdateScore = onUpdateScore,
+                    onEnabledChange = onEnabledChange
                 )
                 1 -> WordsTabContent(
                     wordList = uiState.wordList,
@@ -316,6 +335,7 @@ fun KanjiTabContent(
     kanjiData: KanjiData,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
     onUpdateScore: (KnowledgeType, Boolean) -> Unit,
+    onEnabledChange: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val fontFamily = TypefaceManager.getTypeface(context)?.let { FontFamily(it) }
@@ -427,6 +447,27 @@ fun KanjiTabContent(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
+        }
+
+        item {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "${stringResource(org.kaqui.R.string.enabled_label)}:",
+                    style = MaterialTheme.typography.body1,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(20f)
+                )
+                Switch(
+                    checked = kanjiData.enabled,
+                    onCheckedChange = onEnabledChange,
+                    modifier = Modifier.width(150.dp).wrapContentWidth(Alignment.Start)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.weight(30f).height(6.dp))
+            }
         }
 
         // Reading status
@@ -551,7 +592,8 @@ fun PreviewKanjiDisplayScreenKanjiTab() {
             listOf(),
             5
         ),
-        kanjiId = 39135
+        kanjiId = 39135,
+        enabled = true
     )
 
     val sampleWordList = listOf(
@@ -568,6 +610,7 @@ fun PreviewKanjiDisplayScreenKanjiTab() {
         onTabSelected = {},
         onBackClick = {},
         onUpdateScore = { _, _ -> },
+        onEnabledChange = {},
         onWordClick = {},
         onHistoryItemClick = {}
     )
@@ -597,7 +640,8 @@ fun PreviewKanjiDisplayScreenWordsTab() {
             listOf(),
             5
         ),
-        kanjiId = 39135
+        kanjiId = 39135,
+        enabled = true
     )
 
     val sampleWordList = listOf(
@@ -615,6 +659,7 @@ fun PreviewKanjiDisplayScreenWordsTab() {
         onTabSelected = {},
         onBackClick = {},
         onUpdateScore = { _, _ -> },
+        onEnabledChange = {},
         onWordClick = {},
         onHistoryItemClick = {}
     )
