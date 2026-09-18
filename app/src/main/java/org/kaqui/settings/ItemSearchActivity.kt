@@ -100,8 +100,14 @@ class ItemSearchViewModel : ViewModel() {
         this.dbView = dbView
         this.kanaWords = kanaWords
         this.mode = mode
+    }
 
-        uiState = uiState.copy(stats = dbView.getStats())
+    fun refresh() {
+        itemCache.clear()
+        uiState = uiState.copy(
+            stats = dbView.getStats(),
+            cacheVersion = uiState.cacheVersion + 1
+        )
     }
 
     fun onSearchQueryChange(query: String) {
@@ -186,6 +192,12 @@ class ItemSearchActivity : ComponentActivity() {
                 }
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Item state may have been changed by the item details activity
+        viewModel.refresh()
     }
 }
 

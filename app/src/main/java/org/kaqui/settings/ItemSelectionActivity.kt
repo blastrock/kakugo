@@ -81,16 +81,14 @@ class ItemSelectionViewModel : ViewModel() {
         uiState = uiState.copy(
             mode = mode,
         )
-        loadItems()
     }
 
-    private fun loadItems() {
-        val itemIds = dbView.getAllItems()
-        val stats = dbView.getStats()
-
+    fun refresh() {
+        itemCache.clear()
         uiState = uiState.copy(
-            itemIds = itemIds,
-            stats = stats
+            itemIds = dbView.getAllItems(),
+            stats = dbView.getStats(),
+            cacheVersion = uiState.cacheVersion + 1
         )
     }
 
@@ -185,6 +183,12 @@ class ItemSelectionActivity : ComponentActivity() {
                 onSelectNone = viewModel::selectNone
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Item state may have been changed by the item details activity
+        viewModel.refresh()
     }
 
     companion object {
