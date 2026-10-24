@@ -142,6 +142,23 @@ class SrsCalculator {
             return ScoreUpdate(item.id, newShortScore.toFloat(), newLongScore.toFloat(), now, minLastAsked)
         }
 
+        // Score update for an answer given at answeredAt and swapped from originalCertainty to
+        // certainty, computed from the item's pre-answer scores. A wrong answer swapped to a
+        // correct one rewards the short score as usual, but only raises the long score to the
+        // minimum required when the short score reaches 1.
+        fun getSwappedScoreUpdate(minLastAsked: Long, item: Item, originalCertainty: Certainty, certainty: Certainty, answeredAt: Long): ScoreUpdate {
+            val update = getScoreUpdate(minLastAsked, item, certainty).copy(lastAsked = answeredAt)
+            if (originalCertainty != Certainty.DONTKNOW)
+                return update
+
+            val newLongScore =
+                    if (update.shortScore < 1f)
+                        item.longScore
+                    else
+                        max(item.longScore, MIN_LONG_SCORE)
+            return update.copy(longScore = newLongScore.toFloat())
+        }
+
         fun createManualScoreUpdate(
             itemId: Int,
             currentShortScore: Double,

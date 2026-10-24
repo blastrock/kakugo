@@ -428,14 +428,7 @@ class TestEngine(
         } else {
             // The item still holds its pre-answer scores, so recomputing an update from it
             // gives the scores the swapped certainty would have produced in the first place.
-            val update = SrsCalculator.getScoreUpdate(la.minLastAsked, la.correctItem, la.swappedCertainty)
-            correctScoreUpdate =
-                    if (la.originalCertainty == Certainty.DONTKNOW)
-                        // Recovering from a wrong answer rewards the short score only, the
-                        // long score stays at its baseline.
-                        update.copy(longScore = la.correctItem.longScore.toFloat(), lastAsked = la.answeredAt)
-                    else
-                        update.copy(lastAsked = la.answeredAt)
+            correctScoreUpdate = SrsCalculator.getSwappedScoreUpdate(la.minLastAsked, la.correctItem, la.originalCertainty, la.swappedCertainty, la.answeredAt)
             itemView.applyScoreUpdate(correctScoreUpdate)
             // Cancel the penalty on the picked wrong item by restoring its baseline scores.
             la.wrongItem?.let { w ->
